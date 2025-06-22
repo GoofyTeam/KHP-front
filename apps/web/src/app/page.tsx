@@ -1,3 +1,5 @@
+import { Button } from "@workspace/ui/components/button";
+
 import Image from "next/image";
 
 export default function Home() {
@@ -82,6 +84,8 @@ export default function Home() {
           />
           Examples
         </a>
+        <Button variant="destructive">AAAAAAAAAAAAAAAAAA</Button>
+        <Button variant="link">AAAAAAAAAAAAAAAAAA</Button>
         <a
           className="flex items-center gap-2 hover:underline hover:underline-offset-4"
           href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
