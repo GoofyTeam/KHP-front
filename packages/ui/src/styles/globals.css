@@ -8,6 +8,17 @@
 @theme {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  --color-khp-background: var(--khp-background);
+  --color-khp-primary: var(--khp-primary);
+  --color-khp-primary-hover: var(--khp-primary-hover);
+  --color-khp-error: var(--khp-error);
+  --color-khp-warning: var(--khp-warning);
+  --color-khp-info: var(--khp-info);
+  --color-khp-border: var(--khp-border);
+  --color-khp-text-primary: var(--khp-text-primary);
+  --color-khp-text-secondary: var(--khp-text-secondary);
+  --color-khp-text-on-primary: var(--khp-text-on-primary);
 }
 
 :root {
