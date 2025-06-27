@@ -1,19 +1,12 @@
 # -------------------------------
-# Étape de base commune
-# -------------------------------
 FROM node:22-alpine AS base
 
-# Mettez à jour et installez libc6-compat
 RUN apk update && apk add --no-cache libc6-compat
     
 WORKDIR /app
     
-# Installez Turbo CLI globalement via npm
-# Remplacez <your-major-version> par la version majeure souhaitée, ex: 2
 RUN npm install -g turbo@^2
     
-# -------------------------------
-# Étape de "builder" : prune + préparation
 # -------------------------------
 FROM base AS builder
     
@@ -23,8 +16,6 @@ COPY . .
 # Générez un prune pour le workspace "web"
 RUN turbo prune web --docker
     
-# -------------------------------
-# Étape d'installation & build
 # -------------------------------
 FROM base AS installer
     

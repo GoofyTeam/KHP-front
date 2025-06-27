@@ -34,12 +34,16 @@ build: build-web build-pwa
 
 # Démarrage des conteneurs
 start-web:
+	@echo "[WEB] Removing old Web container if exists..."
+	docker rm -f $(WEB_IMAGE_NAME) || true
 	@echo "[WEB] Starting container..."
 	docker run -d -p 5432:3000 --name $(WEB_IMAGE_NAME) $(WEB_IMAGE_NAME):$(WEB_VERSION)
 
 start-pwa:
+	@echo "[PWA] Removing old PWA container if exists..."
+	docker rm -f $(PWA_IMAGE_NAME) || true
 	@echo "[PWA] Starting container..."
-	docker run -d -p 5433:3000 --name $(PWA_IMAGE_NAME) $(PWA_IMAGE_NAME):$(PWA_VERSION)
+	docker run -d -p 5433:80 --name $(PWA_IMAGE_NAME) $(PWA_IMAGE_NAME):$(PWA_VERSION)
 
 start: start-web start-pwa
 
