@@ -1,4 +1,4 @@
-name: Deploy KHP Web App image
+name: Deploy KHP PWA image
 
 on:
   push:
