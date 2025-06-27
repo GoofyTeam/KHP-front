@@ -43,3 +43,16 @@ npm run build --filter=web
 - `preview` – build then start the production server
 - `lint` – run ESLint on the project
 
+### Docker & deployment
+
+This app also provides a Dockerfile. You can build and run the container with
+the repository `Makefile`:
+
+```bash
+make build-web
+make start-web
+```
+
+The `deploy_webapp.yml` workflow builds and publishes the image to GitHub
+Container Registry whenever `main` is pushed.
+
