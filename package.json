@@ -1,8 +1,10 @@
 {
-  "name": "KHP-front",
+  "name": "khpfront",
   "private": true,
   "scripts": {
     "build": "turbo run build",
+    "build:web": "turbo run build --filter=web",
+    "build:pwa": "turbo run build --filter=pwa",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
