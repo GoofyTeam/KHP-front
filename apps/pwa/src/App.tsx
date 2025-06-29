@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@workspace/ui/components/button";
+import { Input } from "@workspace/ui/components/input";
 
 import PWABadge from "./PWABadge.tsx";
 
@@ -14,6 +15,8 @@ function App() {
       >
         count is {count}
       </Button>
+
+      <Input variant="khpproduct" placeholder="coucou" />
 
       <PWABadge />
     </div>
