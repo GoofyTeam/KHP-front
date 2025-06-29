@@ -10,8 +10,8 @@ const inputVariants = cva(baseClasses, {
     variant: {
       default:
         "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-      khpdefault: "bg-transparent border border-khp-primary rounded-md",
-      khpproduct:
+      "khp-default": "bg-transparent border border-khp-primary rounded-md",
+      "khp-product":
         "h-9 rounded-md bg-muted px-3 py-1.5 text-sm text-muted-foreground placeholder:text-muted-foreground border-0 shadow-none focus-visible:ring-0",
     },
   },
