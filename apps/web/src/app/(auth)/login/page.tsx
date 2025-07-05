@@ -7,18 +7,14 @@ import Image from "next/image";
 import { httpClient } from "@/lib/httpClient";
 import { LoginForm } from "@workspace/ui/components/login-form";
 
-// Interface pour les erreurs de validation
 interface ValidationErrors {
   [key: string]: string[];
 }
 
-// Interface pour la réponse d'erreur de l'API
 interface ErrorResponse {
   errors?: ValidationErrors;
   message?: string;
 }
-
-// Interface pour la réponse de l'API lors de la connexion
 interface LoginResponse {
   user: {
     id: number;
@@ -54,19 +50,24 @@ export default function Login() {
     } catch (error) {
       try {
         const errorObj = error as Error;
-        const errorData: ErrorResponse = JSON.parse(
-          errorObj.message.replace("Erreur HTTP 422: ", ""),
-        );
 
-        if (errorData.errors) {
-          setErrors(errorData.errors);
-        } else {
-          setGeneralError(
-            errorData.message || "Identifiants incorrects ou erreur de serveur",
+        if (errorObj.message.startsWith("HTTP error 422: ")) {
+          const errorData: ErrorResponse = JSON.parse(
+            errorObj.message.replace("HTTP error 422: ", ""),
           );
+
+          if (errorData.errors) {
+            setErrors(errorData.errors);
+          } else {
+            setGeneralError(
+              errorData.message || "Mismatched credentials or server error",
+            );
+          }
+        } else {
+          setGeneralError("Mismatched credentials or server error");
         }
-      } catch (parseError) {
-        setGeneralError("Identifiants incorrects ou erreur de serveur");
+      } catch {
+        setGeneralError("Mismatched credentials or server error");
       }
     } finally {
       setIsLoading(false);
@@ -76,7 +77,7 @@ export default function Login() {
   function translateError(error: string): string {
     switch (error) {
       case "validation.required":
-        return "Ce champ est requis";
+        return "This field is required.";
       default:
         return error;
     }
@@ -101,67 +102,18 @@ export default function Login() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-              <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold">Connexion</h1>
-                <p className="text-muted-foreground text-sm text-balance">
-                  Entrez vos identifiants pour vous connecter
-                </p>
+            <LoginForm onSubmit={handleSubmit} isLoading={isLoading} />
+
+            {errors.email && (
+              <div className="mt-2 text-red-500 text-sm">
+                Email: {translateError(errors.email[0])}
               </div>
-
-              <div className="grid gap-6">
-                <div className="grid gap-3">
-                  <label htmlFor="email">Email</label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="exemple@email.com"
-                    required
-                    disabled={isLoading}
-                    className={`flex h-10 w-full rounded-md border ${errors.email ? "border-red-500" : "border-input"} bg-background px-3 py-2 text-sm`}
-                  />
-                  {errors.email && (
-                    <p className="text-red-500 text-sm">
-                      {translateError(errors.email[0])}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid gap-3">
-                  <div className="flex items-center">
-                    <label htmlFor="password">Mot de passe</label>
-                    <a
-                      href="#"
-                      className="ml-auto text-sm underline-offset-4 hover:underline"
-                    >
-                      Mot de passe oublié?
-                    </a>
-                  </div>
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    required
-                    disabled={isLoading}
-                    className={`flex h-10 w-full rounded-md border ${errors.password ? "border-red-500" : "border-input"} bg-background px-3 py-2 text-sm`}
-                  />
-                  {errors.password && (
-                    <p className="text-red-500 text-sm">
-                      {translateError(errors.password[0])}
-                    </p>
-                  )}
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-                >
-                  {isLoading ? "Connexion en cours..." : "Se connecter"}
-                </button>
+            )}
+            {errors.password && (
+              <div className="mt-2 text-red-500 text-sm">
+                Mot de passe: {translateError(errors.password[0])}
               </div>
-            </form>
+            )}
           </div>
         </div>
       </div>
