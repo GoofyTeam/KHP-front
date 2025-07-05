@@ -50,8 +50,11 @@ export default async function middleware(req: NextRequest) {
   const response = NextResponse.next();
 
   if (isAuthenticated && userData) {
-    const encodedUserData = Buffer.from(JSON.stringify(userData)).toString(
-      "base64",
+    const encodedUserData = btoa(
+      new TextEncoder().encode(JSON.stringify(userData)).reduce(
+        (data, byte) => data + String.fromCharCode(byte),
+        ""
+      ),
     );
     response.headers.set("x-user", encodedUserData);
 

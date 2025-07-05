@@ -48,27 +48,18 @@ export default function Login() {
 
       router.push("/dashboard");
     } catch (error) {
-      try {
-        const errorObj = error as Error;
 
-        if (errorObj.message.startsWith("HTTP error 422")) {
-          const errorData: ErrorResponse = JSON.parse(
-            errorObj.message.replace("HTTP error 422", ""),
-          );
-
-          if (errorData.errors) {
-            setErrors(errorData.errors);
-          } else {
-            setGeneralError(
-              errorData.message || "Mismatched credentials or server error",
-            );
-          }
-        } else {
-          setGeneralError("Mismatched credentials or server error");
-        }
-      } catch {
-        setGeneralError("Mismatched credentials or server error");
+      const errorObj = error as { response?: ErrorResponse; message: string };
+      if (errorObj.response?.errors) {
+        setErrors(errorObj.response.errors);
+      } else if (errorObj.response?.message) {
+        setGeneralError(errorObj.response.message);
       }
+      else {
+        setGeneralError("An unexpected error occurred. Please try again.");
+        console.error("Unexpected error:", errorObj.message);
+      }
+
     } finally {
       setIsLoading(false);
     }

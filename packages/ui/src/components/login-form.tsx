@@ -52,7 +52,7 @@ export function LoginForm({
             placeholder="m@example.com"
             required
             disabled={isLoading}
-            className={errorEmail ? "border-red-500" : ""}
+            className={cn(errorEmail && "border-red-500")}
           />
           {errorEmail && <p className="text-red-500 text-sm">{errorEmail}</p>}
         </div>
@@ -72,7 +72,7 @@ export function LoginForm({
             type="password"
             required
             disabled={isLoading}
-            className={errorPassword ? "border-red-500" : ""}
+            className={cn(errorPassword && "border-red-500")}
           />
           {errorPassword && (
             <p className="text-red-500 text-sm">{errorPassword}</p>
