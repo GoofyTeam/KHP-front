@@ -41,8 +41,6 @@ class HttpClient {
         );
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
       const match = document.cookie
         .split("; ")
         .find((row) => row.startsWith("XSRF-TOKEN="));
