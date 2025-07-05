@@ -6,6 +6,8 @@
     "build:web": "turbo run build --filter=web",
     "build:pwa": "turbo run build --filter=pwa",
     "dev": "turbo run dev",
+    "dev:web": "turbo run dev --filter=web",
+    "dev:pwa": "turbo run dev:host --filter=pwa",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types"
