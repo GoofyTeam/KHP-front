@@ -51,9 +51,9 @@ export default function Login() {
       try {
         const errorObj = error as Error;
 
-        if (errorObj.message.startsWith("HTTP error 422: ")) {
+        if (errorObj.message.startsWith("HTTP error 422")) {
           const errorData: ErrorResponse = JSON.parse(
-            errorObj.message.replace("HTTP error 422: ", ""),
+            errorObj.message.replace("HTTP error 422", ""),
           );
 
           if (errorData.errors) {
