@@ -1,15 +1,29 @@
-// Client HTTP optimisé pour Laravel Sanctum
-
 const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 const isBrowser = typeof window !== "undefined";
 
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  company_id?: number;
+}
+
+export interface AuthResponse {
+  user: User;
+  token?: string;
+}
+
+export interface RequestData {
+  [key: string]: unknown;
+}
+
 class HttpClient {
   /**
-   * Récupère le token CSRF depuis les cookies
+   * Get CSRF token from the backend.
    */
   private async getCsrfToken(): Promise<string | null> {
     if (!isBrowser) {
-      console.warn("getCsrfToken ne peut être appelé que côté client");
+      console.warn("getCsrfToken can\'t be called on the server");
       return null;
     }
 
@@ -22,7 +36,9 @@ class HttpClient {
       });
 
       if (!res.ok) {
-        throw new Error(`Échec init CSRF (${res.status})`);
+        throw new Error(
+          `Failed to fetch CSRF token: ${res.status} ${res.statusText}`,
+        );
       }
 
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -32,7 +48,7 @@ class HttpClient {
         .find((row) => row.startsWith("XSRF-TOKEN="));
 
       if (!match) {
-        console.warn("Cookie XSRF-TOKEN introuvable après init CSRF");
+        console.warn("Cookie XSRF-TOKEN not found");
         return null;
       }
 
@@ -40,18 +56,18 @@ class HttpClient {
 
       return decodeURIComponent(raw);
     } catch (error) {
-      console.error("Erreur lors de la récupération du token CSRF:", error);
+      console.error("Error fetching CSRF token:", error);
       return null;
     }
   }
 
   /**
-   * Méthode générique pour effectuer des requêtes HTTP
+   * Generic request method to handle all HTTP methods.
    */
-  private async request<T>(
+  private async request<T, D extends RequestData = RequestData>(
     method: "GET" | "POST" | "PUT" | "DELETE",
     endpoint: string,
-    data?: any,
+    data?: D,
     options: RequestInit = {},
   ): Promise<T> {
     let xsrfToken: string | null = null;
@@ -59,7 +75,7 @@ class HttpClient {
     if (method !== "GET" && isBrowser) {
       xsrfToken = await this.getCsrfToken();
       if (!xsrfToken) {
-        console.warn("Aucun token CSRF disponible - requête risquée");
+        console.warn("CSRF token is not available, proceeding without it.");
       }
     }
 
@@ -69,8 +85,6 @@ class HttpClient {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        Origin: API_URL,
-        Cookie: document.cookie,
         ...(xsrfToken ? { "X-XSRF-TOKEN": xsrfToken } : {}),
         ...options.headers,
       },
@@ -80,41 +94,40 @@ class HttpClient {
 
     if (!res.ok) {
       if (res.status === 419) {
-        console.error("Erreur CSRF 419 – token expiré ou invalide");
-        throw new Error("Session expirée. Veuillez rafraîchir la page.");
+        throw new Error("Session expired, please refresh the page.");
       }
 
       const errorText = await res.text().catch(() => null);
       console.error(
-        `Erreur ${method} ${endpoint} :`,
+        `Error ${method} ${endpoint} :`,
         res.status,
         errorText || res.statusText,
       );
 
-      throw new Error(`Erreur HTTP ${res.status}`);
+      throw new Error(`HTTP error ${res.status}`);
     }
 
-    return res.json();
+    return res.json() as Promise<T>;
   }
 
   async get<T>(endpoint: string, options?: RequestInit): Promise<T> {
     return this.request<T>("GET", endpoint, undefined, options);
   }
 
-  async post<T>(
+  async post<T, D extends RequestData = RequestData>(
     endpoint: string,
-    data?: any,
+    data?: D,
     options?: RequestInit,
   ): Promise<T> {
-    return this.request<T>("POST", endpoint, data, options);
+    return this.request<T, D>("POST", endpoint, data, options);
   }
 
-  async put<T>(
+  async put<T, D extends RequestData = RequestData>(
     endpoint: string,
-    data?: any,
+    data?: D,
     options?: RequestInit,
   ): Promise<T> {
-    return this.request<T>("PUT", endpoint, data, options);
+    return this.request<T, D>("PUT", endpoint, data, options);
   }
 
   async delete<T>(endpoint: string, options?: RequestInit): Promise<T> {

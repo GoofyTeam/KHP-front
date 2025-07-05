@@ -1,5 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+interface UserData {
+  id?: number;
+  email?: string;
+  name?: string;
+  company_id?: number;
+}
+
 const protectedRoutes = ["/dashboard", "/profile", "/settings", "/account"];
 const authRoutes = [
   "/login",
@@ -8,12 +15,6 @@ const authRoutes = [
   "/reset-password",
 ];
 const API_URL = process.env.NEXT_PUBLIC_API_URL!;
-
-const sessionCache = new Map<
-  string,
-  { isValid: boolean; timestamp: number; userData?: any }
->();
-const CACHE_TTL = 30 * 1000;
 
 const serverHttpClient = {
   async fetch(endpoint: string, req: NextRequest): Promise<Response> {
@@ -52,11 +53,9 @@ export default async function middleware(req: NextRequest) {
     const encodedUserData = Buffer.from(JSON.stringify(userData)).toString(
       "base64",
     );
-
     response.headers.set("x-user", encodedUserData);
 
     if (userData.id) response.headers.set("x-user-id", userData.id.toString());
-    if (userData.email) response.headers.set("x-user-email", userData.email);
     if (userData.name) response.headers.set("x-user-name", userData.name);
   }
 
@@ -65,21 +64,11 @@ export default async function middleware(req: NextRequest) {
 
 async function checkAuthenticationAndGetUser(
   req: NextRequest,
-): Promise<{ isAuthenticated: boolean; userData?: any }> {
+): Promise<{ isAuthenticated: boolean; userData?: UserData }> {
   try {
     const khpSession = req.cookies.get("khp_session")?.value;
 
     if (!khpSession) return { isAuthenticated: false };
-
-    const cacheKey = khpSession;
-    const cached = sessionCache.get(cacheKey);
-
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-      return {
-        isAuthenticated: cached.isValid,
-        userData: cached.userData,
-      };
-    }
 
     const response = await serverHttpClient.fetch("/api/user", req);
     const isValid = response.ok;
@@ -89,16 +78,10 @@ async function checkAuthenticationAndGetUser(
       userData = await response.json().catch(() => undefined);
     }
 
-    sessionCache.set(cacheKey, {
-      isValid,
-      userData,
-      timestamp: Date.now(),
-    });
-
     return { isAuthenticated: isValid, userData };
   } catch (error) {
     console.error(
-      "Erreur lors de la vérification de l'authentification:",
+      "Error checking authentication and getting user data:",
       error,
     );
     return { isAuthenticated: false };
