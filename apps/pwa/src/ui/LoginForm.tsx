@@ -24,18 +24,10 @@ export function LoginForm({
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
-    // Here you would typically send the email and password to your authentication API
-    console.log("Email:", email);
-    console.log("Password:", password);
-
     try {
       await api.post("/api/login", {
         email,
         password,
-        head: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
       });
 
       navigate({
@@ -44,7 +36,6 @@ export function LoginForm({
       });
     } catch (error) {
       console.error("Login failed:", error);
-      // Handle login failure (e.g., show an error message)
     }
   }
 
@@ -54,7 +45,7 @@ export function LoginForm({
         <CardHeader>
           <CardTitle>{import.meta.env.VITE_PROJECT_NAME} - Login</CardTitle>
           <CardDescription>
-            Please proceed to login to access to the application.
+            Please proceed to login to access the application.
           </CardDescription>
         </CardHeader>
         <CardContent>
