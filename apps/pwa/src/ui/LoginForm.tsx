@@ -10,11 +10,14 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import api from "../lib/api";
+import { useNavigate } from "@tanstack/react-router";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const navigate = useNavigate();
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
@@ -25,16 +28,24 @@ export function LoginForm({
     console.log("Email:", email);
     console.log("Password:", password);
 
-    const newUser = await api.post("/api/login", {
-      email,
-      password,
-      head: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-    });
+    try {
+      await api.post("/api/login", {
+        email,
+        password,
+        head: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      });
 
-    console.log("Login response:", newUser);
+      navigate({
+        to: "/inventory",
+        replace: true,
+      });
+    } catch (error) {
+      console.error("Login failed:", error);
+      // Handle login failure (e.g., show an error message)
+    }
   }
 
   return (
