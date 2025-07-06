@@ -81,6 +81,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               {data.navMain.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
+                    size="lg"
                     tooltip={item.title}
                     onClick={() => setActiveItem(item)}
                     isActive={activeItem?.title === item.title}
