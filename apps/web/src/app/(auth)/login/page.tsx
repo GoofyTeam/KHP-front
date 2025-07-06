@@ -8,7 +8,9 @@ import { httpClient } from "@/lib/httpClient";
 import {
   LoginForm,
   LoginFormValues,
-} from "@workspace/ui/components/login-form";
+} from "@/components/login-form";
+
+const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || "KHP";
 
 export default function Login() {
   const router = useRouter();
@@ -40,7 +42,7 @@ export default function Login() {
             <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
               <GalleryVerticalEnd className="size-4" />
             </div>
-            GoofyTeam
+            <span className="text-lg font-bold">{APP_NAME}</span>
           </a>
         </div>
         <div className="flex flex-1 items-center justify-center">
