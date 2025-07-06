@@ -33,15 +33,15 @@ cd apps/pwa && npm run dev    # Vite PWA
 
 The root `package.json` exposes several scripts:
 
-| Script | Description |
-| ------ | ----------- |
-| `npm run build` | Build all apps and packages |
-| `npm run dev` | Start all apps in development mode |
-| `npm run lint` | Lint all packages |
-| `npm run format` | Format files with Prettier |
-| `npm run check-types` | Run TypeScript type checks |
-| `npm run build:web` | Build only the Next.js web app |
-| `npm run build:pwa` | Build only the PWA |
+| Script                | Description                        |
+| --------------------- | ---------------------------------- |
+| `npm run build`       | Build all apps and packages        |
+| `npm run dev`         | Start all apps in development mode |
+| `npm run lint`        | Lint all packages                  |
+| `npm run format`      | Format files with Prettier         |
+| `npm run check-types` | Run TypeScript type checks         |
+| `npm run build:web`   | Build only the Next.js web app     |
+| `npm run build:pwa`   | Build only the PWA                 |
 
 In addition to npm scripts, a `Makefile` provides shortcuts to build and run the
 Docker images for both apps:
