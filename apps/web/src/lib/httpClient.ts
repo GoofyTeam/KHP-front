@@ -130,7 +130,7 @@ class HttpClient {
 
         const errorText = await res.text().catch(() => null);
 
-        throw new Error(`${errorText || res.statusText}`);
+        throw new Error(`${res.status}: ${errorText || res.statusText}`);
       }
 
       return res.json() as Promise<T>;
