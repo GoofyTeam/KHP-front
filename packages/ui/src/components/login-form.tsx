@@ -3,6 +3,7 @@
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { useForm } from "react-hook-form";
+import { useEffect } from "react";
 
 import {
   Form,
@@ -34,17 +35,19 @@ export function LoginForm({
   errors = {},
   isLoading = false,
 }: LoginFormProps) {
+
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
-    defaultValues: {
-      email:
-        document.querySelector<HTMLInputElement>('input[name="email"]')
-          ?.value || "",
-      password:
-        document.querySelector<HTMLInputElement>('input[name="password"]')
-          ?.value || "",
-    },
+    defaultValues: { email: "", password: "" },
   });
+
+  useEffect(() => {
+    const email = (document.querySelector('input[name="email"]') as HTMLInputElement)?.value;
+    const password = (document.querySelector('input[name="password"]') as HTMLInputElement)?.value;
+    if (email || password) {
+      form.reset({ email, password });
+    }
+  }, [form]);
 
   return (
     <Form {...form}>
