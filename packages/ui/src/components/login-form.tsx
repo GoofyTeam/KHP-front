@@ -1,87 +1,93 @@
-import { Label } from "@workspace/ui/components/label";
+"use client";
+
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
-import { cn } from "@workspace/ui/lib/utils";
+import { useForm } from "react-hook-form";
 
-interface LoginFormProps extends React.ComponentProps<"form"> {
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@workspace/ui/components/form";
+
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+export const loginFormSchema = z.object({
+  email: z.string().email("Adresse email invalide"),
+  password: z.string().min(1, "Le mot de passe est requis"),
+});
+
+export type LoginFormValues = z.infer<typeof loginFormSchema>;
+
+interface LoginFormProps {
+  handleSubmit: (values: LoginFormValues) => void;
+  errors?: Record<string, string>;
   isLoading?: boolean;
-  errorEmail?: string;
-  errorPassword?: string;
-  texts?: {
-    title?: string;
-    subtitle?: string;
-    emailLabel?: string;
-    passwordLabel?: string;
-    forgotPassword?: string;
-    loginButton?: string;
-    loadingButton?: string;
-  };
 }
 
 export function LoginForm({
-  className,
+  handleSubmit,
+  errors = {},
   isLoading = false,
-  errorEmail,
-  errorPassword,
-  texts = {},
-  ...props
 }: LoginFormProps) {
-  const {
-    title = "Login to your account",
-    subtitle = "Enter your email below to login to your account",
-    emailLabel = "Email",
-    passwordLabel = "Password",
-    forgotPassword = "Forgot your password?",
-    loginButton = "Login",
-    loadingButton = "Logging in...",
-  } = texts;
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginFormSchema),
+    defaultValues: {
+      email:
+        document.querySelector<HTMLInputElement>('input[name="email"]')
+          ?.value || "",
+      password:
+        document.querySelector<HTMLInputElement>('input[name="password"]')
+          ?.value || "",
+    },
+  });
 
   return (
-    <form className={cn("flex flex-col gap-6", className)} {...props}>
-      <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">{title}</h1>
-        <p className="text-muted-foreground text-sm text-balance">{subtitle}</p>
-      </div>
-      <div className="grid gap-6">
-        <div className="grid gap-3">
-          <Label htmlFor="email">{emailLabel}</Label>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            placeholder="m@example.com"
-            required
-            disabled={isLoading}
-            className={cn(errorEmail && "border-red-500")}
-          />
-          {errorEmail && <p className="text-red-500 text-sm">{errorEmail}</p>}
-        </div>
-        <div className="grid gap-3">
-          <div className="flex items-center">
-            <Label htmlFor="password">{passwordLabel}</Label>
-            <a
-              href="#"
-              className="ml-auto text-sm underline-offset-4 hover:underline"
-            >
-              {forgotPassword}
-            </a>
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className={"flex flex-col gap-6"}
+      >
+        {errors.auth && (
+          <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md">
+            {errors.auth}
           </div>
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            required
-            disabled={isLoading}
-            className={cn(errorPassword && "border-red-500")}
-          />
-          {errorPassword && (
-            <p className="text-red-500 text-sm">{errorPassword}</p>
+        )}
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input placeholder="Email" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )}
-        </div>
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? loadingButton : loginButton}
+        />
+
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Mot de passe</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="Mot de passe" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? "Connexion..." : "Se connecter"}
         </Button>
-      </div>
-    </form>
+      </form>
+    </Form>
   );
 }

@@ -18,16 +18,28 @@ export interface RequestData {
 }
 
 class HttpClient {
+  private xsrfToken: string | null = null;
+
   /**
-   * Get CSRF token from the backend.
+   * Get CSRF token from the backend if not already available.
    */
   private async getCsrfToken(): Promise<string | null> {
     if (!isBrowser) {
-      console.warn("getCsrfToken can\'t be called on the server");
+      console.warn("getCsrfToken can't be called on the server");
       return null;
     }
 
+    if (this.xsrfToken) {
+      return this.xsrfToken;
+    }
+
     try {
+      const existingToken = this.extractTokenFromCookie();
+      if (existingToken) {
+        this.xsrfToken = existingToken;
+        return existingToken;
+      }
+
       const res = await fetch(`${API_URL}/sanctum/csrf-cookie`, {
         method: "GET",
         credentials: "include",
@@ -41,22 +53,41 @@ class HttpClient {
         );
       }
 
-      const match = document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("XSRF-TOKEN="));
-
-      if (!match) {
-        console.warn("Cookie XSRF-TOKEN not found");
-        return null;
+      const token = this.extractTokenFromCookie();
+      if (token) {
+        this.xsrfToken = token;
+        return token;
       }
 
-      const raw = match.split("=")[1];
-
-      return decodeURIComponent(raw);
+      console.warn("Cookie XSRF-TOKEN not found after fetch");
+      return null;
     } catch (error) {
       console.error("Error fetching CSRF token:", error);
       return null;
     }
+  }
+
+  /**
+   * Extract CSRF token from cookies
+   */
+  private extractTokenFromCookie(): string | null {
+    const match = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("XSRF-TOKEN="));
+
+    if (!match) {
+      return null;
+    }
+
+    const raw = match.split("=")[1];
+    return decodeURIComponent(raw);
+  }
+
+  /**
+   * Reset CSRF token (used when token is invalid)
+   */
+  private resetCsrfToken() {
+    this.xsrfToken = null;
   }
 
   /**
@@ -77,35 +108,38 @@ class HttpClient {
       }
     }
 
-    const res = await fetch(`${API_URL}${endpoint}`, {
-      method,
-      credentials: "include",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        ...(xsrfToken ? { "X-XSRF-TOKEN": xsrfToken } : {}),
-        ...options.headers,
-      },
-      body: data ? JSON.stringify(data) : undefined,
-      ...options,
-    });
+    try {
+      const res = await fetch(`${API_URL}${endpoint}`, {
+        method,
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          ...(xsrfToken ? { "X-XSRF-TOKEN": xsrfToken } : {}),
+          ...options.headers,
+        },
+        body: data ? JSON.stringify(data) : undefined,
+        ...options,
+      });
 
-    if (!res.ok) {
-      if (res.status === 419) {
-        throw new Error("Session expired, please refresh the page.");
+      if (!res.ok) {
+        if (res.status === 419) {
+          this.resetCsrfToken();
+          throw new Error("Session expired, please refresh the page.");
+        }
+
+        const errorText = await res.text().catch(() => null);
+
+        throw new Error(`${errorText || res.statusText}`);
       }
 
-      const errorText = await res.text().catch(() => null);
-      console.error(
-        `Error ${method} ${endpoint} :`,
-        res.status,
-        errorText || res.statusText,
-      );
-
-      throw new Error(`HTTP error ${res.status}`);
+      return res.json() as Promise<T>;
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("Session expired")) {
+        this.resetCsrfToken();
+      }
+      throw error;
     }
-
-    return res.json() as Promise<T>;
   }
 
   async get<T>(endpoint: string, options?: RequestInit): Promise<T> {

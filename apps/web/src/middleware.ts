@@ -51,10 +51,9 @@ export default async function middleware(req: NextRequest) {
 
   if (isAuthenticated && userData) {
     const encodedUserData = btoa(
-      new TextEncoder().encode(JSON.stringify(userData)).reduce(
-        (data, byte) => data + String.fromCharCode(byte),
-        ""
-      ),
+      new TextEncoder()
+        .encode(JSON.stringify(userData))
+        .reduce((data, byte) => data + String.fromCharCode(byte), ""),
     );
     response.headers.set("x-user", encodedUserData);
 
