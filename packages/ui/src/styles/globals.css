@@ -19,6 +19,8 @@
   --color-khp-text-primary: var(--khp-text-primary);
   --color-khp-text-secondary: var(--khp-text-secondary);
   --color-khp-text-on-primary: var(--khp-text-on-primary);
+  --color-khp-surface: var(--khp-surface);
+  --color-khp-background-secondary: var(--khp-background-secondary);
 }
 
 :root {
@@ -61,12 +63,14 @@
   --khp-text-primary: #1f2937;
   --khp-text-secondary: #6b7280;
   --khp-text-on-primary: #ffffff;
-  --sidebar: hsl(0 0% 98%);
-  --sidebar-foreground: hsl(240 5.3% 26.1%);
-  --sidebar-primary: hsl(240 5.9% 10%);
+  --khp-surface: #ffffff;
+  --khp-background-secondary: #f1f2f6;
+  --sidebar: var(--color-khp-background);
+  --sidebar-foreground: var(--color-khp-text-primary);
+  --sidebar-primary: var(--color-khp-primary);
   --sidebar-primary-foreground: hsl(0 0% 98%);
-  --sidebar-accent: hsl(240 4.8% 95.9%);
-  --sidebar-accent-foreground: hsl(240 5.9% 10%);
+  --sidebar-accent: var(--color-khp-primary);
+  --sidebar-accent-foreground: var(--color-khp-text-on-primary);
   --sidebar-border: hsl(220 13% 91%);
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
 }
