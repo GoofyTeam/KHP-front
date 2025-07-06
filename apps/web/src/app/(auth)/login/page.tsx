@@ -12,7 +12,7 @@ import {
 
 export default function Login() {
   const router = useRouter();
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(values: LoginFormValues) {
