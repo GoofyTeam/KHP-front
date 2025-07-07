@@ -1,4 +1,7 @@
-import { FC } from "react";
+"use client";
+
+import { FC, ReactNode } from "react";
+import { Slot } from "@radix-ui/react-slot";
 
 type IconType = "plus" | "note";
 type ColorType = "green" | "red";
@@ -9,6 +12,8 @@ type QuickAccessButtonProps = {
   color: ColorType;
   onClick?: () => void;
   subtitle?: string;
+  asChild?: boolean;
+  className?: string;
 };
 
 const icons: Record<IconType, React.ReactElement> = {
@@ -64,11 +69,15 @@ export const QuickAccessButton: FC<QuickAccessButtonProps> = ({
   color,
   onClick,
   subtitle,
+  asChild = false,
+  className = "",
 }) => {
+  const Comp = asChild ? Slot : "button";
+
   return (
-    <button
+    <Comp
       onClick={onClick}
-      className="flex flex-col justify-between items-center p-2 w-36 h-36 sm:w-44 sm:h-44 border border-khp-primary/30 rounded-md hover:shadow-md transition"
+      className={`flex flex-col justify-between items-center p-2 w-40 h-40 border border-khp-primary/30 rounded-md hover:shadow-md transition ${className}`}
     >
       <span className="text-center text-xs sm:text-sm font-medium text-gray-800">
         {title}
@@ -76,7 +85,7 @@ export const QuickAccessButton: FC<QuickAccessButtonProps> = ({
 
       <div className="flex-1 flex items-center justify-center">
         <div
-          className={`w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center rounded-full ${circleColors[color]}`}
+          className={`w-20 h-20 flex items-center justify-center rounded-full ${circleColors[color]}`}
         >
           {icons[icon]}
         </div>
@@ -87,6 +96,6 @@ export const QuickAccessButton: FC<QuickAccessButtonProps> = ({
           {subtitle}
         </p>
       )}
-    </button>
+    </Comp>
   );
 };
