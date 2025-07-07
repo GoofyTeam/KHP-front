@@ -14,8 +14,10 @@
     "@tailwindcss/vite": "^4.1.10",
     "@tanstack/react-router": "^1.125.1",
     "@tanstack/react-router-devtools": "^1.125.1",
+    "@uidotdev/usehooks": "^2.4.1",
     "@workspace/ui": "*",
     "react": "^19.0.0",
+    "react-barcode-scanner": "^4.0.0",
     "react-dom": "^19.0.0",
     "tailwindcss": "^4.1.10"
   },
