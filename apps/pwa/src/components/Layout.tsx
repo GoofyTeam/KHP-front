@@ -36,6 +36,7 @@ export function Layout({ children, className }: LayoutProps) {
                 variant="link"
                 size="lg"
                 className="text-khp-text-on-primary !p-0"
+                aria-label="Go back"
               >
                 <ArrowLeft className="!h-8 !w-8 md:!h-10 md:!w-10" />
               </Button>
