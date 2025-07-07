@@ -1,19 +1,37 @@
 "use client";
 
-import { FC } from "react";
+import { FC, ReactElement, cloneElement, isValidElement } from "react";
 import { Slot } from "@radix-ui/react-slot";
+import { cn } from "@workspace/ui/lib/utils";
 
 type IconType = "plus" | "note";
 type ColorType = "green" | "red";
 
-type QuickAccessButtonProps = {
+type BaseProps = {
   title: string;
   icon: IconType;
   color: ColorType;
-  onClick?: () => void;
-  subtitle?: string;
-  asChild?: boolean;
   className?: string;
+  subtitle?: string;
+};
+
+type WithOnClick = BaseProps & {
+  onClick: () => void;
+  asChild?: false;
+  children?: never;
+};
+
+type WithAsChild = BaseProps & {
+  asChild: true;
+  children: ReactElement<{ className?: string }>;
+  onClick?: never;
+};
+
+type QuickAccessButtonProps = WithOnClick | WithAsChild;
+
+const circleColors: Record<ColorType, string> = {
+  green: "bg-khp-primary",
+  red: "bg-khp-error",
 };
 
 const icons: Record<IconType, React.ReactElement> = {
@@ -58,34 +76,25 @@ const icons: Record<IconType, React.ReactElement> = {
   ),
 };
 
-const circleColors: Record<ColorType, string> = {
-  green: "bg-khp-primary",
-  red: "bg-khp-error",
-};
-
 export const QuickAccessButton: FC<QuickAccessButtonProps> = ({
   title,
   icon,
   color,
-  onClick,
+  className = "",
   subtitle,
   asChild = false,
-  className = "",
+  children,
+  ...rest
 }) => {
-  const Comp = asChild ? Slot : "button";
-
-  return (
-    <Comp
-      onClick={onClick}
-      className={`flex flex-col justify-between items-center p-2 w-40 h-40 border border-khp-primary/30 rounded-md hover:shadow-md transition ${className}`}
-    >
+  const content = (
+    <div className="flex flex-col justify-between items-center p-2 w-36 h-36 sm:w-44 sm:h-44 border border-khp-primary/30 rounded-md hover:shadow-md transition">
       <span className="text-center text-xs sm:text-sm font-medium text-gray-800">
         {title}
       </span>
 
       <div className="flex-1 flex items-center justify-center">
         <div
-          className={`w-20 h-20 flex items-center justify-center rounded-full ${circleColors[color]}`}
+          className={`w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center rounded-full ${circleColors[color]}`}
         >
           {icons[icon]}
         </div>
@@ -96,6 +105,33 @@ export const QuickAccessButton: FC<QuickAccessButtonProps> = ({
           {subtitle}
         </p>
       )}
-    </Comp>
+    </div>
+  );
+
+  if (asChild && isValidElement(children)) {
+    return cloneElement(
+      children,
+      {
+        className: cn(
+          "inline-flex w-fit h-fit",
+          children.props.className,
+          className
+        ),
+        ...rest,
+      },
+      content
+    );
+  }
+
+  return (
+    <button
+      {...rest}
+      className={cn(
+        "flex flex-col justify-between items-center p-2 w-36 h-36 sm:w-44 sm:h-44 border border-khp-primary/30 rounded-md hover:shadow-md transition",
+        className
+      )}
+    >
+      {content}
+    </button>
   );
 };
