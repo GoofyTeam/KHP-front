@@ -1,7 +1,6 @@
 "use client";
 
 import { FC, ReactElement, cloneElement, isValidElement } from "react";
-import { Slot } from "@radix-ui/react-slot";
 import { cn } from "@workspace/ui/lib/utils";
 
 type IconType = "plus" | "note";
