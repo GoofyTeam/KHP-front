@@ -70,9 +70,9 @@ export const QuickAccessButton: FC<QuickAccessButtonProps> = ({
       onClick={onClick}
       className="flex flex-col justify-between items-center p-2 w-36 h-36 sm:w-44 sm:h-44 border border-khp-primary/30 rounded-md hover:shadow-md transition"
     >
-      <h2 className="text-center text-xs sm:text-sm font-medium text-gray-800">
+      <span className="text-center text-xs sm:text-sm font-medium text-gray-800">
         {title}
-      </h2>
+      </span>
 
       <div className="flex-1 flex items-center justify-center">
         <div
