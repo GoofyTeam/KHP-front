@@ -3,6 +3,7 @@ import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { ArrowLeft } from "lucide-react";
 import { useRouter, useLocation } from "@tanstack/react-router";
+import { useCurrentTitle } from "../hooks/usePageTitle";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -11,16 +12,10 @@ interface LayoutProps {
 
 const PAGES_WITHOUT_BACK_BUTTON = ["/inventory", "/login"];
 
-const ROUTE_TITLES: Record<string, string> = {
-  "/inventory": "Inventory",
-  "/login": "Login",
-};
-
 export function Layout({ children, className }: LayoutProps) {
   const router = useRouter();
   const location = useLocation();
-
-  const title = ROUTE_TITLES[location.pathname] || "";
+  const title = useCurrentTitle();
 
   const handleGoBack = () => {
     router.history.back();
