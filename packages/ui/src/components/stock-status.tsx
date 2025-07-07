@@ -4,7 +4,7 @@ import { ArrowDown, OctagonAlert } from "lucide-react";
 
 import { cn } from "@workspace/ui/lib/utils";
 
-const badgeVariants = cva(
+const stockStatusVariants = cva(
   "inline-flex items-center gap-1.5 transition-colors",
   {
     variants: {
@@ -35,9 +35,9 @@ const circleVariants = cva("rounded-full border flex-shrink-0", {
   },
 });
 
-interface BadgeProps
+interface StockStatusProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {
+    VariantProps<typeof stockStatusVariants> {
   showLabel?: boolean;
   label?: string;
 }
@@ -70,18 +70,18 @@ const getDefaultLabel = (variant: string) => {
   }
 };
 
-function Badge({
+function StockStatus({
   className,
   variant = "in-stock",
   showLabel = true,
   label,
   ...props
-}: BadgeProps) {
+}: StockStatusProps) {
   const Icon = getIcon(variant || "in-stock");
   const displayLabel = label || getDefaultLabel(variant || "in-stock");
 
   return (
-    <div className={cn(badgeVariants({ variant, className }))} {...props}>
+    <div className={cn(stockStatusVariants({ variant, className }))} {...props}>
       {/* For in-stock and out-of-stock, show colored circle */}
       {(variant === "in-stock" || variant === "out-of-stock") && (
         <div className={cn(circleVariants({ variant }))} />
@@ -98,4 +98,4 @@ function Badge({
   );
 }
 
-export { Badge, badgeVariants, circleVariants };
+export { StockStatus, stockStatusVariants, circleVariants };
