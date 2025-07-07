@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, ReactNode } from "react";
+import { FC } from "react";
 import { Slot } from "@radix-ui/react-slot";
 
 type IconType = "plus" | "note";
