@@ -32,7 +32,7 @@ export function Layout({ children, className }: LayoutProps) {
 
   return (
     <div className={cn("min-h-screen bg-khp-background", className)}>
-      <header className="bg-khp-primary text-khp-text-on-primary shadow-sm h-16">
+      <header className="bg-khp-primary text-khp-text-on-primary shadow-sm h-16 sticky top-0 z-10">
         <div className="mx-auto flex max-w-7xl items-center px-4 sm:px-6 lg:px-8 h-full">
           <div className="flex items-center gap-2 w-full">
             {shouldShowBackButton && (
