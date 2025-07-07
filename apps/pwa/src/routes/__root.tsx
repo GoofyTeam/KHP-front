@@ -5,7 +5,6 @@ import {
   useLocation,
 } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
-import { useEffect } from "react";
 import api from "../lib/api";
 import { Layout } from "../components/Layout";
 
@@ -44,11 +43,7 @@ const PAGE_DOCUMENT_TITLES: Record<string, string> = {
 };
 
 function getDocumentTitle(pathname: string): string {
-  console.log("Debug - Current pathname:", pathname);
-  console.log("Debug - Available titles:", Object.keys(PAGE_DOCUMENT_TITLES));
-
   if (PAGE_DOCUMENT_TITLES[pathname]) {
-    console.log("Debug - Found title:", PAGE_DOCUMENT_TITLES[pathname]);
     return PAGE_DOCUMENT_TITLES[pathname];
   }
 
@@ -66,14 +61,6 @@ function getDocumentTitle(pathname: string): string {
 function RootComponent() {
   const location = useLocation();
   const documentTitle = getDocumentTitle(location.pathname);
-
-  console.log("Debug - Final document title:", documentTitle);
-
-  // Fallback avec document.title pour s'assurer que le titre se met à jour
-  useEffect(() => {
-    document.title = documentTitle;
-    console.log("Debug - Document title set to:", document.title);
-  }, [documentTitle]);
 
   if (PAGES_WITHOUT_LAYOUT.includes(location.pathname)) {
     return (
