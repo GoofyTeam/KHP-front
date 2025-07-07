@@ -1,7 +1,7 @@
-import * as React from "react";
 import { Outlet, createRootRoute, redirect } from "@tanstack/react-router";
 import api from "../lib/api";
 import { router } from "../main";
+import { Layout } from "../components/Layout";
 
 export const Route = createRootRoute({
   beforeLoad: async ({ location }) => {
@@ -32,8 +32,8 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   return (
-    <React.Fragment>
+    <Layout>
       <Outlet />
-    </React.Fragment>
+    </Layout>
   );
 }
