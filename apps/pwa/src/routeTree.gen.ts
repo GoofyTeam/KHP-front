@@ -13,6 +13,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ProtectedScanRouteImport } from './routes/_protected/scan'
 import { Route as ProtectedInventoryRouteImport } from './routes/_protected/inventory'
 import { Route as ProtectedHandleItemRouteImport } from './routes/_protected/handle-item'
+import { Route as ProtectedProductIdRouteImport } from './routes/_protected/product.$id'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -34,18 +35,25 @@ const ProtectedHandleItemRoute = ProtectedHandleItemRouteImport.update({
   path: '/handle-item',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProtectedProductIdRoute = ProtectedProductIdRouteImport.update({
+  id: '/_protected/product/$id',
+  path: '/product/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/handle-item': typeof ProtectedHandleItemRoute
   '/inventory': typeof ProtectedInventoryRoute
   '/scan': typeof ProtectedScanRoute
+  '/product/$id': typeof ProtectedProductIdRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/handle-item': typeof ProtectedHandleItemRoute
   '/inventory': typeof ProtectedInventoryRoute
   '/scan': typeof ProtectedScanRoute
+  '/product/$id': typeof ProtectedProductIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,18 +61,20 @@ export interface FileRoutesById {
   '/_protected/handle-item': typeof ProtectedHandleItemRoute
   '/_protected/inventory': typeof ProtectedInventoryRoute
   '/_protected/scan': typeof ProtectedScanRoute
+  '/_protected/product/$id': typeof ProtectedProductIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/login' | '/handle-item' | '/inventory' | '/scan'
+  fullPaths: '/login' | '/handle-item' | '/inventory' | '/scan' | '/product/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/handle-item' | '/inventory' | '/scan'
+  to: '/login' | '/handle-item' | '/inventory' | '/scan' | '/product/$id'
   id:
     | '__root__'
     | '/login'
     | '/_protected/handle-item'
     | '/_protected/inventory'
     | '/_protected/scan'
+    | '/_protected/product/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -72,6 +82,7 @@ export interface RootRouteChildren {
   ProtectedHandleItemRoute: typeof ProtectedHandleItemRoute
   ProtectedInventoryRoute: typeof ProtectedInventoryRoute
   ProtectedScanRoute: typeof ProtectedScanRoute
+  ProtectedProductIdRoute: typeof ProtectedProductIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -104,6 +115,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedHandleItemRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_protected/product/$id': {
+      id: '/_protected/product/$id'
+      path: '/product/$id'
+      fullPath: '/product/$id'
+      preLoaderRoute: typeof ProtectedProductIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -112,6 +130,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProtectedHandleItemRoute: ProtectedHandleItemRoute,
   ProtectedInventoryRoute: ProtectedInventoryRoute,
   ProtectedScanRoute: ProtectedScanRoute,
+  ProtectedProductIdRoute: ProtectedProductIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
