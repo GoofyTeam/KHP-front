@@ -3,6 +3,10 @@ import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { ArrowLeft } from "lucide-react";
 import { useRouter, useLocation } from "@tanstack/react-router";
+import {
+  useProductRouteInfo,
+  type ProductRouteInfo,
+} from "../hooks/useProductRouteInfo";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -18,22 +22,20 @@ const PAGE_TITLES: Record<string, string> = {
   "/handle-item": "Traiter l'article",
 };
 
-function getPageTitle(pathname: string): string {
+function getPageTitle(
+  pathname: string,
+  productInfo?: ProductRouteInfo
+): string {
   if (PAGE_TITLES[pathname]) {
     return PAGE_TITLES[pathname];
   }
 
-  if (pathname.startsWith("/products/")) {
-    const parts = pathname.split("/");
-    const id = parts[2];
-    
-    // Si c'est /products/1/history
-    if (parts[3] === "history") {
-      return `Historique - Produit ${id}`;
+  if (productInfo?.isProductRoute && productInfo.id) {
+    if (productInfo.isHistoryRoute) {
+      return `Historique - Produit ${productInfo.id}`;
     }
-    
-    // Si c'est /products/1
-    return `Produit ${id}`;
+
+    return `Produit ${productInfo.id}`;
   }
 
   return "";
@@ -42,7 +44,8 @@ function getPageTitle(pathname: string): string {
 export function Layout({ children, className }: LayoutProps) {
   const router = useRouter();
   const location = useLocation();
-  const title = getPageTitle(location.pathname);
+  const productInfo = useProductRouteInfo();
+  const title = getPageTitle(location.pathname, productInfo);
 
   const handleGoBack = () => {
     router.history.back();

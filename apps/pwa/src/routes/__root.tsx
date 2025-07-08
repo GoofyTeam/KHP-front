@@ -7,6 +7,10 @@ import {
 import { Helmet } from "react-helmet-async";
 import api from "../lib/api";
 import { Layout } from "../components/Layout";
+import {
+  useProductRouteInfo,
+  type ProductRouteInfo,
+} from "../hooks/useProductRouteInfo";
 
 export const Route = createRootRoute({
   beforeLoad: async ({ location }) => {
@@ -42,24 +46,22 @@ const PAGE_DOCUMENT_TITLES: Record<string, string> = {
   "/handle-item": "Traiter l'article - KHP",
 };
 
-function getDocumentTitle(pathname: string): string {
+function getDocumentTitle(
+  pathname: string,
+  productInfo?: ProductRouteInfo
+): string {
   if (PAGE_DOCUMENT_TITLES[pathname]) {
     return PAGE_DOCUMENT_TITLES[pathname];
   }
 
-  if (pathname.startsWith("/products/")) {
-    const parts = pathname.split("/");
-    const id = parts[2];
-
-    // Si c'est /products/1/history
-    if (parts[3] === "history") {
-      const title = `Historique - Produit ${id} - KHP`;
+  if (productInfo?.isProductRoute && productInfo.id) {
+    if (productInfo.isHistoryRoute) {
+      const title = `Historique - Produit ${productInfo.id} - KHP`;
       console.log("Debug - Product history title:", title);
       return title;
     }
 
-    // Si c'est /products/1
-    const title = `Produit ${id} - KHP`;
+    const title = `Produit ${productInfo.id} - KHP`;
     console.log("Debug - Product title:", title);
     return title;
   }
@@ -70,7 +72,8 @@ function getDocumentTitle(pathname: string): string {
 
 function RootComponent() {
   const location = useLocation();
-  const documentTitle = getDocumentTitle(location.pathname);
+  const productInfo = useProductRouteInfo();
+  const documentTitle = getDocumentTitle(location.pathname, productInfo);
 
   if (PAGES_WITHOUT_LAYOUT.includes(location.pathname)) {
     return (

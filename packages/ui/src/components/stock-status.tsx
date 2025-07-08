@@ -82,17 +82,15 @@ function StockStatus({
 
   return (
     <div className={cn(stockStatusVariants({ variant, className }))} {...props}>
-      {/* For in-stock and out-of-stock, show colored circle */}
+
       {(variant === "in-stock" || variant === "out-of-stock") && (
         <div className={cn(circleVariants({ variant }))} />
       )}
 
-      {/* For low-stock and expired, show icon */}
       {(variant === "low-stock" || variant === "expired") && (
         <Icon className="size-4" />
       )}
 
-      {/* Show label if requested */}
       {showLabel && (
         <span className="text-sm font-medium text-khp-text-primary hidden sm:inline">
           {displayLabel}

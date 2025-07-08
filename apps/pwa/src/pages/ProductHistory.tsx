@@ -1,7 +1,6 @@
 import { HistoryTable, type HistoryEntry } from "../components/history-table";
 
 export default function ProductHistoryPage() {
-  // Données d'exemple étendues pour l'historique complet
   const fullHistoryData: HistoryEntry[] = [
     {
       id: "1",
