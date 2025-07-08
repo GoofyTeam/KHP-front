@@ -2,7 +2,6 @@
   "extends": "@workspace/typescript-config/react-library.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "moduleResolution": "bundler",
     "paths": {
       "@workspace/ui/*": ["./src/*"]
     }

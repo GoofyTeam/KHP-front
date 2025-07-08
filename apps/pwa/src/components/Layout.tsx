@@ -23,7 +23,7 @@ function getPageTitle(pathname: string): string {
     return PAGE_TITLES[pathname];
   }
 
-  if (pathname.startsWith("/product/")) {
+  if (pathname.startsWith("/products/")) {
     const id = pathname.split("/")[2];
     return `Produit ${id}`;
   }

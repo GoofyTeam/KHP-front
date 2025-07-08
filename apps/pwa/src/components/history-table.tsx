@@ -1,4 +1,3 @@
-import * as React from "react";
 import { ArrowUp, ArrowDown } from "lucide-react";
 
 import { cn } from "@workspace/ui/lib/utils";
@@ -9,7 +8,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "./table.js";
+} from "@workspace/ui/components/table";
 
 export type HistoryEntry = {
   id: string;
@@ -31,26 +30,24 @@ export function HistoryTable({
 }: HistoryTableProps) {
   return (
     <div className={cn("w-full", className)}>
-      <div className="border">
-        <Table>
-          {showHeader && (
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[50px]"></TableHead>
-                <TableHead>Quantity</TableHead>
-                <TableHead>Date</TableHead>
-              </TableRow>
-            </TableHeader>
-          )}
-        </Table>
+      <div className="border overflow-hidden">
         <div className="max-h-[15vh] [@media(min-height:600px)]:max-h-[20vh] [@media(min-height:700px)]:max-h-[25vh] [@media(min-height:800px)]:max-h-[30vh] overflow-y-auto">
           <Table>
+            {showHeader && (
+              <TableHeader className="sticky top-0 z-10 bg-background">
+                <TableRow>
+                  <TableHead className="w-[50px]"></TableHead>
+                  <TableHead>Quantity</TableHead>
+                  <TableHead>Date</TableHead>
+                </TableRow>
+              </TableHeader>
+            )}
             <TableBody>
               {data.length ? (
                 data.map((entry, index) => (
                   <TableRow
                     key={entry.id}
-                    className={cn(index === data.length - 1 && "border-b")}
+                    className={cn(index === data.length - 1 && "border-b-0")}
                   >
                     <TableCell className="flex justify-center w-[50px]">
                       {entry.type === "add" ? (

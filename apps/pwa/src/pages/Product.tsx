@@ -1,17 +1,10 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { StockStatus } from "@workspace/ui/components/stock-status";
-import {
-  HistoryTable,
-  type HistoryEntry,
-} from "@workspace/ui/components/history-table";
+import { HistoryTable, type HistoryEntry } from "../components/history-table";
 import { Button } from "@workspace/ui/components/button";
 import { NotebookPen } from "lucide-react";
 
-export const Route = createFileRoute("/_protected/product/$id")({
-  component: RouteComponent,
-});
-
-function RouteComponent() {
+export default function ProductPage() {
   const navigate = useNavigate();
 
   const historyData: HistoryEntry[] = [
