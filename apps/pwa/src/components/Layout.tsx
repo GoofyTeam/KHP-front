@@ -2,11 +2,7 @@ import * as React from "react";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { ArrowLeft } from "lucide-react";
-import { useRouter, useLocation } from "@tanstack/react-router";
-import {
-  useProductRouteInfo,
-  type ProductRouteInfo,
-} from "../hooks/useProductRouteInfo";
+import { useRouter, useLocation, useMatch } from "@tanstack/react-router";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -24,18 +20,19 @@ const PAGE_TITLES: Record<string, string> = {
 
 function getPageTitle(
   pathname: string,
-  productInfo?: ProductRouteInfo
+  productId?: string | null,
+  isHistoryRoute?: boolean
 ): string {
   if (PAGE_TITLES[pathname]) {
     return PAGE_TITLES[pathname];
   }
 
-  if (productInfo?.isProductRoute && productInfo.id) {
-    if (productInfo.isHistoryRoute) {
-      return `Historique - Produit ${productInfo.id}`;
+  if (productId) {
+    if (isHistoryRoute) {
+      return `Historique - Produit ${productId}`;
     }
 
-    return `Produit ${productInfo.id}`;
+    return `Produit ${productId}`;
   }
 
   return "";
@@ -44,8 +41,22 @@ function getPageTitle(
 export function Layout({ children, className }: LayoutProps) {
   const router = useRouter();
   const location = useLocation();
-  const productInfo = useProductRouteInfo();
-  const title = getPageTitle(location.pathname, productInfo);
+  
+  // Accéder directement aux paramètres de route via useMatch
+  const productMatch = useMatch({ 
+    from: "/_protected/products/$id",
+    shouldThrow: false 
+  });
+  
+  const historyMatch = useMatch({ 
+    from: "/_protected/products/$id_/history",
+    shouldThrow: false 
+  });
+  
+  const productId = productMatch?.params?.id || historyMatch?.params?.id;
+  const isHistoryRoute = Boolean(historyMatch);
+  
+  const title = getPageTitle(location.pathname, productId, isHistoryRoute);
 
   const handleGoBack = () => {
     router.history.back();

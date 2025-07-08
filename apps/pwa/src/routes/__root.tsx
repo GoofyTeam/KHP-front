@@ -3,14 +3,11 @@ import {
   createRootRoute,
   redirect,
   useLocation,
+  useMatch,
 } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 import api from "../lib/api";
 import { Layout } from "../components/Layout";
-import {
-  useProductRouteInfo,
-  type ProductRouteInfo,
-} from "../hooks/useProductRouteInfo";
 
 export const Route = createRootRoute({
   beforeLoad: async ({ location }) => {
@@ -48,20 +45,21 @@ const PAGE_DOCUMENT_TITLES: Record<string, string> = {
 
 function getDocumentTitle(
   pathname: string,
-  productInfo?: ProductRouteInfo
+  productId?: string | null,
+  isHistoryRoute?: boolean
 ): string {
   if (PAGE_DOCUMENT_TITLES[pathname]) {
     return PAGE_DOCUMENT_TITLES[pathname];
   }
 
-  if (productInfo?.isProductRoute && productInfo.id) {
-    if (productInfo.isHistoryRoute) {
-      const title = `Historique - Produit ${productInfo.id} - KHP`;
+  if (productId) {
+    if (isHistoryRoute) {
+      const title = `Historique - Produit ${productId} - KHP`;
       console.log("Debug - Product history title:", title);
       return title;
     }
 
-    const title = `Produit ${productInfo.id} - KHP`;
+    const title = `Produit ${productId} - KHP`;
     console.log("Debug - Product title:", title);
     return title;
   }
@@ -72,8 +70,26 @@ function getDocumentTitle(
 
 function RootComponent() {
   const location = useLocation();
-  const productInfo = useProductRouteInfo();
-  const documentTitle = getDocumentTitle(location.pathname, productInfo);
+
+  // Accéder directement aux paramètres de route via useMatch
+  const productMatch = useMatch({
+    from: "/_protected/products/$id",
+    shouldThrow: false,
+  });
+
+  const historyMatch = useMatch({
+    from: "/_protected/products/$id_/history",
+    shouldThrow: false,
+  });
+
+  const productId = productMatch?.params?.id || historyMatch?.params?.id;
+  const isHistoryRoute = Boolean(historyMatch);
+
+  const documentTitle = getDocumentTitle(
+    location.pathname,
+    productId,
+    isHistoryRoute
+  );
 
   if (PAGES_WITHOUT_LAYOUT.includes(location.pathname)) {
     return (
