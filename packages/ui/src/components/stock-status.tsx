@@ -9,10 +9,10 @@ const stockStatusVariants = cva(
   {
     variants: {
       variant: {
-        "in-stock": "text-khp-primary",
-        "out-of-stock": "text-khp-error",
-        "low-stock": "text-khp-warning",
-        expired: "text-khp-error",
+        "in-stock": "",
+        "out-of-stock": "",
+        "low-stock": "",
+        expired: "",
       },
     },
     defaultVariants: {
@@ -24,8 +24,8 @@ const stockStatusVariants = cva(
 const circleVariants = cva("rounded-full border flex-shrink-0", {
   variants: {
     variant: {
-      "in-stock": "bg-khp-primary border-khp-primary w-4 h-4",
-      "out-of-stock": "bg-khp-error border-khp-error w-4 h-4",
+      "in-stock": "bg-khp-primary border-khp-primary w-3 h-3",
+      "out-of-stock": "bg-khp-error border-khp-error w-3 h-3",
       "low-stock": "",
       expired: "",
     },
@@ -89,11 +89,15 @@ function StockStatus({
 
       {/* For low-stock and expired, show icon */}
       {(variant === "low-stock" || variant === "expired") && (
-        <Icon className="size-5" />
+        <Icon className="size-4" />
       )}
 
       {/* Show label if requested */}
-      {showLabel && <span className="text-sm font-medium">{displayLabel}</span>}
+      {showLabel && (
+        <span className="text-sm font-medium text-khp-text-primary hidden sm:inline">
+          {displayLabel}
+        </span>
+      )}
     </div>
   );
 }
