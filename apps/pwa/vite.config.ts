@@ -7,7 +7,10 @@ import tailwindcss from "@tailwindcss/vite";
 // https://vitejs.dev/config/
 export default defineConfig({
   server: {
-    allowedHosts: ["ed2f-87-89-252-154.ngrok-free.app"],
+    allowedHosts: [],
+  },
+  optimizeDeps: {
+    exclude: ["@preflower/barcode-detector-polyfill"],
   },
   plugins: [
     tanstackRouter({

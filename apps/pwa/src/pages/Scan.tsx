@@ -1,6 +1,9 @@
 import { Button } from "@workspace/ui/components/button";
 import { useEffect } from "react";
+import "react-barcode-scanner/polyfill";
+
 import {
+  BarcodeFormat,
   BarcodeScanner,
   DetectedBarcode,
   ScanOptions,
@@ -24,14 +27,10 @@ const portraitConstraints = {
 
 const scanOptions: ScanOptions = {
   formats: [
-    "ean-13",
-    "gtin-13",
-    "ean-8",
-    "upc-a",
-    "upc-12",
-    "upc-e",
-    "ean-14",
-    "gtin-14",
+    BarcodeFormat.EAN_13,
+    BarcodeFormat.EAN_8,
+    BarcodeFormat.UPC_A,
+    BarcodeFormat.UPC_E,
   ],
   delay: 1000,
 };
@@ -149,7 +148,7 @@ export default function ScanPage() {
 
         <Button
           variant="khp-default"
-          className="absolute bottom-4 left-1/2 transform -translate-x-1/2 pointer-events-auto "
+          className="absolute bottom-4 left-1/2 transform -translate-x-1/2 pointer-events-auto"
           size="xl"
           onClick={() => {
             navigate({
