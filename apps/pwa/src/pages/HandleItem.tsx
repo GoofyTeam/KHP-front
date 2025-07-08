@@ -15,16 +15,32 @@ import { Input } from "@workspace/ui/components/input";
 import { Button } from "@workspace/ui/components/button";
 import { useRef, useState } from "react";
 
-const handleItemSchema = z.object({
-  image: z.string().url().optional(),
-  product_name: z.string(),
-  product_category: z.string(),
-  product_units: z.string(),
-  product_quantity: z.string(),
-});
+import { Image } from "lucide-react";
+
+const handleItemSchema = z
+  .object({
+    method: z.enum(["add", "update", "db", "remove"]),
+    image: z.string().url().optional(),
+    product_name: z.string(),
+    product_category: z.string(),
+    product_units: z.string().optional(),
+    product_quantity: z.string().optional(),
+    quantity_lost: z.string().optional(),
+    reason_lost: z.string().optional(),
+  })
+  .refine((data) => {
+    if (data.method === "remove") {
+      return data.quantity_lost !== undefined && data.reason_lost !== undefined;
+    }
+    if (data.method === "add" || data.method === "update") {
+      return data.product_name !== "" && data.product_category !== "";
+    }
+
+    return true;
+  });
 
 function HandleItem() {
-  const { product } = useLoaderData({
+  const { product, type } = useLoaderData({
     from: "/_protected/handle-item",
   });
 
@@ -52,12 +68,23 @@ function HandleItem() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[75svh] my-4">
       <Form {...form}>
-        <img
-          src={filePreview || product?.image_url || ""}
-          alt={form.getValues().product_name || "Product Image"}
-          className="aspect-square object-contain max-w-1/2 w-full my-6"
-          onClick={() => inputRef.current?.click()}
-        />
+        {filePreview || product?.image_url ? (
+          <img
+            src={filePreview || product?.image_url || ""}
+            alt={form.getValues().product_name || "Product Image"}
+            className="aspect-square object-contain max-w-1/2 w-full my-6"
+            onClick={() => inputRef.current?.click()}
+          />
+        ) : (
+          <div
+            className="aspect-square h-34 w-34 border border-khp-primary rounded-lg flex flex-col items-center justify-center my-4 cursor-pointer hover:bg-khp-primary/10"
+            onClick={() => inputRef.current?.click()}
+          >
+            <Image className="text-khp-primary" strokeWidth={1} size={32} />
+            <p className="text-khp-primary font-light">Add a picture</p>
+          </div>
+        )}
+
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-4 flex flex-col items-center px-4 w-full max-w-md"
@@ -84,7 +111,7 @@ function HandleItem() {
                         const reader = new FileReader();
                         reader.onloadend = () => {
                           setFilePreview(reader.result as string);
-                          onChange(file); // Mettre à jour le champ du formulaire avec le fichier
+                          onChange(file);
                         };
                         reader.readAsDataURL(file);
                       } else {
@@ -103,9 +130,14 @@ function HandleItem() {
             name="product_name"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>Product Name</FormLabel>
+                <FormLabel className="text-lg">Product Name</FormLabel>
                 <FormControl>
-                  <Input variant="khp-default" className="w-full" {...field} />
+                  <Input
+                    variant="khp-default-pwa"
+                    className="w-full"
+                    {...field}
+                    disabled={type === "remove"}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -116,47 +148,105 @@ function HandleItem() {
             name="product_category"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>Product Category</FormLabel>
+                <FormLabel className="text-lg">Product Category</FormLabel>
                 <FormControl>
-                  <Input variant="khp-default" className="w-full" {...field} />
+                  <Input
+                    variant="khp-default-pwa"
+                    className="w-full"
+                    {...field}
+                    disabled={type === "remove"}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="product_units"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Product Units</FormLabel>
-                <FormControl>
-                  <Input variant="khp-default" className="w-full" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="product_quantity"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Product Quantity</FormLabel>
-                <FormControl>
-                  <Input variant="khp-default" className="w-full" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {type !== "remove" && (
+            <FormField
+              control={form.control}
+              name="product_units"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel className="text-lg">Product Units</FormLabel>
+                  <FormControl>
+                    <Input
+                      variant="khp-default-pwa"
+                      className="w-full"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+          {type !== "remove" && (
+            <FormField
+              control={form.control}
+              name="product_quantity"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel className="text-lg">Product Quantity</FormLabel>
+                  <FormControl>
+                    <Input
+                      variant="khp-default-pwa"
+                      className="w-full"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          {type === "remove" && (
+            <FormField
+              control={form.control}
+              name="quantity_lost"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel className="text-lg">Lost quantity</FormLabel>
+                  <FormControl>
+                    <Input
+                      variant="khp-default-pwa"
+                      className="w-full"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          {type === "remove" && (
+            <FormField
+              control={form.control}
+              name="reason_lost"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel className="text-lg">Reason for loss</FormLabel>
+                  <FormControl>
+                    <Input
+                      variant="khp-default-pwa"
+                      className="w-full"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
           <Button
             type="submit"
-            variant="khp-default"
-            size="lg"
+            variant={type === "remove" ? "khp-destructive" : "khp-default"}
+            size="xl"
             className="w-full"
           >
-            Submit
+            {type === "remove" ? "Register loss" : "Save"}
           </Button>
         </form>
       </Form>

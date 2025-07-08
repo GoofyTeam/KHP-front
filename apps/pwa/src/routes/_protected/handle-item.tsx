@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import HandleItem from "../../pages/HandleItem";
 
 type handleItemSearch = {
-  mode: "scan" | "manual" | "db" | "update" | "remove";
+  mode: "scan" | "manual" | "db" | "update";
   type: "add" | "remove";
   barcode?: string;
 };
@@ -27,6 +27,7 @@ export const Route = createFileRoute("/_protected/handle-item")({
   },
   loader: async ({ deps: { mode, type, barcode } }) => {
     if (mode === "scan") {
+      // TODO: Handle fetch the backend with the barcode
       const res = await fetch(
         `https://world.openfoodfacts.net/api/v3/product/${barcode}?product_type=all&cc=us&lc=us&fields=image_url%2Cimage_small_url%2Cproduct_name%2Cgeneric_name%2Ccategories%2Cquantity%2Cbrands%2Cpackaging%2Cingredients_text%2Cnutriments%2Cnutrient_levels%2Clabels%2Cadditives_tags%2Callergens_tags%2Ctraces_tags%2Cemb_codes_tags%2Clinks`
       );
@@ -59,6 +60,10 @@ export const Route = createFileRoute("/_protected/handle-item")({
         barcode,
         product: data.product || null,
       };
+    } else if (mode === "update") {
+      // Handle fetching by product ID for update
+    } else if (mode === "db") {
+      // Handle fetching by product ID from the database
     }
 
     return {
