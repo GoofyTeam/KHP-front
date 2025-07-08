@@ -16,6 +16,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/login": "Connexion",
   "/scan": "Scanner",
   "/handle-item": "Traiter l'article",
+  "/404": "Page non trouvée",
 };
 
 function getPageTitle(
@@ -41,21 +42,21 @@ function getPageTitle(
 export function Layout({ children, className }: LayoutProps) {
   const router = useRouter();
   const location = useLocation();
-  
+
   // Accéder directement aux paramètres de route via useMatch
-  const productMatch = useMatch({ 
+  const productMatch = useMatch({
     from: "/_protected/products/$id",
-    shouldThrow: false 
+    shouldThrow: false,
   });
-  
-  const historyMatch = useMatch({ 
+
+  const historyMatch = useMatch({
     from: "/_protected/products/$id_/history",
-    shouldThrow: false 
+    shouldThrow: false,
   });
-  
+
   const productId = productMatch?.params?.id || historyMatch?.params?.id;
   const isHistoryRoute = Boolean(historyMatch);
-  
+
   const title = getPageTitle(location.pathname, productId, isHistoryRoute);
 
   const handleGoBack = () => {

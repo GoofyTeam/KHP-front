@@ -4,10 +4,9 @@ import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
-
 export default defineConfig({
   server: {
-    allowedHosts: [],
+    allowedHosts: ["01636b7ea25f.ngrok-free.app"],
   },
   optimizeDeps: {
     exclude: ["@preflower/barcode-detector-polyfill"],
