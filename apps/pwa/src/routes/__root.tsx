@@ -47,7 +47,7 @@ function getDocumentTitle(pathname: string): string {
     return PAGE_DOCUMENT_TITLES[pathname];
   }
 
-  if (pathname.startsWith("/product/")) {
+  if (pathname.startsWith("/products/")) {
     const id = pathname.split("/")[2];
     const title = `Produit ${id} - KHP`;
     console.log("Debug - Product title:", title);
