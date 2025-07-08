@@ -3,6 +3,7 @@ import {
   createRootRoute,
   redirect,
   useLocation,
+  useMatch,
 } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 import api from "../lib/api";
@@ -42,14 +43,23 @@ const PAGE_DOCUMENT_TITLES: Record<string, string> = {
   "/handle-item": "Traiter l'article - KHP",
 };
 
-function getDocumentTitle(pathname: string): string {
+function getDocumentTitle(
+  pathname: string,
+  productId?: string | null,
+  isHistoryRoute?: boolean
+): string {
   if (PAGE_DOCUMENT_TITLES[pathname]) {
     return PAGE_DOCUMENT_TITLES[pathname];
   }
 
-  if (pathname.startsWith("/products/")) {
-    const id = pathname.split("/")[2];
-    const title = `Produit ${id} - KHP`;
+  if (productId) {
+    if (isHistoryRoute) {
+      const title = `Historique - Produit ${productId} - KHP`;
+      console.log("Debug - Product history title:", title);
+      return title;
+    }
+
+    const title = `Produit ${productId} - KHP`;
     console.log("Debug - Product title:", title);
     return title;
   }
@@ -60,7 +70,26 @@ function getDocumentTitle(pathname: string): string {
 
 function RootComponent() {
   const location = useLocation();
-  const documentTitle = getDocumentTitle(location.pathname);
+
+  // Accéder directement aux paramètres de route via useMatch
+  const productMatch = useMatch({
+    from: "/_protected/products/$id",
+    shouldThrow: false,
+  });
+
+  const historyMatch = useMatch({
+    from: "/_protected/products/$id_/history",
+    shouldThrow: false,
+  });
+
+  const productId = productMatch?.params?.id || historyMatch?.params?.id;
+  const isHistoryRoute = Boolean(historyMatch);
+
+  const documentTitle = getDocumentTitle(
+    location.pathname,
+    productId,
+    isHistoryRoute
+  );
 
   if (PAGES_WITHOUT_LAYOUT.includes(location.pathname)) {
     return (

@@ -21,20 +21,27 @@ interface HistoryTableProps {
   data: HistoryEntry[];
   className?: string;
   showHeader?: boolean;
+  limitHeight?: boolean;
 }
 
 export function HistoryTable({
   data,
   className,
   showHeader = true,
+  limitHeight = true,
 }: HistoryTableProps) {
   return (
     <div className={cn("w-full", className)}>
       <div className="border overflow-hidden">
-        <div className="max-h-[15vh] [@media(min-height:600px)]:max-h-[20vh] [@media(min-height:700px)]:max-h-[25vh] [@media(min-height:800px)]:max-h-[30vh] overflow-y-auto">
+        <div
+          className={cn(
+            limitHeight &&
+              "max-h-[15vh] [@media(min-height:600px)]:max-h-[20vh] [@media(min-height:700px)]:max-h-[25vh] [@media(min-height:800px)]:max-h-[30vh] overflow-y-auto"
+          )}
+        >
           <Table>
             {showHeader && (
-              <TableHeader className="sticky top-0 z-10 bg-background">
+              <TableHeader className="sticky top-0  bg-background">
                 <TableRow>
                   <TableHead className="w-[50px]"></TableHead>
                   <TableHead>Quantity</TableHead>
@@ -51,9 +58,9 @@ export function HistoryTable({
                   >
                     <TableCell className="flex justify-center w-[50px]">
                       {entry.type === "add" ? (
-                        <ArrowUp className="h-4 w-4 text-khp-primary" />
+                        <ArrowUp className="h-5 w-5 text-khp-primary" />
                       ) : (
-                        <ArrowDown className="h-4 w-4 text-khp-error" />
+                        <ArrowDown className="h-5 w-5 text-khp-error" />
                       )}
                     </TableCell>
                     <TableCell className="font-medium">
