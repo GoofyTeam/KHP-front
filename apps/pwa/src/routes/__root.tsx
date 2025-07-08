@@ -8,6 +8,18 @@ import {
 import { Helmet } from "react-helmet-async";
 import api from "../lib/api";
 import { Layout } from "../components/Layout";
+import NotFoundPage from "../pages/NotFound";
+
+function NotFoundComponent() {
+  return (
+    <>
+      <Helmet>
+        <title>Page non trouvée - KHP</title>
+      </Helmet>
+      <NotFoundPage />
+    </>
+  );
+}
 
 export const Route = createRootRoute({
   beforeLoad: async ({ location }) => {
@@ -32,6 +44,7 @@ export const Route = createRootRoute({
     }
   },
   component: RootComponent,
+  notFoundComponent: NotFoundComponent,
 });
 
 const PAGES_WITHOUT_LAYOUT = ["/scan", "/login"];
@@ -41,13 +54,19 @@ const PAGE_DOCUMENT_TITLES: Record<string, string> = {
   "/login": "Connexion - KHP",
   "/scan": "Scanner - KHP",
   "/handle-item": "Traiter l'article - KHP",
+  "/404": "Page non trouvée - KHP",
 };
 
 function getDocumentTitle(
   pathname: string,
   productId?: string | null,
-  isHistoryRoute?: boolean
+  isHistoryRoute?: boolean,
+  isNotFound?: boolean
 ): string {
+  if (isNotFound) {
+    return PAGE_DOCUMENT_TITLES["/404"];
+  }
+
   if (PAGE_DOCUMENT_TITLES[pathname]) {
     return PAGE_DOCUMENT_TITLES[pathname];
   }
