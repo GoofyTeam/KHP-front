@@ -244,7 +244,7 @@ function HandleItem() {
             type="submit"
             variant={type === "remove" ? "khp-destructive" : "khp-default"}
             size="xl"
-            className="w-full"
+            className="w-full my-4"
           >
             {type === "remove" ? "Register loss" : "Save"}
           </Button>
