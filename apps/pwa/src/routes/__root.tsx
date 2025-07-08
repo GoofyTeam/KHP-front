@@ -48,7 +48,17 @@ function getDocumentTitle(pathname: string): string {
   }
 
   if (pathname.startsWith("/products/")) {
-    const id = pathname.split("/")[2];
+    const parts = pathname.split("/");
+    const id = parts[2];
+
+    // Si c'est /products/1/history
+    if (parts[3] === "history") {
+      const title = `Historique - Produit ${id} - KHP`;
+      console.log("Debug - Product history title:", title);
+      return title;
+    }
+
+    // Si c'est /products/1
     const title = `Produit ${id} - KHP`;
     console.log("Debug - Product title:", title);
     return title;

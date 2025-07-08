@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import { StockStatus } from "@workspace/ui/components/stock-status";
 import { HistoryTable, type HistoryEntry } from "../components/history-table";
 import { Button } from "@workspace/ui/components/button";
@@ -6,6 +6,7 @@ import { NotebookPen } from "lucide-react";
 
 export default function ProductPage() {
   const navigate = useNavigate();
+  const { id } = useParams({ from: "/_protected/products/$id" });
 
   const historyData: HistoryEntry[] = [
     {
@@ -69,7 +70,8 @@ export default function ProductPage() {
       <div className="flex justify-between items-center gap-2 px-6 py-2">
         <h3 className="text-lg font-semibold">History :</h3>
         <Link
-          to="/inventory"
+          to="/products/$id/history"
+          params={{ id }}
           className="text-sm text-khp-primary underline underline-offset-2 cursor-pointer"
         >
           View all
