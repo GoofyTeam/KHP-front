@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import HandleItem from "../../pages/HandleItem";
+import GetLocations from "../../graphql/getLocations.gql";
+import { graphqlRequest } from "../../lib/graph-client";
 
 type handleItemSearch = {
   mode: "scan" | "manual" | "db" | "update";
@@ -26,6 +28,18 @@ export const Route = createFileRoute("/_protected/handle-item")({
     }
   },
   loader: async ({ deps: { mode, type, barcode } }) => {
+    //getLocations.gql
+    const availableLocations = await graphqlRequest(GetLocations, {
+      fetchOptions: {
+        cache: "no-store",
+      },
+    }).then((res) => res.locations.data);
+    console.log("Available locations:", availableLocations);
+    if (!availableLocations || availableLocations.length === 0) {
+      throw new Error("No locations available");
+    }
+    console.log("Available locations fetched successfully", availableLocations);
+
     if (mode === "scan") {
       // TODO: Handle fetch the backend with the barcode
       const res = await fetch(
