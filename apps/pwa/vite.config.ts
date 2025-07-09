@@ -3,7 +3,8 @@ import { VitePWA } from "vite-plugin-pwa";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
-import graphqlLoader from "vite-plugin-graphql-loader";
+//import graphqlLoader from "vite-plugin-graphql-loader";
+import typedGraphQL from "vite-plugin-typed-graphql";
 
 export default defineConfig({
   server: {
@@ -15,7 +16,23 @@ export default defineConfig({
     exclude: ["@preflower/barcode-detector-polyfill"],
   },
   plugins: [
-    graphqlLoader(),
+    //graphqlLoader(),
+    typedGraphQL({
+      schemaPath: "./src/graphql/generated/schema.graphql",
+      generateDeclarations: true,
+      codegenPluginConfigs: {
+        typescript: {
+          strictScalars: true,
+        },
+        typescriptOperations: {
+          strictScalars: true,
+        },
+      },
+      defaultScalarType: "unknown",
+      scalars: {
+        DateTime: "string",
+      },
+    }),
     tanstackRouter({
       target: "react",
       autoCodeSplitting: true,

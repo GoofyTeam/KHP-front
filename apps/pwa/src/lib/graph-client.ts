@@ -25,24 +25,17 @@ async function csrfFetch(
 
 export const gqlClient = new GraphQLClient(
   `${import.meta.env.VITE_API_URL}/graphql`,
-  {
-    fetch: csrfFetch,
-  }
+  { fetch: csrfFetch }
 );
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function graphqlRequest<T = any, V extends object = Variables>(
-  query: RequestDocument,
-  variables?: V
-): Promise<T> {
-  try {
-    return await gqlClient.request<T>({
-      document: query,
-      variables: variables,
-    });
-  } catch (err) {
-    // Vous pouvez personnaliser le traitement des erreurs GraphQL ici
-    console.error("Erreur GraphQL", err);
-    throw err;
-  }
+export async function graphqlRequest<
+  TData = unknown,
+  TVars extends Variables = Variables,
+>(
+  document: RequestDocument,
+  variables?: TVars,
+  requestHeaders?: HeadersInit
+): Promise<TData> {
+  // @ts-expect-error - L'argument de type '[TVars | undefined, HeadersInit | undefined]' n'est pas attribuable au paramètre de type 'VariablesAndRequestHeadersArgs<TVars>'.
+  return gqlClient.request<TData, TVars>(document, variables, requestHeaders);
 }

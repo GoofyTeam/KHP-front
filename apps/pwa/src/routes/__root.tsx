@@ -55,16 +55,13 @@ function getDocumentTitle(
   if (productId) {
     if (isHistoryRoute) {
       const title = `Historique - Produit ${productId} - KHP`;
-      console.log("Debug - Product history title:", title);
       return title;
     }
 
     const title = `Produit ${productId} - KHP`;
-    console.log("Debug - Product title:", title);
     return title;
   }
 
-  console.log("Debug - Using default title: KHP");
   return "KHP";
 }
 

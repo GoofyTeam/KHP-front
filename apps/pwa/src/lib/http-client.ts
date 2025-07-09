@@ -75,14 +75,7 @@ export class ImprovedHttpClient {
     const match = document.cookie.match(
       new RegExp("(^|; )" + name + "=([^;]*)")
     );
-    if (process.env.NODE_ENV === "development") {
-      console.log("Reading cookie:", name, match);
-      console.log("Document cookies:", document.cookie);
-      console.log(
-        "Decoded cookie value:",
-        match ? decodeURIComponent(match[2]) : null
-      );
-    }
+
     return match ? decodeURIComponent(match[2]) : null;
   }
 
