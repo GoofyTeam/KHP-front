@@ -86,7 +86,7 @@ export const QuickAccessButton: FC<QuickAccessButtonProps> = ({
   ...rest
 }) => {
   const content = (
-    <div className="flex flex-col justify-between items-center p-2 w-36 h-36 sm:w-44 sm:h-44 border border-khp-primary/30 rounded-md hover:shadow-md transition">
+    <div className="flex flex-col justify-between items-center p-2 w-36 h-36 sm:w-44 sm:h-44 border-2 border-khp-primary/30 rounded-md hover:shadow-md transition">
       <span className="text-center text-xs sm:text-sm font-medium text-gray-800">
         {title}
       </span>

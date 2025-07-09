@@ -17,7 +17,9 @@ const authRoutes = [
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 if (!API_URL) {
-  throw new Error("Environment variable NEXT_PUBLIC_API_URL is not defined. Please set it in your environment.");
+  throw new Error(
+    "Environment variable NEXT_PUBLIC_API_URL is not defined. Please set it in your environment."
+  );
 }
 
 const serverHttpClient = {
@@ -41,11 +43,11 @@ export default async function middleware(req: NextRequest) {
   const { isAuthenticated, userData } =
     await checkAuthenticationAndGetUser(req);
 
-  if (isProtectedRoute(path) && !isAuthenticated) {
-    const url = new URL("/login", req.url);
-    url.searchParams.set("from", path);
-    return NextResponse.redirect(url);
-  }
+  // if (isProtectedRoute(path) && !isAuthenticated) {
+  //   const url = new URL("/login", req.url);
+  //   url.searchParams.set("from", path);
+  //   return NextResponse.redirect(url);
+  // }
 
   if (isAuthRoute(path) && isAuthenticated) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
@@ -57,7 +59,7 @@ export default async function middleware(req: NextRequest) {
     const encodedUserData = btoa(
       new TextEncoder()
         .encode(JSON.stringify(userData))
-        .reduce((data, byte) => data + String.fromCharCode(byte), ""),
+        .reduce((data, byte) => data + String.fromCharCode(byte), "")
     );
     response.headers.set("x-user", encodedUserData);
 
@@ -69,7 +71,7 @@ export default async function middleware(req: NextRequest) {
 }
 
 async function checkAuthenticationAndGetUser(
-  req: NextRequest,
+  req: NextRequest
 ): Promise<{ isAuthenticated: boolean; userData?: UserData }> {
   try {
     const khpSession = req.cookies.get("khp_session")?.value;
@@ -88,7 +90,7 @@ async function checkAuthenticationAndGetUser(
   } catch (error) {
     console.error(
       "Error checking authentication and getting user data:",
-      error,
+      error
     );
     return { isAuthenticated: false };
   }
@@ -96,13 +98,13 @@ async function checkAuthenticationAndGetUser(
 
 function isProtectedRoute(path: string): boolean {
   return protectedRoutes.some(
-    (route) => path === route || path.startsWith(`${route}/`),
+    (route) => path === route || path.startsWith(`${route}/`)
   );
 }
 
 function isAuthRoute(path: string): boolean {
   return authRoutes.some(
-    (route) => path === route || path.startsWith(`${route}/`),
+    (route) => path === route || path.startsWith(`${route}/`)
   );
 }
 
