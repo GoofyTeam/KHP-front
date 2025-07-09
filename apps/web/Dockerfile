@@ -1,6 +1,9 @@
 # -------------------------------
 FROM node:22-alpine AS base
 
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-"http://localhost:8000"}
+
 RUN apk update && apk add --no-cache libc6-compat
     
 WORKDIR /app
