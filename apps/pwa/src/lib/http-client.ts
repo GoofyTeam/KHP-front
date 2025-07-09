@@ -71,7 +71,7 @@ export class ImprovedHttpClient {
   /**
    * Lecture d'un cookie par nom
    */
-  private readCookie(name: string): string | null {
+  public readCookie(name: string): string | null {
     const match = document.cookie.match(
       new RegExp("(^|; )" + name + "=([^;]*)")
     );

@@ -3,6 +3,7 @@ import { VitePWA } from "vite-plugin-pwa";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import graphqlLoader from "vite-plugin-graphql-loader";
 
 export default defineConfig({
   server: {
@@ -14,6 +15,7 @@ export default defineConfig({
     exclude: ["@preflower/barcode-detector-polyfill"],
   },
   plugins: [
+    graphqlLoader(),
     tanstackRouter({
       target: "react",
       autoCodeSplitting: true,
