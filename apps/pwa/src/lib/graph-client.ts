@@ -9,7 +9,7 @@ async function csrfFetch(
     await api.initCSRF();
     const token = api.readCookie("XSRF-TOKEN");
     if (!token) {
-      throw new Error("CSRF token introuvable dans les cookies");
+      throw new Error("CSRF token not found in cookies");
     }
     init.headers = {
       ...(init.headers || {}),
