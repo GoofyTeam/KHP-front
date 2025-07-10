@@ -21,18 +21,19 @@ const PAGE_TITLES: Record<string, string> = {
 function getPageTitle(
   pathname: string,
   productId?: string | null,
-  isHistoryRoute?: boolean
+  isHistoryRoute?: boolean,
+  productName?: string | null
 ): string {
   if (PAGE_TITLES[pathname]) {
     return PAGE_TITLES[pathname];
   }
 
   if (productId) {
+    const displayName = productName || `Produit ${productId}`;
     if (isHistoryRoute) {
-      return `Historique - Produit ${productId}`;
+      return `Historique - ${displayName}`;
     }
-
-    return `Produit ${productId}`;
+    return displayName;
   }
 
   return "";
@@ -42,7 +43,6 @@ export function Layout({ children, className }: LayoutProps) {
   const router = useRouter();
   const location = useLocation();
 
-  // Accéder directement aux paramètres de route via useMatch
   const productMatch = useMatch({
     from: "/_protected/products/$id",
     shouldThrow: false,
@@ -56,7 +56,22 @@ export function Layout({ children, className }: LayoutProps) {
   const productId = productMatch?.params?.id || historyMatch?.params?.id;
   const isHistoryRoute = Boolean(historyMatch);
 
-  const title = getPageTitle(location.pathname, productId, isHistoryRoute);
+  let productName: string | null = null;
+  try {
+    if (productMatch) {
+      const loaderData = productMatch.loaderData as { name?: string };
+      productName = loaderData?.name || null;
+    }
+  } catch {
+    productName = null;
+  }
+
+  const title = getPageTitle(
+    location.pathname,
+    productId,
+    isHistoryRoute,
+    productName
+  );
 
   const handleGoBack = () => {
     router.history.back();
