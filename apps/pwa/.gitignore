@@ -26,4 +26,5 @@ dev-dist
 
 .tanstack
 
-generated
+*.gql.d.ts
+*.graphql.d.ts
