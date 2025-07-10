@@ -1,0 +1,17 @@
+query getCompanyProducts {
+  ingredients {
+    data {
+      id
+      name
+      image_url
+      unit
+      quantities {
+        quantity
+        location {
+          id
+          name
+        }
+      }
+    }
+  }
+}

@@ -1,15 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
+import InventoryPage from "../../pages/Inventory";
+import { graphqlRequest } from "../../lib/graph-client";
+import {
+  GetCompanyProducts,
+  GetCompanyProductsQuery,
+} from "../../graphql/getCompanyProducts.gql";
 
 export const Route = createFileRoute("/_protected/inventory")({
-  component: RouteComponent,
-});
+  loader: async () => {
+    const data =
+      await graphqlRequest<GetCompanyProductsQuery>(GetCompanyProducts);
 
-function RouteComponent() {
-  return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold text-khp-text-primary mb-4">
-        Gestion des Stocks
-      </h2>
-    </div>
-  );
-}
+    let ingredients = data.ingredients.data;
+    if (!ingredients || ingredients.length === 0) {
+      ingredients = [];
+    }
+
+    return {
+      ingredients,
+    };
+  },
+  component: InventoryPage,
+});
