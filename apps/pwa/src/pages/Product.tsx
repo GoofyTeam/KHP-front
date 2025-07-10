@@ -28,6 +28,109 @@ export default function ProductPage() {
 
   const [selectedLocation, setSelectedLocation] = useState<string>("all");
 
+  const getStockData = (): StockSummary => {
+    if (product.quantities && product.quantities.length > 0) {
+      const locationStocks: LocationStock[] = product.quantities.map(
+        (qty: {
+          quantity: number;
+          location: { id: string; name: string };
+        }) => ({
+          locationId: qty.location.id,
+          locationName: qty.location.name,
+          quantity: qty.quantity,
+          unit: product.unit,
+        })
+      );
+
+      return {
+        totalQuantity: locationStocks.reduce(
+          (total, loc) => total + loc.quantity,
+          0
+        ),
+        unit: product.unit,
+        locations: locationStocks,
+      };
+    }
+
+    return {
+      totalQuantity: 5,
+      unit: product.unit,
+      locations: [
+        {
+          locationId: "1",
+          locationName: "Fridge",
+          quantity: 2,
+          unit: product.unit,
+        },
+        {
+          locationId: "2",
+          locationName: "Freezer",
+          quantity: 3,
+          unit: product.unit,
+        },
+      ],
+    };
+  };
+
+  const stockData = getStockData();
+
+  const getDisplayStock = (): {
+    quantity: number;
+    locationText: string;
+    status: "in-stock" | "low-stock" | "out-of-stock";
+  } => {
+    if (selectedLocation === "all") {
+      const totalQuantity = stockData.totalQuantity;
+      const locationCount = stockData.locations.length;
+
+      return {
+        quantity: totalQuantity,
+        locationText: `in ${locationCount} location${locationCount > 1 ? "s" : ""}`,
+        status:
+          totalQuantity > 5
+            ? "in-stock"
+            : totalQuantity > 0
+              ? "low-stock"
+              : "out-of-stock",
+      };
+    } else {
+      const location = stockData.locations.find(
+        (loc) => loc.locationId === selectedLocation
+      );
+      if (!location) {
+        return {
+          quantity: 0,
+          locationText: "location not found",
+          status: "out-of-stock",
+        };
+      }
+
+      return {
+        quantity: location.quantity,
+        locationText: `at ${location.locationName}`,
+        status:
+          location.quantity > 5
+            ? "in-stock"
+            : location.quantity > 0
+              ? "low-stock"
+              : "out-of-stock",
+      };
+    }
+  };
+
+  const displayStock = getDisplayStock();
+
+  useEffect(() => {
+    if (product?.name) {
+      document.title = `${product.name} - KHP`;
+    }
+    return () => {
+      document.title = "KHP";
+    };
+  }, [product?.name]);
+
+  const [selectedLocation, setSelectedLocation] = useState<string>("all");
+
   useEffect(() => {
     if (product?.name) {
       document.title = `${product.name} - KHP`;
@@ -86,19 +189,31 @@ export default function ProductPage() {
     }
   })();
 
+  if (!product) {
+    return <div>Product not found</div>;
+  }
+
   return (
     <div>
       <div className="p-6 flex flex-col gap-4 ">
         <div className="flex flex-col justify-center items-center">
           <img
-            src="https://images.openfoodfacts.org/images/products/761/303/666/8910/front_fr.164.400.jpg"
-            alt="Produit"
+            src={
+              product.image_url ||
+              "https://via.placeholder.com/400x400?text=No+Image"
+            }
+            alt={product.name}
             className="aspect-square object-contain max-w-1/2 w-full"
           />
         </div>
         <div className="flex flex-col gap-1 ">
-          <h2 className="text-2xl font-semibold">Nom du produit</h2>
-          <p>Categorie : Aliments en conserve</p>
+          <h2 className="text-2xl font-semibold">{product.name}</h2>
+          <p>
+            Category:{" "}
+            {product.categories
+              .map((cat: { name: string }) => cat.name)
+              .join(", ") || "Unspecified"}
+          </p>
         </div>
 
         <div className="flex flex-col gap-4">
@@ -130,7 +245,7 @@ export default function ProductPage() {
       </div>
 
       <div className="flex justify-between items-center gap-2 px-6 py-2">
-        <h3 className="text-lg font-semibold">History :</h3>
+        <h3 className="text-lg font-semibold">History:</h3>
         <Link
           to="/products/$id/history"
           params={{ id }}

@@ -44,7 +44,6 @@ export function Layout({ children, className }: LayoutProps) {
   const router = useRouter();
   const location = useLocation();
 
-  // Accéder directement aux paramètres de route via useMatch
   const productMatch = useMatch({
     from: "/_protected/products/$id",
     shouldThrow: false,
