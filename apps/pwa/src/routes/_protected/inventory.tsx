@@ -11,10 +11,7 @@ export const Route = createFileRoute("/_protected/inventory")({
     const data =
       await graphqlRequest<GetCompanyProductsQuery>(GetCompanyProducts);
 
-    let ingredients = data.ingredients.data;
-    if (!ingredients || ingredients.length === 0) {
-      ingredients = [];
-    }
+    const ingredients = data.ingredients.data ?? [];
 
     return {
       ingredients,
