@@ -37,4 +37,5 @@ yarn-error.log*
 .DS_Store
 *.pem
 
-generated
+*.gql.d.ts
+*.graphql.d.ts

@@ -15,6 +15,7 @@ import {
   CompanyPaginator,
   Ingredient,
   IngredientPaginator,
+  IngredientQuantity,
   Location,
   LocationPaginator,
   OrderByClause,
