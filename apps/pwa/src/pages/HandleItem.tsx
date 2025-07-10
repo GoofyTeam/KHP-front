@@ -1,7 +1,7 @@
-import { useLoaderData } from "@tanstack/react-router";
+import { useLoaderData, useNavigate } from "@tanstack/react-router";
 import z from "zod";
 
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
@@ -13,34 +13,37 @@ import {
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
 import { Button } from "@workspace/ui/components/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
 import { useRef, useState } from "react";
 
-import { Image } from "lucide-react";
+import { Minus, Plus, Image } from "lucide-react";
+import api from "../lib/api";
+import { cn } from "@workspace/ui/lib/utils";
 
-const handleItemSchema = z
-  .object({
-    method: z.enum(["add", "update", "db", "remove"]),
-    image: z.string().url().optional(),
-    product_name: z.string(),
-    product_category: z.string(),
-    product_units: z.string().optional(),
-    product_quantity: z.string().optional(),
-    quantity_lost: z.string().optional(),
-    reason_lost: z.string().optional(),
-  })
-  .refine((data) => {
-    if (data.method === "remove") {
-      return data.quantity_lost !== undefined && data.reason_lost !== undefined;
-    }
-    if (data.method === "add" || data.method === "update") {
-      return data.product_name !== "" && data.product_category !== "";
-    }
-
-    return true;
-  });
+const stockEntrySchema = z.object({
+  quantity: z.string().nonempty("Quantity required"),
+  location: z.string().nonempty("Location required"),
+});
+const handleItemSchema = z.object({
+  image: z.instanceof(File).optional(),
+  product_name: z.string().nonempty("Product name is required"),
+  product_category: z.string().nonempty("Category is required"),
+  product_units: z.string().nonempty("Units are required"),
+  stockEntries: z
+    .array(stockEntrySchema)
+    .min(1, "At least one stock entry is required"),
+});
+type HandleItem = z.infer<typeof handleItemSchema>;
 
 function HandleItem() {
-  const { product, type } = useLoaderData({
+  const navigate = useNavigate();
+  const { product, type, availableLocations } = useLoaderData({
     from: "/_protected/handle-item",
   });
 
@@ -54,15 +57,54 @@ function HandleItem() {
       product_name: product?.product_name || "",
       product_category: product?.categories[0] || "",
       product_units: product?.quantity || "",
-      product_quantity: product?.quantity || "",
+      stockEntries: product?.stockEntries || [{ quantity: "", location: "" }],
     },
   });
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "stockEntries",
+  });
 
-  console.log("Product form page loaded with data:", product);
+  async function onSubmit(values: z.infer<typeof handleItemSchema>) {
+    if (type === "add") {
+      try {
+        await api.post("/api/ingredients", {
+          name: values.product_name,
+          unit: values.product_units,
+          categories: [values.product_category],
+          quantities: values.stockEntries.map((entry) => ({
+            quantity: parseInt(entry.quantity),
+            location_id: entry.location,
+          })),
+        });
 
-  function onSubmit(values: z.infer<typeof handleItemSchema>) {
-    // TODO: handle submition
-    console.log(values);
+        navigate({
+          to: "/inventory",
+          replace: true,
+        });
+      } catch (error) {
+        console.error("Error adding ingredient:", error);
+      }
+    } else if (type === "remove") {
+      try {
+        await api.post("/api/ingredients", {
+          name: values.product_name,
+          unit: values.product_units,
+          categories: [values.product_category],
+          quantities: values.stockEntries.map((entry) => ({
+            quantity: parseInt(entry.quantity),
+            location_id: entry.location,
+          })),
+        });
+
+        navigate({
+          to: "/inventory",
+          replace: true,
+        });
+      } catch (error) {
+        console.error("Error adding ingredient:", error);
+      }
+    }
   }
 
   return (
@@ -130,7 +172,7 @@ function HandleItem() {
             name="product_name"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel className="text-lg">Product Name</FormLabel>
+                <FormLabel className="text-lg">Name</FormLabel>
                 <FormControl>
                   <Input
                     variant="khp-default-pwa"
@@ -143,35 +185,36 @@ function HandleItem() {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="product_category"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel className="text-lg">Product Category</FormLabel>
-                <FormControl>
-                  <Input
-                    variant="khp-default-pwa"
-                    className="w-full"
-                    {...field}
-                    disabled={type === "remove"}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {type !== "remove" && (
+          <div className="grid grid-cols-2 gap-4 w-full">
+            <FormField
+              control={form.control}
+              name="product_category"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel className="text-lg">Category</FormLabel>
+                  <FormControl>
+                    <Input
+                      variant="khp-default-pwa"
+                      className="w-full"
+                      {...field}
+                      disabled={type === "remove"}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="product_units"
               render={({ field }) => (
                 <FormItem className="w-full">
-                  <FormLabel className="text-lg">Product Units</FormLabel>
+                  <FormLabel className="text-lg">Units</FormLabel>
                   <FormControl>
                     <Input
                       variant="khp-default-pwa"
                       className="w-full"
+                      disabled={type === "remove"}
                       {...field}
                     />
                   </FormControl>
@@ -179,66 +222,88 @@ function HandleItem() {
                 </FormItem>
               )}
             />
-          )}
-          {type !== "remove" && (
-            <FormField
-              control={form.control}
-              name="product_quantity"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormLabel className="text-lg">Product Quantity</FormLabel>
-                  <FormControl>
-                    <Input
-                      variant="khp-default-pwa"
-                      className="w-full"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
+          </div>
 
-          {type === "remove" && (
-            <FormField
-              control={form.control}
-              name="quantity_lost"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormLabel className="text-lg">Lost quantity</FormLabel>
-                  <FormControl>
-                    <Input
-                      variant="khp-default-pwa"
-                      className="w-full"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">
+              {type === "remove"
+                ? "Register the loss of the ingredient"
+                : "Stock entries"}
+            </h3>
+            {fields.map((field, index) => (
+              <div key={field.id} className="grid grid-cols-2 gap-4">
+                {/* Quantité */}
+                <FormField
+                  control={form.control}
+                  name={`stockEntries.${index}.quantity`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Quantity</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-          {type === "remove" && (
-            <FormField
-              control={form.control}
-              name="reason_lost"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormLabel className="text-lg">Reason for loss</FormLabel>
-                  <FormControl>
-                    <Input
-                      variant="khp-default-pwa"
-                      className="w-full"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
+                {/* Localisation */}
+                <FormField
+                  control={form.control}
+                  name={`stockEntries.${index}.location`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Location</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select location" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {availableLocations.map((location) => (
+                            <SelectItem key={location.id} value={location.id}>
+                              {location.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            ))}
+          </div>
+
+          <div
+            className={cn(
+              "grid grid-cols-2 gap-4 w-full",
+              type === "remove" ? "hidden" : ""
+            )}
+          >
+            <Button
+              type="button"
+              variant="khp-destructive"
+              size="lg"
+              className="w-full my-4"
+              onClick={() => remove(fields.length - 1)}
+            >
+              <Minus />
+            </Button>
+            <Button
+              type="button"
+              variant="khp-outline"
+              size="lg"
+              className="w-full my-4"
+              onClick={() => append({ quantity: "", location: "" })}
+            >
+              <Plus />
+            </Button>
+          </div>
 
           <Button
             type="submit"
