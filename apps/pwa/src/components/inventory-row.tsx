@@ -16,7 +16,7 @@ function InventoryRow({
       <div className="flex items-center gap-4">
         <img
           src={productDetails.image_url || "/placeholder.png"}
-          alt="Placeholder"
+          alt={productDetails.image_url ? productDetails.name : `Image not available for ${productDetails.name}`}
           className="w-16 h-16 rounded-md"
         />
         <p className="max-w-42 truncate">{productDetails.name}</p>
