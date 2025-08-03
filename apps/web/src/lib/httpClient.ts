@@ -59,6 +59,7 @@ class HttpClient {
       }
 
       const token = this.extractTokenFromCookie();
+      
       if (token) {
         this.xsrfToken = token;
         return token;

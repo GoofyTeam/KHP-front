@@ -9,23 +9,37 @@ import {
 
 export const metadata: Metadata = {
   title: "KHP | Stocks",
-  description: "Your new kitchen management app stocks",
+  description:
+    "Gestion des stocks - Visualisez et gérez l'inventaire de votre entreprise",
 };
 
-export default function DashboardLayout({
+export default function StocksLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <main>
+    <main className="min-h-screen">
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <header className="bg-background sticky top-0 flex shrink-0 items-center gap-2 border-b p-4 md:hidden">
+          {/* Header mobile */}
+          <header className="bg-background sticky top-0 z-10 flex shrink-0 items-center gap-2 border-b p-4 md:hidden">
             <SidebarTrigger className="-ml-1" />
+            <h1 className="text-lg font-semibold">Stocks</h1>
           </header>
-          <div className="flex flex-1 flex-col gap-4 p-4">{children}</div>
+
+          {/* Header desktop */}
+          <div className="hidden md:block border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div className="flex h-14 items-center px-6">
+              <h1 className="text-xl font-semibold">Gestion des Stocks</h1>
+            </div>
+          </div>
+
+          {/* Contenu principal */}
+          <div className="flex flex-1 flex-col">
+            <div className="flex-1 space-y-6 p-6">{children}</div>
+          </div>
         </SidebarInset>
       </SidebarProvider>
     </main>
