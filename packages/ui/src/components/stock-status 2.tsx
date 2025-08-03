@@ -24,10 +24,10 @@ const stockStatusVariants = cva(
 const circleVariants = cva("rounded-full border flex-shrink-0", {
   variants: {
     variant: {
-      "in-stock": "bg-green-500 border-green-500 w-3 h-3",
-      "out-of-stock": "bg-red-500 border-red-500 w-3 h-3",
-      "low-stock": "bg-orange-500 border-orange-500 w-3 h-3",
-      expired: "bg-gray-500 border-gray-500 w-3 h-3",
+      "in-stock": "bg-khp-primary border-khp-primary w-3 h-3",
+      "out-of-stock": "bg-khp-error border-khp-error w-3 h-3",
+      "low-stock": "",
+      expired: "",
     },
   },
   defaultVariants: {
@@ -82,9 +82,20 @@ function StockStatus({
 
   return (
     <div className={cn(stockStatusVariants({ variant, className }))} {...props}>
-      <div className={cn(circleVariants({ variant }))} />
 
-      {showLabel && <span className="text-sm font-medium">{displayLabel}</span>}
+      {(variant === "in-stock" || variant === "out-of-stock") && (
+        <div className={cn(circleVariants({ variant }))} />
+      )}
+
+      {(variant === "low-stock" || variant === "expired") && (
+        <Icon className="size-4" />
+      )}
+
+      {showLabel && (
+        <span className="text-sm font-medium text-khp-text-primary hidden sm:inline">
+          {displayLabel}
+        </span>
+      )}
     </div>
   );
 }

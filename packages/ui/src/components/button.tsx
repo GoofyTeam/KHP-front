@@ -14,15 +14,15 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90",
         outline:
-          "border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground",
+          "border border-khp-primary bg-transparent text-khp-primary hover:bg-khp-primary/10",
         secondary:
           "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         "khp-default":
-          "bg-khp-primary text-khp-text-on-primary hover:bg-khp-primary-hover",
+          "bg-khp-primary text-khp-text-on-primary hover:bg-khp-primary-hover !h-[48px] px-6 rounded-xl",
         "khp-destructive":
-          "bg-khp-error text-khp-text-on-primary hover:bg-khp-error/90",
+          "bg-khp-error text-khp-text-on-primary hover:bg-khp-error/90 !h-[48px] px-6 rounded-xl",
         "khp-outline":
           "border border-khp-primary bg-transparent text-khp-primary hover:bg-khp-primary/10",
       },
