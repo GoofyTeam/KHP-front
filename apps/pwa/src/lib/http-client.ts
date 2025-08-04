@@ -30,12 +30,20 @@ export class ImprovedHttpClient {
       headerName: config.csrfConfig?.headerName ?? "X-XSRF-TOKEN",
       endpoint: config.csrfConfig?.endpoint ?? "/sanctum/csrf-cookie",
     };
+    this.csrfToken = this.readCookie(this.csrfConfig.cookieName);
   }
 
   /**
    * Initialisation CSRF automatique si nécessaire
    */
   async initCSRF(): Promise<void> {
+    // Si on a déjà un token en cookie, on l'utilise sans appel réseau
+    const existing = this.readCookie(this.csrfConfig.cookieName);
+    if (existing) {
+      this.csrfToken = existing;
+      return;
+    }
+
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), this.timeout);
@@ -56,6 +64,7 @@ export class ImprovedHttpClient {
         throw this.createHttpError(res, "CSRF initialization failed");
       }
 
+      // On relit le cookie après le fetch
       this.csrfToken = this.readCookie(this.csrfConfig.cookieName);
       if (!this.csrfToken) {
         throw new Error(`Cookie ${this.csrfConfig.cookieName} not found`);
@@ -75,7 +84,6 @@ export class ImprovedHttpClient {
     const match = document.cookie.match(
       new RegExp("(^|; )" + name + "=([^;]*)")
     );
-
     return match ? decodeURIComponent(match[2]) : null;
   }
 
