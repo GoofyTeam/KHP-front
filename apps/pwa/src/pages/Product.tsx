@@ -22,6 +22,11 @@ interface LocationStock {
   locationName: string;
   quantity: number;
   unit: string;
+  locationType?: {
+    id: string;
+    name: string;
+    is_default: boolean;
+  };
 }
 
 interface StockSummary {
@@ -41,6 +46,11 @@ interface ProductData {
     location: {
       id: string;
       name: string;
+      locationType?: {
+        id: string;
+        name: string;
+        is_default: boolean;
+      };
     };
   }>;
 }
@@ -59,12 +69,21 @@ export default function ProductPage() {
       const locationStocks: LocationStock[] = product.quantities.map(
         (qty: {
           quantity: number;
-          location: { id: string; name: string };
+          location: {
+            id: string;
+            name: string;
+            locationType?: {
+              id: string;
+              name: string;
+              is_default: boolean;
+            };
+          };
         }) => ({
           locationId: qty.location.id,
           locationName: qty.location.name,
           quantity: qty.quantity,
           unit: product.unit,
+          locationType: qty.location.locationType,
         })
       );
 
@@ -102,16 +121,12 @@ export default function ProductPage() {
 
   const getDisplayStock = (): {
     quantity: number;
-    locationText: string;
     status: "in-stock" | "low-stock" | "out-of-stock";
   } => {
     if (selectedLocation === "all") {
       const totalQuantity = stockData.totalQuantity;
-      const locationCount = stockData.locations.length;
-
       return {
         quantity: totalQuantity,
-        locationText: `in ${locationCount} location${locationCount > 1 ? "s" : ""}`,
         status:
           totalQuantity > 5
             ? "in-stock"
@@ -126,14 +141,12 @@ export default function ProductPage() {
       if (!location) {
         return {
           quantity: 0,
-          locationText: "location not found",
           status: "out-of-stock",
         };
       }
 
       return {
         quantity: location.quantity,
-        locationText: `at ${location.locationName}`,
         status:
           location.quantity > 5
             ? "in-stock"
@@ -154,6 +167,13 @@ export default function ProductPage() {
       document.title = "KHP";
     };
   }, [product?.name]);
+
+  // Auto-sélectionner la seule location disponible si il n'y en a qu'une
+  useEffect(() => {
+    if (stockData.locations.length === 1) {
+      setSelectedLocation(stockData.locations[0].locationId);
+    }
+  }, [stockData.locations]);
 
   const historyData: HistoryEntry[] = [
     {
@@ -221,31 +241,61 @@ export default function ProductPage() {
           </p>
         </div>
 
-        <div className="flex flex-col gap-3">
-          <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select a location" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All locations</SelectItem>
-              {stockData.locations.map((location) => (
-                <SelectItem
-                  key={location.locationId}
-                  value={location.locationId}
-                >
-                  {location.locationName}
+        <div className="flex flex-col gap-4">
+          {stockData.locations.length === 1 ? (
+            <div className="flex justify-between items-center p-3 rounded-lg bg-muted/50 border border-border/50">
+              <div className="flex flex-col gap-1">
+                <span className="font-semibold text-card-foreground">
+                  {stockData.locations[0].locationName}
+                </span>
+                {stockData.locations[0].locationType && (
+                  <span className="text-xs text-muted-foreground font-medium">
+                    {stockData.locations[0].locationType.name}
+                  </span>
+                )}
+              </div>
+            </div>
+          ) : stockData.locations.length > 1 ? (
+            <Select
+              value={selectedLocation}
+              onValueChange={setSelectedLocation}
+            >
+              <SelectTrigger className="w-full h-auto py-3 px-4 rounded-lg border-border bg-card shadow-sm">
+                <SelectValue placeholder="Sélectionner une localisation" />
+              </SelectTrigger>
+              <SelectContent className="rounded-lg border-border shadow-lg">
+                <SelectItem value="all" className="py-2">
+                  <span className="font-medium">Toutes les localisations</span>
                 </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+                {stockData.locations.map((location) => (
+                  <SelectItem
+                    key={location.locationId}
+                    value={location.locationId}
+                    className="py-2"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <span className="font-medium">
+                        {location.locationName}
+                      </span>
+                      {location.locationType && (
+                        <span className="text-xs text-muted-foreground">
+                          {location.locationType.name}
+                        </span>
+                      )}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : null}
 
-          <div className="flex justify-between gap-1 items-center">
+          <div className="flex justify-between items-center p-4">
             <div className="flex flex-col">
-              <p className="text-lg font-semibold">
-                Stock: {displayStock.quantity} {product.unit}
+              <p className="text-xl font-bold text-foreground">
+                {displayStock.quantity} {product.unit}
               </p>
-              <p className="text-sm text-gray-600">
-                {displayStock.locationText}
+              <p className="text-sm text-muted-foreground font-medium">
+                Stock disponible
               </p>
             </div>
             <StockStatus variant={displayStock.status} showLabel={false} />

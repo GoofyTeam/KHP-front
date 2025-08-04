@@ -33,11 +33,31 @@ type Company {
   categories: [Category!]!
   locations: [Location!]!
 
+  """Types de localisation associés à cette entreprise."""
+  locationTypes: [LocationType!]!
+
   """When the company was created."""
   created_at: DateTime!
 
   """When the company was last updated."""
   updated_at: DateTime!
+}
+
+"""Champs disponibles pour le tri des entreprises."""
+enum CompanyOrderByField {
+  ID
+  NAME
+  CREATED_AT
+  UPDATED_AT
+}
+
+"""Options de tri pour les entreprises."""
+input CompanyOrderByOrderByClause {
+  """Champ sur lequel effectuer le tri."""
+  field: CompanyOrderByField!
+
+  """Direction du tri."""
+  order: SortOrder!
 }
 
 """A paginated list of Company items."""
@@ -94,6 +114,8 @@ type IngredientQuantity {
   location: Location!
 }
 
+scalar JSON
+
 type Location {
   """Unique primary key."""
   id: ID!
@@ -103,6 +125,9 @@ type Location {
 
   """Location company."""
   company: Company!
+
+  """Type de localisation (Congélateur, Réfrigérateur, etc.)"""
+  locationType: LocationType
 
   """When the location was created."""
   created_at: DateTime!
@@ -114,6 +139,23 @@ type Location {
   ingredients: [Ingredient!]!
 }
 
+"""Champs disponibles pour le tri des emplacements."""
+enum LocationOrderByField {
+  ID
+  NAME
+  CREATED_AT
+  UPDATED_AT
+}
+
+"""Options de tri pour les emplacements."""
+input LocationOrderByOrderByClause {
+  """Champ sur lequel effectuer le tri."""
+  field: LocationOrderByField!
+
+  """Direction du tri."""
+  order: SortOrder!
+}
+
 """A paginated list of Location items."""
 type LocationPaginator {
   """Pagination information about the list of items."""
@@ -121,6 +163,57 @@ type LocationPaginator {
 
   """A list of Location items."""
   data: [Location!]!
+}
+
+"""Type de localisation pour organiser les emplacements de stockage"""
+type LocationType {
+  """Identifiant unique."""
+  id: ID!
+
+  """Nom du type de localisation."""
+  name: String!
+
+  """Indique si c'est un type par défaut (non modifiable)."""
+  is_default: Boolean!
+
+  """L'entreprise à laquelle appartient ce type."""
+  company: Company!
+
+  """Emplacements utilisant ce type de localisation."""
+  locations: [Location!]!
+
+  """Date de création du type."""
+  created_at: DateTime!
+
+  """Date de dernière mise à jour du type."""
+  updated_at: DateTime!
+}
+
+"""Champs disponibles pour le tri des types de localisation."""
+enum LocationTypeOrderByField {
+  ID
+  NAME
+  IS_DEFAULT
+  CREATED_AT
+  UPDATED_AT
+}
+
+"""Options de tri pour les types de localisation."""
+input LocationTypeOrderByOrderByClause {
+  """Champ sur lequel effectuer le tri."""
+  field: LocationTypeOrderByField!
+
+  """Direction du tri."""
+  order: SortOrder!
+}
+
+"""A paginated list of LocationType items."""
+type LocationTypePaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of LocationType items."""
+  data: [LocationType!]!
 }
 
 """Allows ordering a list of records."""
@@ -197,11 +290,11 @@ type Preparation {
   """Unit of measurement for the preparation."""
   unit: String!
 
-  """Type of preparation (e.g., chemical, biological, physical)."""
-  type: PreparationTypeEnum!
-
   """The company that produces this preparation."""
   company: Company!
+  entities: [PreparationEntity!]!
+  locations: [Location!]!
+  quantities: [PreparationQuantity!]!
 
   """When the preparation was created."""
   created_at: DateTime!
@@ -209,6 +302,14 @@ type Preparation {
   """When the preparation was last updated."""
   updated_at: DateTime!
 }
+
+type PreparationEntity {
+  id: ID!
+  entity: PreparationEntityItem!
+  preparation: Preparation!
+}
+
+union PreparationEntityItem = Ingredient | Preparation
 
 """A paginated list of Preparation items."""
 type PreparationPaginator {
@@ -219,12 +320,22 @@ type PreparationPaginator {
   data: [Preparation!]!
 }
 
-enum PreparationTypeEnum {
-  SIMPLE
-  COMPOSITE
+type PreparationQuantity {
+  """Le stock de la préparation."""
+  quantity: Float!
+
+  """La localisation de ce stock."""
+  location: Location!
 }
 
 type Query {
+  """
+  Recherche un produit par code-barres ou par mots-clés.
+  Si 'barcode' est fourni, la recherche se fait par code-barres.
+  Sinon, la recherche se fait par mots-clés.
+  """
+  search(barcode: String, keyword: String, page: Int = 1, pageSize: Int = 20): JSON
+
   """Find a single Category (only if it belongs to the current company)."""
   Category(
     """Search by primary key."""
@@ -261,6 +372,17 @@ type Query {
     name: String
   ): Location
 
+  """
+  Trouve un type de localisation spécifique (seulement s'il appartient à l'entreprise actuelle).
+  """
+  locationType(
+    """Recherche par identifiant."""
+    id: ID
+
+    """Recherche par nom du type."""
+    name: String
+  ): LocationType
+
   """Trouve une preparation (et seulement si elle appartient à ma company)"""
   preparation(id: ID, name: String): Preparation
 
@@ -286,6 +408,9 @@ type Query {
   companies(
     """Filters by name. Accepts SQL LIKE wildcards `%` and `_`."""
     name: String
+
+    """Options de tri des résultats."""
+    orderBy: [OrderByClause!]
 
     """Limits number of fetched items."""
     first: Int! = 10
@@ -316,6 +441,12 @@ type Query {
     """Filter by location name. Accepts SQL LIKE wildcards `%` and `_`."""
     name: String
 
+    """Filter by location type ID."""
+    locationTypeId: ID
+
+    """Options de tri des résultats."""
+    orderBy: [OrderByClause!]
+
     """Limits number of fetched items."""
     first: Int! = 10
 
@@ -323,10 +454,27 @@ type Query {
     page: Int
   ): LocationPaginator!
 
+  """Liste les types de localisation pour l'entreprise actuelle."""
+  locationTypes(
+    """Filtre par nom. Accepte les caractères génériques SQL LIKE `%` et `_`."""
+    name: String
+
+    """Filtre pour afficher uniquement les types par défaut."""
+    is_default: Boolean
+
+    """Options de tri des résultats."""
+    orderBy: [OrderByClause!]
+
+    """Limits number of fetched items."""
+    first: Int! = 10
+
+    """The offset from which items are returned."""
+    page: Int
+  ): LocationTypePaginator!
+
   """Liste les preparations de ma company uniquement"""
   preparations(
     name: String
-    type: String
     unit: String
 
     """Limits number of fetched items."""

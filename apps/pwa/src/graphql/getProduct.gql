@@ -12,6 +12,11 @@ query GetIngredient($id: ID!) {
       location {
         id
         name
+        locationType {
+          id
+          name
+          is_default
+        }
       }
     }
   }
