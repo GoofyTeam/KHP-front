@@ -26,6 +26,7 @@ import {
   LocationTypeOrderByField,
   LocationTypeOrderByOrderByClause,
   LocationTypePaginator,
+  OpenFoodFactsProduct,
   OrderByClause,
   OrderByRelationAggregateFunction,
   OrderByRelationWithColumnAggregateFunction,

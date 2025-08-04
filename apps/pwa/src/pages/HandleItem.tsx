@@ -43,7 +43,7 @@ type HandleItem = z.infer<typeof handleItemSchema>;
 
 function HandleItem() {
   const navigate = useNavigate();
-  const { product, type, availableLocations } = useLoaderData({
+  const { product, type, availableLocations, categories } = useLoaderData({
     from: "/_protected/handle-item",
   });
 
@@ -55,9 +55,11 @@ function HandleItem() {
     defaultValues: {
       image: undefined,
       product_name: product?.product_name || "",
-      product_category: product?.categories[0] || "",
-      product_units: product?.quantity || "",
-      stockEntries: product?.stockEntries || [{ quantity: "", location: "" }],
+      product_category: product?.categories?.[0] || "",
+      product_units: product?.unit != null ? product.unit.toString() : "",
+      stockEntries: [
+        { quantity: product?.base_quantity?.toString(), location: undefined },
+      ],
     },
   });
   const { fields, append, remove } = useFieldArray({
@@ -110,9 +112,9 @@ function HandleItem() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[75svh] my-4">
       <Form {...form}>
-        {filePreview || product?.image_url ? (
+        {filePreview || product?.imageUrl ? (
           <img
-            src={filePreview || product?.image_url || ""}
+            src={filePreview || product?.imageUrl || ""}
             alt={form.getValues().product_name || "Product Image"}
             className="aspect-square object-contain max-w-1/2 w-full my-6"
             onClick={() => inputRef.current?.click()}
@@ -192,14 +194,35 @@ function HandleItem() {
               render={({ field }) => (
                 <FormItem className="w-full">
                   <FormLabel className="text-lg">Category</FormLabel>
-                  <FormControl>
-                    <Input
-                      variant="khp-default-pwa"
-                      className="w-full"
-                      {...field}
-                      disabled={type === "remove"}
-                    />
-                  </FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="w-full border-khp-primary rounded-md px-4 py-6 truncate">
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {product &&
+                        product.categories &&
+                        product.categories.length > 0 &&
+                        product.categories.map((category) => (
+                          <SelectItem
+                            key={category || "default"}
+                            value={category || ""}
+                          >
+                            {category || "Uncategorized"}
+                          </SelectItem>
+                        ))}
+                      {categories &&
+                        categories.map((categorie) => (
+                          <SelectItem key={categorie.id} value={categorie.name}>
+                            {categorie.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -224,7 +247,7 @@ function HandleItem() {
             />
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 w-full">
             <h3 className="text-lg font-medium">
               {type === "remove"
                 ? "Register the loss of the ingredient"
@@ -240,7 +263,7 @@ function HandleItem() {
                     <FormItem>
                       <FormLabel>Quantity</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} variant="khp-default-pwa" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -259,7 +282,7 @@ function HandleItem() {
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full border-khp-primary rounded-md px-4 py-6 truncate">
                             <SelectValue placeholder="Select location" />
                           </SelectTrigger>
                         </FormControl>
@@ -290,6 +313,7 @@ function HandleItem() {
               variant="khp-destructive"
               size="lg"
               className="w-full my-4"
+              disabled={fields.length <= 1}
               onClick={() => remove(fields.length - 1)}
             >
               <Minus />

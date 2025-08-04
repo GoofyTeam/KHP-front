@@ -1,0 +1,10 @@
+query getItemResult($barcode: String, $page: Int!) {
+  search(barcode: $barcode, page: $page) {
+    barcode
+    base_quantity
+    imageUrl
+    product_name
+    categories
+    unit
+  }
+}

@@ -1,0 +1,13 @@
+query getCategories {
+  categories(first: 100) {
+    data {
+      id
+      name
+      updated_at
+    }
+    paginatorInfo {
+      total
+      count
+    }
+  }
+}
