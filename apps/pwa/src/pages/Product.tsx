@@ -33,12 +33,21 @@ export default function ProductPage() {
       const locationStocks: LocationStock[] = product.quantities.map(
         (qty: {
           quantity: number;
-          location: { id: string; name: string };
+          location: {
+            id: string;
+            name: string;
+            locationType?: {
+              id: string;
+              name: string;
+              is_default: boolean;
+            };
+          };
         }) => ({
           locationId: qty.location.id,
           locationName: qty.location.name,
           quantity: qty.quantity,
           unit: product.unit,
+          locationType: qty.location.locationType,
         })
       );
 
@@ -76,16 +85,12 @@ export default function ProductPage() {
 
   const getDisplayStock = (): {
     quantity: number;
-    locationText: string;
     status: "in-stock" | "low-stock" | "out-of-stock";
   } => {
     if (selectedLocation === "all") {
       const totalQuantity = stockData.totalQuantity;
-      const locationCount = stockData.locations.length;
-
       return {
         quantity: totalQuantity,
-        locationText: `in ${locationCount} location${locationCount > 1 ? "s" : ""}`,
         status:
           totalQuantity > 5
             ? "in-stock"
@@ -100,14 +105,12 @@ export default function ProductPage() {
       if (!location) {
         return {
           quantity: 0,
-          locationText: "location not found",
           status: "out-of-stock",
         };
       }
 
       return {
         quantity: location.quantity,
-        locationText: `at ${location.locationName}`,
         status:
           location.quantity > 5
             ? "in-stock"
