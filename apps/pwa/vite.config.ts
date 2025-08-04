@@ -31,6 +31,7 @@ export default defineConfig({
       defaultScalarType: "unknown",
       scalars: {
         DateTime: "string",
+        JSON: "unknown",
       },
     }),
     tanstackRouter({
