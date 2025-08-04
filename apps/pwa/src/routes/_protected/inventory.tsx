@@ -17,31 +17,22 @@ export const Route = createFileRoute("/_protected/inventory")({
     pageIndex: search.pageIndex,
   }),
   loader: async ({ deps: { search_terms, pageIndex } }) => {
-    let options = {};
-
-    if (search_terms && search_terms.trim() !== "") {
-      options = {
-        ...options,
-        name: search_terms.trim(),
-      };
+    const variables: Record<string, unknown> = {
+      page: pageIndex,
+    };
+    if (search_terms?.trim()) {
+      variables.name = search_terms.trim();
     }
 
-    if (pageIndex < 1) {
-      options = {
-        ...options,
-        page: 1,
-      };
-    } else {
-      options = {
-        ...options,
-        page: pageIndex,
-      };
-    }
-
-    return await graphqlRequest<GetCompanyProductsQuery>(
+    const result = await graphqlRequest<GetCompanyProductsQuery>(
       GetCompanyProducts,
-      options
+      variables
     );
+
+    return {
+      data: result.ingredients.data ?? [],
+      pageInfo: result.ingredients.paginatorInfo,
+    };
   },
   component: InventoryPage,
 });

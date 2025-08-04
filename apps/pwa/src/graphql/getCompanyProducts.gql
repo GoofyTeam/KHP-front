@@ -13,5 +13,8 @@ query getCompanyProducts($name: String, $page: Int!) {
         }
       }
     }
+    paginatorInfo {
+      hasMorePages
+    }
   }
 }
