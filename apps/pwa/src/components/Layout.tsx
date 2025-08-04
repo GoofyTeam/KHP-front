@@ -16,6 +16,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/login": "Login",
   "/scan": "Scan",
   "/handle-item": "Handle Item",
+  "/404": "Page Not Found",
 };
 
 function getPageTitle(
