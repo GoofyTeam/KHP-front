@@ -14,7 +14,7 @@ function NotFoundComponent() {
   return (
     <>
       <Helmet>
-        <title>Page non trouvée - KHP</title>
+        <title>Page not found - KHP</title>
       </Helmet>
       <NotFoundPage />
     </>
