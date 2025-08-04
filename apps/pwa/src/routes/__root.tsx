@@ -54,7 +54,7 @@ const PAGE_DOCUMENT_TITLES: Record<string, string> = {
   "/login": "Connexion - KHP",
   "/scan": "Scanner - KHP",
   "/handle-item": "Traiter l'article - KHP",
-  "/404": "Page non trouvée - KHP",
+  "/404": "Page not found - KHP",
 };
 
 function getDocumentTitle(

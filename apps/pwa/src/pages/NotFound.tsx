@@ -20,16 +20,17 @@ export default function NotFoundPage() {
 
         <div className="space-y-2">
           <h2 className="text-2xl font-semibold text-gray-800">
-            Page non trouvée
+            Page Not Found
           </h2>
           <p className="text-gray-600 max-w-md">
-            Désolé, la page que vous recherchez n'existe pas ou a été déplacée.
+            Sorry, the page you are looking for does not exist or has been
+            moved.
           </p>
         </div>
 
         <Button onClick={handleGoHome} variant="khp-default" className="mt-8">
           <Home className="mr-2 h-4 w-4" />
-          Retour à l'inventaire
+          Back to Inventory
         </Button>
       </div>
     </div>
