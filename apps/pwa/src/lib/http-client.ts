@@ -37,6 +37,7 @@ export class ImprovedHttpClient {
    * Initialisation CSRF automatique si nécessaire
    */
   async initCSRF(): Promise<void> {
+    //console.log("Initializing CSRF token...");
     // Si on a déjà un token en cookie, on l'utilise sans appel réseau
     const existing = this.readCookie(this.csrfConfig.cookieName);
     if (existing) {
@@ -160,12 +161,18 @@ export class ImprovedHttpClient {
       // Ne pas retry sur certaines erreurs
       if (error instanceof Error && "status" in error) {
         const httpError = error as HttpError;
-        if (httpError.status >= 400 && httpError.status < 500) {
-          throw error; // Erreurs client, pas de retry
+        // On ne retry pas sur les 4xx *sauf* 429
+        if (
+          httpError.status >= 400 &&
+          httpError.status < 500 &&
+          httpError.status !== 429
+        ) {
+          throw error;
         }
       }
 
-      await new Promise((resolve) => setTimeout(resolve, delay));
+      // backoff exponentiel
+      await new Promise((res) => setTimeout(res, delay));
       return this.withRetry(fn, retries - 1, delay * 2);
     }
   }
@@ -252,6 +259,22 @@ export class ImprovedHttpClient {
         });
 
         clearTimeout(timeoutId);
+
+        if (response.status === 429) {
+          const ra = response.headers.get("Retry-After");
+          if (ra) {
+            const waitMs = parseInt(ra, 10) * 1000;
+            await new Promise((r) => setTimeout(r, waitMs));
+          }
+
+          this.csrfToken = null;
+          await this.initCSRF();
+
+          throw await this.createHttpError(
+            response,
+            "Too Many Requests – CSRF token refreshed, retrying"
+          );
+        }
 
         // Interceptor de réponse
         if (this.interceptors?.response) {

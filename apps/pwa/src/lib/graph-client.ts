@@ -3,20 +3,28 @@ import api from "./api";
 
 async function csrfFetch(
   input: string | URL | Request,
-  init?: RequestInit
+  init: RequestInit = {}
 ): Promise<Response> {
-  if (init?.method === "POST") {
-    await api.initCSRF();
-    const token = api.readCookie("XSRF-TOKEN");
+  // Ne traiter que les requêtes POST
+  if (init.method === "POST") {
+    let token = api.readCookie("XSRF-TOKEN");
+
     if (!token) {
-      throw new Error("CSRF token not found in cookies");
+      //console.info("CSRF token not found in cookies, initializing CSRF...");
+      await api.initCSRF();
+      token = api.readCookie("XSRF-TOKEN");
+      if (!token) {
+        throw new Error("CSRF token not found in cookies after initCSRF()");
+      }
     }
+
     init.headers = {
       ...(init.headers || {}),
       "X-XSRF-TOKEN": token,
       "Content-Type": "application/json",
     };
   }
+
   return fetch(input, {
     ...init,
     credentials: "include",
