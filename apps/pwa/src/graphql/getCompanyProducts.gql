@@ -1,5 +1,5 @@
-query getCompanyProducts {
-  ingredients {
+query getCompanyProducts($name: String, $page: Int!) {
+  ingredients(name: $name, page: $page) {
     data {
       id
       name
