@@ -7,7 +7,13 @@ interface UserData {
   company_id?: number;
 }
 
-const protectedRoutes = ["/dashboard", "/profile", "/settings", "/account"];
+const protectedRoutes = [
+  "/dashboard",
+  "/profile",
+  "/settings",
+  "/account",
+  "/ingredient",
+];
 const authRoutes = [
   "/login",
   "/register",
