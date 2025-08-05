@@ -108,6 +108,18 @@ export interface MultiSelectProps
    * Optional, can be used to override default styles.
    */
   className?: string;
+
+  /**
+   * When true, displays a compact text format like "2 filtres sélectionnés" instead of individual badges.
+   * Optional, defaults to false.
+   */
+  compactMode?: boolean;
+
+  /**
+   * The type of filter for compact mode display (e.g., "status", "category").
+   * Optional, used to customize the compact mode text.
+   */
+  filterType?: string;
 }
 
 export const MultiSelect = React.forwardRef<
@@ -125,6 +137,8 @@ export const MultiSelect = React.forwardRef<
       maxCount = 1,
       modalPopover = false,
       className,
+      compactMode = false,
+      filterType,
       ...props
     },
     ref
@@ -198,62 +212,85 @@ export const MultiSelect = React.forwardRef<
             {...props}
             onClick={handleTogglePopover}
             className={cn(
-              "flex w-full p-1 rounded-md border min-h-10 h-[48px] items-center justify-between bg-inherit hover:bg-inherit [&_svg]:pointer-events-auto",
+              "flex w-auto p-2 rounded-md border min-h-12 h-[48px] items-center justify-between bg-inherit hover:bg-inherit [&_svg]:pointer-events-auto touch-manipulation",
               className
             )}
           >
             {selectedValues.length > 0 ? (
               <div className="flex justify-between items-center w-full">
                 <div className="flex flex-wrap items-center">
-                  {selectedValues.slice(0, maxCount).map((value) => {
-                    const option = options.find((o) => o.value === value);
-                    const IconComponent = option?.icon;
-                    return (
-                      <Badge
-                        key={value}
-                        className={cn(
-                          isAnimating ? "animate-bounce" : "",
-                          multiSelectVariants({ variant })
-                        )}
-                        style={{ animationDuration: `${animation}s` }}
-                      >
-                        {IconComponent && (
-                          <IconComponent className="h-4 w-4 mr-2" />
-                        )}
-                        {option?.label}
-                        <XCircle
-                          className="ml-2 h-4 w-4 cursor-pointer"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            toggleOption(value);
-                          }}
-                        />
-                      </Badge>
-                    );
-                  })}
-                  {selectedValues.length > maxCount && (
+                  {compactMode ? (
                     <Badge
                       className={cn(
-                        "bg-transparent text-foreground border-foreground/1 hover:bg-transparent",
                         isAnimating ? "animate-bounce" : "",
                         multiSelectVariants({ variant })
                       )}
                       style={{ animationDuration: `${animation}s` }}
                     >
-                      {`+ ${selectedValues.length - maxCount} more`}
+                      {selectedValues.length === 1
+                        ? `1 ${filterType || "filter"}`
+                        : `${selectedValues.length} ${filterType || "filters"}`}
                       <XCircle
-                        className="ml-2 h-4 w-4 cursor-pointer"
+                        className="ml-2 h-5 w-5 cursor-pointer touch-manipulation p-0.5"
                         onClick={(event) => {
                           event.stopPropagation();
-                          clearExtraOptions();
+                          handleClear();
                         }}
                       />
                     </Badge>
+                  ) : (
+                    <>
+                      {selectedValues.slice(0, maxCount).map((value) => {
+                        const option = options.find((o) => o.value === value);
+                        const IconComponent = option?.icon;
+                        return (
+                          <Badge
+                            key={value}
+                            className={cn(
+                              isAnimating ? "animate-bounce" : "",
+                              multiSelectVariants({ variant })
+                            )}
+                            style={{ animationDuration: `${animation}s` }}
+                          >
+                            {IconComponent && (
+                              <IconComponent className="h-4 w-4 mr-2" />
+                            )}
+                            {option?.label}
+                            <XCircle
+                              className="ml-2 !h-6 !w-6 cursor-pointer touch-manipulation p-0.5"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                toggleOption(value);
+                              }}
+                            />
+                          </Badge>
+                        );
+                      })}
+                      {selectedValues.length > maxCount && (
+                        <Badge
+                          className={cn(
+                            "bg-transparent text-foreground border-foreground/1 hover:bg-transparent",
+                            isAnimating ? "animate-bounce" : "",
+                            multiSelectVariants({ variant })
+                          )}
+                          style={{ animationDuration: `${animation}s` }}
+                        >
+                          {`+ ${selectedValues.length - maxCount} more`}
+                          <XCircle
+                            className="ml-2 !h-6 !w-6 cursor-pointer touch-manipulation p-0.5"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              clearExtraOptions();
+                            }}
+                          />
+                        </Badge>
+                      )}
+                    </>
                   )}
                 </div>
                 <div className="flex items-center justify-between">
                   <XIcon
-                    className="h-4 mx-2 cursor-pointer text-muted-foreground"
+                    className="!h-6 !w-6 mx-2 cursor-pointer text-muted-foreground touch-manipulation p-1"
                     onClick={(event) => {
                       event.stopPropagation();
                       handleClear();
@@ -263,7 +300,7 @@ export const MultiSelect = React.forwardRef<
                     orientation="vertical"
                     className="flex min-h-6 h-full"
                   />
-                  <ChevronDown className="h-4 mx-2 cursor-pointer text-muted-foreground" />
+                  <ChevronDown className="!h-6 !w-6 cursor-pointer text-muted-foreground touch-manipulation p-1" />
                 </div>
               </div>
             ) : (
@@ -271,7 +308,7 @@ export const MultiSelect = React.forwardRef<
                 <span className="text-sm text-muted-foreground mx-3">
                   {placeholder}
                 </span>
-                <ChevronDown className="h-4 cursor-pointer text-muted-foreground mx-2" />
+                <ChevronDown className="!h-6 !w-6 cursor-pointer text-muted-foreground touch-manipulation p-1" />
               </div>
             )}
           </Button>
@@ -292,11 +329,11 @@ export const MultiSelect = React.forwardRef<
                 <CommandItem
                   key="all"
                   onSelect={toggleAll}
-                  className="cursor-pointer"
+                  className="cursor-pointer min-h-10 py-3 touch-manipulation"
                 >
                   <div
                     className={cn(
-                      "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                      "mr-3 flex h-5 w-5 items-center justify-center rounded-sm border border-primary touch-manipulation",
                       selectedValues.length === options.length
                         ? "bg-primary text-primary-foreground"
                         : "opacity-50 [&_svg]:invisible"
@@ -312,11 +349,11 @@ export const MultiSelect = React.forwardRef<
                     <CommandItem
                       key={option.value}
                       onSelect={() => toggleOption(option.value)}
-                      className="cursor-pointer"
+                      className="cursor-pointer min-h-10 py-3 touch-manipulation"
                     >
                       <div
                         className={cn(
-                          "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                          "mr-3 flex h-5 w-5 items-center justify-center rounded-sm border border-primary touch-manipulation",
                           isSelected
                             ? "bg-primary text-primary-foreground"
                             : "opacity-50 [&_svg]:invisible"
@@ -339,7 +376,7 @@ export const MultiSelect = React.forwardRef<
                     <>
                       <CommandItem
                         onSelect={handleClear}
-                        className="flex-1 justify-center cursor-pointer"
+                        className="flex-1 justify-center cursor-pointer min-h-10 py-3 touch-manipulation"
                       >
                         Clear
                       </CommandItem>
@@ -351,7 +388,7 @@ export const MultiSelect = React.forwardRef<
                   )}
                   <CommandItem
                     onSelect={() => setIsPopoverOpen(false)}
-                    className="flex-1 justify-center cursor-pointer max-w-full"
+                    className="flex-1 justify-center cursor-pointer max-w-full min-h-10 py-3 touch-manipulation"
                   >
                     Close
                   </CommandItem>

@@ -22,7 +22,7 @@ export const columns: ColumnDef<Ingredient>[] = [
     cell: ({ row }) => {
       const ingredient = row.original;
       return (
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3 min-w-0">
           {ingredient.image_url ? (
             <img
               src={ingredient.image_url}
@@ -37,16 +37,16 @@ export const columns: ColumnDef<Ingredient>[] = [
               <Package className="h-5 w-5 text-muted-foreground" />
             </div>
           )}
-          <div>
-            <div className="font-medium">{ingredient.name}</div>
+          <div className="min-w-0 flex-1">
+            <div
+              className="font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[180px]"
+              title={ingredient.name}
+            >
+              {ingredient.name}
+            </div>
           </div>
         </div>
       );
-    },
-    filterFn: (row, id, value) => {
-      const ingredient = row.original;
-      if (!value) return true;
-      return ingredient.name.toLowerCase().includes(value.toLowerCase());
     },
   },
   {
@@ -58,7 +58,11 @@ export const columns: ColumnDef<Ingredient>[] = [
         (sum, q) => sum + q.quantity,
         0
       );
-      return <div className="font-medium">{totalQuantity.toFixed(1)}</div>;
+      return (
+        <div className="font-medium whitespace-nowrap">
+          {totalQuantity.toFixed(1)}
+        </div>
+      );
     },
   },
   {
@@ -72,77 +76,36 @@ export const columns: ColumnDef<Ingredient>[] = [
     cell: ({ row }) => {
       const ingredient = row.original;
       return (
-        <div className="flex flex-wrap gap-1">
-          {ingredient.categories.slice(0, 2).map((category) => (
+        <div className="flex flex-wrap gap-1 max-w-[130px]">
+          {ingredient.categories.slice(0, 1).map((category) => (
             <span
               key={category.id}
-              className="inline-flex items-center rounded-full bg-secondary px-2 py-1 text-xs font-medium"
+              className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap"
             >
               {category.name}
             </span>
           ))}
-          {ingredient.categories.length > 2 && (
-            <span className="text-xs text-muted-foreground">
-              +{ingredient.categories.length - 2}
+          {ingredient.categories.length > 1 && (
+            <span className="text-xs text-muted-foreground whitespace-nowrap">
+              +{ingredient.categories.length - 1}
             </span>
           )}
         </div>
       );
     },
-    filterFn: (row, id, value) => {
-      const ingredient = row.original;
-      if (!value || (Array.isArray(value) && value.length === 0)) return true;
-
-      // Handle array of values (multi-select)
-      if (Array.isArray(value)) {
-        return value.some((filterValue) =>
-          ingredient.categories.some((category) =>
-            category.name.toLowerCase().includes(filterValue.toLowerCase())
-          )
-        );
-      }
-
-      // Handle single value (legacy)
-      if (value === "all") return true;
-      return ingredient.categories.some((category) =>
-        category.name.toLowerCase().includes(value.toLowerCase())
-      );
-    },
   },
-  {
-    id: "expiry_date",
-    header: "Expiry date",
-    cell: () => {
-      // Mock expiry date for now - you can replace this with real data
-      const mockDate = new Date();
-      mockDate.setDate(mockDate.getDate() + Math.floor(Math.random() * 30));
-      return (
-        <div className="text-sm">{mockDate.toLocaleDateString("fr-FR")}</div>
-      );
-    },
-  },
+
   {
     id: "status",
     header: "Status",
     cell: ({ row }) => {
       const ingredient = row.original;
       const status = getStockStatus(ingredient.quantities);
-      return <StockStatus variant={status} showLabel />;
-    },
-    filterFn: (row, id, value) => {
-      const ingredient = row.original;
-      if (!value || (Array.isArray(value) && value.length === 0)) return true;
-
-      const status = getStockStatus(ingredient.quantities);
-
-      // Handle array of values (multi-select)
-      if (Array.isArray(value)) {
-        return value.includes(status);
-      }
-
-      // Handle single value (legacy)
-      if (value === "all") return true;
-      return status === value;
+      return (
+        <div className="whitespace-nowrap">
+          <StockStatus variant={status} showLabel />
+        </div>
+      );
     },
   },
   {

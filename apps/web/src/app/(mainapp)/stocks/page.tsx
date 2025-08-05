@@ -1,22 +1,25 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useLayoutEffect, useRef } from "react";
+import { useDebounce } from "@uidotdev/usehooks";
 import { AlertTriangle, Search, MoreVertical, Plus } from "lucide-react";
 
 import { Card, CardContent } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { MultiSelect } from "@workspace/ui/components/multi-select";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
-import { useIngredients, getStockStatus } from "@/hooks/useIngredients";
+import { useIngredients, useCategories } from "@/hooks/useIngredients";
 import { DataTable } from "@/components/data-table/data-table";
 import { columns } from "@/components/data-table/columns";
-import type { ColumnFiltersState, OnChangeFn } from "@tanstack/react-table";
+
+// Plus besoin de FilterState - état découplé
 
 export default function StocksPage() {
   const {
@@ -30,158 +33,146 @@ export default function StocksPage() {
     loadMore,
   } = useIngredients();
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
-  const [statusFilter, setStatusFilter] = useState<string[]>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const { categories, fetchCategories } = useCategories();
 
-  // Options for the multi-selects
-  const categoryOptions = [
-    { label: "Meat", value: "Meat" },
-    { label: "Vegetables", value: "Vegetables" },
-    { label: "Dairy", value: "Dairy" },
-    { label: "Grains", value: "Grains" },
-  ];
+  // État local pour l'input de recherche (découplé du tableau)
+  const [searchInput, setSearchInput] = useState("");
+  const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
 
-  const statusOptions = [
-    { label: "In Stock", value: "in-stock" },
-    { label: "Low Stock", value: "low-stock" },
-    { label: "Out of Stock", value: "out-of-stock" },
-  ];
+  // Plus besoin de transition - l'input est découplé
 
-  // Debounced search
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  // Debounce SEULEMENT pour l'API, pas pour l'affichage
+  const debouncedSearchTerm = useDebounce(searchInput.trim(), 400);
+  const debouncedCategories = useDebounce(categoryFilters, 300);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-    }, 300);
+  const categoryOptions = useMemo(() => {
+    return categories.map((cat) => ({
+      label: cat.name,
+      value: cat.id.toString(),
+    }));
+  }, [categories]);
 
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
+  // Colonnes stables
+  const stableColumns = useMemo(() => columns, []);
 
-  // Initial load
-  useEffect(() => {
-    fetchIngredients().catch(console.error);
-  }, [fetchIngredients]);
-
-  // Handle search changes
-  useEffect(() => {
-    if (debouncedSearchTerm !== searchTerm) return; // Wait for debounce
-
-    const searchQuery = debouncedSearchTerm.trim();
-    fetchIngredients(searchQuery).catch(console.error);
-  }, [debouncedSearchTerm, searchTerm, fetchIngredients]);
-
-  // Update column filters when filters change and auto-load more data if needed
-  useEffect(() => {
-    const filters: ColumnFiltersState = [];
-
-    if (searchTerm.trim()) {
-      filters.push({ id: "name", value: searchTerm.trim() });
+  // Optimisation des données pour éviter les re-renders inutiles
+  const lastIngredientsRef = useRef<typeof ingredients>([]);
+  const filteredResults = useMemo(() => {
+    // Si la longueur est différente, on met à jour
+    if (ingredients.length !== lastIngredientsRef.current.length) {
+      lastIngredientsRef.current = ingredients;
+      return ingredients;
     }
 
-    if (categoryFilter.length > 0) {
-      filters.push({ id: "categories", value: categoryFilter });
+    // Si les IDs sont différents, on met à jour
+    const currentIds = ingredients.map((i) => i.id).join(",");
+    const lastIds = lastIngredientsRef.current.map((i) => i.id).join(",");
+    if (currentIds !== lastIds) {
+      lastIngredientsRef.current = ingredients;
+      return ingredients;
     }
 
-    if (statusFilter.length > 0) {
-      filters.push({ id: "status", value: statusFilter });
-    }
+    // Sinon, on garde l'ancienne référence pour éviter les re-renders
+    return lastIngredientsRef.current;
+  }, [ingredients]);
 
-    setColumnFilters(filters);
+  // Plus besoin de callback pour les filtres
 
-    // Auto-load more data when filters are applied to ensure we have enough results
-    if (
-      (categoryFilter.length > 0 || statusFilter.length > 0) &&
-      ingredients.length < 50 &&
-      hasMore &&
-      !loadingMore
-    ) {
-      console.log("Auto-loading more data for filtering...");
-      loadMore().catch(console.error);
-    }
-  }, [
-    searchTerm,
-    categoryFilter,
-    statusFilter,
-    ingredients.length,
-    hasMore,
-    loadingMore,
-    loadMore,
-  ]);
+  // État de chargement - seulement du hook
+  const isSearchLoading = searchLoading;
 
+  // Handlers découplés - pas de relation avec le tableau
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchInput(value); // Pas de startTransition - pas de re-render du tableau
+  }, []);
+
+  const handleCategoriesChange = useCallback((categories: string[]) => {
+    setCategoryFilters(categories); // Pas de startTransition - pas de re-render du tableau
+  }, []);
+
+  // Refs pour accéder aux valeurs actuelles sans causer de re-renders
+  const loadMoreRef = useRef(loadMore);
+  const hasMoreRef = useRef(hasMore);
+  const loadingMoreRef = useRef(loadingMore);
+  const isLoadingRef = useRef(false); // Protection contre les appels multiples
+
+  // Mettre à jour les refs
+  loadMoreRef.current = loadMore;
+  hasMoreRef.current = hasMore;
+  loadingMoreRef.current = loadingMore;
+
+  // Version stable de handleLoadMore avec protection
   const handleLoadMore = useCallback(() => {
-    loadMore().catch(console.error);
-  }, [loadMore]);
-
-  // Count filtered results
-  const filteredCount = useMemo(() => {
-    if (columnFilters.length === 0) return ingredients.length;
-
-    return ingredients.filter((ingredient) => {
-      return columnFilters.every((filter) => {
-        if (filter.id === "name") {
-          return ingredient.name
-            .toLowerCase()
-            .includes((filter.value as string).toLowerCase());
-        }
-        if (filter.id === "categories") {
-          const values = Array.isArray(filter.value)
-            ? (filter.value as string[])
-            : [filter.value as string];
-          return values.some((value) =>
-            ingredient.categories.some((category) =>
-              category.name.toLowerCase().includes(value.toLowerCase())
-            )
-          );
-        }
-        if (filter.id === "status") {
-          const status = getStockStatus(ingredient.quantities);
-          const values = Array.isArray(filter.value)
-            ? (filter.value as string[])
-            : [filter.value as string];
-          return values.includes(status);
-        }
-        return true;
-      });
-    }).length;
-  }, [ingredients, columnFilters]);
-
-  // Auto-load more data if we don't have enough filtered results
-  useEffect(() => {
-    const hasActiveFilters =
-      categoryFilter.length > 0 || statusFilter.length > 0;
-    if (
-      hasActiveFilters &&
-      filteredCount < 10 &&
-      hasMore &&
-      !loadingMore &&
-      !searchLoading
-    ) {
-      console.log(`Only ${filteredCount} filtered results, loading more...`);
-      setTimeout(() => {
-        loadMore().catch(console.error);
-      }, 500); // Small delay to avoid rapid loading
+    // Protection contre les appels multiples
+    if (isLoadingRef.current || loadingMoreRef.current || !hasMoreRef.current) {
+      return;
     }
-  }, [
-    filteredCount,
-    categoryFilter.length,
-    statusFilter.length,
-    hasMore,
+
+    isLoadingRef.current = true;
+    loadMoreRef
+      .current()
+      .catch(console.error)
+      .finally(() => {
+        // Délai réduit pour permettre l'infinite scroll
+        setTimeout(() => {
+          isLoadingRef.current = false;
+        }, 300);
+      });
+  }, []); // Pas de dépendances = fonction stable
+
+  const handleRegisterLost = useCallback(() => {}, []);
+
+  const handleAddToStock = useCallback(() => {}, []);
+
+  // Refs pour les fonctions stables
+  const fetchIngredientsRef = useRef(fetchIngredients);
+  const fetchCategoriesRef = useRef(fetchCategories);
+  const lastSearchRef = useRef<{ search: string; categoryId?: string }>({
+    search: "",
+  });
+
+  // Mettre à jour les refs
+  fetchIngredientsRef.current = fetchIngredients;
+  fetchCategoriesRef.current = fetchCategories;
+
+  // Chargement initial - une seule fois au montage
+  useLayoutEffect(() => {
+    fetchIngredientsRef.current().catch(console.error);
+    fetchCategoriesRef.current().catch(console.error);
+  }, []); // Pas de dépendances = une seule fois
+
+  // Recherche avec debounce - se déclenche toujours (même pour input vide)
+  useLayoutEffect(() => {
+    const categoryId =
+      debouncedCategories.length > 0 ? debouncedCategories[0] : undefined;
+
+    // Éviter les appels inutiles si les paramètres n'ont pas changé
+    const currentSearch = { search: debouncedSearchTerm, categoryId };
+    if (
+      lastSearchRef.current.search === currentSearch.search &&
+      lastSearchRef.current.categoryId === currentSearch.categoryId
+    ) {
+      return;
+    }
+
+    lastSearchRef.current = currentSearch;
+
+    // Appel API même si search est vide (pour réafficher le tableau normal)
+    fetchIngredientsRef
+      .current(debouncedSearchTerm || "", categoryId)
+      .catch(console.error);
+  }, [debouncedSearchTerm, debouncedCategories]);
+
+  // Props stables pour le DataTable - AUCUN lien avec l'input de recherche
+  const dataTableProps = {
+    columns: stableColumns,
+    data: filteredResults,
+    columnFilters: [], // Tableau vide constant
+    onColumnFiltersChange: () => {}, // Fonction vide
+    searchLoading: isSearchLoading,
     loadingMore,
-    searchLoading,
-    loadMore,
-  ]);
-
-  const handleRegisterLost = () => {
-    console.log("Register lost clicked");
-    // Implement register lost functionality
-  };
-
-  const handleAddToStock = () => {
-    console.log("Add to stock clicked");
-    // Implement add to stock functionality
+    hasMore,
+    onLoadMore: handleLoadMore,
   };
 
   if (error) {
@@ -206,6 +197,7 @@ export default function StocksPage() {
     );
   }
 
+  // Skeleton complet seulement pour le premier chargement
   if (initialLoading) {
     return (
       <div className="space-y-6">
@@ -230,23 +222,13 @@ export default function StocksPage() {
 
   return (
     <div className="space-y-6">
-      {/* Filters and Actions */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between space-x-2">
         <div className="flex items-center space-x-2">
           <MultiSelect
             options={categoryOptions}
-            onValueChange={setCategoryFilter}
-            defaultValue={categoryFilter}
+            onValueChange={handleCategoriesChange}
+            defaultValue={categoryFilters}
             placeholder="Select Categories"
-            variant="default"
-            className="w-auto"
-          />
-
-          <MultiSelect
-            options={statusOptions}
-            onValueChange={setStatusFilter}
-            defaultValue={statusFilter}
-            placeholder="Select Status"
             variant="default"
             className="w-auto"
           />
@@ -255,15 +237,14 @@ export default function StocksPage() {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search products..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={searchInput}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="pl-10 max-w-sm h-[48px]"
             />
           </div>
         </div>
 
         <div className="flex items-center space-x-2">
-          {/* Desktop buttons */}
           <div className="hidden lg:flex items-center space-x-2">
             <Button
               variant="khp-destructive"
@@ -277,21 +258,20 @@ export default function StocksPage() {
             </Button>
           </div>
 
-          {/* Mobile/Tablet dropdown */}
           <div className="lg:hidden">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon">
-                  <MoreVertical className="h-24 w-24" />
+                  <MoreVertical className="h-4 w-4" />
                   <span className="sr-only">More actions</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem
                   onClick={handleRegisterLost}
-                  className="bg-destructive text-khp-text-on-primary"
+                  className="text-destructive focus:text-destructive"
                 >
-                  <AlertTriangle className="mr-2 h-4 w-4 text-khp-text-on-primary" />
+                  <AlertTriangle className="mr-2 h-4 w-4" />
                   Register lost
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleAddToStock}>
@@ -304,19 +284,7 @@ export default function StocksPage() {
         </div>
       </div>
 
-      {/* Data Table */}
-      <DataTable
-        columns={columns}
-        data={ingredients}
-        columnFilters={columnFilters}
-        onColumnFiltersChange={
-          setColumnFilters as OnChangeFn<ColumnFiltersState>
-        }
-        searchLoading={searchLoading}
-        loadingMore={loadingMore}
-        hasMore={hasMore}
-        onLoadMore={handleLoadMore}
-      />
+      <DataTable {...dataTableProps} />
     </div>
   );
 }
