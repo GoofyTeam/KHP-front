@@ -7,20 +7,13 @@ import {
   SortingState,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
   getSortedRowModel,
   useReactTable,
   OnChangeFn,
 } from "@tanstack/react-table";
+import { useRouter } from "next/navigation";
+import { useDebounce } from "@uidotdev/usehooks";
 import { Skeleton } from "@workspace/ui/components/skeleton";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@workspace/ui/components/table";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -33,7 +26,7 @@ interface DataTableProps<TData, TValue> {
   onLoadMore?: () => void;
 }
 
-export function DataTable<TData, TValue>({
+function DataTableComponent<TData, TValue>({
   columns,
   data,
   columnFilters = [],
@@ -45,7 +38,15 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState({});
+  const [scrollInfo, setScrollInfo] = React.useState({
+    scrollTop: 0,
+    scrollHeight: 0,
+    clientHeight: 0,
+  });
   const tableRef = React.useRef<HTMLDivElement>(null);
+  const router = useRouter();
+
+  const debouncedScrollInfo = useDebounce(scrollInfo, 100);
 
   const table = useReactTable({
     data,
@@ -54,7 +55,7 @@ export function DataTable<TData, TValue>({
     onColumnFiltersChange,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
+    // Pas de getFilteredRowModel() - tout le filtrage se fait côté serveur
     onRowSelectionChange: setRowSelection,
     state: {
       sorting,
@@ -65,33 +66,12 @@ export function DataTable<TData, TValue>({
 
   const rows = table.getRowModel().rows;
 
-  // Infinite scroll logic with debounce
   React.useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-
     const handleScroll = () => {
-      // Clear previous timeout
-      clearTimeout(timeoutId);
+      if (!tableRef.current) return;
 
-      // Debounce the scroll handler
-      timeoutId = setTimeout(() => {
-        if (
-          !tableRef.current ||
-          !onLoadMore ||
-          !hasMore ||
-          loadingMore ||
-          searchLoading
-        )
-          return;
-
-        const { scrollTop, scrollHeight, clientHeight } = tableRef.current;
-        const threshold = 500; // Increased threshold to prevent too frequent calls
-
-        if (scrollTop + clientHeight >= scrollHeight - threshold) {
-          console.log("Triggering loadMore...");
-          onLoadMore();
-        }
-      }, 100); // 100ms debounce
+      const { scrollTop, scrollHeight, clientHeight } = tableRef.current;
+      setScrollInfo({ scrollTop, scrollHeight, clientHeight });
     };
 
     const tableElement = tableRef.current;
@@ -99,16 +79,33 @@ export function DataTable<TData, TValue>({
       tableElement.addEventListener("scroll", handleScroll);
       return () => {
         tableElement.removeEventListener("scroll", handleScroll);
-        clearTimeout(timeoutId);
       };
     }
-  }, [onLoadMore, hasMore, loadingMore, searchLoading]);
+  }, []);
+
+  React.useEffect(() => {
+    if (
+      !tableRef.current ||
+      !onLoadMore ||
+      !hasMore ||
+      loadingMore ||
+      searchLoading
+    )
+      return;
+
+    const { scrollTop, scrollHeight, clientHeight } = debouncedScrollInfo;
+    const threshold = 500;
+
+    if (scrollTop + clientHeight >= scrollHeight - threshold) {
+      onLoadMore();
+    }
+  }, [debouncedScrollInfo, onLoadMore, hasMore, loadingMore, searchLoading]);
 
   return (
     <div className="w-full space-y-4">
       <div
         ref={tableRef}
-        className="relative overflow-auto rounded-md border border-khp-primary max-h-[80vh]"
+        className="relative overflow-auto rounded-md border border-khp-primary max-h-[80vh] lg:max-h-[70vh] min-w-full"
       >
         {searchLoading && (
           <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/80 z-10 flex items-center justify-center">
@@ -120,7 +117,7 @@ export function DataTable<TData, TValue>({
             </div>
           </div>
         )}
-        <table className="w-full caption-bottom text-sm">
+        <table className="w-full caption-bottom text-sm min-w-[800px]">
           <thead className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/95 z-20 border-b border-khp-primary ">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr
@@ -131,7 +128,21 @@ export function DataTable<TData, TValue>({
                   return (
                     <th
                       key={header.id}
-                      className="h-12 px-4 text-left align-middle font-medium text-muted-foreground bg-background/95 backdrop-blur"
+                      className="h-12 px-4 text-left align-middle font-medium text-muted-foreground bg-background/95 backdrop-blur whitespace-nowrap"
+                      style={{
+                        minWidth:
+                          header.column.id === "name"
+                            ? "200px"
+                            : header.column.id === "categories"
+                              ? "150px"
+                              : header.column.id === "currentStock"
+                                ? "120px"
+                                : header.column.id === "status"
+                                  ? "120px"
+                                  : header.column.id === "actions"
+                                    ? "100px"
+                                    : "100px",
+                      }}
                     >
                       {header.isPlaceholder
                         ? null
@@ -148,22 +159,45 @@ export function DataTable<TData, TValue>({
           <tbody className="[&_tr:last-child]:border-0">
             {rows?.length ? (
               <>
-                {rows.map((row) => (
-                  <tr
-                    key={row.id}
-                    className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
-                    data-state={row.getIsSelected() && "selected"}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} className="p-4 align-middle">
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
+                {rows.map((row) => {
+                  const ingredient = row.original as { id: string };
+                  return (
+                    <tr
+                      key={row.id}
+                      className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted cursor-pointer"
+                      data-state={row.getIsSelected() && "selected"}
+                      onClick={() =>
+                        router.push(`/ingredient/${ingredient.id}`)
+                      }
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <td
+                          key={cell.id}
+                          className="p-4 align-middle whitespace-nowrap"
+                          style={{
+                            minWidth:
+                              cell.column.id === "name"
+                                ? "200px"
+                                : cell.column.id === "categories"
+                                  ? "150px"
+                                  : cell.column.id === "currentStock"
+                                    ? "120px"
+                                    : cell.column.id === "status"
+                                      ? "120px"
+                                      : cell.column.id === "actions"
+                                        ? "100px"
+                                        : "100px",
+                          }}
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })}
                 {loadingMore && (
                   <>
                     {Array.from({ length: 3 }).map((_, i) => (
@@ -171,8 +205,25 @@ export function DataTable<TData, TValue>({
                         key={`loading-${i}`}
                         className="border-b transition-colors"
                       >
-                        {columns.map((_, colIndex) => (
-                          <td key={colIndex} className="p-4 align-middle">
+                        {columns.map((col, colIndex) => (
+                          <td
+                            key={colIndex}
+                            className="p-4 align-middle whitespace-nowrap"
+                            style={{
+                              minWidth:
+                                colIndex === 0
+                                  ? "200px"
+                                  : colIndex === 1
+                                    ? "150px"
+                                    : colIndex === 2
+                                      ? "120px"
+                                      : colIndex === 3
+                                        ? "120px"
+                                        : colIndex === 4
+                                          ? "100px"
+                                          : "100px",
+                            }}
+                          >
                             <Skeleton className="h-12 w-full" />
                           </td>
                         ))}
@@ -185,7 +236,8 @@ export function DataTable<TData, TValue>({
               <tr className="border-b transition-colors">
                 <td
                   colSpan={columns.length}
-                  className="h-24 text-center p-4 align-middle"
+                  className="h-24 text-center p-4 align-middle whitespace-nowrap"
+                  style={{ minWidth: "800px" }}
                 >
                   No results.
                 </td>
@@ -194,15 +246,11 @@ export function DataTable<TData, TValue>({
           </tbody>
         </table>
       </div>
-
-      {rows?.length > 0 && (
-        <div className="flex items-center justify-center py-4">
-          <div className="text-sm text-muted-foreground">
-            Showing {rows.length} results
-            {!hasMore && " (all loaded)"}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
+
+// Mémorisation simple du DataTable - se base sur les références des props
+export const DataTable = React.memo(DataTableComponent) as <TData, TValue>(
+  props: DataTableProps<TData, TValue>
+) => React.ReactElement;

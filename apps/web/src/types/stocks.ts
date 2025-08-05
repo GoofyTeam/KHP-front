@@ -41,6 +41,10 @@ export interface IngredientsData {
   paginatorInfo: PaginatorInfo;
 }
 
+export interface CategoriesData {
+  data: Category[];
+}
+
 export interface GraphQLError {
   message: string;
   extensions?: Record<string, unknown>;
@@ -53,7 +57,8 @@ export interface GraphQLError {
 
 export interface GraphQLResponse {
   data?: {
-    ingredients: IngredientsData;
+    ingredients?: IngredientsData;
+    categories?: CategoriesData;
   };
   errors?: GraphQLError[];
 }
@@ -70,4 +75,4 @@ export interface StockSummary {
   outOfStock: number;
 }
 
-export type StockStatus = "in-stock" | "low-stock" | "out-of-stock"; 
+export type StockStatus = "in-stock" | "low-stock" | "out-of-stock";
