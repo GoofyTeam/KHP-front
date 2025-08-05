@@ -60,9 +60,6 @@ export const Route = createFileRoute("/_protected/handle-item")({
         variables
       );
 
-      console.log("Item result:", result);
-      console.log("Available locations:", availableLocations);
-      console.log("Categories:", categories);
 
       return {
         mode,
