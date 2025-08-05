@@ -5,6 +5,14 @@ import {
   GetLocations,
   GetLocationsQuery,
 } from "../../graphql/getLocations.gql";
+import {
+  GetItemResult,
+  GetItemResultQuery,
+} from "../../graphql/getItemResult.gql";
+import {
+  GetCategories,
+  GetCategoriesQuery,
+} from "../../graphql/getCategories.gql";
 
 type handleItemSearch = {
   mode: "scan" | "manual" | "db" | "update";
@@ -31,39 +39,35 @@ export const Route = createFileRoute("/_protected/handle-item")({
     }
   },
   loader: async ({ deps: { mode, type, barcode } }) => {
-    const data = await graphqlRequest<GetLocationsQuery>(GetLocations);
-    const availableLocations = data.locations.data || [];
+    const locationQuery = await graphqlRequest<GetLocationsQuery>(GetLocations);
+    const availableLocations = locationQuery.locations.data || [];
+    const categoriesQuery =
+      await graphqlRequest<GetCategoriesQuery>(GetCategories);
+    const categories = categoriesQuery.categories.data || [];
 
     if (mode === "scan") {
-      // TODO: Handle fetch the backend with the barcode
-      const res = await fetch(
-        `https://world.openfoodfacts.net/api/v3/product/${barcode}?product_type=all&cc=us&lc=us&fields=image_url%2Cimage_small_url%2Cproduct_name%2Cgeneric_name%2Ccategories%2Cquantity%2Cbrands%2Cpackaging%2Cingredients_text%2Cnutriments%2Cnutrient_levels%2Clabels%2Cadditives_tags%2Callergens_tags%2Ctraces_tags%2Cemb_codes_tags%2Clinks`
+      if (!barcode) {
+        //Redirect to scan with error
+        throw new Error("Barcode is required for scan mode");
+      }
+      const variables = {
+        barcode,
+        page: 1,
+      };
+
+      const result = await graphqlRequest<GetItemResultQuery>(
+        GetItemResult,
+        variables
       );
 
-      if (!res.ok) {
-        throw new Error("Failed to fetch product data");
-      }
-
-      const data = await res.json();
-
-      if (!data.product) {
-        throw new Error("Product not found");
-      }
-
-      if (data.product.categories) {
-        data.product.categories = data.product.categories
-          .split(",")
-          .map((category: string) => category.trim());
-      } else {
-        data.product.categories = [];
-      }
 
       return {
         mode,
         type,
         barcode,
-        product: data.product || null,
+        product: result.search,
         availableLocations,
+        categories,
       };
     } else if (mode === "update") {
       // Handle fetching by product ID for update
