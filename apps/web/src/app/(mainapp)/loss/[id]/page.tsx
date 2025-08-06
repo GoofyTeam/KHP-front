@@ -105,23 +105,24 @@ export default async function LossPage({ params }: LossPageProps) {
   return (
     <div className="w-full flex flex-col lg:flex-row gap-8 p-4 lg:p-8">
       {/* Colonne 1 */}
-      <div className="flex flex-col gap-4 justify-center items-center w-full lg:w-1/2">
+      <div className="flex flex-col gap-8 justify-center items-center w-full lg:w-1/2">
         {/* Product Title */}
-        <div className="space-y-2 w-full lg:w-3/4 max-w-md">
-          <h1 className="text-2xl lg:text-4xl font-bold text-khp-text-primary leading-tight">
+        <div className="text-center space-y-4 w-full lg:w-3/4 max-w-md">
+          <h1 className="text-3xl lg:text-5xl font-bold text-khp-text-primary leading-tight">
             {ingredient.name}
           </h1>
-          <div className="flex items-center gap-2">
-            <CategoryBadge categories={ingredient.categories} />
-          </div>
+          <CategoryBadge categories={ingredient.categories} />
         </div>
 
+        {/* Product Image */}
         <div className="w-full lg:w-3/4 max-w-md">
-          <img
-            src={ingredient.image_url}
-            alt={ingredient.name}
-            className="w-full h-full max-h-128"
-          />
+          <div className="aspect-square rounded-xl overflow-hidden bg-khp-background-secondary">
+            <img
+              src={ingredient.image_url}
+              alt={ingredient.name}
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+            />
+          </div>
         </div>
       </div>
 
