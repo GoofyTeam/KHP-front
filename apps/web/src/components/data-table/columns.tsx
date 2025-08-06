@@ -2,7 +2,6 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal, Package, Trash2 } from "lucide-react";
-import Link from "next/link";
 import { useMemo } from "react";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -122,13 +121,8 @@ export function useColumns(
 
           if (isRegisterLostMode) {
             return (
-              <div onClick={(e) => e.stopPropagation()}>
-                <Button variant="destructive" size="icon" asChild>
-                  <Link href={`/loss/${ingredient.id}`}>
-                    <span className="sr-only">Register as lost</span>
-                    <Trash2 className="h-4 w-4" />
-                  </Link>
-                </Button>
+              <div className="flex items-center justify-center">
+                <Trash2 className="h-4 w-4 text-destructive" />
               </div>
             );
           }

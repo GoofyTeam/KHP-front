@@ -278,7 +278,7 @@ export default function StocksPage() {
         </div>
       </div>
 
-      <DataTable columns={columns} {...dataTableProps} />
+      <DataTable columns={columns} {...dataTableProps} isRegisterLostMode={isRegisterLostMode} />
     </div>
   );
 }
