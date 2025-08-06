@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo, useLayoutEffect, useRef } from "react";
 import { useDebounce } from "@uidotdev/usehooks";
-import { AlertTriangle, Search, MoreVertical, Plus } from "lucide-react";
+import { Search, MoreVertical, Plus, AlertTriangle } from "lucide-react";
 
 import { Card, CardContent } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
@@ -17,7 +17,7 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import { useIngredients, useCategories } from "@/hooks/useIngredients";
 import { DataTable } from "@/components/data-table/data-table";
-import { columns } from "@/components/data-table/columns";
+import { useColumns } from "@/components/data-table/columns";
 
 // Plus besoin de FilterState - état découplé
 
@@ -35,13 +35,16 @@ export default function StocksPage() {
 
   const { categories, fetchCategories } = useCategories();
 
+  // État local optimisé pour le mode register lost
+  const [isRegisterLostMode, setIsRegisterLostMode] = useState(false);
+
+  // Colonnes memoized pour éviter les re-renders inutiles
+  const columns = useColumns(isRegisterLostMode);
+
   // État local pour l'input de recherche (découplé du tableau)
   const [searchInput, setSearchInput] = useState("");
   const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
 
-  // Plus besoin de transition - l'input est découplé
-
-  // Debounce SEULEMENT pour l'API, pas pour l'affichage
   const debouncedSearchTerm = useDebounce(searchInput.trim(), 400);
   const debouncedCategories = useDebounce(categoryFilters, 300);
 
@@ -51,9 +54,6 @@ export default function StocksPage() {
       value: cat.id.toString(),
     }));
   }, [categories]);
-
-  // Colonnes stables
-  const stableColumns = useMemo(() => columns, []);
 
   // Optimisation des données pour éviter les re-renders inutiles
   const lastIngredientsRef = useRef<typeof ingredients>([]);
@@ -120,9 +120,20 @@ export default function StocksPage() {
       });
   }, []); // Pas de dépendances = fonction stable
 
-  const handleRegisterLost = useCallback(() => {}, []);
+  // Handler pour activer le mode "register lost"
+  const handleRegisterLost = useCallback(() => {
+    setIsRegisterLostMode(true);
+  }, [setIsRegisterLostMode]);
 
-  const handleAddToStock = useCallback(() => {}, []);
+  // Handler pour annuler le mode "register lost"
+  const handleCancelRegisterLost = useCallback(() => {
+    setIsRegisterLostMode(false);
+  }, [setIsRegisterLostMode]);
+
+  const handleAddToStock = useCallback(() => {
+    // TODO: Logique d'ajout au stock
+    console.log("Adding to stock...");
+  }, []);
 
   // Refs pour les fonctions stables
   const fetchIngredientsRef = useRef(fetchIngredients);
@@ -165,7 +176,6 @@ export default function StocksPage() {
 
   // Props stables pour le DataTable - AUCUN lien avec l'input de recherche
   const dataTableProps = {
-    columns: stableColumns,
     data: filteredResults,
     columnFilters: [], // Tableau vide constant
     onColumnFiltersChange: () => {}, // Fonction vide
@@ -246,13 +256,23 @@ export default function StocksPage() {
 
         <div className="flex items-center space-x-2">
           <div className="hidden lg:flex items-center space-x-2">
-            <Button
-              variant="khp-destructive"
-              size="lg"
-              onClick={handleRegisterLost}
-            >
-              Register lost
-            </Button>
+            {isRegisterLostMode ? (
+              <Button
+                variant="outline"
+                onClick={handleCancelRegisterLost}
+                className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+              >
+                Cancel
+              </Button>
+            ) : (
+              <Button
+                variant="khp-destructive"
+                size="lg"
+                onClick={handleRegisterLost}
+              >
+                Register lost
+              </Button>
+            )}
             <Button variant="khp-default" size="lg" onClick={handleAddToStock}>
               Add to stock
             </Button>
@@ -267,13 +287,22 @@ export default function StocksPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem
-                  onClick={handleRegisterLost}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <AlertTriangle className="mr-2 h-4 w-4" />
-                  Register lost
-                </DropdownMenuItem>
+                {isRegisterLostMode ? (
+                  <DropdownMenuItem
+                    onClick={handleCancelRegisterLost}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    Cancel
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem
+                    onClick={handleRegisterLost}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <AlertTriangle className="mr-2 h-4 w-4" />
+                    Register lost
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={handleAddToStock}>
                   <Plus className="mr-2 h-4 w-4" />
                   Add to stock
@@ -284,7 +313,7 @@ export default function StocksPage() {
         </div>
       </div>
 
-      <DataTable {...dataTableProps} />
+      <DataTable columns={columns} {...dataTableProps} />
     </div>
   );
 }
