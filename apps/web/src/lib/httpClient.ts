@@ -1,7 +1,9 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 if (!API_URL) {
-  throw new Error("Environment variable NEXT_PUBLIC_API_URL is not defined. Please set it in your environment.");
+  throw new Error(
+    "Environment variable NEXT_PUBLIC_API_URL is not defined. Please set it in your environment."
+  );
 }
 const isBrowser = typeof window !== "undefined";
 
@@ -53,7 +55,7 @@ class HttpClient {
 
       if (!res.ok) {
         throw new Error(
-          `Failed to fetch CSRF token: ${res.status} ${res.statusText}`,
+          `Failed to fetch CSRF token: ${res.status} ${res.statusText}`
         );
       }
 
@@ -101,7 +103,7 @@ class HttpClient {
     method: "GET" | "POST" | "PUT" | "DELETE",
     endpoint: string,
     data?: D,
-    options: RequestInit = {},
+    options: RequestInit = {}
   ): Promise<T> {
     let xsrfToken: string | null = null;
 
@@ -153,7 +155,7 @@ class HttpClient {
   async post<T, D extends RequestData = RequestData>(
     endpoint: string,
     data?: D,
-    options?: RequestInit,
+    options?: RequestInit
   ): Promise<T> {
     return this.request<T, D>("POST", endpoint, data, options);
   }
@@ -161,13 +163,17 @@ class HttpClient {
   async put<T, D extends RequestData = RequestData>(
     endpoint: string,
     data?: D,
-    options?: RequestInit,
+    options?: RequestInit
   ): Promise<T> {
     return this.request<T, D>("PUT", endpoint, data, options);
   }
 
   async delete<T>(endpoint: string, options?: RequestInit): Promise<T> {
     return this.request<T>("DELETE", endpoint, undefined, options);
+  }
+
+  async graphql<T>(query: string, variables?: Record<string, any>): Promise<T> {
+    return this.post<T>("/graphql", { query, variables });
   }
 }
 
