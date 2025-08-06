@@ -1,5 +1,5 @@
-query getCompanyProducts {
-  ingredients {
+query getCompanyProducts($searchQuery: String, $page: Int!) {
+  ingredients(search: $searchQuery, page: $page) {
     data {
       id
       name
@@ -12,6 +12,9 @@ query getCompanyProducts {
           name
         }
       }
+    }
+    paginatorInfo {
+      hasMorePages
     }
   }
 }
