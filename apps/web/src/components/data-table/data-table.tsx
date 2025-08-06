@@ -24,6 +24,7 @@ interface DataTableProps<TData, TValue> {
   initialLoading?: boolean;
   loadingMore?: boolean;
   hasMore?: boolean;
+  isRegisterLostMode?: boolean;
   onLoadMore?: () => void;
 }
 
@@ -36,6 +37,7 @@ function DataTableComponent<TData, TValue>({
   initialLoading = false,
   loadingMore = false,
   hasMore = false,
+  isRegisterLostMode = false,
   onLoadMore,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -168,7 +170,11 @@ function DataTableComponent<TData, TValue>({
                       className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted cursor-pointer"
                       data-state={row.getIsSelected() && "selected"}
                       onClick={() =>
-                        router.push(`/ingredient/${ingredient.id}`)
+                        router.push(
+                          isRegisterLostMode
+                            ? `/loss/${ingredient.id}`
+                            : `/ingredient/${ingredient.id}`
+                        )
                       }
                     >
                       {row.getVisibleCells().map((cell) => (
