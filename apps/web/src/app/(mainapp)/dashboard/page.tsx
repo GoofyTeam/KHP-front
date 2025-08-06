@@ -1,7 +1,7 @@
 // import { QuickAccessButton } from "@workspace/ui/components/quick-access-button";
 // import Link from "next/link";
 import { InventoryTable } from "@/components/InventoryTable";
-import { AddStockTable } from "@/components/AddStockTable";
+// import { AddStockTable } from "@/components/AddStockTable";
 // import { StockTable } from "@/components/AddStockTable2";
 
 export default function Dashboard() {

@@ -101,10 +101,9 @@ export function AddStockTable() {
 
   const [isEditMode, setIsEditMode] = React.useState(false);
   const [fixedKeyboardHeight, setFixedKeyboardHeight] = React.useState(0);
-  const [initialScrollTop, setInitialScrollTop] = React.useState(0);
   const [isKeyboardOpen, setIsKeyboardOpen] = React.useState(false);
-  const [viewportHeight, setViewportHeight] = React.useState(0);
-  const [scrollOffset, setScrollOffset] = React.useState(0);
+  const [, setViewportHeight] = React.useState(0);
+  const [, setScrollOffset] = React.useState(0);
 
   const [rows, setRows] = React.useState<RowData[]>([]);
   const [draft, setDraft] = React.useState<RowData>({
@@ -450,13 +449,6 @@ export function AddStockTable() {
           }, 100);
         }
       }, 100);
-    }
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    const target = e.target as Element;
-    if (target.closest('[data-select-options="true"]')) {
-      return;
     }
   };
 
@@ -1076,7 +1068,6 @@ export function AddStockTable() {
             position: "fixed",
             height: (() => {
               if (isKeyboardOpen && window.visualViewport) {
-                const viewportTop = window.visualViewport.offsetTop || 0;
                 const barHeight = 80;
                 const availableHeight =
                   window.visualViewport.height - barHeight;
