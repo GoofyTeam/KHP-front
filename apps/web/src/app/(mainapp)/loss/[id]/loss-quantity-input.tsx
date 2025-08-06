@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   InputOTP,
   InputOTPGroup,
@@ -10,11 +10,13 @@ import {
 interface LossQuantityInputProps {
   totalStock: number;
   unit: string;
+  onValidationChange?: (isValid: boolean, lossQuantity: number) => void;
 }
 
 export function LossQuantityInput({
   totalStock,
   unit,
+  onValidationChange,
 }: LossQuantityInputProps) {
   const [lossValue, setLossValue] = useState("");
   const getLossQuantity = () => {
@@ -30,6 +32,13 @@ export function LossQuantityInput({
 
   const lossQuantity = getLossQuantity();
   const remainingStock = Math.max(0, totalStock - lossQuantity);
+  const isValid = lossQuantity <= totalStock && lossQuantity > 0;
+
+  useEffect(() => {
+    if (onValidationChange) {
+      onValidationChange(isValid, lossQuantity);
+    }
+  }, [isValid, lossQuantity, onValidationChange]);
 
   return (
     <>
@@ -116,16 +125,6 @@ export function LossQuantityInput({
           </span>
         </div>
       </div>
-
-      {lossQuantity > totalStock && (
-        <p className="text-xs text-khp-error mt-2">
-          ⚠️ Loss quantity exceeds available stock!
-        </p>
-      )}
-
-      <p className="text-xs text-khp-text-secondary mt-2">
-        Enter the quantity lost (max: {totalStock} {unit})
-      </p>
     </>
   );
 }
