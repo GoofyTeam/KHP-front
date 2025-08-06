@@ -55,7 +55,6 @@ function DataTableComponent<TData, TValue>({
     onColumnFiltersChange,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    // Pas de getFilteredRowModel() - tout le filtrage se fait côté serveur
     onRowSelectionChange: setRowSelection,
     state: {
       sorting,
