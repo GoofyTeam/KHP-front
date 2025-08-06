@@ -21,7 +21,7 @@ export const Route = createFileRoute("/_protected/inventory")({
       page: pageIndex,
     };
     if (search_terms?.trim()) {
-      variables.name = search_terms.trim();
+      variables.searchQuery = search_terms.trim();
     }
 
     const result = await graphqlRequest<GetCompanyProductsQuery>(

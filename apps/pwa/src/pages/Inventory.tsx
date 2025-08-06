@@ -34,7 +34,7 @@ function InventoryPage() {
     navigate({
       search: {
         search_terms: debouncedTerm || undefined,
-        pageIndex: 1, // reset pagination à chaque nouvelle recherche
+        pageIndex: 1,
       },
     });
   }, [debouncedTerm, navigate]);
@@ -55,7 +55,7 @@ function InventoryPage() {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          observer.disconnect(); // déconnecte pour éviter la boucle
+          observer.disconnect();
           navigate({
             search: {
               search_terms: debouncedTerm || undefined,
@@ -89,8 +89,11 @@ function InventoryPage() {
         </Button>
       </div>
 
-      {allItems.map((ingredient) => (
-        <InventoryRow key={ingredient.id} productDetails={ingredient} />
+      {allItems.map((ingredient, index) => (
+        <InventoryRow
+          key={index + ingredient.id + "_" + ingredient.name}
+          productDetails={ingredient}
+        />
       ))}
       {pageInfo.hasMorePages ? (
         <div ref={sentinelRef} className="h-8" />
