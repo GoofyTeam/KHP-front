@@ -1,109 +1,175 @@
-import * as React from "react"
+"use client";
 
-import { cn } from "@workspace/ui/lib/utils"
+import * as React from "react";
+import { cn } from "@workspace/ui/lib/utils";
 
-const Table = React.forwardRef<
-  HTMLTableElement,
-  React.HTMLAttributes<HTMLTableElement>
->(({ className, ...props }, ref) => (
-  <div className="relative w-full overflow-auto">
-    <table
-      ref={ref}
-      className={cn("w-full caption-bottom text-sm", className)}
+export type TableVariant = "default" | "inventory" | "add-stock";
+
+const variantStyles: Record<
+  TableVariant,
+  {
+    wrapper: string;
+    table: string;
+    header: string;
+    body: string;
+    footer: string;
+    row: string;
+    head: string;
+    cell: string;
+    caption: string;
+  }
+> = {
+  default: {
+    wrapper: "relative w-full overflow-x-auto",
+    table: "w-full caption-bottom text-sm",
+    header: "[&_tr]:border-b border-blue-500",
+    body: "[&_tr:last-child]:border-0",
+    footer: "bg-muted/50 border-t font-medium [&>tr]:last:border-b-0",
+    row: "border-b border-gray-200 hover:bg-muted/50 data-[state=selected]:bg-muted transition-colors",
+    head: "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+    cell: "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+    caption: "text-muted-foreground mt-4 text-sm",
+  },
+  inventory: {
+    wrapper:
+      "relative w-full overflow-x-auto rounded-lg border-2 border-khp-primary/30",
+    table:
+      "w-full caption-bottom text-sm text-khp-text-secondary border-collapse",
+    header:
+      "bg-white border-b border-khp-primary/30 [&_tr]:border-none text-khp-text-primary",
+    body: "[&_tr:last-child]:border-0",
+    footer: "bg-muted/50 border-t font-medium [&>tr]:last:border-b-0",
+    row: "border-b border-text-secondary h-16",
+    head: "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+    cell: "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+    caption: "text-muted-foreground mt-4 text-sm",
+  },
+  "add-stock": {
+    wrapper:
+      "relative w-full overflow-x-auto rounded-lg border-2 border-khp-primary/30",
+    table:
+      "w-full caption-bottom text-sm text-khp-text-secondary border-collapse",
+    header:
+      "bg-white border-b border-khp-primary/30 [&_tr]:border-none text-khp-text-primary",
+    body: "[&_tr:last-child]:border-0",
+    footer: "bg-muted/50 border-t font-medium [&>tr]:last:border-b-0",
+    row: "border-b border-text-secondary h-16",
+    head: "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+    cell: "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+    caption: "text-muted-foreground mt-4 text-sm",
+  },
+};
+
+const TableVariantContext = React.createContext<TableVariant>("default");
+const useTableVariant = () => React.useContext(TableVariantContext);
+
+interface TableProps extends React.ComponentProps<"table"> {
+  variant?: TableVariant;
+}
+function Table({
+  variant = "default",
+  className,
+  children,
+  ...props
+}: TableProps) {
+  const styles = variantStyles[variant];
+  return (
+    <TableVariantContext.Provider value={variant}>
+      <div data-slot="table-container" className={cn(styles.wrapper)}>
+        <table
+          data-slot="table"
+          className={cn(styles.table, className)}
+          {...props}
+        >
+          {children}
+        </table>
+      </div>
+    </TableVariantContext.Provider>
+  );
+}
+
+function TableHeader({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<"thead">) {
+  const styles = variantStyles[useTableVariant()];
+  return (
+    <thead
+      data-slot="table-header"
+      className={cn(styles.header, className)}
+      {...props}
+    >
+      <tr>{children}</tr>
+    </thead>
+  );
+}
+
+function TableBody(props: React.ComponentProps<"tbody">) {
+  const styles = variantStyles[useTableVariant()];
+  return (
+    <tbody
+      data-slot="table-body"
+      className={cn(styles.body, props.className)}
       {...props}
     />
-  </div>
-))
-Table.displayName = "Table"
+  );
+}
 
-const TableHeader = React.forwardRef<
-  HTMLTableSectionElement,
-  React.HTMLAttributes<HTMLTableSectionElement>
->(({ className, ...props }, ref) => (
-  <thead ref={ref} className={cn("[&_tr]:border-b", className)} {...props} />
-))
-TableHeader.displayName = "TableHeader"
+function TableFooter(props: React.ComponentProps<"tfoot">) {
+  const styles = variantStyles[useTableVariant()];
+  return (
+    <tfoot
+      data-slot="table-footer"
+      className={cn(styles.footer, props.className)}
+      {...props}
+    />
+  );
+}
 
-const TableBody = React.forwardRef<
-  HTMLTableSectionElement,
-  React.HTMLAttributes<HTMLTableSectionElement>
->(({ className, ...props }, ref) => (
-  <tbody
-    ref={ref}
-    className={cn("[&_tr:last-child]:border-0", className)}
-    {...props}
-  />
-))
-TableBody.displayName = "TableBody"
+function TableRow(props: React.ComponentProps<"tr">) {
+  const styles = variantStyles[useTableVariant()];
+  return (
+    <tr
+      data-slot="table-row"
+      className={cn(styles.row, props.className)}
+      {...props}
+    />
+  );
+}
 
-const TableFooter = React.forwardRef<
-  HTMLTableSectionElement,
-  React.HTMLAttributes<HTMLTableSectionElement>
->(({ className, ...props }, ref) => (
-  <tfoot
-    ref={ref}
-    className={cn(
-      "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0",
-      className
-    )}
-    {...props}
-  />
-))
-TableFooter.displayName = "TableFooter"
+function TableHead(props: React.ComponentProps<"th">) {
+  const styles = variantStyles[useTableVariant()];
+  return (
+    <th
+      data-slot="table-head"
+      className={cn(styles.head, props.className)}
+      {...props}
+    />
+  );
+}
 
-const TableRow = React.forwardRef<
-  HTMLTableRowElement,
-  React.HTMLAttributes<HTMLTableRowElement>
->(({ className, ...props }, ref) => (
-  <tr
-    ref={ref}
-    className={cn(
-      "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
-      className
-    )}
-    {...props}
-  />
-))
-TableRow.displayName = "TableRow"
+function TableCell(props: React.ComponentProps<"td">) {
+  const styles = variantStyles[useTableVariant()];
+  return (
+    <td
+      data-slot="table-cell"
+      className={cn(styles.cell, props.className)}
+      {...props}
+    />
+  );
+}
 
-const TableHead = React.forwardRef<
-  HTMLTableCellElement,
-  React.ThHTMLAttributes<HTMLTableCellElement>
->(({ className, ...props }, ref) => (
-  <th
-    ref={ref}
-    className={cn(
-      "h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0",
-      className
-    )}
-    {...props}
-  />
-))
-TableHead.displayName = "TableHead"
-
-const TableCell = React.forwardRef<
-  HTMLTableCellElement,
-  React.TdHTMLAttributes<HTMLTableCellElement>
->(({ className, ...props }, ref) => (
-  <td
-    ref={ref}
-    className={cn("p-4 align-middle [&:has([role=checkbox])]:pr-0", className)}
-    {...props}
-  />
-))
-TableCell.displayName = "TableCell"
-
-const TableCaption = React.forwardRef<
-  HTMLTableCaptionElement,
-  React.HTMLAttributes<HTMLTableCaptionElement>
->(({ className, ...props }, ref) => (
-  <caption
-    ref={ref}
-    className={cn("mt-4 text-sm text-muted-foreground", className)}
-    {...props}
-  />
-))
-TableCaption.displayName = "TableCaption"
+function TableCaption(props: React.ComponentProps<"caption">) {
+  const styles = variantStyles[useTableVariant()];
+  return (
+    <caption
+      data-slot="table-caption"
+      className={cn(styles.caption, props.className)}
+      {...props}
+    />
+  );
+}
 
 export {
   Table,
@@ -114,4 +180,4 @@ export {
   TableRow,
   TableCell,
   TableCaption,
-} 
+};
