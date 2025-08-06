@@ -30,12 +30,12 @@ export default function StocksLayout({
 
           <div className="hidden md:block border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="flex h-14 items-center px-6">
-              <h1 className="text-xl font-semibold">Gestion des Stocks</h1>
+              <h1 className="text-xl font-semibold">Stock Management</h1>
             </div>
           </div>
 
           <div className="flex flex-1 flex-col">
-            <div className="flex-1 space-y-6 p-6">{children}</div>
+            <div className="flex-1 space-y-6 p-4 md:p-6">{children}</div>
           </div>
         </SidebarInset>
       </SidebarProvider>
