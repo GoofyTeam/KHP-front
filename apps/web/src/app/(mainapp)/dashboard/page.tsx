@@ -11,8 +11,8 @@ export default function Dashboard() {
       {/* <QuickAccessButton asChild title="Quick Access" icon="plus" color="green">
         <Link href="/stock" />
       </QuickAccessButton> */}
-      {/* <InventoryTable /> */}
-      <AddStockTable />
+      <InventoryTable />
+      {/* <AddStockTable /> */}
       {/* <StockTable /> */}
     </div>
   );

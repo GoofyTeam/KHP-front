@@ -39,7 +39,7 @@ const variantStyles: Record<
       "bg-white border-b border-khp-primary/30 [&_tr]:border-none text-khp-text-primary",
     body: "[&_tr:last-child]:border-0",
     footer: "bg-muted/50 border-t font-medium [&>tr]:last:border-b-0",
-    row: "border-b border-text-secondary h-16",
+    row: "border-b border-khp-text-secondary/30 h-16",
     head: "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
     cell: "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
     caption: "text-muted-foreground mt-4 text-sm",
@@ -53,7 +53,7 @@ const variantStyles: Record<
       "bg-white border-b border-khp-primary/30 [&_tr]:border-none text-khp-text-primary",
     body: "[&_tr:last-child]:border-0",
     footer: "bg-muted/50 border-t font-medium [&>tr]:last:border-b-0",
-    row: "border-b border-text-secondary h-16",
+    row: "border-b border-khp-text-secondary/30 h-16",
     head: "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
     cell: "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
     caption: "text-muted-foreground mt-4 text-sm",
@@ -100,7 +100,7 @@ function TableHeader({
       className={cn(styles.header, className)}
       {...props}
     >
-      <tr>{children}</tr>
+      {children}
     </thead>
   );
 }
