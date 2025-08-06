@@ -33,19 +33,19 @@ export function useColumns(
                 <img
                   src={ingredient.image_url}
                   alt={ingredient.name}
-                  className="h-10 w-10 rounded-md object-cover"
+                  className="h-10 w-10 rounded-md object-cover flex-shrink-0"
                   onError={(e) => {
                     e.currentTarget.style.display = "none";
                   }}
                 />
               ) : (
-                <div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center">
+                <div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
                   <Package className="h-5 w-5 text-muted-foreground" />
                 </div>
               )}
               <div className="min-w-0 flex-1">
                 <div
-                  className="font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[180px]"
+                  className="font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[160px]"
                   title={ingredient.name}
                 >
                   {ingredient.name}
@@ -122,17 +122,14 @@ export function useColumns(
 
           if (isRegisterLostMode) {
             return (
-              <Button
-                variant="destructive"
-                size="icon"
-                asChild
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Link href={`/loss/${ingredient.id}`}>
-                  <span className="sr-only">Register as lost</span>
-                  <Trash2 className="h-4 w-4" />
-                </Link>
-              </Button>
+              <div onClick={(e) => e.stopPropagation()}>
+                <Button variant="destructive" size="icon" asChild>
+                  <Link href={`/loss/${ingredient.id}`}>
+                    <span className="sr-only">Register as lost</span>
+                    <Trash2 className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
             );
           }
 

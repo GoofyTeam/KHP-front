@@ -21,6 +21,7 @@ interface DataTableProps<TData, TValue> {
   columnFilters?: ColumnFiltersState;
   onColumnFiltersChange?: OnChangeFn<ColumnFiltersState>;
   searchLoading?: boolean;
+  initialLoading?: boolean;
   loadingMore?: boolean;
   hasMore?: boolean;
   onLoadMore?: () => void;
@@ -32,6 +33,7 @@ function DataTableComponent<TData, TValue>({
   columnFilters = [],
   onColumnFiltersChange,
   searchLoading = false,
+  initialLoading = false,
   loadingMore = false,
   hasMore = false,
   onLoadMore,
@@ -104,7 +106,7 @@ function DataTableComponent<TData, TValue>({
     <div className="w-full space-y-4">
       <div
         ref={tableRef}
-        className="relative overflow-auto rounded-md border border-khp-primary max-h-[80vh] lg:max-h-[70vh] min-w-full"
+        className="relative overflow-auto rounded-md border border-khp-primary h-[600px] min-w-full"
       >
         {searchLoading && (
           <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/80 z-10 flex items-center justify-center">
@@ -117,7 +119,7 @@ function DataTableComponent<TData, TValue>({
           </div>
         )}
         <table className="w-full caption-bottom text-sm min-w-[800px]">
-          <thead className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/95 z-20 border-b border-khp-primary ">
+          <thead className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/95 z-20 border-b border-khp-primary">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr
                 key={headerGroup.id}
@@ -155,7 +157,7 @@ function DataTableComponent<TData, TValue>({
               </tr>
             ))}
           </thead>
-          <tbody className="[&_tr:last-child]:border-0">
+          <tbody>
             {rows?.length ? (
               <>
                 {rows.map((row) => {
@@ -231,11 +233,43 @@ function DataTableComponent<TData, TValue>({
                   </>
                 )}
               </>
+            ) : initialLoading ? (
+              <>
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <tr
+                    key={`initial-loading-${i}`}
+                    className="border-b transition-colors"
+                  >
+                    {columns.map((col, colIndex) => (
+                      <td
+                        key={colIndex}
+                        className="p-4 align-middle whitespace-nowrap"
+                        style={{
+                          minWidth:
+                            colIndex === 0
+                              ? "200px"
+                              : colIndex === 1
+                                ? "150px"
+                                : colIndex === 2
+                                  ? "120px"
+                                  : colIndex === 3
+                                    ? "120px"
+                                    : colIndex === 4
+                                      ? "100px"
+                                      : "100px",
+                        }}
+                      >
+                        <Skeleton className="h-12 w-full" />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </>
             ) : (
               <tr className="border-b transition-colors">
                 <td
                   colSpan={columns.length}
-                  className="h-24 text-center p-4 align-middle whitespace-nowrap"
+                  className="p-4 text-center align-middle whitespace-nowrap text-muted-foreground"
                   style={{ minWidth: "800px" }}
                 >
                   No results.
@@ -249,7 +283,6 @@ function DataTableComponent<TData, TValue>({
   );
 }
 
-// Mémorisation simple du DataTable - se base sur les références des props
 export const DataTable = React.memo(DataTableComponent) as <TData, TValue>(
   props: DataTableProps<TData, TValue>
 ) => React.ReactElement;
