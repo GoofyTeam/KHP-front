@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
-import { Trash2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -8,9 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
-import { Button } from "@workspace/ui/components/button";
 import { CategoryBadge } from "@workspace/ui/components/category-badge";
-import { LossQuantityInput } from "./loss-quantity-input";
+import { LossForm } from "./loss-form";
 import {
   Ingredient,
   GraphQLResponse,
@@ -189,22 +187,8 @@ export default async function LossPage({ params }: LossPageProps) {
             </div>
           </div>
 
-          {/* Loss Quantity Input */}
-          <div className="border-t border-khp-border">
-            <LossQuantityInput totalStock={totalStock} unit={ingredient.unit} />
-          </div>
-
-          {/* Add Loss Button */}
-          <div className="mt-8 pt-6 border-t border-khp-border">
-            <Button
-              variant="destructive"
-              size="xl"
-              className="w-full py-4 px-6 text-base font-semibold"
-            >
-              <Trash2 className="w-5 h-5 mr-3" />
-              Add Loss
-            </Button>
-          </div>
+          {/* Loss Form with validation */}
+          <LossForm ingredient={ingredient} totalStock={totalStock} />
         </div>
       </div>
     </div>
