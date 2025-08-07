@@ -1,7 +1,9 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 if (!API_URL) {
-  throw new Error("Environment variable NEXT_PUBLIC_API_URL is not defined. Please set it in your environment.");
+  throw new Error(
+    "Environment variable NEXT_PUBLIC_API_URL is not defined. Please set it in your environment."
+  );
 }
 const isBrowser = typeof window !== "undefined";
 
@@ -27,7 +29,7 @@ class HttpClient {
   /**
    * Get CSRF token from the backend if not already available.
    */
-  private async getCsrfToken(): Promise<string | null> {
+  public async getCsrfToken(): Promise<string | null> {
     if (!isBrowser) {
       console.warn("getCsrfToken can't be called on the server");
       return null;
@@ -53,7 +55,7 @@ class HttpClient {
 
       if (!res.ok) {
         throw new Error(
-          `Failed to fetch CSRF token: ${res.status} ${res.statusText}`,
+          `Failed to fetch CSRF token: ${res.status} ${res.statusText}`
         );
       }
 
@@ -74,7 +76,7 @@ class HttpClient {
   /**
    * Extract CSRF token from cookies
    */
-  private extractTokenFromCookie(): string | null {
+  public extractTokenFromCookie(): string | null {
     const match = document.cookie
       .split("; ")
       .find((row) => row.startsWith("XSRF-TOKEN="));
@@ -101,7 +103,7 @@ class HttpClient {
     method: "GET" | "POST" | "PUT" | "DELETE",
     endpoint: string,
     data?: D,
-    options: RequestInit = {},
+    options: RequestInit = {}
   ): Promise<T> {
     let xsrfToken: string | null = null;
 
@@ -153,7 +155,7 @@ class HttpClient {
   async post<T, D extends RequestData = RequestData>(
     endpoint: string,
     data?: D,
-    options?: RequestInit,
+    options?: RequestInit
   ): Promise<T> {
     return this.request<T, D>("POST", endpoint, data, options);
   }
@@ -161,7 +163,7 @@ class HttpClient {
   async put<T, D extends RequestData = RequestData>(
     endpoint: string,
     data?: D,
-    options?: RequestInit,
+    options?: RequestInit
   ): Promise<T> {
     return this.request<T, D>("PUT", endpoint, data, options);
   }
