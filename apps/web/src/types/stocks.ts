@@ -25,6 +25,7 @@ export interface Ingredient {
   categories: Category[];
   created_at?: string;
   updated_at?: string;
+  stockMovements?: StockMovement[];
 }
 
 export interface PaginatorInfo {
@@ -78,3 +79,15 @@ export interface StockSummary {
 }
 
 export type StockStatus = "in-stock" | "low-stock" | "out-of-stock";
+
+export interface StockMovement {
+  id?: string;
+  type: string; // e.g., "addition" | "withdrawal"
+  quantity_before: number;
+  quantity_after: number;
+  created_at?: string;
+  location?: {
+    id: string;
+    name?: string;
+  };
+}
