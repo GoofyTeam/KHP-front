@@ -1,38 +1,37 @@
-import { HttpLink } from "@apollo/client";
-import {
-  registerApolloClient,
-  ApolloClient,
-  InMemoryCache,
-} from "@apollo/client-integration-nextjs";
-import { headers } from "next/headers";
+import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
+import { registerApolloClient } from "@apollo/client-integration-nextjs";
+import type { DocumentNode } from "graphql";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 if (!API_URL) {
-  throw new Error("NEXT_PUBLIC_API_URL n’est pas défini.");
+  throw new Error("NEXT_PUBLIC_API_URL is not defined.");
 }
 
-const nextHeaders = await headers();
-const cookieHeader = nextHeaders.get("cookie") || "";
-
-export const { getClient, query, PreloadQuery } = registerApolloClient(() => {
+// Create Apollo Client for server-side rendering
+const { getClient, query } = registerApolloClient(() => {
   return new ApolloClient({
     cache: new InMemoryCache(),
     link: new HttpLink({
-      // this needs to be an absolute url, as relative urls cannot be used in SSR
       uri: `${API_URL}/graphql`,
-      credentials: "include", // include cookies for CSRF protection
-      headers: {
-        Accept: "application/json", // or any other value you want to specify
-        "Content-Type": "application/json", // ensure the content type is set correctly
-      },
-      fetch: (uri, options) =>
-        fetch(uri, {
+      credentials: "include",
+      // For server-side rendering, we need to handle cookies manually
+      fetch: async (uri, options) => {
+        const { headers } = await import("next/headers");
+        const headersList = await headers();
+        const cookieHeader = headersList.get("cookie") || "";
+
+        return fetch(uri, {
           ...options,
           headers: {
             ...options?.headers,
-            cookie: cookieHeader,
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            Cookie: cookieHeader,
           },
-        }),
+        });
+      },
     }),
   });
 });
+
+export { getClient, query };
