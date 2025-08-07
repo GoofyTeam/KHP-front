@@ -1,10 +1,6 @@
-import { HttpLink } from "@apollo/client";
-import {
-  registerApolloClient,
-  ApolloClient,
-  InMemoryCache,
-} from "@apollo/client-integration-nextjs";
-import { headers } from "next/headers";
+import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
+import { registerApolloClient } from "@apollo/client-integration-nextjs";
+import type { DocumentNode } from "graphql";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
   ? process.env.NEXT_PUBLIC_API_URL

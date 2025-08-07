@@ -581,6 +581,9 @@ type Query {
     """Options de tri des ingrédients"""
     orderBy: [OrderByClause!]
 
+    """Options de tri des ingrédients"""
+    orderBy: [OrderByClause!]
+
     """Limits number of fetched items."""
     first: Int! = 10
 
@@ -659,6 +662,9 @@ type Query {
 
     """Filtrer par une ou plusieurs catégories."""
     categoryIds: [ID!]
+
+    """Options de tri des préparations"""
+    orderBy: [OrderByClause!]
 
     """Options de tri des préparations"""
     orderBy: [OrderByClause!]

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
-import { headers } from "next/headers";
-import { getIngredient } from "../../../../graphql/getIngredient";
+import { query } from "@/lib/ApolloClient";
+import { GetIngredientDocument } from "@/graphql/generated/graphql";
 import type { Ingredient, IngredientQuantity } from "../../../../types/stocks";
 import Link from "next/link";
 import Image from "next/image";
@@ -13,6 +13,7 @@ import { CategoryBadge } from "../../../../components/category-badge";
 import { LocationSelector } from "../../../../components/location-selector";
 import { Button } from "@workspace/ui/components/button";
 import { StatCard } from "../../../../components/stat-card";
+import { MovementHistory } from "../../../../components/movement-history";
 
 interface IngredientPageProps {
   params: Promise<{
@@ -22,21 +23,30 @@ interface IngredientPageProps {
 
 async function fetchIngredient(id: string): Promise<Ingredient> {
   try {
-    // Get server-side headers for authentication
-    const headersList = await headers();
-    const cookieHeader = headersList.get("cookie") || "";
+    const { data, loading, error } = await query({
+      query: GetIngredientDocument,
+      variables: { id },
+    });
 
-    const response = await getIngredient(id, cookieHeader);
-    return response.ingredient;
+    if (error) {
+      console.error("GraphQL error:", error);
+      throw error;
+    }
+
+    if (!data?.ingredient) {
+      notFound();
+    }
+
+    return data.ingredient;
   } catch (error) {
     console.error("Error fetching ingredient:", error);
 
     if (error instanceof Error) {
-      if (error.message === "UNAUTHENTICATED") {
+      if (error.message.includes("Unauthenticated")) {
         // This should be handled by middleware, but just in case
         throw error;
       }
-      if (error.message === "Ingredient not found") {
+      if (error.message.includes("not found")) {
         notFound();
       }
     }
@@ -107,85 +117,62 @@ export default async function IngredientPage({ params }: IngredientPageProps) {
       {/* Colonne 2 */}
       <div className="w-full lg:w-1/2 flex flex-col justify-center mb-10 lg:mb-0">
         <div className="w-full lg:w-3/4 max-w-md flex flex-col gap-6">
-          {/* Location Selector */}
-          <div>
-            <LocationSelector
-              quantities={ingredient.quantities}
-              placeholder="Choisir un emplacement"
-              label="Emplacement"
-            />
-          </div>
           {/* Product Description */}
           <p className="text-khp-text-secondary leading-relaxed">
             {ingredient.name} apporte des haricots fondants en sauce tomate
             sucrée-acidulée, idéale pour enrichir en un clin d&apos;œil purées,
             gratins ou mijotés.
           </p>
+          {/* Location Selector */}
+          <div className="mb-4">
+            <LocationSelector
+              quantities={ingredient.quantities}
+              placeholder="Choisir un emplacement"
+              label="Emplacement"
+            />
+          </div>
+        </div>
 
-          {/* Stock Cards - Desktop Grid / Mobile Carousel */}
-          <div className="space-y-6">
-            {/* Desktop: Grid layout */}
-            <div className="hidden md:grid md:grid-cols-3 gap-4">
-              <StatCard
-                value={totalStock}
-                unit={ingredient.unit}
-                label="Stock total"
-              />
-              <StatCard
-                value={ingredient.quantities.length}
-                label="Emplacements"
-                variant="outline"
-              />
-              <StatCard
-                value={Math.round(totalStock / ingredient.quantities.length)}
-                unit={ingredient.unit}
-                label="Moyenne/lieu"
-                variant="outline"
-              />
-            </div>
-
-            {/* Mobile: Carousel layout */}
-            <div className="md:hidden">
-              <Carousel
-                opts={{
-                  align: "start",
-                }}
-                className="w-full"
-              >
-                <CarouselContent>
-                  {/* Stock Total Card */}
-                  <CarouselItem className="basis-[80%]">
-                    <StatCard
-                      value={totalStock}
-                      unit={ingredient.unit}
-                      label="Stock total"
-                    />
-                  </CarouselItem>
-
-                  {/* Locations Count Card */}
-                  <CarouselItem className="basis-[80%]">
-                    <StatCard
-                      value={ingredient.quantities.length}
-                      label="Emplacements"
-                      variant="outline"
-                    />
-                  </CarouselItem>
-
-                  {/* Average Stock per Location Card */}
-                  <CarouselItem className="basis-[80%]">
-                    <StatCard
-                      value={Math.round(
-                        totalStock / ingredient.quantities.length
-                      )}
-                      unit={ingredient.unit}
-                      label="Moyenne/lieu"
-                      variant="outline"
-                    />
-                  </CarouselItem>
-                </CarouselContent>
-              </Carousel>
+        {/* Stats intégrées - Design épuré */}
+        <div className="space-y-4 w-full lg:w-3/4 max-w-md">
+          {/* Stock principal - Compact et élégant */}
+          <div className="bg-khp-primary rounded-lg px-5 py-4 text-white">
+            <div className="flex items-baseline justify-between">
+              <div>
+                <span className="text-3xl font-bold">{totalStock}</span>
+                <span className="text-lg ml-2 opacity-90">
+                  {ingredient.unit}
+                </span>
+              </div>
+              <span className="text-sm opacity-80">Stock total</span>
             </div>
           </div>
+
+          {/* Métriques compactes */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-white rounded-lg px-4 py-3 border border-khp-border">
+              <div className="text-xl font-semibold text-khp-primary">
+                {ingredient.quantities.length}
+              </div>
+              <div className="text-sm text-khp-text-secondary">
+                Emplacements
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg px-4 py-3 border border-khp-border">
+              <div className="text-xl font-semibold text-khp-primary">
+                {Math.round(totalStock / ingredient.quantities.length)}
+                <span className="text-sm ml-1">{ingredient.unit}</span>
+              </div>
+              <div className="text-sm text-khp-text-secondary">Par lieu</div>
+            </div>
+          </div>
+
+          {/* Movement History */}
+          <MovementHistory
+            movements={ingredient.stockMovements || []}
+            unit={ingredient.unit}
+          />
         </div>
       </div>
     </div>
