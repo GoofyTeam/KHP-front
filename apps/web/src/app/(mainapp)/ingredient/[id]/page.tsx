@@ -9,6 +9,10 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@workspace/ui/components/carousel";
+import { CategoryBadge } from "../../../../components/category-badge";
+import { LocationSelector } from "../../../../components/location-selector";
+import { Button } from "@workspace/ui/components/button";
+import { StatCard } from "../../../../components/stat-card";
 
 interface IngredientPageProps {
   params: Promise<{
@@ -57,37 +61,31 @@ export default async function IngredientPage({ params }: IngredientPageProps) {
   );
 
   return (
-    <div className="flex flex-col md:flex-row gap-24">
-      {/* Left Column */}
-      <div className="w-full md:w-1/2 flex justify-center md:justify-end md:pl-24">
-        <div className="w-full max-w-lg space-y-6">
-          {ingredient.quantities.length > 1 ? (
-            <select className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-900 ">
-              {ingredient.quantities.map(
-                (q: IngredientQuantity, index: number) => (
-                  <option key={index} value={q.location.id}>
-                    {q.location.name}
-                  </option>
-                )
-              )}
-            </select>
-          ) : (
-            <div className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900">
-              {ingredient.quantities[0]?.location.name || "Aucun emplacement"}
-            </div>
-          )}
-          <div className="w-full flex justify-center items-center">
+    <div className="w-full flex flex-col lg:flex-row gap-8 p-4 lg:p-8">
+      {/* Colonne 1 */}
+      <div className="flex flex-col gap-8 justify-center items-center w-full lg:w-1/2">
+        {/* Product Title */}
+        <div className="text-center space-y-4 w-full lg:w-3/4 max-w-md">
+          <h1 className="text-3xl lg:text-5xl font-bold text-khp-text-primary leading-tight">
+            {ingredient.name}
+          </h1>
+          <CategoryBadge categories={ingredient.categories} />
+        </div>
+
+        {/* Product Image */}
+        <div className="w-full lg:w-3/4 max-w-md">
+          <div className="aspect-square rounded-xl overflow-hidden bg-khp-background-secondary">
             {ingredient.image_url ? (
               <Image
                 src={ingredient.image_url}
                 alt={ingredient.name}
-                width={300}
-                height={300}
-                className="object-contain w-80 h-80"
+                width={400}
+                height={400}
+                className="w-full h-full  transition-transform duration-300"
                 unoptimized={process.env.NODE_ENV === "development"}
               />
             ) : (
-              <div className="w-80 h-80 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center">
+              <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
                 <div className="text-center text-white">
                   <div className="text-2xl font-bold mb-2">HEINZ</div>
                   <div className="text-lg">BAKED</div>
@@ -97,79 +95,97 @@ export default async function IngredientPage({ params }: IngredientPageProps) {
               </div>
             )}
           </div>
-          <button className="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors">
-            Move quantity
-          </button>
+        </div>
+        {/* Action Button */}
+        <div className="mt-8 w-full lg:w-3/4 max-w-md">
+          <Button variant="khp-outline" size="xl-full">
+            Déplacer la quantité
+          </Button>
         </div>
       </div>
 
-      {/* Right Column */}
-      <div className="w-full md:w-1/2 space-y-6">
-        {/* Product Info */}
-        <div className="bg-white rounded-lg p-6 md:pr-24">
-          <h1 className="text-4xl font-bold text-gray-900 mb-3">
-            {ingredient.name.toUpperCase()}
-          </h1>
-          <div className="flex items-center gap-2 mb-6">
-            <Link
-              href={`/category/${ingredient.categories[0]?.id || ""}`}
-              className=" underline underline-offset-2 cursor-pointer"
-            >
-              {ingredient.categories[0]?.name}
-            </Link>
+      {/* Colonne 2 */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center mb-10 lg:mb-0">
+        <div className="w-full lg:w-3/4 max-w-md flex flex-col gap-6">
+          {/* Location Selector */}
+          <div>
+            <LocationSelector
+              quantities={ingredient.quantities}
+              placeholder="Choisir un emplacement"
+              label="Emplacement"
+            />
           </div>
-
-          <p className="text-gray-600 leading-relaxed">
+          {/* Product Description */}
+          <p className="text-khp-text-secondary leading-relaxed">
             {ingredient.name} apporte des haricots fondants en sauce tomate
             sucrée-acidulée, idéale pour enrichir en un clin d&apos;œil purées,
             gratins ou mijotés.
           </p>
-        </div>
 
-        <div>
-          <Carousel
-            opts={{
-              align: "start",
-            }}
-            className="w-full"
-          >
-            <CarouselContent>
-              {/* Stock Total Card */}
-              <CarouselItem className="basis-[33%]">
-                <div className="w-full aspect-square flex flex-col justify-center items-center bg-khp-primary rounded-xl p-6 text-white">
-                  <div className="text-5xl md:text-6xl font-bold mb-4">
-                    {totalStock}
-                    <span className="text-2xl font-normal ml-2">
-                      {ingredient.unit}
-                    </span>
-                  </div>
-                  <div className="text-lg opacity-90">Stock total</div>
-                </div>
-              </CarouselItem>
-              <CarouselItem className="basis-[33%]">
-                <div className="w-full aspect-square flex flex-col justify-center items-center bg-khp-primary rounded-xl p-6 text-white">
-                  <div className="text-5xl md:text-6xl font-bold mb-4">
-                    {totalStock}
-                    <span className="text-2xl font-normal ml-2">
-                      {ingredient.unit}
-                    </span>
-                  </div>
-                  <div className="text-lg opacity-90">Stock total</div>
-                </div>
-              </CarouselItem>
-              <CarouselItem className="basis-[33%]">
-                <div className="w-full aspect-square flex flex-col justify-center items-center bg-khp-primary rounded-xl p-6 text-white">
-                  <div className="text-5xl md:text-6xl font-bold mb-4">
-                    {totalStock}
-                    <span className="text-2xl font-normal ml-2">
-                      {ingredient.unit}
-                    </span>
-                  </div>
-                  <div className="text-lg opacity-90">Stock total</div>
-                </div>
-              </CarouselItem>
-            </CarouselContent>
-          </Carousel>
+          {/* Stock Cards - Desktop Grid / Mobile Carousel */}
+          <div className="space-y-6">
+            {/* Desktop: Grid layout */}
+            <div className="hidden md:grid md:grid-cols-3 gap-4">
+              <StatCard
+                value={totalStock}
+                unit={ingredient.unit}
+                label="Stock total"
+              />
+              <StatCard
+                value={ingredient.quantities.length}
+                label="Emplacements"
+                variant="outline"
+              />
+              <StatCard
+                value={Math.round(totalStock / ingredient.quantities.length)}
+                unit={ingredient.unit}
+                label="Moyenne/lieu"
+                variant="outline"
+              />
+            </div>
+
+            {/* Mobile: Carousel layout */}
+            <div className="md:hidden">
+              <Carousel
+                opts={{
+                  align: "start",
+                }}
+                className="w-full"
+              >
+                <CarouselContent>
+                  {/* Stock Total Card */}
+                  <CarouselItem className="basis-[80%]">
+                    <StatCard
+                      value={totalStock}
+                      unit={ingredient.unit}
+                      label="Stock total"
+                    />
+                  </CarouselItem>
+
+                  {/* Locations Count Card */}
+                  <CarouselItem className="basis-[80%]">
+                    <StatCard
+                      value={ingredient.quantities.length}
+                      label="Emplacements"
+                      variant="outline"
+                    />
+                  </CarouselItem>
+
+                  {/* Average Stock per Location Card */}
+                  <CarouselItem className="basis-[80%]">
+                    <StatCard
+                      value={Math.round(
+                        totalStock / ingredient.quantities.length
+                      )}
+                      unit={ingredient.unit}
+                      label="Moyenne/lieu"
+                      variant="outline"
+                    />
+                  </CarouselItem>
+                </CarouselContent>
+              </Carousel>
+            </div>
+          </div>
         </div>
       </div>
     </div>
