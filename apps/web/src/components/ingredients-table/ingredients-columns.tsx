@@ -16,7 +16,7 @@ import { StockStatus } from "@workspace/ui/components/stock-status";
 import type { Ingredient } from "@/types/stocks";
 import { getStockStatus } from "@/hooks/useIngredients";
 
-export function useColumns(
+export function useIngredientsColumns(
   isRegisterLostMode: boolean
 ): ColumnDef<Ingredient>[] {
   return useMemo(
