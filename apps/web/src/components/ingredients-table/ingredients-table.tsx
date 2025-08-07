@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 import { useDebounce } from "@uidotdev/usehooks";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 
-interface DataTableProps<TData, TValue> {
+interface IngredientsTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   columnFilters?: ColumnFiltersState;
@@ -28,7 +28,7 @@ interface DataTableProps<TData, TValue> {
   onLoadMore?: () => void;
 }
 
-function DataTableComponent<TData, TValue>({
+function IngredientsTableComponent<TData, TValue>({
   columns,
   data,
   columnFilters = [],
@@ -39,7 +39,7 @@ function DataTableComponent<TData, TValue>({
   hasMore = false,
   isRegisterLostMode = false,
   onLoadMore,
-}: DataTableProps<TData, TValue>) {
+}: IngredientsTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState({});
   const [scrollInfo, setScrollInfo] = React.useState({
@@ -49,8 +49,10 @@ function DataTableComponent<TData, TValue>({
   });
   const tableRef = React.useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const lastScrollTime = React.useRef(0);
+  const isScrolling = React.useRef(false);
 
-  const debouncedScrollInfo = useDebounce(scrollInfo, 100);
+  const debouncedScrollInfo = useDebounce(scrollInfo, 100); // Optimisé pour de meilleures performances
 
   const table = useReactTable({
     data,
@@ -73,18 +75,39 @@ function DataTableComponent<TData, TValue>({
     const handleScroll = () => {
       if (!tableRef.current) return;
 
+      const now = Date.now();
+
+      // Throttle scroll events pour améliorer les performances
+      if (now - lastScrollTime.current < 16) {
+        // ~60fps
+        return;
+      }
+
+      lastScrollTime.current = now;
+      isScrolling.current = true;
+
       const { scrollTop, scrollHeight, clientHeight } = tableRef.current;
       setScrollInfo({ scrollTop, scrollHeight, clientHeight });
+
+      // Reset scrolling flag après un délai
+      setTimeout(() => {
+        isScrolling.current = false;
+      }, 150);
     };
 
     const tableElement = tableRef.current;
     if (tableElement) {
-      tableElement.addEventListener("scroll", handleScroll);
+      // Utiliser passive: true pour de meilleures performances
+      tableElement.addEventListener("scroll", handleScroll, { passive: true });
       return () => {
         tableElement.removeEventListener("scroll", handleScroll);
       };
     }
   }, []);
+
+  // Ref pour éviter les appels multiples rapides
+  const lastLoadMoreCallRef = React.useRef<number>(0);
+  const isLoadingMoreRef = React.useRef(false);
 
   React.useEffect(() => {
     if (
@@ -92,15 +115,28 @@ function DataTableComponent<TData, TValue>({
       !onLoadMore ||
       !hasMore ||
       loadingMore ||
-      searchLoading
+      searchLoading ||
+      isScrolling.current ||
+      isLoadingMoreRef.current
     )
       return;
 
     const { scrollTop, scrollHeight, clientHeight } = debouncedScrollInfo;
-    const threshold = 500;
+    const threshold = 200;
+    const now = Date.now();
 
-    if (scrollTop + clientHeight >= scrollHeight - threshold) {
+    if (
+      scrollTop + clientHeight >= scrollHeight - threshold &&
+      now - lastLoadMoreCallRef.current > 800
+    ) {
+      lastLoadMoreCallRef.current = now;
+      isLoadingMoreRef.current = true;
+
       onLoadMore();
+
+      setTimeout(() => {
+        isLoadingMoreRef.current = false;
+      }, 1000);
     }
   }, [debouncedScrollInfo, onLoadMore, hasMore, loadingMore, searchLoading]);
 
@@ -108,7 +144,7 @@ function DataTableComponent<TData, TValue>({
     <div className="w-full space-y-4">
       <div
         ref={tableRef}
-        className="relative overflow-auto rounded-md border border-khp-primary h-[600px] min-w-full"
+        className="relative overflow-auto rounded-md border border-khp-primary h-[calc(80vh-56px)]  min-w-full"
       >
         {searchLoading && (
           <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/80 z-10 flex items-center justify-center">
@@ -120,7 +156,7 @@ function DataTableComponent<TData, TValue>({
             </div>
           </div>
         )}
-        <table className="w-full caption-bottom text-sm min-w-[800px]">
+        <table className="h-full w-full caption-bottom text-sm">
           <thead className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/95 z-20 border-b border-khp-primary">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr
@@ -272,13 +308,11 @@ function DataTableComponent<TData, TValue>({
                 ))}
               </>
             ) : (
-              <tr className="border-b transition-colors">
-                <td
-                  colSpan={columns.length}
-                  className="p-4 text-center align-middle whitespace-nowrap text-muted-foreground"
-                  style={{ minWidth: "800px" }}
-                >
-                  No results.
+              <tr>
+                <td colSpan={columns.length} className="p-0 relative">
+                  <div className="flex items-center justify-center text-muted-foreground text-lg font-medium h-full w-full">
+                    Nothing found
+                  </div>
                 </td>
               </tr>
             )}
@@ -289,6 +323,9 @@ function DataTableComponent<TData, TValue>({
   );
 }
 
-export const DataTable = React.memo(DataTableComponent) as <TData, TValue>(
-  props: DataTableProps<TData, TValue>
+export const IngredientsTable = React.memo(IngredientsTableComponent) as <
+  TData,
+  TValue,
+>(
+  props: IngredientsTableProps<TData, TValue>
 ) => React.ReactElement;

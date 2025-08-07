@@ -1,0 +1,8 @@
+query GetCategories {
+  categories {
+    data {
+      id
+      name
+    }
+  }
+}

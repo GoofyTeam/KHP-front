@@ -9,8 +9,7 @@ import {
 
 export const metadata: Metadata = {
   title: "KHP | Stocks",
-  description:
-    "Gestion des stocks - Visualisez et gérez l'inventaire de votre entreprise",
+  description: "Stocks Management - View and manage your company's inventory",
 };
 
 export default function StocksLayout({
@@ -30,7 +29,7 @@ export default function StocksLayout({
 
           <div className="hidden md:block border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="flex h-14 items-center px-6">
-              <h1 className="text-xl font-semibold">Stock Management</h1>
+              <h1 className="text-xl font-semibold">Stocks Management</h1>
             </div>
           </div>
 
