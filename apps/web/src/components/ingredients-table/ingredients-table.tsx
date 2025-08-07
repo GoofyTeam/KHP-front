@@ -156,7 +156,7 @@ function IngredientsTableComponent<TData, TValue>({
             </div>
           </div>
         )}
-        <table className="h-full w-full caption-bottom text-sm">
+        <table className="w-full caption-bottom text-sm table-fixed">
           <thead className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/95 z-20 border-b border-khp-primary">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr
@@ -204,6 +204,11 @@ function IngredientsTableComponent<TData, TValue>({
                     <tr
                       key={row.id}
                       className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted cursor-pointer"
+                      style={{
+                        height: "60px",
+                        maxHeight: "60px",
+                        minHeight: "60px",
+                      }}
                       data-state={row.getIsSelected() && "selected"}
                       onClick={() =>
                         router.push(
@@ -218,6 +223,9 @@ function IngredientsTableComponent<TData, TValue>({
                           key={cell.id}
                           className="p-4 align-middle whitespace-nowrap"
                           style={{
+                            height: "60px",
+                            maxHeight: "60px",
+                            minHeight: "60px",
                             minWidth:
                               cell.column.id === "name"
                                 ? "200px"
@@ -247,12 +255,20 @@ function IngredientsTableComponent<TData, TValue>({
                       <tr
                         key={`loading-${i}`}
                         className="border-b transition-colors"
+                        style={{
+                          height: "60px",
+                          maxHeight: "60px",
+                          minHeight: "60px",
+                        }}
                       >
                         {columns.map((col, colIndex) => (
                           <td
                             key={colIndex}
                             className="p-4 align-middle whitespace-nowrap"
                             style={{
+                              height: "60px",
+                              maxHeight: "60px",
+                              minHeight: "60px",
                               minWidth:
                                 colIndex === 0
                                   ? "200px"
@@ -281,12 +297,20 @@ function IngredientsTableComponent<TData, TValue>({
                   <tr
                     key={`initial-loading-${i}`}
                     className="border-b transition-colors"
+                    style={{
+                      height: "60px",
+                      maxHeight: "60px",
+                      minHeight: "60px",
+                    }}
                   >
                     {columns.map((col, colIndex) => (
                       <td
                         key={colIndex}
                         className="p-4 align-middle whitespace-nowrap"
                         style={{
+                          height: "60px",
+                          maxHeight: "60px",
+                          minHeight: "60px",
                           minWidth:
                             colIndex === 0
                               ? "200px"
