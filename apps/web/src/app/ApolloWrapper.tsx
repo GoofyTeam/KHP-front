@@ -18,7 +18,6 @@ function makeClient() {
     uri: `${API_URL}/graphql`,
     credentials: "include",
     fetch: (uri, options) => {
-      console.log("Fetching GraphQL endpoint:", uri);
 
       const csrfToken = Cookie.get("XSRF-TOKEN") || "";
 
