@@ -1,8 +1,8 @@
 import { query } from "@/lib/ApolloClient";
 import { GetCategoriesDocument } from "@/graphql/generated/graphql";
-import StocksContainer from "@/components/stocks-container";
+import StocksPage from "@/components/stocks/stocks-page";
 
-export default async function StocksPage() {
+export default async function Page() {
   const { data: categoriesData, error: categoriesError } = await query({
     query: GetCategoriesDocument,
   });
@@ -21,5 +21,5 @@ export default async function StocksPage() {
 
   const initialCategories = categoriesData?.categories?.data || [];
 
-  return <StocksContainer initialCategories={initialCategories} />;
+  return <StocksPage initialCategories={initialCategories} />;
 }
