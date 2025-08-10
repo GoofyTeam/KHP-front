@@ -14,19 +14,21 @@ const authRoutes = [
   "/forgot-password",
   "/reset-password",
 ];
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
-
-/* if (!API_URL) {
-  throw new Error(
-    "Environment variable NEXT_PUBLIC_API_URL is not defined. Please set it in your environment."
-  );
-} */
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || process.env.NODE_ENV === "production"
+    ? "https://dash.goofykhp.fr"
+    : null;
 
 const serverHttpClient = {
   async fetch(endpoint: string, req: NextRequest): Promise<Response> {
     const cookieHeader = req.headers.get("cookie") || "";
 
-    return fetch(`${API_URL}${endpoint}`, {
+    const baseUrl = API_URL || req.nextUrl.origin;
+    const url = new URL(endpoint, baseUrl);
+
+    console.log("[MW] API target:", url.toString());
+
+    return fetch(url.toString(), {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -66,6 +68,12 @@ export default async function middleware(req: NextRequest) {
     if (userData.id) response.headers.set("x-user-id", userData.id.toString());
     if (userData.name) response.headers.set("x-user-name", userData.name);
   }
+
+  response.headers.set("x-mw-api-url", API_URL || "EMPTY");
+  response.headers.set(
+    "x-mw-has-cookie",
+    String(!!req.cookies.get("khp_session"))
+  );
 
   return response;
 }

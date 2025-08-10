@@ -6,10 +6,11 @@ import {
 } from "@apollo/client-integration-nextjs";
 import { headers } from "next/headers";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
-/* if (!API_URL) {
-  throw new Error("NEXT_PUBLIC_API_URL n’est pas défini.");
-} */
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (process.env.NODE_ENV === "production"
+    ? "https://dash.goofykhp.fr"
+    : "http://localhost:8000");
 
 export const { getClient, query, PreloadQuery } = registerApolloClient(
   async () => {

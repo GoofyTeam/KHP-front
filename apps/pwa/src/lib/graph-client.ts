@@ -1,6 +1,12 @@
 import { GraphQLClient, RequestDocument, Variables } from "graphql-request";
 import api from "./api";
 
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.MODE === "production"
+    ? "https://app.goofykhp.fr"
+    : "http://localhost:8000");
+
 async function csrfFetch(
   input: string | URL | Request,
   init: RequestInit = {}
@@ -31,10 +37,9 @@ async function csrfFetch(
   });
 }
 
-export const gqlClient = new GraphQLClient(
-  `${import.meta.env.VITE_API_URL}/graphql`,
-  { fetch: csrfFetch }
-);
+export const gqlClient = new GraphQLClient(`${API_URL}/graphql`, {
+  fetch: csrfFetch,
+});
 
 export async function graphqlRequest<
   TData = unknown,

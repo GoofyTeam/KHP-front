@@ -32,3 +32,16 @@ jobs:
           labels: ${{ steps.metadata.outputs.labels }}
           cache: true
           cache-repository: ghcr.io/${{ github.repository }}/cache
+  restart_web-infra:
+    needs: [build]
+    uses: ./.github/workflows/argocd-restart.yml
+    with:
+      app: khp-main
+      targets: khp-front-web
+      namespace: khp-main
+      grpc_web: true
+      wait: true
+      timeout: "300"
+    secrets:
+      ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
+      ARGOCD_TOKEN: ${{ secrets.ARGOCD_TOKEN }}

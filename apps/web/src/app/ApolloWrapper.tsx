@@ -8,10 +8,11 @@ import {
 } from "@apollo/client-integration-nextjs";
 import Cookie from "js-cookie";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
-/* if (!API_URL) {
-  throw new Error("NEXT_PUBLIC_API_URL is not defined.");
-} */
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (process.env.NODE_ENV === "production"
+    ? "https://dash.goofykhp.fr"
+    : "http://localhost:8000");
 
 function makeClient() {
   const httpLink = new HttpLink({
