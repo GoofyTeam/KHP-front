@@ -78,6 +78,8 @@ type CompanyPaginator {
   data: [Company!]!
 }
 
+scalar Date
+
 """
 A datetime string with format `Y-m-d H:i:s`, e.g. `2018-05-23 13:43:32`.
 """
@@ -99,11 +101,36 @@ type Ingredient {
   categories: [Category!]!
   image_url: String
 
+  """Historique des mouvements de stock pour cet ingrédient"""
+  stockMovements: [StockMovement!]!
+  withdrawals_today_count: Int!
+
+  """Number of withdrawals for this ingredient today."""
+  withdrawals_this_week_count: Int!
+
+  """Number of withdrawals for this ingredient this week."""
+  withdrawals_this_month_count: Int!
+
   """When the ingredient was created."""
   created_at: DateTime!
 
   """When the ingredient was last updated."""
   updated_at: DateTime!
+}
+
+input IngredientOrderByClause {
+  column: IngredientOrderByField!
+  order: SortOrder! = ASC
+}
+
+enum IngredientOrderByField {
+  ID
+  NAME
+  CREATED_AT
+  UPDATED_AT
+  WITHDRAWALS_TODAY
+  WITHDRAWALS_THIS_WEEK
+  WITHDRAWALS_THIS_MONTH
 }
 
 """A paginated list of Ingredient items."""
@@ -116,7 +143,7 @@ type IngredientPaginator {
 }
 
 type IngredientQuantity {
-  """Le stock de l’ingrédient."""
+  """Le stock de l'ingrédient."""
   quantity: Float!
 
   """La localisation de ce stock."""
@@ -319,6 +346,16 @@ type Preparation {
   categories: [Category!]!
   quantities: [PreparationQuantity!]!
 
+  """Historique des mouvements de stock pour cette préparation"""
+  stockMovements: [StockMovement!]!
+  withdrawals_today_count: Int!
+
+  """Number of withdrawals for this ingredient today."""
+  withdrawals_this_week_count: Int!
+
+  """Number of withdrawals for this ingredient this week."""
+  withdrawals_this_month_count: Int!
+
   """When the preparation was created."""
   created_at: DateTime!
 
@@ -333,6 +370,21 @@ type PreparationEntity {
 }
 
 union PreparationEntityItem = Ingredient | Preparation
+
+input PreparationOrderByClause {
+  column: PreparationOrderByField!
+  order: SortOrder! = ASC
+}
+
+enum PreparationOrderByField {
+  ID
+  NAME
+  CREATED_AT
+  UPDATED_AT
+  WITHDRAWALS_TODAY
+  WITHDRAWALS_THIS_WEEK
+  WITHDRAWALS_THIS_MONTH
+}
 
 """A paginated list of Preparation items."""
 type PreparationPaginator {
@@ -452,8 +504,15 @@ type Query {
 
     """Filter by unit of measurement. Accepts SQL LIKE wildcards `%` and `_`."""
     unit: String
-    locationId: ID
-    categoryId: ID
+
+    """Filtrer par un ou plusieurs identifiants d'emplacements."""
+    locationIds: [ID!]
+
+    """Filtrer par une ou plusieurs catégories."""
+    categoryIds: [ID!]
+
+    """Options de tri des ingrédients"""
+    orderBy: [OrderByClause!]
 
     """Limits number of fetched items."""
     first: Int! = 10
@@ -512,11 +571,14 @@ type Query {
     """Filtre par unité de mesure avec opérateur LIKE."""
     unit: String
 
-    """Filtre par catégorie"""
-    categoryId: ID
+    """Filtrer par un ou plusieurs identifiants d'emplacements."""
+    locationIds: [ID!]
 
-    """Filtre par identifiant d'emplacement"""
-    locationId: ID
+    """Filtrer par une ou plusieurs catégories."""
+    categoryIds: [ID!]
+
+    """Options de tri des préparations"""
+    orderBy: [OrderByClause!]
 
     """Limits number of fetched items."""
     first: Int! = 10
@@ -524,6 +586,36 @@ type Query {
     """The offset from which items are returned."""
     page: Int
   ): PreparationPaginator!
+
+  """Liste les mouvements de stock pour l'entreprise actuelle."""
+  stockMovements(
+    """Filtre par type de mouvement."""
+    type: String
+
+    """Filtre par ID d'emplacement."""
+    location_id: ID
+
+    """Filtre par type d'entité concernée."""
+    trackable_type: String
+
+    """Filtre par ID d'entité concernée."""
+    trackable_id: ID
+
+    """Filtre par date de début."""
+    start_date: DateTime
+
+    """Filtre par date de fin."""
+    end_date: DateTime
+
+    """Options de tri des résultats."""
+    orderBy: [OrderByClause!]
+
+    """Limits number of fetched items."""
+    first: Int! = 10
+
+    """The offset from which items are returned."""
+    page: Int
+  ): StockMovementPaginator!
 
   """List multiple users."""
   users(
@@ -545,6 +637,74 @@ enum SortOrder {
 
   """Sort records in descending order."""
   DESC
+}
+
+"""Représente un mouvement de stock d'un ingrédient ou d'une préparation."""
+type StockMovement {
+  """Identifiant unique."""
+  id: ID!
+
+  """Type d'entité concernée par ce mouvement (ingredient ou preparation)."""
+  trackable_type: String!
+
+  """ID de l'entité concernée."""
+  trackable_id: ID!
+
+  """L'emplacement où le mouvement a eu lieu."""
+  location: Location!
+
+  """L'entreprise à laquelle appartient ce mouvement."""
+  company: Company!
+
+  """L'utilisateur qui a effectué l'opération."""
+  user: User
+
+  """Type de mouvement: 'addition' ou 'withdrawal'."""
+  type: String!
+
+  """Quantité concernée par le mouvement (toujours positive)."""
+  quantity: Float!
+
+  """Quantité avant le mouvement."""
+  quantity_before: Float
+
+  """Quantité après le mouvement."""
+  quantity_after: Float
+
+  """Date et heure de création du mouvement."""
+  created_at: DateTime!
+
+  """Date et heure de dernière mise à jour du mouvement."""
+  updated_at: DateTime!
+}
+
+"""Options de tri pour les mouvements de stock."""
+input StockMovementOrderByClause {
+  """Champ sur lequel effectuer le tri."""
+  field: StockMovementOrderByField!
+
+  """Direction du tri."""
+  order: SortOrder!
+}
+
+"""Champs disponibles pour le tri des mouvements de stock."""
+enum StockMovementOrderByField {
+  ID
+  TYPE
+  QUANTITY
+  QUANTITY_BEFORE
+  QUANTITY_AFTER
+  CREATED_AT
+  UPDATED_AT
+}
+
+"""A paginated list of StockMovement items."""
+type StockMovementPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of StockMovement items."""
+  data: [StockMovement!]!
 }
 
 """
