@@ -1,0 +1,596 @@
+type Category {
+  """Unique primary key."""
+  id: ID!
+
+  """Category name."""
+  name: String!
+
+  """Ingredients in this category."""
+  ingredients: [Ingredient!]!
+
+  """Preparations in this category."""
+  preparations: [Preparation!]!
+
+  """The company that owns this category."""
+  company: Company!
+
+  """When the Category was created."""
+  created_at: DateTime!
+
+  """When the Category was last updated."""
+  updated_at: DateTime!
+}
+
+"""A paginated list of Category items."""
+type CategoryPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of Category items."""
+  data: [Category!]!
+}
+
+type Company {
+  """Unique primary key."""
+  id: ID!
+
+  """Company name."""
+  name: String!
+
+  """Preparations associated with this company."""
+  preparations: [Preparation!]!
+  categories: [Category!]!
+  locations: [Location!]!
+
+  """Types de localisation associés à cette entreprise."""
+  locationTypes: [LocationType!]!
+
+  """When the company was created."""
+  created_at: DateTime!
+
+  """When the company was last updated."""
+  updated_at: DateTime!
+}
+
+"""Champs disponibles pour le tri des entreprises."""
+enum CompanyOrderByField {
+  ID
+  NAME
+  CREATED_AT
+  UPDATED_AT
+}
+
+"""Options de tri pour les entreprises."""
+input CompanyOrderByOrderByClause {
+  """Champ sur lequel effectuer le tri."""
+  field: CompanyOrderByField!
+
+  """Direction du tri."""
+  order: SortOrder!
+}
+
+"""A paginated list of Company items."""
+type CompanyPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of Company items."""
+  data: [Company!]!
+}
+
+"""
+A datetime string with format `Y-m-d H:i:s`, e.g. `2018-05-23 13:43:32`.
+"""
+scalar DateTime
+
+type Ingredient {
+  """Unique primary key."""
+  id: ID!
+
+  """Ingredient name."""
+  name: String!
+
+  """Unit of measurement for the ingredient."""
+  unit: String!
+  quantities: [IngredientQuantity!]!
+
+  """The company that owns this ingredient."""
+  company: Company!
+  categories: [Category!]!
+  image_url: String
+
+  """When the ingredient was created."""
+  created_at: DateTime!
+
+  """When the ingredient was last updated."""
+  updated_at: DateTime!
+}
+
+"""A paginated list of Ingredient items."""
+type IngredientPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of Ingredient items."""
+  data: [Ingredient!]!
+}
+
+type IngredientQuantity {
+  """Le stock de l’ingrédient."""
+  quantity: Float!
+
+  """La localisation de ce stock."""
+  location: Location!
+}
+
+scalar JSON
+
+type Location {
+  """Unique primary key."""
+  id: ID!
+
+  """Location name."""
+  name: String!
+
+  """Location company."""
+  company: Company!
+
+  """Type de localisation (Congélateur, Réfrigérateur, etc.)"""
+  locationType: LocationType
+
+  """When the location was created."""
+  created_at: DateTime!
+
+  """When the location was last updated."""
+  updated_at: DateTime!
+
+  """Ingredients stored in this location."""
+  ingredients: [Ingredient!]!
+}
+
+"""Champs disponibles pour le tri des emplacements."""
+enum LocationOrderByField {
+  ID
+  NAME
+  CREATED_AT
+  UPDATED_AT
+}
+
+"""Options de tri pour les emplacements."""
+input LocationOrderByOrderByClause {
+  """Champ sur lequel effectuer le tri."""
+  field: LocationOrderByField!
+
+  """Direction du tri."""
+  order: SortOrder!
+}
+
+"""A paginated list of Location items."""
+type LocationPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of Location items."""
+  data: [Location!]!
+}
+
+"""Type de localisation pour organiser les emplacements de stockage"""
+type LocationType {
+  """Identifiant unique."""
+  id: ID!
+
+  """Nom du type de localisation."""
+  name: String!
+
+  """Indique si c'est un type par défaut (non modifiable)."""
+  is_default: Boolean!
+
+  """L'entreprise à laquelle appartient ce type."""
+  company: Company!
+
+  """Emplacements utilisant ce type de localisation."""
+  locations: [Location!]!
+
+  """Date de création du type."""
+  created_at: DateTime!
+
+  """Date de dernière mise à jour du type."""
+  updated_at: DateTime!
+}
+
+"""Champs disponibles pour le tri des types de localisation."""
+enum LocationTypeOrderByField {
+  ID
+  NAME
+  IS_DEFAULT
+  CREATED_AT
+  UPDATED_AT
+}
+
+"""Options de tri pour les types de localisation."""
+input LocationTypeOrderByOrderByClause {
+  """Champ sur lequel effectuer le tri."""
+  field: LocationTypeOrderByField!
+
+  """Direction du tri."""
+  order: SortOrder!
+}
+
+"""A paginated list of LocationType items."""
+type LocationTypePaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of LocationType items."""
+  data: [LocationType!]!
+}
+
+"""Représente un produit alimentaire issu d'OpenFoodFacts"""
+type OpenFoodFactsProduct {
+  barcode: String
+  product_name: String
+  base_quantity: Float
+  unit: String
+  categories: [String]
+  imageUrl: String
+  is_already_in_database: Boolean
+}
+
+"""Allows ordering a list of records."""
+input OrderByClause {
+  """The column that is used for ordering."""
+  column: String!
+
+  """The direction that is used for ordering."""
+  order: SortOrder!
+}
+
+"""
+Aggregate functions when ordering by a relation without specifying a column.
+"""
+enum OrderByRelationAggregateFunction {
+  """Amount of items."""
+  COUNT
+}
+
+"""
+Aggregate functions when ordering by a relation that may specify a column.
+"""
+enum OrderByRelationWithColumnAggregateFunction {
+  """Average."""
+  AVG
+
+  """Minimum."""
+  MIN
+
+  """Maximum."""
+  MAX
+
+  """Sum."""
+  SUM
+
+  """Amount of items."""
+  COUNT
+}
+
+"""Information about pagination using a fully featured paginator."""
+type PaginatorInfo {
+  """Number of items in the current page."""
+  count: Int!
+
+  """Index of the current page."""
+  currentPage: Int!
+
+  """Index of the first item in the current page."""
+  firstItem: Int
+
+  """Are there more pages after this one?"""
+  hasMorePages: Boolean!
+
+  """Index of the last item in the current page."""
+  lastItem: Int
+
+  """Index of the last available page."""
+  lastPage: Int!
+
+  """Number of items per page."""
+  perPage: Int!
+
+  """Number of total available items."""
+  total: Int!
+}
+
+type Preparation {
+  """Unique primary key."""
+  id: ID!
+
+  """Preparation name."""
+  name: String!
+
+  """Unit of measurement for the preparation."""
+  unit: String!
+
+  """The company that produces this preparation."""
+  company: Company!
+  entities: [PreparationEntity!]!
+  locations: [Location!]!
+
+  """The categories associated with this preparation."""
+  categories: [Category!]!
+  quantities: [PreparationQuantity!]!
+
+  """When the preparation was created."""
+  created_at: DateTime!
+
+  """When the preparation was last updated."""
+  updated_at: DateTime!
+}
+
+type PreparationEntity {
+  id: ID!
+  entity: PreparationEntityItem!
+  preparation: Preparation!
+}
+
+union PreparationEntityItem = Ingredient | Preparation
+
+"""A paginated list of Preparation items."""
+type PreparationPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of Preparation items."""
+  data: [Preparation!]!
+}
+
+type PreparationQuantity {
+  """Le stock de la préparation."""
+  quantity: Float!
+
+  """La localisation de ce stock."""
+  location: Location!
+}
+
+type Query {
+  """
+  Recherche un produit par code-barres ou par mots-clés.
+  Si 'barcode' est fourni, la recherche se fait par code-barres.
+  Sinon, la recherche se fait par mots-clés.
+  """
+  search(barcode: String, keyword: String, page: Int = 1, pageSize: Int = 20): OpenFoodFactsProduct
+
+  """Find a single Category (only if it belongs to the current company)."""
+  Category(
+    """Search by primary key."""
+    id: ID
+
+    """Search by Category name."""
+    name: String
+  ): Category
+
+  """Find a single company by an identifying attribute."""
+  company(
+    """Search by primary key."""
+    id: ID
+
+    """Search by company name."""
+    name: String
+  ): Company
+
+  """Find a single ingredient (only if it belongs to the current company)."""
+  ingredient(
+    """Search by primary key."""
+    id: ID
+
+    """Search by ingredient name."""
+    name: String
+  ): Ingredient
+
+  """Find a single location (only if it belongs to the current company)."""
+  location(
+    """Search by primary key."""
+    id: ID
+
+    """Search by location name."""
+    name: String
+  ): Location
+
+  """
+  Trouve un type de localisation spécifique (seulement s'il appartient à l'entreprise actuelle).
+  """
+  locationType(
+    """Recherche par identifiant."""
+    id: ID
+
+    """Recherche par nom du type."""
+    name: String
+  ): LocationType
+
+  """Trouve une preparation (et seulement si elle appartient à ma company)"""
+  preparation(id: ID, name: String): Preparation
+
+  """Find a single user by an identifying attribute."""
+  user(
+    """Search by primary key."""
+    id: ID
+
+    """Search by email address."""
+    email: String
+  ): User
+
+  """List categories for the current company."""
+  categories(
+    """Search by category name. Accepts SQL LIKE wildcards `%` and `_`."""
+    search: String
+
+    """Limits number of fetched items."""
+    first: Int! = 10
+
+    """The offset from which items are returned."""
+    page: Int
+  ): CategoryPaginator!
+
+  """List multiple companies."""
+  companies(
+    """Filters by name. Accepts SQL LIKE wildcards `%` and `_`."""
+    name: String
+
+    """Options de tri des résultats."""
+    orderBy: [OrderByClause!]
+
+    """Limits number of fetched items."""
+    first: Int! = 10
+
+    """The offset from which items are returned."""
+    page: Int
+  ): CompanyPaginator!
+
+  """List ingredients for the current company."""
+  ingredients(
+    """Filter by a search term. Accepts SQL LIKE wildcards `%` and `_`."""
+    search: String
+
+    """Filter by unit of measurement. Accepts SQL LIKE wildcards `%` and `_`."""
+    unit: String
+    locationId: ID
+    categoryId: ID
+
+    """Limits number of fetched items."""
+    first: Int! = 10
+
+    """The offset from which items are returned."""
+    page: Int
+  ): IngredientPaginator!
+
+  """List locations for the current company."""
+  locations(
+    """
+    Recherche par nom, insensible aux accents et à la casse. Accepte les caractères génériques SQL LIKE `%` et `_`.
+    """
+    search: String
+
+    """Filter by location type ID."""
+    locationTypeId: ID
+
+    """Options de tri des résultats."""
+    orderBy: [OrderByClause!]
+
+    """Limits number of fetched items."""
+    first: Int! = 10
+
+    """The offset from which items are returned."""
+    page: Int
+  ): LocationPaginator!
+
+  """Liste les types de localisation pour l'entreprise actuelle."""
+  locationTypes(
+    """
+    Recherche par nom, insensible aux accents et à la casse. Accepte les caractères génériques SQL LIKE `%` et `_`.
+    """
+    search: String
+
+    """Filtre pour afficher uniquement les types par défaut."""
+    is_default: Boolean
+
+    """Options de tri des résultats."""
+    orderBy: [OrderByClause!]
+
+    """Limits number of fetched items."""
+    first: Int! = 10
+
+    """The offset from which items are returned."""
+    page: Int
+  ): LocationTypePaginator!
+
+  """Liste les preparations de ma company uniquement"""
+  preparations(
+    """
+    Recherche par nom, insensible aux accents et à la casse. Accepte les caractères génériques SQL LIKE `%` et `_`.
+    """
+    search: String
+
+    """Filtre par unité de mesure avec opérateur LIKE."""
+    unit: String
+
+    """Filtre par catégorie"""
+    categoryId: ID
+
+    """Filtre par identifiant d'emplacement"""
+    locationId: ID
+
+    """Limits number of fetched items."""
+    first: Int! = 10
+
+    """The offset from which items are returned."""
+    page: Int
+  ): PreparationPaginator!
+
+  """List multiple users."""
+  users(
+    """Filters by name. Accepts SQL LIKE wildcards `%` and `_`."""
+    name: String
+
+    """Limits number of fetched items."""
+    first: Int! = 10
+
+    """The offset from which items are returned."""
+    page: Int
+  ): UserPaginator!
+}
+
+"""Directions for ordering a list of records."""
+enum SortOrder {
+  """Sort records in ascending order."""
+  ASC
+
+  """Sort records in descending order."""
+  DESC
+}
+
+"""
+Specify if you want to include or exclude trashed results from a query.
+"""
+enum Trashed {
+  """Only return trashed results."""
+  ONLY
+
+  """Return both trashed and non-trashed results."""
+  WITH
+
+  """Only return non-trashed results."""
+  WITHOUT
+}
+
+"""Account of a person who uses this application."""
+type User {
+  """Unique primary key."""
+  id: ID!
+
+  """The company this user belongs to."""
+  company: Company
+
+  """Non-unique name."""
+  name: String!
+
+  """Unique email address."""
+  email: String!
+
+  """When the email was verified."""
+  email_verified_at: DateTime
+
+  """When the account was created."""
+  created_at: DateTime!
+
+  """When the account was last updated."""
+  updated_at: DateTime!
+}
+
+"""A paginated list of User items."""
+type UserPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of User items."""
+  data: [User!]!
+}
+

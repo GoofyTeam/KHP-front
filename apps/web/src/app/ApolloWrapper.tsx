@@ -8,17 +8,16 @@ import {
 } from "@apollo/client-integration-nextjs";
 import Cookie from "js-cookie";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-if (!API_URL) {
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
+/* if (!API_URL) {
   throw new Error("NEXT_PUBLIC_API_URL is not defined.");
-}
+} */
 
 function makeClient() {
   const httpLink = new HttpLink({
     uri: `${API_URL}/graphql`,
     credentials: "include",
     fetch: (uri, options) => {
-
       const csrfToken = Cookie.get("XSRF-TOKEN") || "";
 
       const headers = {

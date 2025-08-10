@@ -9,6 +9,7 @@ import { Input } from "@workspace/ui/components/input";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@workspace/ui/components/button";
 import { ScanBarcode } from "lucide-react";
+import type { GetCompanyProductsQuery } from "../graphql/getCompanyProducts.gql";
 
 function InventoryPage() {
   const { data, pageInfo } = useLoaderData({
@@ -21,7 +22,8 @@ function InventoryPage() {
 
   const [searchTerm, setSearchTerm] = useState(search_terms);
   const [debouncedTerm, setDebouncedTerm] = useState(search_terms);
-  const [allItems, setAllItems] = useState(data);
+  const [allItems, setAllItems] =
+    useState<GetCompanyProductsQuery["ingredients"]["data"]>(data);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -43,7 +45,12 @@ function InventoryPage() {
     if (pageIndex === 1) {
       setAllItems(data);
     } else {
-      setAllItems((prev) => [...prev, ...data]);
+      setAllItems(
+        (prev: GetCompanyProductsQuery["ingredients"]["data"]) => [
+          ...prev,
+          ...data,
+        ]
+      );
     }
   }, [data, pageIndex]);
 
@@ -89,12 +96,17 @@ function InventoryPage() {
         </Button>
       </div>
 
-      {allItems.map((ingredient, index) => (
-        <InventoryRow
-          key={index + ingredient.id + "_" + ingredient.name}
-          productDetails={ingredient}
-        />
-      ))}
+      {allItems.map(
+        (
+          ingredient: GetCompanyProductsQuery["ingredients"]["data"][number],
+          index: number
+        ) => (
+          <InventoryRow
+            key={index + ingredient.id + "_" + ingredient.name}
+            productDetails={ingredient}
+          />
+        )
+      )}
       {pageInfo.hasMorePages ? (
         <div ref={sentinelRef} className="h-8" />
       ) : (

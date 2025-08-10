@@ -34,6 +34,8 @@ RUN npm ci
 # Copy source and build
 COPY --from=builder /app/out/full/ ./
 
+RUN npm run -w apps/pwa introspect
+
 RUN turbo run build
 
 # Stage 2: Serve with nginx

@@ -3,7 +3,7 @@ import InventoryPage from "../../pages/Inventory";
 import { graphqlRequest } from "../../lib/graph-client";
 import {
   GetCompanyProducts,
-  GetCompanyProductsQuery,
+  type GetCompanyProductsQuery,
 } from "../../graphql/getCompanyProducts.gql";
 import z from "zod";
 
