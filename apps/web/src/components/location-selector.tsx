@@ -65,20 +65,24 @@ export function LocationSelector({
 
   // Multiple locations case
   return (
-    <div className={`space-y-2 ${className}`}>
-      <h3 className="text-base font-semibold text-khp-text-primary">{label}</h3>
-      <Select value={value} onValueChange={onValueChange}>
-        <SelectTrigger className="w-full h-12 border-khp-primary bg-white hover:bg-khp-primary/5 focus:bg-khp-primary/5 transition-all">
-          <SelectValue placeholder={placeholder} />
-        </SelectTrigger>
-        <SelectContent>
-          {quantities.map((q, index: number) => (
-            <SelectItem key={index} value={index.toString()}>
-              <span className="font-medium">{q.location.name}</span>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+    <>
+      <div className={`space-y-2 ${className}`}>
+        <h3 className="text-base font-semibold text-khp-text-primary">
+          {label}
+        </h3>
+        <Select value={value} onValueChange={onValueChange}>
+          <SelectTrigger className="w-full !h-14 text-base border-khp-primary focus:bg-khp-primary/5 transition-all">
+            <SelectValue placeholder={placeholder} />
+          </SelectTrigger>
+          <SelectContent>
+            {quantities.map((q, index: number) => (
+              <SelectItem key={index} value={index.toString()}>
+                <span className="font-medium">{q.location.name}</span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </>
   );
 }

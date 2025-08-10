@@ -83,8 +83,8 @@ export type StockStatus = "in-stock" | "low-stock" | "out-of-stock";
 export interface StockMovement {
   id?: string;
   type: string; // e.g., "addition" | "withdrawal"
-  quantity_before: number;
-  quantity_after: number;
+  quantity_before?: number | null;
+  quantity_after?: number | null;
   created_at?: string;
   location?: {
     id: string;
