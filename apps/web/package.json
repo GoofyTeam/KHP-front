@@ -20,7 +20,8 @@
     "js-cookie": "^3.0.5",
     "next": "15.3.4",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "get-graphql-schema": "^2.1.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

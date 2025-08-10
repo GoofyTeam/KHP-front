@@ -1,5 +1,5 @@
 import { StockStatus } from "@workspace/ui/components/stock-status";
-import { GetCompanyProductsQuery } from "../graphql/getCompanyProducts.gql";
+import type { GetCompanyProductsQuery } from "../graphql/getCompanyProducts.gql";
 import { Link } from "@tanstack/react-router";
 import { CookingPot } from "lucide-react";
 

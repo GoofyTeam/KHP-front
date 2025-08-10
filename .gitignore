@@ -38,6 +38,10 @@ yarn-error.log*
 *.pem
 
 generated/*
-!generated/.gitkeep
 **/generated/*
+**/generated/** */
 !**/generated/.gitkeep
+!**/generated/schema.graphql
+graphql/*.d.ts
+*.gql.d.ts
+!.gql

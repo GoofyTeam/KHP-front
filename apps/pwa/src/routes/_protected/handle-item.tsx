@@ -3,16 +3,16 @@ import HandleItem from "../../pages/HandleItem";
 import { graphqlRequest } from "../../lib/graph-client";
 import {
   GetLocations,
-  GetLocationsQuery,
+  type GetLocationsQuery,
 } from "../../graphql/getLocations.gql";
 import {
-  GetItemResult,
-  GetItemResultQuery,
-} from "../../graphql/getItemResult.gql";
-import {
   GetCategories,
-  GetCategoriesQuery,
+  type GetCategoriesQuery,
 } from "../../graphql/getCategories.gql";
+import {
+  GetItemResult,
+  type GetItemResultQuery,
+} from "../../graphql/getItemResult.gql";
 
 type handleItemSearch = {
   mode: "scan" | "manual" | "db" | "update";
@@ -59,7 +59,6 @@ export const Route = createFileRoute("/_protected/handle-item")({
         GetItemResult,
         variables
       );
-
 
       return {
         mode,
