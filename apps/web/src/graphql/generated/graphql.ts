@@ -1,0 +1,643 @@
+/* eslint-disable */
+import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
+export type Maybe<T> = T | null;
+export type InputMaybe<T> = Maybe<T>;
+export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
+/** All built-in and custom scalars, mapped to their actual values */
+export type Scalars = {
+  ID: { input: string; output: string; }
+  String: { input: string; output: string; }
+  Boolean: { input: boolean; output: boolean; }
+  Int: { input: number; output: number; }
+  Float: { input: number; output: number; }
+  Date: { input: any; output: any; }
+  /** A datetime string with format `Y-m-d H:i:s`, e.g. `2018-05-23 13:43:32`. */
+  DateTime: { input: any; output: any; }
+  JSON: { input: any; output: any; }
+};
+
+export type Category = {
+  __typename?: 'Category';
+  /** The company that owns this category. */
+  company: Company;
+  /** When the Category was created. */
+  created_at: Scalars['DateTime']['output'];
+  /** Unique primary key. */
+  id: Scalars['ID']['output'];
+  /** Ingredients in this category. */
+  ingredients: Array<Ingredient>;
+  /** Category name. */
+  name: Scalars['String']['output'];
+  /** Preparations in this category. */
+  preparations: Array<Preparation>;
+  /** When the Category was last updated. */
+  updated_at: Scalars['DateTime']['output'];
+};
+
+/** A paginated list of Category items. */
+export type CategoryPaginator = {
+  __typename?: 'CategoryPaginator';
+  /** A list of Category items. */
+  data: Array<Category>;
+  /** Pagination information about the list of items. */
+  paginatorInfo: PaginatorInfo;
+};
+
+export type Company = {
+  __typename?: 'Company';
+  categories: Array<Category>;
+  /** When the company was created. */
+  created_at: Scalars['DateTime']['output'];
+  /** Unique primary key. */
+  id: Scalars['ID']['output'];
+  /** Types de localisation associés à cette entreprise. */
+  locationTypes: Array<LocationType>;
+  locations: Array<Location>;
+  /** Company name. */
+  name: Scalars['String']['output'];
+  /** Preparations associated with this company. */
+  preparations: Array<Preparation>;
+  /** When the company was last updated. */
+  updated_at: Scalars['DateTime']['output'];
+};
+
+/** Champs disponibles pour le tri des entreprises. */
+export enum CompanyOrderByField {
+  CreatedAt = 'CREATED_AT',
+  Id = 'ID',
+  Name = 'NAME',
+  UpdatedAt = 'UPDATED_AT'
+}
+
+/** Options de tri pour les entreprises. */
+export type CompanyOrderByOrderByClause = {
+  /** Champ sur lequel effectuer le tri. */
+  field: CompanyOrderByField;
+  /** Direction du tri. */
+  order: SortOrder;
+};
+
+/** A paginated list of Company items. */
+export type CompanyPaginator = {
+  __typename?: 'CompanyPaginator';
+  /** A list of Company items. */
+  data: Array<Company>;
+  /** Pagination information about the list of items. */
+  paginatorInfo: PaginatorInfo;
+};
+
+export type Ingredient = {
+  __typename?: 'Ingredient';
+  categories: Array<Category>;
+  /** The company that owns this ingredient. */
+  company: Company;
+  /** When the ingredient was created. */
+  created_at: Scalars['DateTime']['output'];
+  /** Unique primary key. */
+  id: Scalars['ID']['output'];
+  image_url?: Maybe<Scalars['String']['output']>;
+  /** Ingredient name. */
+  name: Scalars['String']['output'];
+  quantities: Array<IngredientQuantity>;
+  /** Historique des mouvements de stock pour cet ingrédient */
+  stockMovements: Array<StockMovement>;
+  /** Unit of measurement for the ingredient. */
+  unit: Scalars['String']['output'];
+  /** When the ingredient was last updated. */
+  updated_at: Scalars['DateTime']['output'];
+  /** Number of withdrawals for this ingredient this week. */
+  withdrawals_this_month_count: Scalars['Int']['output'];
+  /** Number of withdrawals for this ingredient today. */
+  withdrawals_this_week_count: Scalars['Int']['output'];
+  withdrawals_today_count: Scalars['Int']['output'];
+};
+
+export type IngredientOrderByClause = {
+  column: IngredientOrderByField;
+  order?: SortOrder;
+};
+
+export enum IngredientOrderByField {
+  CreatedAt = 'CREATED_AT',
+  Id = 'ID',
+  Name = 'NAME',
+  UpdatedAt = 'UPDATED_AT',
+  WithdrawalsThisMonth = 'WITHDRAWALS_THIS_MONTH',
+  WithdrawalsThisWeek = 'WITHDRAWALS_THIS_WEEK',
+  WithdrawalsToday = 'WITHDRAWALS_TODAY'
+}
+
+/** A paginated list of Ingredient items. */
+export type IngredientPaginator = {
+  __typename?: 'IngredientPaginator';
+  /** A list of Ingredient items. */
+  data: Array<Ingredient>;
+  /** Pagination information about the list of items. */
+  paginatorInfo: PaginatorInfo;
+};
+
+export type IngredientQuantity = {
+  __typename?: 'IngredientQuantity';
+  /** La localisation de ce stock. */
+  location: Location;
+  /** Le stock de l'ingrédient. */
+  quantity: Scalars['Float']['output'];
+};
+
+export type Location = {
+  __typename?: 'Location';
+  /** Location company. */
+  company: Company;
+  /** When the location was created. */
+  created_at: Scalars['DateTime']['output'];
+  /** Unique primary key. */
+  id: Scalars['ID']['output'];
+  /** Ingredients stored in this location. */
+  ingredients: Array<Ingredient>;
+  /** Type de localisation (Congélateur, Réfrigérateur, etc.) */
+  locationType?: Maybe<LocationType>;
+  /** Location name. */
+  name: Scalars['String']['output'];
+  /** When the location was last updated. */
+  updated_at: Scalars['DateTime']['output'];
+};
+
+/** Champs disponibles pour le tri des emplacements. */
+export enum LocationOrderByField {
+  CreatedAt = 'CREATED_AT',
+  Id = 'ID',
+  Name = 'NAME',
+  UpdatedAt = 'UPDATED_AT'
+}
+
+/** Options de tri pour les emplacements. */
+export type LocationOrderByOrderByClause = {
+  /** Champ sur lequel effectuer le tri. */
+  field: LocationOrderByField;
+  /** Direction du tri. */
+  order: SortOrder;
+};
+
+/** A paginated list of Location items. */
+export type LocationPaginator = {
+  __typename?: 'LocationPaginator';
+  /** A list of Location items. */
+  data: Array<Location>;
+  /** Pagination information about the list of items. */
+  paginatorInfo: PaginatorInfo;
+};
+
+/** Type de localisation pour organiser les emplacements de stockage */
+export type LocationType = {
+  __typename?: 'LocationType';
+  /** L'entreprise à laquelle appartient ce type. */
+  company: Company;
+  /** Date de création du type. */
+  created_at: Scalars['DateTime']['output'];
+  /** Identifiant unique. */
+  id: Scalars['ID']['output'];
+  /** Indique si c'est un type par défaut (non modifiable). */
+  is_default: Scalars['Boolean']['output'];
+  /** Emplacements utilisant ce type de localisation. */
+  locations: Array<Location>;
+  /** Nom du type de localisation. */
+  name: Scalars['String']['output'];
+  /** Date de dernière mise à jour du type. */
+  updated_at: Scalars['DateTime']['output'];
+};
+
+/** Champs disponibles pour le tri des types de localisation. */
+export enum LocationTypeOrderByField {
+  CreatedAt = 'CREATED_AT',
+  Id = 'ID',
+  IsDefault = 'IS_DEFAULT',
+  Name = 'NAME',
+  UpdatedAt = 'UPDATED_AT'
+}
+
+/** Options de tri pour les types de localisation. */
+export type LocationTypeOrderByOrderByClause = {
+  /** Champ sur lequel effectuer le tri. */
+  field: LocationTypeOrderByField;
+  /** Direction du tri. */
+  order: SortOrder;
+};
+
+/** A paginated list of LocationType items. */
+export type LocationTypePaginator = {
+  __typename?: 'LocationTypePaginator';
+  /** A list of LocationType items. */
+  data: Array<LocationType>;
+  /** Pagination information about the list of items. */
+  paginatorInfo: PaginatorInfo;
+};
+
+/** Représente un produit alimentaire issu d'OpenFoodFacts */
+export type OpenFoodFactsProduct = {
+  __typename?: 'OpenFoodFactsProduct';
+  barcode?: Maybe<Scalars['String']['output']>;
+  base_quantity?: Maybe<Scalars['Float']['output']>;
+  categories?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  imageUrl?: Maybe<Scalars['String']['output']>;
+  is_already_in_database?: Maybe<Scalars['Boolean']['output']>;
+  product_name?: Maybe<Scalars['String']['output']>;
+  unit?: Maybe<Scalars['String']['output']>;
+};
+
+/** Allows ordering a list of records. */
+export type OrderByClause = {
+  /** The column that is used for ordering. */
+  column: Scalars['String']['input'];
+  /** The direction that is used for ordering. */
+  order: SortOrder;
+};
+
+/** Aggregate functions when ordering by a relation without specifying a column. */
+export enum OrderByRelationAggregateFunction {
+  /** Amount of items. */
+  Count = 'COUNT'
+}
+
+/** Aggregate functions when ordering by a relation that may specify a column. */
+export enum OrderByRelationWithColumnAggregateFunction {
+  /** Average. */
+  Avg = 'AVG',
+  /** Amount of items. */
+  Count = 'COUNT',
+  /** Maximum. */
+  Max = 'MAX',
+  /** Minimum. */
+  Min = 'MIN',
+  /** Sum. */
+  Sum = 'SUM'
+}
+
+/** Information about pagination using a fully featured paginator. */
+export type PaginatorInfo = {
+  __typename?: 'PaginatorInfo';
+  /** Number of items in the current page. */
+  count: Scalars['Int']['output'];
+  /** Index of the current page. */
+  currentPage: Scalars['Int']['output'];
+  /** Index of the first item in the current page. */
+  firstItem?: Maybe<Scalars['Int']['output']>;
+  /** Are there more pages after this one? */
+  hasMorePages: Scalars['Boolean']['output'];
+  /** Index of the last item in the current page. */
+  lastItem?: Maybe<Scalars['Int']['output']>;
+  /** Index of the last available page. */
+  lastPage: Scalars['Int']['output'];
+  /** Number of items per page. */
+  perPage: Scalars['Int']['output'];
+  /** Number of total available items. */
+  total: Scalars['Int']['output'];
+};
+
+export type Preparation = {
+  __typename?: 'Preparation';
+  /** The categories associated with this preparation. */
+  categories: Array<Category>;
+  /** The company that produces this preparation. */
+  company: Company;
+  /** When the preparation was created. */
+  created_at: Scalars['DateTime']['output'];
+  entities: Array<PreparationEntity>;
+  /** Unique primary key. */
+  id: Scalars['ID']['output'];
+  locations: Array<Location>;
+  /** Preparation name. */
+  name: Scalars['String']['output'];
+  quantities: Array<PreparationQuantity>;
+  /** Historique des mouvements de stock pour cette préparation */
+  stockMovements: Array<StockMovement>;
+  /** Unit of measurement for the preparation. */
+  unit: Scalars['String']['output'];
+  /** When the preparation was last updated. */
+  updated_at: Scalars['DateTime']['output'];
+  /** Number of withdrawals for this ingredient this week. */
+  withdrawals_this_month_count: Scalars['Int']['output'];
+  /** Number of withdrawals for this ingredient today. */
+  withdrawals_this_week_count: Scalars['Int']['output'];
+  withdrawals_today_count: Scalars['Int']['output'];
+};
+
+export type PreparationEntity = {
+  __typename?: 'PreparationEntity';
+  entity: PreparationEntityItem;
+  id: Scalars['ID']['output'];
+  preparation: Preparation;
+};
+
+export type PreparationEntityItem = Ingredient | Preparation;
+
+export type PreparationOrderByClause = {
+  column: PreparationOrderByField;
+  order?: SortOrder;
+};
+
+export enum PreparationOrderByField {
+  CreatedAt = 'CREATED_AT',
+  Id = 'ID',
+  Name = 'NAME',
+  UpdatedAt = 'UPDATED_AT',
+  WithdrawalsThisMonth = 'WITHDRAWALS_THIS_MONTH',
+  WithdrawalsThisWeek = 'WITHDRAWALS_THIS_WEEK',
+  WithdrawalsToday = 'WITHDRAWALS_TODAY'
+}
+
+/** A paginated list of Preparation items. */
+export type PreparationPaginator = {
+  __typename?: 'PreparationPaginator';
+  /** A list of Preparation items. */
+  data: Array<Preparation>;
+  /** Pagination information about the list of items. */
+  paginatorInfo: PaginatorInfo;
+};
+
+export type PreparationQuantity = {
+  __typename?: 'PreparationQuantity';
+  /** La localisation de ce stock. */
+  location: Location;
+  /** Le stock de la préparation. */
+  quantity: Scalars['Float']['output'];
+};
+
+export type Query = {
+  __typename?: 'Query';
+  /** Find a single Category (only if it belongs to the current company). */
+  Category?: Maybe<Category>;
+  /** List categories for the current company. */
+  categories: CategoryPaginator;
+  /** List multiple companies. */
+  companies: CompanyPaginator;
+  /** Find a single company by an identifying attribute. */
+  company?: Maybe<Company>;
+  /** Find a single ingredient (only if it belongs to the current company). */
+  ingredient?: Maybe<Ingredient>;
+  /** List ingredients for the current company. */
+  ingredients: IngredientPaginator;
+  /** Find a single location (only if it belongs to the current company). */
+  location?: Maybe<Location>;
+  /** Trouve un type de localisation spécifique (seulement s'il appartient à l'entreprise actuelle). */
+  locationType?: Maybe<LocationType>;
+  /** Liste les types de localisation pour l'entreprise actuelle. */
+  locationTypes: LocationTypePaginator;
+  /** List locations for the current company. */
+  locations: LocationPaginator;
+  /** Trouve une preparation (et seulement si elle appartient à ma company) */
+  preparation?: Maybe<Preparation>;
+  /** Liste les preparations de ma company uniquement */
+  preparations: PreparationPaginator;
+  /**
+   * Recherche un produit par code-barres ou par mots-clés.
+   * Si 'barcode' est fourni, la recherche se fait par code-barres.
+   * Sinon, la recherche se fait par mots-clés.
+   */
+  search?: Maybe<OpenFoodFactsProduct>;
+  /** Liste les mouvements de stock pour l'entreprise actuelle. */
+  stockMovements: StockMovementPaginator;
+  /** Find a single user by an identifying attribute. */
+  user?: Maybe<User>;
+  /** List multiple users. */
+  users: UserPaginator;
+};
+
+
+export type QueryCategoryArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryCategoriesArgs = {
+  first?: Scalars['Int']['input'];
+  page?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryCompaniesArgs = {
+  first?: Scalars['Int']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
+  orderBy?: InputMaybe<Array<OrderByClause>>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryCompanyArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryIngredientArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryIngredientsArgs = {
+  categoryIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+  first?: Scalars['Int']['input'];
+  locationIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+  orderBy?: InputMaybe<Array<OrderByClause>>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  unit?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryLocationArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryLocationTypeArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryLocationTypesArgs = {
+  first?: Scalars['Int']['input'];
+  is_default?: InputMaybe<Scalars['Boolean']['input']>;
+  orderBy?: InputMaybe<Array<OrderByClause>>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryLocationsArgs = {
+  first?: Scalars['Int']['input'];
+  locationTypeId?: InputMaybe<Scalars['ID']['input']>;
+  orderBy?: InputMaybe<Array<OrderByClause>>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryPreparationArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryPreparationsArgs = {
+  categoryIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+  first?: Scalars['Int']['input'];
+  locationIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+  orderBy?: InputMaybe<Array<OrderByClause>>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  unit?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QuerySearchArgs = {
+  barcode?: InputMaybe<Scalars['String']['input']>;
+  keyword?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  pageSize?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryStockMovementsArgs = {
+  end_date?: InputMaybe<Scalars['DateTime']['input']>;
+  first?: Scalars['Int']['input'];
+  location_id?: InputMaybe<Scalars['ID']['input']>;
+  orderBy?: InputMaybe<Array<OrderByClause>>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  start_date?: InputMaybe<Scalars['DateTime']['input']>;
+  trackable_id?: InputMaybe<Scalars['ID']['input']>;
+  trackable_type?: InputMaybe<Scalars['String']['input']>;
+  type?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryUserArgs = {
+  email?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type QueryUsersArgs = {
+  first?: Scalars['Int']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** Directions for ordering a list of records. */
+export enum SortOrder {
+  /** Sort records in ascending order. */
+  Asc = 'ASC',
+  /** Sort records in descending order. */
+  Desc = 'DESC'
+}
+
+/** Représente un mouvement de stock d'un ingrédient ou d'une préparation. */
+export type StockMovement = {
+  __typename?: 'StockMovement';
+  /** L'entreprise à laquelle appartient ce mouvement. */
+  company: Company;
+  /** Date et heure de création du mouvement. */
+  created_at: Scalars['DateTime']['output'];
+  /** Identifiant unique. */
+  id: Scalars['ID']['output'];
+  /** L'emplacement où le mouvement a eu lieu. */
+  location: Location;
+  /** Quantité concernée par le mouvement (toujours positive). */
+  quantity: Scalars['Float']['output'];
+  /** Quantité après le mouvement. */
+  quantity_after?: Maybe<Scalars['Float']['output']>;
+  /** Quantité avant le mouvement. */
+  quantity_before?: Maybe<Scalars['Float']['output']>;
+  /** ID de l'entité concernée. */
+  trackable_id: Scalars['ID']['output'];
+  /** Type d'entité concernée par ce mouvement (ingredient ou preparation). */
+  trackable_type: Scalars['String']['output'];
+  /** Type de mouvement: 'addition' ou 'withdrawal'. */
+  type: Scalars['String']['output'];
+  /** Date et heure de dernière mise à jour du mouvement. */
+  updated_at: Scalars['DateTime']['output'];
+  /** L'utilisateur qui a effectué l'opération. */
+  user?: Maybe<User>;
+};
+
+/** Options de tri pour les mouvements de stock. */
+export type StockMovementOrderByClause = {
+  /** Champ sur lequel effectuer le tri. */
+  field: StockMovementOrderByField;
+  /** Direction du tri. */
+  order: SortOrder;
+};
+
+/** Champs disponibles pour le tri des mouvements de stock. */
+export enum StockMovementOrderByField {
+  CreatedAt = 'CREATED_AT',
+  Id = 'ID',
+  Quantity = 'QUANTITY',
+  QuantityAfter = 'QUANTITY_AFTER',
+  QuantityBefore = 'QUANTITY_BEFORE',
+  Type = 'TYPE',
+  UpdatedAt = 'UPDATED_AT'
+}
+
+/** A paginated list of StockMovement items. */
+export type StockMovementPaginator = {
+  __typename?: 'StockMovementPaginator';
+  /** A list of StockMovement items. */
+  data: Array<StockMovement>;
+  /** Pagination information about the list of items. */
+  paginatorInfo: PaginatorInfo;
+};
+
+/** Specify if you want to include or exclude trashed results from a query. */
+export enum Trashed {
+  /** Only return trashed results. */
+  Only = 'ONLY',
+  /** Return both trashed and non-trashed results. */
+  With = 'WITH',
+  /** Only return non-trashed results. */
+  Without = 'WITHOUT'
+}
+
+/** Account of a person who uses this application. */
+export type User = {
+  __typename?: 'User';
+  /** The company this user belongs to. */
+  company?: Maybe<Company>;
+  /** When the account was created. */
+  created_at: Scalars['DateTime']['output'];
+  /** Unique email address. */
+  email: Scalars['String']['output'];
+  /** When the email was verified. */
+  email_verified_at?: Maybe<Scalars['DateTime']['output']>;
+  /** Unique primary key. */
+  id: Scalars['ID']['output'];
+  /** Non-unique name. */
+  name: Scalars['String']['output'];
+  /** When the account was last updated. */
+  updated_at: Scalars['DateTime']['output'];
+};
+
+/** A paginated list of User items. */
+export type UserPaginator = {
+  __typename?: 'UserPaginator';
+  /** A list of User items. */
+  data: Array<User>;
+  /** Pagination information about the list of items. */
+  paginatorInfo: PaginatorInfo;
+};
+
+export type GetLocationsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetLocationsQuery = { __typename?: 'Query', locations: { __typename?: 'LocationPaginator', data: Array<{ __typename?: 'Location', name: string, id: string }> } };
+
+
+export const GetLocationsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetLocations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"data"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]}}]} as unknown as DocumentNode<GetLocationsQuery, GetLocationsQueryVariables>;
