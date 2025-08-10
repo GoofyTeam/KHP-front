@@ -3,6 +3,10 @@ import { query } from "@/lib/ApolloClient";
 import { QuickAccessButton } from "@workspace/ui/components/quick-access-button";
 import Link from "next/link";
 
+// Avoid static generation rendering for this page
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function Dashboard() {
   const { data, loading, error } = await query({
     query: GetLocationsDocument,

@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "generate-pwa-assets": "pwa-assets-generator",
-    "introspect": "get-graphql-schema http://localhost:8000/graphql > src/graphql/generated/schema.graphql"
+    "introspect": "get-graphql-schema https://back.goofykhp.fr/graphql > src/graphql/generated/schema.graphql"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.10",
@@ -18,6 +18,7 @@
     "@tanstack/react-router-devtools": "^1.125.1",
     "@uidotdev/usehooks": "^2.4.1",
     "@workspace/ui": "*",
+    "get-graphql-schema": "^2.1.2",
     "graphql": "^16.11.0",
     "graphql-request": "^7.2.0",
     "react": "^19.0.0",
@@ -37,7 +38,6 @@
     "eslint": "^9.18.0",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.18",
-    "get-graphql-schema": "^2.1.2",
     "globals": "^15.14.0",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.20.0",
