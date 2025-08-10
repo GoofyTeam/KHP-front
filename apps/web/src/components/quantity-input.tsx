@@ -27,30 +27,29 @@ export function QuantityInput({
 
   useEffect(() => {
     if (autoFocus && inputRefs.current[0] && !disabled) {
-      inputRefs.current[0].focus();
+      setTimeout(() => inputRefs.current[0]?.focus(), 100);
     }
   }, [autoFocus, disabled]);
 
-  const handleInputChange = (index: number, inputValue: string) => {
-    if (!/^\d$/.test(inputValue) && inputValue !== "") return;
+  const getFormattedValue = (val: string) => {
+    return val.padEnd(6, " ");
+  };
 
-    const newValue = value.padEnd(6, "").split("");
-    newValue[index] = inputValue;
-    onChange(newValue.join("").replace(/\s+$/, ""));
+  const handleInputChange = (index: number, inputValue: string) => {
+    if (!/^\d?$/.test(inputValue)) return;
+
+    const currentFormatted = getFormattedValue(value);
+    const newValueArray = currentFormatted.split("");
+    newValueArray[index] = inputValue || " ";
+
+    const newValue = newValueArray.join("").replace(/\s+$/, "");
+    onChange(newValue);
 
     if (inputValue && index < 5) {
-      let nextIndex;
-      if (index < 2) {
-        nextIndex = index + 1;
-      } else if (index === 2) {
-        nextIndex = 3;
-      } else {
-        nextIndex = index + 1;
-      }
-
+      const nextIndex = index + 1;
       const nextInput = inputRefs.current[nextIndex];
       if (nextInput) {
-        nextInput.focus();
+        setTimeout(() => nextInput.focus(), 10);
       }
     }
   };
@@ -60,28 +59,48 @@ export function QuantityInput({
     e: React.KeyboardEvent<HTMLInputElement>
   ) => {
     if (e.key === "Backspace") {
-      if (!value[index] && index > 0) {
-        let prevIndex;
-        if (index === 3) {
-          prevIndex = 2;
-        } else {
-          prevIndex = index - 1;
-        }
+      const currentFormatted = getFormattedValue(value);
 
-        const prevInput = inputRefs.current[prevIndex];
-        if (prevInput) {
-          prevInput.focus();
+      if (!currentFormatted[index] || currentFormatted[index] === " ") {
+        if (index > 0) {
+          const prevInput = inputRefs.current[index - 1];
+          if (prevInput) {
+            setTimeout(() => prevInput.focus(), 10);
+          }
         }
-      } else if (value[index]) {
-        const newValue = value.padEnd(6, "").split("");
-        newValue[index] = "";
-        onChange(newValue.join("").replace(/\s+$/, ""));
+      } else {
+        const newValueArray = currentFormatted.split("");
+        newValueArray[index] = " ";
+        const newValue = newValueArray.join("").replace(/\s+$/, "");
+        onChange(newValue);
+      }
+    }
+    if (e.key === "ArrowLeft" && index > 0) {
+      e.preventDefault();
+      const prevInput = inputRefs.current[index - 1];
+      if (prevInput) {
+        setTimeout(() => prevInput.focus(), 10);
       }
     }
 
+    if (e.key === "ArrowRight" && index < 5) {
+      e.preventDefault();
+      const nextInput = inputRefs.current[index + 1];
+      if (nextInput) {
+        setTimeout(() => nextInput.focus(), 10);
+      }
+    }
     if (
       !/[0-9]/.test(e.key) &&
-      !["Backspace", "Delete", "Tab", "ArrowLeft", "ArrowRight"].includes(e.key)
+      ![
+        "Backspace",
+        "Delete",
+        "Tab",
+        "ArrowLeft",
+        "ArrowRight",
+        "Home",
+        "End",
+      ].includes(e.key)
     ) {
       e.preventDefault();
     }
@@ -91,13 +110,13 @@ export function QuantityInput({
     e.preventDefault();
     const pastedText = e.clipboardData.getData("text").replace(/\D/g, "");
     if (pastedText.length > 0) {
-      const newValue = pastedText.padEnd(6, "").slice(0, 6);
-      onChange(newValue.replace(/\s+$/, ""));
+      const limitedText = pastedText.slice(0, 6);
+      onChange(limitedText);
 
-      const lastFilledIndex = Math.min(pastedText.length - 1, 5);
-      const targetInput = inputRefs.current[lastFilledIndex];
+      const lastIndex = Math.min(limitedText.length - 1, 5);
+      const targetInput = inputRefs.current[lastIndex];
       if (targetInput) {
-        setTimeout(() => targetInput.focus(), 0);
+        setTimeout(() => targetInput.focus(), 10);
       }
     }
   };
@@ -106,14 +125,16 @@ export function QuantityInput({
     inputRefs.current[index] = el;
   };
 
+  const formattedValue = getFormattedValue(value);
+
   return (
     <div className={`w-full ${className}`}>
       <h3 className="text-sm sm:text-base font-semibold text-khp-text-primary mb-2">
         {title}
       </h3>
       <div className="flex items-center justify-center gap-3 w-full">
-        <div className="border-2 border-khp-primary rounded-xl py-3 sm:py-4 px-6 sm:px-8 transition-colors focus-within:border-khp-primary-hover bg-white w-full">
-          <div className="flex items-center justify-center gap-1 sm:gap-1.5">
+        <div className="border-2 border-khp-primary rounded-xl py-1 px-2 sm:py-2 sm:px-4 transition-colors focus-within:border-khp-primary-hover bg-white w-full">
+          <div className="flex items-center justify-center gap-0.5 sm:gap-1">
             {[0, 1, 2].map((index) => (
               <input
                 key={index}
@@ -122,18 +143,20 @@ export function QuantityInput({
                 inputMode="numeric"
                 pattern="[0-9]*"
                 maxLength={1}
-                value={value[index] || ""}
+                value={
+                  formattedValue[index] === " " ? "" : formattedValue[index]
+                }
                 onChange={(e) => handleInputChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 onPaste={handlePaste}
                 disabled={disabled}
-                className="w-12 sm:w-16 md:w-20 lg:w-24 h-16 sm:h-20 md:h-24 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-mono border-none bg-transparent text-left pl-2 focus:outline-none focus:ring-0 placeholder:opacity-50"
+                className="w-10 sm:w-12 md:w-16 h-14 sm:h-16 md:h-20 text-3xl sm:text-2xl md:text-3xl lg:text-4xl font-bold font-mono border-none bg-transparent text-center focus:outline-none focus:ring-0 placeholder:opacity-50"
                 placeholder={placeholder}
               />
             ))}
 
-            <div className="w-4 sm:w-5 h-16 sm:h-20 md:h-24 flex items-center justify-center">
-              <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-mono text-khp-text-primary">
+            <div className="w-4 sm:w-4 h-14 sm:h-16 md:h-20 flex items-center justify-center">
+              <span className="text-3xl sm:text-2xl md:text-3xl lg:text-4xl font-bold font-mono text-khp-text-primary">
                 .
               </span>
             </div>
@@ -146,12 +169,14 @@ export function QuantityInput({
                 inputMode="numeric"
                 pattern="[0-9]*"
                 maxLength={1}
-                value={value[index] || ""}
+                value={
+                  formattedValue[index] === " " ? "" : formattedValue[index]
+                }
                 onChange={(e) => handleInputChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 onPaste={handlePaste}
                 disabled={disabled}
-                className="w-12 sm:w-16 md:w-20 lg:w-24 h-16 sm:h-20 md:h-24 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-mono border-none bg-transparent text-left pl-2 focus:outline-none focus:ring-0 placeholder:opacity-50"
+                className="w-10 sm:w-12 md:w-16 h-14 sm:h-16 md:h-20 text-3xl sm:text-2xl md:text-3xl lg:text-4xl font-bold font-mono border-none bg-transparent text-center focus:outline-none focus:ring-0 placeholder:opacity-50"
                 placeholder={placeholder}
               />
             ))}
