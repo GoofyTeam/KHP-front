@@ -1,16 +1,16 @@
 import { notFound } from "next/navigation";
 import { query } from "@/lib/ApolloClient";
-import { GetIngredientDocument } from "@/graphql/generated/graphql";
-import type { Ingredient } from "../../../../types/stocks";
-import Link from "next/link";
+import {
+  GetIngredientDocument,
+  GetLocationsDocument,
+} from "@/graphql/generated/graphql";
+import type { Ingredient, Location } from "../../../../../types/stocks";
 import Image from "next/image";
-import { CategoryBadge } from "../../../../components/category-badge";
-import { Button } from "@workspace/ui/components/button";
-import { MovementHistory } from "../../../../components/movement-history";
-import { IngredientPageClient } from "../../../../components/ingredient-page-client";
-import { IngredientStockDisplay } from "../../../../components/ingredient-stock-display";
+import { CategoryBadge } from "../../../../../components/category-badge";
+import { MoveQuantityForm } from "../../../../../components/move-quantity-form";
+import { IngredientPageClient } from "../../../../../components/ingredient-page-client";
 
-interface IngredientPageProps {
+interface MovePageProps {
   params: Promise<{
     id: string;
   }>;
@@ -18,7 +18,7 @@ interface IngredientPageProps {
 
 async function fetchIngredient(id: string): Promise<Ingredient> {
   try {
-    const { data, error } = await query({
+    const { data, loading, error } = await query({
       query: GetIngredientDocument,
       variables: { id },
     });
@@ -49,19 +49,40 @@ async function fetchIngredient(id: string): Promise<Ingredient> {
   }
 }
 
-export default async function IngredientPage({ params }: IngredientPageProps) {
+async function fetchLocations(): Promise<Location[]> {
+  try {
+    const { data, error } = await query({
+      query: GetLocationsDocument,
+      variables: {},
+    });
+
+    if (error) {
+      console.error("GraphQL error:", error);
+      throw error;
+    }
+
+    return data?.locations?.data || [];
+  } catch (error) {
+    console.error("Error fetching locations:", error);
+    return [];
+  }
+}
+
+export default async function MoveQuantityPage({ params }: MovePageProps) {
   const { id } = await params;
 
   if (!id) {
     notFound();
   }
 
-  const ingredient = await fetchIngredient(id);
+  const [ingredient, locations] = await Promise.all([
+    fetchIngredient(id),
+    fetchLocations(),
+  ]);
 
   return (
     <IngredientPageClient ingredient={ingredient}>
       <div className="w-full flex flex-col lg:flex-row gap-8">
-        {/* Colonne 1 */}
         <div className="flex flex-col gap-8 justify-center items-center w-full lg:w-1/2">
           <div className="text-center space-y-4 w-full lg:w-3/4 max-w-md">
             <h1 className="text-3xl lg:text-5xl font-bold text-khp-text-primary leading-tight">
@@ -77,7 +98,7 @@ export default async function IngredientPage({ params }: IngredientPageProps) {
                   alt={ingredient.name}
                   width={400}
                   height={400}
-                  className="w-full h-full  transition-transform duration-300"
+                  className="w-full h-full transition-transform duration-300"
                   unoptimized={process.env.NODE_ENV === "development"}
                 />
               ) : (
@@ -94,31 +115,15 @@ export default async function IngredientPage({ params }: IngredientPageProps) {
               )}
             </div>
           </div>
-          <div className="mt-8 w-full lg:w-3/4 max-w-md">
-            <Link href={`/ingredient/${id}/move`}>
-              <Button variant="khp-outline" size="xl-full">
-                Déplacer la quantité
-              </Button>
-            </Link>
-          </div>
+          <div className="mt-8 w-full h-16 hidden lg:block"></div>
         </div>
 
         {/* Colonne 2 */}
         <div className="w-full lg:w-1/2 flex flex-col justify-center mb-10 lg:mb-0">
           <div className="w-full lg:w-3/4 max-w-md flex flex-col gap-6">
-            <p>
-              {ingredient.name} apporte des haricots fondants en sauce tomate
-              sucrée-acidulée, idéale pour enrichir en un clin d&apos;œil
-              purées, gratins ou mijotés.
-            </p>
-          </div>
-
-          <IngredientStockDisplay ingredient={ingredient} />
-
-          <div className="w-full lg:w-3/4 max-w-md">
-            <MovementHistory
-              movements={ingredient.stockMovements || []}
-              unit={ingredient.unit}
+            <MoveQuantityForm
+              ingredient={ingredient}
+              allLocations={locations}
             />
           </div>
         </div>

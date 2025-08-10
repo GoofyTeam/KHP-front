@@ -2,8 +2,8 @@ import { ArrowDown, ArrowUp } from "lucide-react";
 import { ScrollArea } from "@workspace/ui/components/scroll-area";
 
 type Movement = {
-  quantity_before: number;
-  quantity_after: number;
+  quantity_before?: number | null;
+  quantity_after?: number | null;
   type: string;
   created_at?: string;
 };
@@ -44,7 +44,9 @@ export function MovementHistory({
         <ScrollArea className={`${maxHeightClass} w-full`}>
           <div className="px-2 divide-y divide-khp-border">
             {movements.map((m, idx) => {
-              const delta = Math.abs(m.quantity_after - m.quantity_before);
+              const quantityBefore = m.quantity_before ?? 0;
+              const quantityAfter = m.quantity_after ?? 0;
+              const delta = Math.abs(quantityAfter - quantityBefore);
               const isAddition = m.type === "addition";
               const iconClasses = isAddition
                 ? "text-khp-primary bg-khp-primary/10"
