@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
-import { useRef, useState } from "react";
+import { useRef, useState, type ChangeEvent } from "react";
 
 import { Minus, Plus, Image } from "lucide-react";
 import api from "../lib/api";
@@ -74,7 +74,7 @@ function HandleItem() {
           name: values.product_name,
           unit: values.product_units,
           categories: [values.product_category],
-          quantities: values.stockEntries.map((entry) => ({
+          quantities: values.stockEntries.map((entry: HandleItem["stockEntries"][number]) => ({
             quantity: parseInt(entry.quantity),
             location_id: entry.location,
           })),
@@ -93,7 +93,7 @@ function HandleItem() {
           name: values.product_name,
           unit: values.product_units,
           categories: [values.product_category],
-          quantities: values.stockEntries.map((entry) => ({
+          quantities: values.stockEntries.map((entry: HandleItem["stockEntries"][number]) => ({
             quantity: parseInt(entry.quantity),
             location_id: entry.location,
           })),
@@ -145,11 +145,11 @@ function HandleItem() {
                     name={name}
                     accept="image/*"
                     capture="environment"
-                    ref={(e) => {
+                    ref={(e: HTMLInputElement | null) => {
                       ref(e);
                       inputRef.current = e;
                     }}
-                    onChange={(e) => {
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
                       const file = e.target.files?.[0];
                       if (file) {
                         const reader = new FileReader();
@@ -207,7 +207,7 @@ function HandleItem() {
                       {product &&
                         product.categories &&
                         product.categories.length > 0 &&
-                        product.categories.map((category) => (
+                        product.categories.map((category: string | null) => (
                           <SelectItem
                             key={category || "default"}
                             value={category || ""}
@@ -216,7 +216,7 @@ function HandleItem() {
                           </SelectItem>
                         ))}
                       {categories &&
-                        categories.map((categorie) => (
+                        categories.map((categorie: { id: string; name: string }) => (
                           <SelectItem key={categorie.id} value={categorie.name}>
                             {categorie.name}
                           </SelectItem>
@@ -253,7 +253,7 @@ function HandleItem() {
                 ? "Register the loss of the ingredient"
                 : "Stock entries"}
             </h3>
-            {fields.map((field, index) => (
+            {fields.map((field: (typeof fields)[number], index: number) => (
               <div key={field.id} className="grid grid-cols-2 gap-4">
                 {/* Quantité */}
                 <FormField
@@ -287,7 +287,7 @@ function HandleItem() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {availableLocations.map((location) => (
+                          {availableLocations.map((location: { id: string; name: string }) => (
                             <SelectItem key={location.id} value={location.id}>
                               {location.name}
                             </SelectItem>
