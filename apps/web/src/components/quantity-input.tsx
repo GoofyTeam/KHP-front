@@ -32,14 +32,22 @@ export function QuantityInput({
   }, [autoFocus, disabled]);
 
   const handleInputChange = (index: number, inputValue: string) => {
-    if (!/^\d*$/.test(inputValue)) return;
+    if (!/^\d$/.test(inputValue) && inputValue !== "") return;
 
-    const newValue = value.split("");
+    const newValue = value.padEnd(6, "").split("");
     newValue[index] = inputValue;
-    onChange(newValue.join(""));
+    onChange(newValue.join("").replace(/\s+$/, ""));
 
     if (inputValue && index < 5) {
-      const nextIndex = index < 2 ? index + 1 : index + 2;
+      let nextIndex;
+      if (index < 2) {
+        nextIndex = index + 1;
+      } else if (index === 2) {
+        nextIndex = 3;
+      } else {
+        nextIndex = index + 1;
+      }
+
       const nextInput = inputRefs.current[nextIndex];
       if (nextInput) {
         nextInput.focus();
@@ -51,11 +59,45 @@ export function QuantityInput({
     index: number,
     e: React.KeyboardEvent<HTMLInputElement>
   ) => {
-    if (e.key === "Backspace" && !value[index] && index > 0) {
-      const prevIndex = index > 3 ? index - 2 : index - 1;
-      const prevInput = inputRefs.current[prevIndex];
-      if (prevInput) {
-        prevInput.focus();
+    if (e.key === "Backspace") {
+      if (!value[index] && index > 0) {
+        let prevIndex;
+        if (index === 3) {
+          prevIndex = 2;
+        } else {
+          prevIndex = index - 1;
+        }
+
+        const prevInput = inputRefs.current[prevIndex];
+        if (prevInput) {
+          prevInput.focus();
+        }
+      } else if (value[index]) {
+        const newValue = value.padEnd(6, "").split("");
+        newValue[index] = "";
+        onChange(newValue.join("").replace(/\s+$/, ""));
+      }
+    }
+
+    if (
+      !/[0-9]/.test(e.key) &&
+      !["Backspace", "Delete", "Tab", "ArrowLeft", "ArrowRight"].includes(e.key)
+    ) {
+      e.preventDefault();
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pastedText = e.clipboardData.getData("text").replace(/\D/g, "");
+    if (pastedText.length > 0) {
+      const newValue = pastedText.padEnd(6, "").slice(0, 6);
+      onChange(newValue.replace(/\s+$/, ""));
+
+      const lastFilledIndex = Math.min(pastedText.length - 1, 5);
+      const targetInput = inputRefs.current[lastFilledIndex];
+      if (targetInput) {
+        setTimeout(() => targetInput.focus(), 0);
       }
     }
   };
@@ -65,28 +107,33 @@ export function QuantityInput({
   };
 
   return (
-    <div className={`space-y-2 ${className}`}>
-      <h3 className="text-base font-semibold text-khp-text-primary">{title}</h3>
-      <div className="flex items-center justify-center sm:justify-start gap-3">
-        <div className="border-2 border-khp-primary rounded-xl p-3 transition-colors focus-within:border-khp-primary-hover bg-white">
-          <div className="flex items-center gap-2">
+    <div className={`w-full ${className}`}>
+      <h3 className="text-sm sm:text-base font-semibold text-khp-text-primary mb-2">
+        {title}
+      </h3>
+      <div className="flex items-center justify-center gap-3 w-full">
+        <div className="border-2 border-khp-primary rounded-xl py-3 sm:py-4 px-6 sm:px-8 transition-colors focus-within:border-khp-primary-hover bg-white w-full">
+          <div className="flex items-center justify-center gap-1 sm:gap-1.5">
             {[0, 1, 2].map((index) => (
               <input
                 key={index}
                 ref={setInputRef(index)}
                 type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 maxLength={1}
                 value={value[index] || ""}
                 onChange={(e) => handleInputChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
+                onPaste={handlePaste}
                 disabled={disabled}
-                className="w-12 h-20 text-4xl font-bold font-mono border-none bg-transparent text-left pl-2 focus:outline-none focus:ring-0 placeholder:text-4xl placeholder:text-gray-400"
+                className="w-12 sm:w-16 md:w-20 lg:w-24 h-16 sm:h-20 md:h-24 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-mono border-none bg-transparent text-left pl-2 focus:outline-none focus:ring-0 placeholder:opacity-50"
                 placeholder={placeholder}
               />
             ))}
 
-            <div className="w-3 h-20 flex items-center justify-center">
-              <span className="text-3xl font-bold font-mono text-khp-text-primary">
+            <div className="w-4 sm:w-5 h-16 sm:h-20 md:h-24 flex items-center justify-center">
+              <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-mono text-khp-text-primary">
                 .
               </span>
             </div>
@@ -96,12 +143,15 @@ export function QuantityInput({
                 key={index}
                 ref={setInputRef(index)}
                 type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 maxLength={1}
                 value={value[index] || ""}
                 onChange={(e) => handleInputChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
+                onPaste={handlePaste}
                 disabled={disabled}
-                className="w-12 h-20 text-4xl font-bold font-mono border-none bg-transparent text-left pl-2 focus:outline-none focus:ring-0 placeholder:text-4xl placeholder:text-gray-400"
+                className="w-12 sm:w-16 md:w-20 lg:w-24 h-16 sm:h-20 md:h-24 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-mono border-none bg-transparent text-left pl-2 focus:outline-none focus:ring-0 placeholder:opacity-50"
                 placeholder={placeholder}
               />
             ))}
@@ -109,7 +159,7 @@ export function QuantityInput({
         </div>
 
         {unit && (
-          <span className="text-lg font-medium text-khp-text-primary">
+          <span className="text-sm sm:text-base md:text-lg font-medium text-khp-text-primary flex-shrink-0">
             {unit}
           </span>
         )}
