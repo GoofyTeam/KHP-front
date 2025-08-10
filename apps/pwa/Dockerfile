@@ -4,8 +4,8 @@ FROM node:22-alpine AS base
 ARG VITE_PROJECT_NAME
 ARG VITE_API_URL
 
-ENV VITE_PROJECT_NAME=${VITE_PROJECT_NAME:-"KHP PWA"}
-ENV VITE_API_URL=${VITE_API_URL:-"http://localhost:3000/api"}
+ENV VITE_PROJECT_NAME=${VITE_PROJECT_NAME:-"KHP App"}
+ENV VITE_API_URL=${VITE_API_URL:-""}
 
 RUN apk update && apk add --no-cache libc6-compat
         
@@ -33,6 +33,8 @@ RUN npm ci
 
 # Copy source and build
 COPY --from=builder /app/out/full/ ./
+
+RUN npm run -w apps/pwa introspect
 
 RUN turbo run build
 
