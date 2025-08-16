@@ -252,6 +252,60 @@ type LocationTypePaginator {
   data: [LocationType!]!
 }
 
+"""Représente une perte d'ingrédient ou de préparation."""
+type Loss {
+  """Identifiant unique."""
+  id: ID!
+
+  """Type d'entité concernée par cette perte (ingredient ou preparation)."""
+  lossable_type: String!
+
+  """ID de l'entité concernée."""
+  lossable_id: ID!
+
+  """L'emplacement où la perte a eu lieu."""
+  location: Location!
+
+  """L'entreprise à laquelle appartient cette perte."""
+  company: Company!
+
+  """L'utilisateur qui a enregistré la perte."""
+  user: User
+
+  """Quantité perdue."""
+  quantity: Float!
+
+  """Raison de la perte."""
+  reason: String
+
+  """Date et heure de création de la perte."""
+  created_at: DateTime!
+
+  """Date et heure de dernière mise à jour de la perte."""
+  updated_at: DateTime!
+}
+
+input LossOrderByClause {
+  field: LossOrderByField!
+  order: SortOrder!
+}
+
+enum LossOrderByField {
+  ID
+  QUANTITY
+  CREATED_AT
+  UPDATED_AT
+}
+
+"""A paginated list of Loss items."""
+type LossPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of Loss items."""
+  data: [Loss!]!
+}
+
 """Représente un produit alimentaire issu d'OpenFoodFacts"""
 type OpenFoodFactsProduct {
   barcode: String
@@ -560,6 +614,22 @@ type Query {
     """The offset from which items are returned."""
     page: Int
   ): LocationTypePaginator!
+
+  """Liste les pertes pour l'entreprise actuelle."""
+  losses(
+    trackable_type: String
+    trackable_id: ID
+    location_id: ID
+    start_date: DateTime
+    end_date: DateTime
+    orderBy: [OrderByClause!]
+
+    """Limits number of fetched items."""
+    first: Int! = 10
+
+    """The offset from which items are returned."""
+    page: Int
+  ): LossPaginator!
 
   """Liste les preparations de ma company uniquement"""
   preparations(

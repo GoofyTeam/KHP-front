@@ -1,11 +1,11 @@
 import { GraphQLClient, RequestDocument, Variables } from "graphql-request";
 import api from "./api";
 
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  (import.meta.env.MODE === "production"
+const API_URL = import.meta.env.VITE_API_URL
+  ? import.meta.env.VITE_API_URL
+  : import.meta.env.MODE === "production"
     ? "https://app.goofykhp.fr"
-    : "http://localhost:8000");
+    : null;
 
 async function csrfFetch(
   input: string | URL | Request,

@@ -1,8 +1,8 @@
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  (process.env.NODE_ENV === "production"
+const API_URL = process.env.NEXT_PUBLIC_API_URL
+  ? process.env.NEXT_PUBLIC_API_URL
+  : process.env.NODE_ENV === "production"
     ? "https://dash.goofykhp.fr"
-    : "http://localhost:8000");
+    : null;
 
 const isBrowser = typeof window !== "undefined";
 

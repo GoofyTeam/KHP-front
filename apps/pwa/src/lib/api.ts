@@ -1,11 +1,11 @@
 import { ImprovedHttpClient } from "./http-client";
 import type { HttpClientConfig } from "../types/http-client";
 
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  (import.meta.env.MODE === "production"
+const API_URL = import.meta.env.VITE_API_URL
+  ? import.meta.env.VITE_API_URL
+  : import.meta.env.MODE === "production"
     ? "https://app.goofykhp.fr"
-    : "http://localhost:8000");
+    : null;
 
 const config: HttpClientConfig = {
   baseUrl: API_URL,

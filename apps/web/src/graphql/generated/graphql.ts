@@ -236,6 +236,52 @@ export type LocationTypePaginator = {
   paginatorInfo: PaginatorInfo;
 };
 
+/** Représente une perte d'ingrédient ou de préparation. */
+export type Loss = {
+  __typename?: 'Loss';
+  /** L'entreprise à laquelle appartient cette perte. */
+  company: Company;
+  /** Date et heure de création de la perte. */
+  created_at: Scalars['DateTime']['output'];
+  /** Identifiant unique. */
+  id: Scalars['ID']['output'];
+  /** L'emplacement où la perte a eu lieu. */
+  location: Location;
+  /** ID de l'entité concernée. */
+  lossable_id: Scalars['ID']['output'];
+  /** Type d'entité concernée par cette perte (ingredient ou preparation). */
+  lossable_type: Scalars['String']['output'];
+  /** Quantité perdue. */
+  quantity: Scalars['Float']['output'];
+  /** Raison de la perte. */
+  reason?: Maybe<Scalars['String']['output']>;
+  /** Date et heure de dernière mise à jour de la perte. */
+  updated_at: Scalars['DateTime']['output'];
+  /** L'utilisateur qui a enregistré la perte. */
+  user?: Maybe<User>;
+};
+
+export type LossOrderByClause = {
+  field: LossOrderByField;
+  order: SortOrder;
+};
+
+export enum LossOrderByField {
+  CreatedAt = 'CREATED_AT',
+  Id = 'ID',
+  Quantity = 'QUANTITY',
+  UpdatedAt = 'UPDATED_AT'
+}
+
+/** A paginated list of Loss items. */
+export type LossPaginator = {
+  __typename?: 'LossPaginator';
+  /** A list of Loss items. */
+  data: Array<Loss>;
+  /** Pagination information about the list of items. */
+  paginatorInfo: PaginatorInfo;
+};
+
 /** Représente un produit alimentaire issu d'OpenFoodFacts */
 export type OpenFoodFactsProduct = {
   __typename?: 'OpenFoodFactsProduct';
@@ -388,6 +434,8 @@ export type Query = {
   locationTypes: LocationTypePaginator;
   /** List locations for the current company. */
   locations: LocationPaginator;
+  /** Liste les pertes pour l'entreprise actuelle. */
+  losses: LossPaginator;
   /** Trouve une preparation (et seulement si elle appartient à ma company) */
   preparation?: Maybe<Preparation>;
   /** Liste les preparations de ma company uniquement */
@@ -478,6 +526,18 @@ export type QueryLocationsArgs = {
   orderBy?: InputMaybe<Array<OrderByClause>>;
   page?: InputMaybe<Scalars['Int']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryLossesArgs = {
+  end_date?: InputMaybe<Scalars['DateTime']['input']>;
+  first?: Scalars['Int']['input'];
+  location_id?: InputMaybe<Scalars['ID']['input']>;
+  orderBy?: InputMaybe<Array<OrderByClause>>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  start_date?: InputMaybe<Scalars['DateTime']['input']>;
+  trackable_id?: InputMaybe<Scalars['ID']['input']>;
+  trackable_type?: InputMaybe<Scalars['String']['input']>;
 };
 
 

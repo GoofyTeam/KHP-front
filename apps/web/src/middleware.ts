@@ -14,10 +14,17 @@ const authRoutes = [
   "/forgot-password",
   "/reset-password",
 ];
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || process.env.NODE_ENV === "production"
+const API_URL = process.env.NEXT_PUBLIC_API_URL
+  ? process.env.NEXT_PUBLIC_API_URL
+  : process.env.NODE_ENV === "production"
     ? "https://dash.goofykhp.fr"
     : null;
+
+console.log("[MW] API URL:", API_URL);
+console.log(
+  "[MW] process.env.NEXT_PUBLIC_API_URL:",
+  process.env.NEXT_PUBLIC_API_URL
+);
 
 const serverHttpClient = {
   async fetch(endpoint: string, req: NextRequest): Promise<Response> {
