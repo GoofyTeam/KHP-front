@@ -83,14 +83,14 @@ export default async function MoveQuantityPage({ params }: MovePageProps) {
   return (
     <IngredientPageClient ingredient={ingredient}>
       <div className="w-full flex flex-col lg:flex-row gap-8">
-        <div className="flex flex-col gap-8 justify-center items-center w-full lg:w-1/2">
+        <div className="flex flex-col gap-8 justify-center items-center w-full h-fit lg:w-1/2">
           <div className="text-center space-y-4 w-full lg:w-3/4 max-w-md">
             <h1 className="text-3xl lg:text-5xl font-bold text-khp-text-primary leading-tight">
               {ingredient.name}
             </h1>
             <CategoryBadge categories={ingredient.categories} />
           </div>
-          <div className="w-full lg:w-3/4 max-w-md">
+          <div className="w-full lg:w-1/2 max-w-md">
             <div className="aspect-square rounded-xl overflow-hidden bg-khp-background-secondary">
               {ingredient.image_url ? (
                 <Image
@@ -120,7 +120,7 @@ export default async function MoveQuantityPage({ params }: MovePageProps) {
 
         {/* Colonne 2 */}
         <div className="w-full lg:w-1/2 flex flex-col justify-center mb-10 lg:mb-0">
-          <div className="w-full lg:w-3/4 max-w-md flex flex-col gap-6">
+          <div className="w-full lg:w-4/5 flex flex-col gap-6">
             <MoveQuantityForm
               ingredient={ingredient}
               allLocations={locations}

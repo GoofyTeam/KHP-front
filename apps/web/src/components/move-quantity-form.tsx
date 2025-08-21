@@ -40,13 +40,9 @@ export function MoveQuantityForm({
   const maxQuantity = selectedSourceLocation?.quantity || 0;
 
   const getQuantityFromOTP = () => {
-    if (formData.quantityOTP.length === 0) return 0;
+    if (!formData.quantityOTP || formData.quantityOTP.length === 0) return 0;
 
-    const padded = formData.quantityOTP.padEnd(6, "0");
-    const beforeDecimal = padded.slice(0, 3) || "000";
-    const afterDecimal = padded.slice(3, 6) || "000";
-
-    return parseFloat(`${beforeDecimal}.${afterDecimal}`);
+    return parseFloat(formData.quantityOTP) || 0;
   };
 
   const moveQuantity = getQuantityFromOTP();
@@ -55,9 +51,8 @@ export function MoveQuantityForm({
     (location) => location.id !== selectedSourceLocation?.location.id
   );
 
-  // Convert available destinations to IngredientQuantity format for LocationSelector
   const destinationQuantities = availableDestinations.map((location) => ({
-    quantity: 0, // Not relevant for destination selection
+    quantity: 0,
     location: location,
   }));
 
@@ -126,7 +121,7 @@ export function MoveQuantityForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6 ">
       <div className="space-y-2">
         <LocationSelector
           quantities={ingredient.quantities}
@@ -175,7 +170,7 @@ export function MoveQuantityForm({
       {moveQuantity > 0 && moveQuantity > maxQuantity && (
         <div className="flex items-center space-x-2 p-3 bg-red-50 border border-red-200 rounded-lg">
           <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
-          <p className="text-sm text-red-700">
+          <p className="text-sm text-red-700 mb-0">
             The quantity to move ({moveQuantity.toFixed(3)} {ingredient.unit})
             exceeds the available quantity ({maxQuantity} {ingredient.unit})
           </p>
@@ -185,6 +180,7 @@ export function MoveQuantityForm({
       <div className="flex space-x-4 pt-4">
         <Button
           variant="khp-default"
+          size="xl-full"
           type="submit"
           disabled={
             isSubmitting ||

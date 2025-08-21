@@ -69,14 +69,14 @@ export default async function IngredientPage({ params }: IngredientPageProps) {
             </h1>
             <CategoryBadge categories={ingredient.categories} />
           </div>
-          <div className="w-full lg:w-3/4 max-w-md">
+          <div className="w-full lg:w-1/2 max-w-md">
             <div className="aspect-square rounded-xl overflow-hidden bg-khp-background-secondary">
               {ingredient.image_url ? (
                 <Image
                   src={ingredient.image_url}
                   alt={ingredient.name}
-                  width={400}
-                  height={400}
+                  width={200}
+                  height={200}
                   className="w-full h-full  transition-transform duration-300"
                   unoptimized={process.env.NODE_ENV === "development"}
                 />
@@ -104,15 +104,7 @@ export default async function IngredientPage({ params }: IngredientPageProps) {
         </div>
 
         {/* Colonne 2 */}
-        <div className="w-full lg:w-1/2 flex flex-col justify-center mb-10 lg:mb-0">
-          <div className="w-full lg:w-3/4 max-w-md flex flex-col gap-6">
-            <p>
-              {ingredient.name} apporte des haricots fondants en sauce tomate
-              sucrée-acidulée, idéale pour enrichir en un clin d&apos;œil
-              purées, gratins ou mijotés.
-            </p>
-          </div>
-
+        <div className="w-full lg:w-1/2 flex flex-col justify-center items-center mb-10 lg:mb-0">
           <IngredientStockDisplay ingredient={ingredient} />
 
           <div className="w-full lg:w-3/4 max-w-md">

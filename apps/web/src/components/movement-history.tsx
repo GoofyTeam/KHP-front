@@ -1,5 +1,6 @@
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { ScrollArea } from "@workspace/ui/components/scroll-area";
+import { formatQuantity } from "../lib/formatQuantity";
 
 type Movement = {
   quantity_before?: number | null;
@@ -23,10 +24,7 @@ function formatDate(value?: string): string {
   return `${day}/${month}/${year}`;
 }
 
-function formatQty(qty: number): string {
-  if (qty >= 1) return qty.toFixed(1);
-  return qty.toFixed(3);
-}
+// Utiliser la fonction formatQuantity commune pour un formatage cohérent
 
 export function MovementHistory({
   movements,
@@ -72,7 +70,7 @@ export function MovementHistory({
                   </div>
                   <div className="flex-1 text-center">
                     <span className="text-khp-text-primary text-sm ">
-                      {formatQty(delta)} {unit.toUpperCase()}
+                      {formatQuantity(delta)} {unit.toUpperCase()}
                     </span>
                   </div>
                   <div className="w-28 text-right">

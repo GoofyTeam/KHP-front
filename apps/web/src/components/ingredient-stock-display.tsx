@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { LocationSelector } from "./location-selector";
 import type { Ingredient, IngredientQuantity } from "../types/stocks";
+import { formatQuantity } from "../lib/formatQuantity";
 
 interface IngredientStockDisplayProps {
   ingredient: Ingredient;
@@ -52,7 +53,9 @@ export function IngredientStockDisplay({
         <div className="bg-khp-primary rounded-lg px-5 py-4 text-white">
           <div className="flex items-baseline justify-between">
             <div>
-              <span className="text-3xl font-bold">{displayStock}</span>
+              <span className="text-3xl font-bold">
+                {formatQuantity(displayStock)}
+              </span>
               <span className="text-lg ml-2 opacity-90">{ingredient.unit}</span>
             </div>
             <span className="text-sm opacity-80">{stockLabel}</span>
@@ -69,7 +72,7 @@ export function IngredientStockDisplay({
 
           <div className="bg-white rounded-lg px-4 py-3 border border-khp-border">
             <div className="text-xl font-semibold text-khp-primary">
-              {totalStock}
+              {formatQuantity(totalStock)}
               <span className="text-sm ml-1">{ingredient.unit}</span>
             </div>
             <div className="text-sm text-khp-text-secondary">Stock total</div>
