@@ -14,8 +14,16 @@ import {
 import { useRouter } from "next/navigation";
 import { useDebounce } from "@uidotdev/usehooks";
 import { Skeleton } from "@workspace/ui/components/skeleton";
+import { useQuery } from "@apollo/client";
+import { AlertTriangle } from "lucide-react";
+import { Card, CardContent } from "@workspace/ui/components/card";
+import { Button } from "@workspace/ui/components/button";
+import { GetIngredientsDocument } from "@/graphql/generated/graphql";
+import { useStocksStore } from "@/stores/stocks-store";
+import { useIngredientsColumns } from "./ingredients-columns";
+import type { Ingredient } from "@/types/stocks";
 
-interface IngredientsTableProps<TData, TValue> {
+interface IngredientsTableBaseProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   columnFilters?: ColumnFiltersState;
@@ -28,7 +36,9 @@ interface IngredientsTableProps<TData, TValue> {
   onLoadMore?: () => void;
 }
 
-function IngredientsTableComponent<TData, TValue>({
+interface IngredientsTableProps {}
+
+function IngredientsTableBase<TData, TValue>({
   columns,
   data,
   columnFilters = [],
@@ -39,7 +49,7 @@ function IngredientsTableComponent<TData, TValue>({
   hasMore = false,
   isRegisterLostMode = false,
   onLoadMore,
-}: IngredientsTableProps<TData, TValue>) {
+}: IngredientsTableBaseProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState({});
   const [scrollInfo, setScrollInfo] = React.useState({
@@ -52,7 +62,7 @@ function IngredientsTableComponent<TData, TValue>({
   const lastScrollTime = React.useRef(0);
   const isScrolling = React.useRef(false);
 
-  const debouncedScrollInfo = useDebounce(scrollInfo, 100); // Optimisé pour de meilleures performances
+  const debouncedScrollInfo = useDebounce(scrollInfo, 100);
 
   const table = useReactTable({
     data,
@@ -77,9 +87,7 @@ function IngredientsTableComponent<TData, TValue>({
 
       const now = Date.now();
 
-      // Throttle scroll events pour améliorer les performances
       if (now - lastScrollTime.current < 16) {
-        // ~60fps
         return;
       }
 
@@ -89,7 +97,6 @@ function IngredientsTableComponent<TData, TValue>({
       const { scrollTop, scrollHeight, clientHeight } = tableRef.current;
       setScrollInfo({ scrollTop, scrollHeight, clientHeight });
 
-      // Reset scrolling flag après un délai
       setTimeout(() => {
         isScrolling.current = false;
       }, 150);
@@ -97,7 +104,6 @@ function IngredientsTableComponent<TData, TValue>({
 
     const tableElement = tableRef.current;
     if (tableElement) {
-      // Utiliser passive: true pour de meilleures performances
       tableElement.addEventListener("scroll", handleScroll, { passive: true });
       return () => {
         tableElement.removeEventListener("scroll", handleScroll);
@@ -105,7 +111,6 @@ function IngredientsTableComponent<TData, TValue>({
     }
   }, []);
 
-  // Ref pour éviter les appels multiples rapides
   const lastLoadMoreCallRef = React.useRef<number>(0);
   const isLoadingMoreRef = React.useRef(false);
 
@@ -347,9 +352,121 @@ function IngredientsTableComponent<TData, TValue>({
   );
 }
 
-export const IngredientsTable = React.memo(IngredientsTableComponent) as <
-  TData,
-  TValue,
->(
-  props: IngredientsTableProps<TData, TValue>
+export function IngredientsTable({}: IngredientsTableProps = {}) {
+  const [page, setPage] = React.useState(1);
+  const [allIngredients, setAllIngredients] = React.useState<Ingredient[]>([]);
+
+  const { filters, isRegisterLostMode } = useStocksStore();
+  const columns = useIngredientsColumns(isRegisterLostMode);
+
+  const {
+    data: ingredientsData,
+    loading: ingredientsLoading,
+    error: ingredientsError,
+    fetchMore,
+  } = useQuery(GetIngredientsDocument, {
+    variables: {
+      page: 1,
+      search: filters.search || undefined,
+      categoryIds:
+        filters.categoryIds && filters.categoryIds.length > 0
+          ? filters.categoryIds
+          : undefined,
+    },
+    fetchPolicy: "cache-and-network",
+    notifyOnNetworkStatusChange: true,
+    onCompleted: (data) => {
+      if (data?.ingredients?.data) {
+        setAllIngredients(data.ingredients.data as Ingredient[]);
+      }
+    },
+  });
+
+  const ingredients = allIngredients;
+  const hasMore =
+    ingredientsData?.ingredients?.paginatorInfo?.hasMorePages || false;
+
+  React.useEffect(() => {
+    setPage(1);
+    setAllIngredients([]);
+  }, [filters.search, filters.categoryIds]);
+
+  const handleLoadMore = React.useCallback(async () => {
+    if (!hasMore || ingredientsLoading) return;
+
+    const nextPage = page + 1;
+    try {
+      if (fetchMore) {
+        const result = await fetchMore({
+          variables: {
+            page: nextPage,
+            search: filters.search || undefined,
+            categoryIds:
+              filters.categoryIds && filters.categoryIds.length > 0
+                ? filters.categoryIds
+                : undefined,
+          },
+        });
+
+        if (result.data?.ingredients?.data) {
+          setAllIngredients((prev) => [
+            ...prev,
+            ...(result.data.ingredients.data as Ingredient[]),
+          ]);
+          setPage(nextPage);
+        }
+      }
+    } catch (error) {
+      console.error("Error loading more ingredients:", error);
+    }
+  }, [
+    hasMore,
+    ingredientsLoading,
+    page,
+    fetchMore,
+    filters.search,
+    filters.categoryIds,
+  ]);
+
+  if (ingredientsError) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex flex-col items-center space-y-4 pt-6">
+            <AlertTriangle className="h-12 w-12 text-destructive" />
+            <div className="text-center">
+              <h3 className="text-lg font-semibold">Loading Error</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                {ingredientsError.message}
+              </p>
+            </div>
+            <Button onClick={() => window.location.reload()} variant="outline">
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <IngredientsTableBase<Ingredient, unknown>
+      columns={columns}
+      data={ingredients}
+      columnFilters={[]}
+      onColumnFiltersChange={() => {}}
+      searchLoading={ingredientsLoading && filters.search !== ""}
+      initialLoading={ingredientsLoading && ingredients.length === 0}
+      loadingMore={false}
+      hasMore={hasMore}
+      onLoadMore={handleLoadMore}
+      isRegisterLostMode={isRegisterLostMode}
+    />
+  );
+}
+
+export const IngredientsTableBaseComponent = React.memo(
+  IngredientsTableBase
+) as <TData, TValue>(
+  props: IngredientsTableBaseProps<TData, TValue>
 ) => React.ReactElement;

@@ -1,6 +1,12 @@
 import { query } from "@/lib/ApolloClient";
 import { GetCategoriesDocument } from "@/graphql/generated/graphql";
-import StocksPage from "@/components/stocks/stocks-page";
+import StocksFilters from "@/components/stocks/stocks-filters";
+import { IngredientsTable } from "@/components/stocks/ingredients-table/ingredients-table";
+
+interface Category {
+  id: string;
+  name: string;
+}
 
 export default async function Page() {
   const { data: categoriesData, error: categoriesError } = await query({
@@ -19,7 +25,12 @@ export default async function Page() {
     );
   }
 
-  const initialCategories = categoriesData?.categories?.data || [];
+  const initialCategories: Category[] = categoriesData?.categories?.data || [];
 
-  return <StocksPage initialCategories={initialCategories} />;
+  return (
+    <div className="space-y-6">
+      <StocksFilters initialCategories={initialCategories} />
+      <IngredientsTable />
+    </div>
+  );
 }

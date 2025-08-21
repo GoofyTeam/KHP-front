@@ -33,25 +33,21 @@ import {
  * Variants for the multi-select component to handle different styles.
  * Uses class-variance-authority (cva) to define different styles based on "variant" prop.
  */
-const multiSelectVariants = cva(
-  "m-1 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300",
-  {
-    variants: {
-      variant: {
-        default:
-          "border-foreground/10 text-foreground bg-card hover:bg-card/80",
-        secondary:
-          "border-foreground/10 bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        destructive:
-          "border-foreground/10 bg-destructive text-destructive-foreground hover:bg-destructive/80",
-        inverted: "inverted",
-      },
+const multiSelectVariants = cva("m-1 ", {
+  variants: {
+    variant: {
+      default: "border-khp-primary text-foreground bg-card hover:bg-card/80",
+      secondary:
+        "border-foreground/10 bg-secondary text-secondary-foreground hover:bg-secondary/80",
+      destructive:
+        "border-foreground/10 bg-destructive text-destructive-foreground hover:bg-destructive/80",
+      inverted: "inverted",
     },
-    defaultVariants: {
-      variant: "default",
-    },
-  }
-);
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+});
 
 /**
  * Props for MultiSelect component
@@ -77,6 +73,9 @@ export interface MultiSelectProps
 
   /** The default selected values when the component mounts. */
   defaultValue?: string[];
+
+  /** The currently selected values (controlled component mode) */
+  value?: string[];
 
   /**
    * Placeholder text to be displayed when no values are selected.
@@ -132,6 +131,7 @@ export const MultiSelect = React.forwardRef<
       onValueChange,
       variant,
       defaultValue = [],
+      value,
       placeholder = "Select options",
       animation = 0,
       maxCount = 1,
@@ -143,16 +143,25 @@ export const MultiSelect = React.forwardRef<
     },
     ref
   ) => {
-    const [selectedValues, setSelectedValues] =
-      React.useState<string[]>(defaultValue);
+    const [selectedValues, setSelectedValues] = React.useState<string[]>(
+      value || defaultValue
+    );
     const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
     const [isAnimating, setIsAnimating] = React.useState(false);
 
     React.useEffect(() => {
-      if (JSON.stringify(selectedValues) !== JSON.stringify(defaultValue)) {
-        setSelectedValues(selectedValues);
+      // Update internal state when value prop changes
+      if (value !== undefined) {
+        setSelectedValues(value);
       }
-    }, [defaultValue, selectedValues]);
+    }, [value]);
+
+    React.useEffect(() => {
+      // Update internal state when defaultValue changes (only if value is not controlled)
+      if (value === undefined) {
+        setSelectedValues(defaultValue);
+      }
+    }, [defaultValue, value]);
 
     const handleInputKeyDown = (
       event: React.KeyboardEvent<HTMLInputElement>

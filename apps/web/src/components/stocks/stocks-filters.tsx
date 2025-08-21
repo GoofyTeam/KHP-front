@@ -20,37 +20,33 @@ interface Category {
   name: string;
 }
 
+import { useStocksStore } from "@/stores/stocks-store";
+
 interface StocksFiltersProps {
   initialCategories: Category[];
-  onFiltersChange: (filters: { search: string; categoryId?: string }) => void;
-  isRegisterLostMode: boolean;
-  onRegisterLost: () => void;
-  onCancelRegisterLost: () => void;
-  onAddToStock: () => void;
 }
 
 export default function StocksFilters({
   initialCategories,
-  onFiltersChange,
-  isRegisterLostMode,
-  onRegisterLost,
-  onCancelRegisterLost,
-  onAddToStock,
 }: StocksFiltersProps) {
-  const [searchInput, setSearchInput] = useState("");
-  const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
+  const { isRegisterLostMode, setIsRegisterLostMode, setFilters, filters } =
+    useStocksStore();
+
+  const [searchInput, setSearchInput] = useState(filters.search || "");
+  const [categoryFilters, setCategoryFilters] = useState<string[]>(
+    filters.categoryIds || []
+  );
 
   const debouncedSearchTerm = useDebounce(searchInput.trim(), 400);
-  const debouncedCategories = useDebounce(categoryFilters, 300);
-
-  const categoryId =
-    debouncedCategories.length > 0 ? debouncedCategories[0] : undefined;
+  const debouncedCategories = useDebounce(categoryFilters, 100); // Reduced delay for better reactivity
 
   const categoryOptions = useMemo(() => {
-    return initialCategories.map((cat) => ({
-      label: cat.name,
-      value: cat.id.toString(),
-    }));
+    return initialCategories
+      .map((cat) => ({
+        label: cat.name,
+        value: cat.id.toString(),
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label)); // Tri alphabétique
   }, [initialCategories]);
 
   const handleSearchChange = useCallback((value: string) => {
@@ -61,13 +57,24 @@ export default function StocksFilters({
     setCategoryFilters(categories);
   }, []);
 
-  // Notify parent of filter changes whenever debounced values change
+  const handleRegisterLost = useCallback(() => {
+    setIsRegisterLostMode(true);
+  }, [setIsRegisterLostMode]);
+
+  const handleCancelRegisterLost = useCallback(() => {
+    setIsRegisterLostMode(false);
+  }, [setIsRegisterLostMode]);
+
+  const handleAddToStock = useCallback(() => {
+    console.log("Adding to stock...");
+  }, []);
+
   useEffect(() => {
-    onFiltersChange({
+    setFilters({
       search: debouncedSearchTerm,
-      categoryId,
+      categoryIds: debouncedCategories,
     });
-  }, [debouncedSearchTerm, categoryId, onFiltersChange]);
+  }, [debouncedSearchTerm, debouncedCategories]); // Removed setFilters from deps
 
   return (
     <div className="flex items-center justify-between space-x-2">
@@ -76,7 +83,7 @@ export default function StocksFilters({
           <MultiSelect
             options={categoryOptions}
             onValueChange={handleCategoriesChange}
-            defaultValue={categoryFilters}
+            value={categoryFilters}
             placeholder="Select categories"
             variant="default"
             className="w-full md:w-auto"
@@ -92,12 +99,12 @@ export default function StocksFilters({
               <DropdownMenuContent align="end" className="w-48">
                 {isRegisterLostMode ? (
                   <DropdownMenuItem
-                    onClick={onCancelRegisterLost}
+                    onClick={handleCancelRegisterLost}
                     className="text-destructive focus:text-destructive"
                   >
                     <Button
                       variant="outline"
-                      onClick={onCancelRegisterLost}
+                      onClick={handleCancelRegisterLost}
                       className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
                     >
                       Cancel
@@ -105,22 +112,22 @@ export default function StocksFilters({
                   </DropdownMenuItem>
                 ) : (
                   <DropdownMenuItem
-                    onClick={onRegisterLost}
+                    onClick={handleRegisterLost}
                     className="text-destructive focus:text-destructive"
                   >
                     <Button
                       variant="khp-destructive"
-                      onClick={onRegisterLost}
+                      onClick={handleRegisterLost}
                       className="w-full"
                     >
                       Register loss
                     </Button>
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem onClick={onAddToStock}>
+                <DropdownMenuItem onClick={handleAddToStock}>
                   <Button
                     variant="khp-default"
-                    onClick={onAddToStock}
+                    onClick={handleAddToStock}
                     className="w-full"
                   >
                     Add to stock
@@ -147,17 +154,17 @@ export default function StocksFilters({
           {isRegisterLostMode ? (
             <Button
               variant="outline"
-              onClick={onCancelRegisterLost}
+              onClick={handleCancelRegisterLost}
               className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
             >
               Cancel
             </Button>
           ) : (
             <>
-              <Button variant="khp-destructive" onClick={onRegisterLost}>
+              <Button variant="khp-destructive" onClick={handleRegisterLost}>
                 Register loss
               </Button>
-              <Button variant="khp-default" onClick={onAddToStock}>
+              <Button variant="khp-default" onClick={handleAddToStock}>
                 Add to stock
               </Button>
             </>

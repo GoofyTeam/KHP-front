@@ -1,5 +1,5 @@
-query GetIngredients($page: Int!, $search: String, $categoryId: ID) {
-  ingredients(page: $page, search: $search, categoryId: $categoryId) {
+query GetIngredients($page: Int!, $search: String, $categoryIds: [ID!]) {
+  ingredients(page: $page, search: $search, categoryIds: $categoryIds) {
     data {
       id
       name

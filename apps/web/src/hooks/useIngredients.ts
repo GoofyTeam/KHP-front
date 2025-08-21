@@ -11,8 +11,8 @@ import type {
 } from "@/types/stocks";
 
 const INGREDIENTS_QUERY = `
-  query GetCompanyIngredients($page: Int!, $search: String, $categoryId: ID) {
-    ingredients(page: $page, search: $search, categoryId: $categoryId) {
+  query GetCompanyIngredients($page: Int!, $search: String, $categoryIds: [ID!]) {
+    ingredients(page: $page, search: $search, categoryIds: $categoryIds) {
       data {
         id
         name
@@ -117,7 +117,7 @@ interface UseIngredientsReturn {
   loadingMore: boolean;
   error: string | null;
   hasMore: boolean;
-  fetchIngredients: (search?: string, categoryId?: string) => Promise<void>;
+  fetchIngredients: (search?: string, categoryIds?: string[]) => Promise<void>;
   loadMore: () => Promise<void>;
   stockSummary: StockSummary;
 }
@@ -130,9 +130,7 @@ export const useIngredients = (): UseIngredientsReturn => {
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [currentSearch, setCurrentSearch] = useState<string>("");
-  const [currentCategoryId, setCurrentCategoryId] = useState<
-    string | undefined
-  >(undefined);
+  const [currentCategoryIds, setCurrentCategoryIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
 
@@ -140,7 +138,7 @@ export const useIngredients = (): UseIngredientsReturn => {
     async (
       page: number,
       search: string = "",
-      categoryId?: string,
+      categoryIds: string[] = [],
       reset: boolean = false
     ) => {
       if (reset) {
@@ -159,7 +157,7 @@ export const useIngredients = (): UseIngredientsReturn => {
           variables: {
             page,
             ...(search.trim() && { search: search.trim() }),
-            ...(categoryId && { categoryId }),
+            ...(categoryIds.length > 0 && { categoryIds }),
           },
         });
 
@@ -212,12 +210,12 @@ export const useIngredients = (): UseIngredientsReturn => {
   );
 
   const fetchIngredients = useCallback(
-    async (search: string = "", categoryId?: string): Promise<void> => {
+    async (search: string = "", categoryIds: string[] = []): Promise<void> => {
       setCurrentSearch(search);
-      setCurrentCategoryId(categoryId);
+      setCurrentCategoryIds(categoryIds);
       // Pour les recherches après le premier chargement, on ne fait pas de reset complet
       const shouldReset = isFirstLoad;
-      await fetchData(1, search, categoryId, shouldReset);
+      await fetchData(1, search, categoryIds, shouldReset);
     },
     [fetchData, isFirstLoad]
   );
@@ -226,14 +224,14 @@ export const useIngredients = (): UseIngredientsReturn => {
     if (!hasMore || loadingMore) {
       return;
     }
-    await fetchData(currentPage + 1, currentSearch, currentCategoryId, false);
+    await fetchData(currentPage + 1, currentSearch, currentCategoryIds, false);
   }, [
     fetchData,
     currentPage,
     hasMore,
     loadingMore,
     currentSearch,
-    currentCategoryId,
+    currentCategoryIds,
   ]);
 
   const stockSummary = useMemo(

@@ -12,8 +12,6 @@
     "codegen": "npm run introspect && graphql-codegen --config codegen.ts"
   },
   "dependencies": {
-    "@tanstack/react-table": "^8.21.3",
-    "@uidotdev/usehooks": "^2.4.1",
     "@workspace/ui": "*",
     "date-fns": "^4.1.0",
     "@apollo/client": "^3.13.9",
