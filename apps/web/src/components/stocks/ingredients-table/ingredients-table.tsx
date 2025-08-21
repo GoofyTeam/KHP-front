@@ -338,11 +338,12 @@ function IngredientsTableBase<TData, TValue>({
               </>
             ) : (
               <tr>
-                <td colSpan={columns.length} className="p-0 relative">
-                  <div className="flex items-center justify-center text-muted-foreground text-lg font-medium h-full w-full">
-                    Nothing found
-                  </div>
-                </td>
+                {/* <td colSpan={columns.length} className="p-0 relative">
+                  
+                </td> */}
+                <div className="flex items-center justify-center text-muted-foreground text-lg font-medium w-full absolute top-1/2 left-1/2 -translate-1/2">
+                  Nothing found
+                </div>
               </tr>
             )}
           </tbody>
