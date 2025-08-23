@@ -21,7 +21,6 @@ export function QuantityInput({
   title = "Quantity",
   className = "",
   autoFocus = false,
-  placeholder = "",
 }: QuantityInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [displayValue, setDisplayValue] = useState("");
