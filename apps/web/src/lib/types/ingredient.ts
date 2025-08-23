@@ -9,6 +9,7 @@ export interface Ingredient {
   quantities: {
     quantity: number;
     location: {
+      id: string;
       name: string;
     };
   }[];
