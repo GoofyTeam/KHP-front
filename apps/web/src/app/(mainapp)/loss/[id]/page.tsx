@@ -1,13 +1,7 @@
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@workspace/ui/components/select";
 import { CategoryBadge } from "@workspace/ui/components/category-badge";
+import { LocationSelector } from "@/components/LocationSelect";
 import { LossForm } from "./loss-form";
 import {
   Ingredient,
@@ -34,6 +28,7 @@ const GET_INGREDIENT_QUERY = `
       quantities {
         quantity
         location {
+          id
           name
         }
       }
@@ -104,9 +99,7 @@ export default async function LossPage({ params }: LossPageProps) {
 
   return (
     <div className="w-full flex flex-col lg:flex-row gap-8 p-4 lg:p-8">
-      {/* Colonne 1 */}
       <div className="flex flex-col gap-8 justify-center items-center w-full lg:w-1/2">
-        {/* Product Title */}
         <div className="text-center space-y-4 w-full lg:w-3/4 max-w-md">
           <h1 className="text-3xl lg:text-5xl font-bold text-khp-text-primary leading-tight">
             {ingredient.name}
@@ -114,80 +107,20 @@ export default async function LossPage({ params }: LossPageProps) {
           <CategoryBadge categories={ingredient.categories} />
         </div>
 
-        {/* Product Image */}
         <div className="w-full lg:w-3/4 max-w-md">
           <div className="aspect-square rounded-xl overflow-hidden bg-khp-background-secondary">
             <img
               src={ingredient.image_url}
               alt={ingredient.name}
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-cover "
             />
           </div>
         </div>
       </div>
 
       {/* Colonne 2 */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center mb-10 lg:mb-0">
+      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center mb-10 lg:mb-0">
         <div className="w-full max-w-md mx-auto lg:mx-0 space-y-6">
-          {/* Location Selection */}
-          <div className="space-y-2">
-            <h3 className="text-base font-semibold text-khp-text-primary">
-              Location
-            </h3>
-            {ingredient.quantities.length > 1 ? (
-              <Select>
-                <SelectTrigger className="w-full h-12 border-khp-primary bg-white hover:bg-khp-primary/5 focus:bg-khp-primary/5 transition-all">
-                  <SelectValue placeholder="Choose location" />
-                </SelectTrigger>
-                <SelectContent>
-                  {ingredient.quantities.map((q, index: number) => (
-                    <SelectItem key={index} value={index.toString()}>
-                      <span className="font-medium">{q.location.name}</span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : (
-              <div className="p-4 bg-white border border-khp-primary rounded-lg">
-                <span className="font-medium text-khp-text-primary">
-                  {ingredient.quantities[0]?.location.name || "No location"}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Current Stock */}
-          <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-khp-text-primary">
-              Current Stock
-            </h3>
-            <div className="flex items-center justify-between p-4 bg-khp-primary/5 border border-khp-primary/20 rounded-lg">
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-khp-primary">
-                  {totalStock}
-                </span>
-                <span className="text-sm text-khp-text-secondary">
-                  {ingredient.unit}
-                </span>
-              </div>
-              <div className="flex items-center justify-center w-10 h-10 bg-khp-primary/10 rounded-full border border-khp-primary/30">
-                <svg
-                  className="w-5 h-5 text-khp-primary"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
-
           {/* Loss Form with validation */}
           <LossForm ingredient={ingredient} totalStock={totalStock} />
         </div>
