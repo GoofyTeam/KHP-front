@@ -24,6 +24,7 @@ interface LocationSelectorProps {
   placeholder?: string;
   label?: string;
   className?: string;
+  unit?: string;
 }
 
 export function LocationSelector({
@@ -33,6 +34,7 @@ export function LocationSelector({
   placeholder = "Choose location",
   label = "Location",
   className = "",
+  unit = "",
 }: LocationSelectorProps) {
   if (!quantities || quantities.length === 0) {
     return (
@@ -47,7 +49,6 @@ export function LocationSelector({
     );
   }
 
-  // Single location case
   if (quantities.length === 1) {
     return (
       <div className={`space-y-2 ${className}`}>
@@ -63,7 +64,8 @@ export function LocationSelector({
     );
   }
 
-  // Multiple locations case
+  const selectedQuantity = value ? quantities[parseInt(value)] : null;
+
   return (
     <>
       <div className={`space-y-2 ${className}`}>
@@ -72,12 +74,38 @@ export function LocationSelector({
         </h3>
         <Select value={value} onValueChange={onValueChange}>
           <SelectTrigger className="w-full !h-14 text-base border-khp-primary focus:bg-khp-primary/5 transition-all">
-            <SelectValue placeholder={placeholder} />
+            {selectedQuantity ? (
+              <div className="flex items-center justify-between w-full">
+                <span className="truncate max-w-[60%] font-medium">
+                  {selectedQuantity.location.name}
+                </span>
+                {selectedQuantity.quantity > 0 && (
+                  <span className="text-sm text-khp-text-secondary ml-2 flex-shrink-0">
+                    {selectedQuantity.quantity} {unit}
+                  </span>
+                )}
+              </div>
+            ) : (
+              <SelectValue placeholder={placeholder} />
+            )}
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="max-h-72">
             {quantities.map((q, index: number) => (
-              <SelectItem key={index} value={index.toString()}>
-                <span className="font-medium">{q.location.name}</span>
+              <SelectItem
+                key={index}
+                value={index.toString()}
+                className="!h-14 !min-h-14 !py-4 !px-4 text-base font-medium cursor-pointer hover:bg-khp-primary/10 focus:bg-khp-primary/15 transition-colors touch-manipulation"
+              >
+                <div className="flex flex-col w-full">
+                  <span className="font-medium text-khp-text-primary">
+                    {q.location.name}
+                  </span>
+                  {q.quantity > 0 && (
+                    <span className="text-sm text-khp-text-secondary mt-1">
+                      {q.quantity} {unit}
+                    </span>
+                  )}
+                </div>
               </SelectItem>
             ))}
           </SelectContent>
