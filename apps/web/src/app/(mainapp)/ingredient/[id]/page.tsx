@@ -98,7 +98,7 @@ export default async function IngredientPage({ params }: IngredientPageProps) {
           <div className="mt-8 w-full lg:w-3/4 max-w-md">
             <Link href={`/ingredient/${id}/move`}>
               <Button variant="khp-outline" size="xl-full">
-                Déplacer la quantité
+                Move Quantity
               </Button>
             </Link>
           </div>

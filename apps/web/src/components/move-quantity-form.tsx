@@ -33,8 +33,12 @@ export function MoveQuantityForm({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  const availableSourceQuantities = ingredient.quantities.filter(
+    (q) => q.quantity > 0
+  );
+
   const selectedSourceLocation = formData.sourceLocationIndex
-    ? ingredient.quantities[parseInt(formData.sourceLocationIndex)]
+    ? availableSourceQuantities[parseInt(formData.sourceLocationIndex)]
     : null;
 
   const maxQuantity = selectedSourceLocation?.quantity || 0;
@@ -47,28 +51,25 @@ export function MoveQuantityForm({
 
   const moveQuantity = getQuantityFromOTP();
 
-  // Get all possible destinations: all locations from ingredient quantities + allLocations
-  const allPossibleLocations = [
-    ...ingredient.quantities.map((q) => q.location),
-    ...allLocations.filter(
-      (loc) => !ingredient.quantities.some((q) => q.location.id === loc.id)
-    ),
-  ];
-
-  const availableDestinations = allPossibleLocations.filter(
-    (location) => location.id !== selectedSourceLocation?.location.id
+  // Get destinations: existing locations with quantities + empty locations
+  const existingDestinations = ingredient.quantities.filter(
+    (q) => q.location.id !== selectedSourceLocation?.location.id
   );
 
-  const destinationQuantities = availableDestinations.map((location) => {
-    // Find if this location has existing quantity in ingredient
-    const existingQuantity = ingredient.quantities.find(
-      (q) => q.location.id === location.id
-    );
-    return {
-      quantity: existingQuantity?.quantity || 0,
+  const newDestinations = allLocations
+    .filter(
+      (loc) => !ingredient.quantities.some((q) => q.location.id === loc.id)
+    )
+    .map((location) => ({
+      quantity: 0,
       location: location,
-    };
-  });
+    }));
+
+  const destinationQuantities = [...existingDestinations, ...newDestinations];
+
+  const selectedDestinationLocation = formData.destinationLocationIndex
+    ? destinationQuantities[parseInt(formData.destinationLocationIndex)]
+    : null;
 
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -138,20 +139,15 @@ export function MoveQuantityForm({
     <form onSubmit={handleSubmit} className="space-y-6 ">
       <div className="space-y-2">
         <LocationSelector
-          quantities={ingredient.quantities}
+          quantities={availableSourceQuantities}
           value={formData.sourceLocationIndex}
           onValueChange={(value) =>
             handleInputChange("sourceLocationIndex", value)
           }
           placeholder="Choose a source location"
           label="From"
+          unit={ingredient.unit}
         />
-        {selectedSourceLocation && (
-          <p className="text-xs text-khp-text-secondary">
-            Available quantity: {selectedSourceLocation.quantity}{" "}
-            {ingredient.unit}
-          </p>
-        )}
       </div>
 
       <QuantityInput
@@ -172,6 +168,7 @@ export function MoveQuantityForm({
           }
           placeholder="Choose a destination location"
           label="To"
+          unit={ingredient.unit}
         />
       </div>
 

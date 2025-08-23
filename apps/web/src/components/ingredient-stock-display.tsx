@@ -48,6 +48,7 @@ export function IngredientStockDisplay({
             onValueChange={setSelectedLocationIndex}
             placeholder="Choisir un emplacement"
             label="Emplacement"
+            unit={ingredient.unit}
           />
         </div>
         <div className="bg-khp-primary rounded-lg px-5 py-4 text-white">
