@@ -6,7 +6,7 @@ import { Button } from "@workspace/ui/components/button";
 import { AlertCircle, CheckCircle } from "lucide-react";
 import type { Ingredient, Location } from "../types/stocks";
 import { QuantityInput } from "./quantity-input";
-import { LocationSelector } from "./location-selector";
+import { LocationSelector } from "./LocationSelect";
 
 interface MoveQuantityFormProps {
   ingredient: Ingredient;
@@ -47,14 +47,28 @@ export function MoveQuantityForm({
 
   const moveQuantity = getQuantityFromOTP();
 
-  const availableDestinations = allLocations.filter(
+  // Get all possible destinations: all locations from ingredient quantities + allLocations
+  const allPossibleLocations = [
+    ...ingredient.quantities.map((q) => q.location),
+    ...allLocations.filter(
+      (loc) => !ingredient.quantities.some((q) => q.location.id === loc.id)
+    ),
+  ];
+
+  const availableDestinations = allPossibleLocations.filter(
     (location) => location.id !== selectedSourceLocation?.location.id
   );
 
-  const destinationQuantities = availableDestinations.map((location) => ({
-    quantity: 0,
-    location: location,
-  }));
+  const destinationQuantities = availableDestinations.map((location) => {
+    // Find if this location has existing quantity in ingredient
+    const existingQuantity = ingredient.quantities.find(
+      (q) => q.location.id === location.id
+    );
+    return {
+      quantity: existingQuantity?.quantity || 0,
+      location: location,
+    };
+  });
 
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

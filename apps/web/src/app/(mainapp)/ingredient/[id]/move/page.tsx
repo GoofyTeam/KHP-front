@@ -8,7 +8,7 @@ import type { Ingredient, Location } from "../../../../../types/stocks";
 import Image from "next/image";
 import { CategoryBadge } from "../../../../../components/category-badge";
 import { MoveQuantityForm } from "../../../../../components/move-quantity-form";
-import { IngredientPageClient } from "../../../../../components/ingredient-page-client";
+import { IngredientHeader } from "../../../../../components/ingredient-header";
 
 interface MovePageProps {
   params: Promise<{
@@ -81,7 +81,8 @@ export default async function MoveQuantityPage({ params }: MovePageProps) {
   ]);
 
   return (
-    <IngredientPageClient ingredient={ingredient}>
+    <>
+      <IngredientHeader />
       <div className="w-full flex flex-col lg:flex-row gap-8">
         <div className="flex flex-col gap-8 justify-center items-center w-full h-fit lg:w-1/2">
           <div className="text-center space-y-4 w-full lg:w-3/4 max-w-md">
@@ -128,6 +129,6 @@ export default async function MoveQuantityPage({ params }: MovePageProps) {
           </div>
         </div>
       </div>
-    </IngredientPageClient>
+    </>
   );
 }

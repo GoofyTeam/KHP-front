@@ -7,8 +7,8 @@ import Image from "next/image";
 import { CategoryBadge } from "../../../../components/category-badge";
 import { Button } from "@workspace/ui/components/button";
 import { MovementHistory } from "../../../../components/movement-history";
-import { IngredientPageClient } from "../../../../components/ingredient-page-client";
 import { IngredientStockDisplay } from "../../../../components/ingredient-stock-display";
+import { IngredientHeader } from "../../../../components/ingredient-header";
 
 interface IngredientPageProps {
   params: Promise<{
@@ -59,7 +59,8 @@ export default async function IngredientPage({ params }: IngredientPageProps) {
   const ingredient = await fetchIngredient(id);
 
   return (
-    <IngredientPageClient ingredient={ingredient}>
+    <>
+      <IngredientHeader />
       <div className="w-full flex flex-col lg:flex-row gap-8">
         {/* Colonne 1 */}
         <div className="flex flex-col gap-8 justify-center items-center w-full lg:w-1/2">
@@ -115,6 +116,6 @@ export default async function IngredientPage({ params }: IngredientPageProps) {
           </div>
         </div>
       </div>
-    </IngredientPageClient>
+    </>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { LocationSelector } from "./location-selector";
+import { LocationSelector } from "./LocationSelect";
 import type { Ingredient, IngredientQuantity } from "../types/stocks";
 import { formatQuantity } from "../lib/formatQuantity";
 

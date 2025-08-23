@@ -5,8 +5,6 @@ import {
   SidebarInset,
   SidebarProvider,
 } from "@workspace/ui/components/sidebar";
-import { DynamicHeader } from "../../../components/dynamic-header";
-import { IngredientProvider } from "../../../components/ingredient-context";
 
 export const metadata: Metadata = {
   title: "KHP | Stocks",
@@ -20,21 +18,17 @@ export default function StocksLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <IngredientProvider>
-      <main className="min-h-screen">
-        <SidebarProvider>
-          <AppSidebar />
-          <SidebarInset>
-            <DynamicHeader />
-
-            <div className="flex flex-1 flex-col">
-              <div className="flex-1 space-y-6 px-4 md:px-0 py-4 lg:py-8">
-                {children}
-              </div>
+    <main className="min-h-screen">
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset>
+          <div className="flex flex-1 flex-col">
+            <div className="flex-1 space-y-6 px-4 md:px-0 pb-4 lg:pb-8">
+              {children}
             </div>
-          </SidebarInset>
-        </SidebarProvider>
-      </main>
-    </IngredientProvider>
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
+    </main>
   );
 }
