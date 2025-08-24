@@ -73,11 +73,11 @@ function getDocumentTitle(
 
   if (productId) {
     if (isHistoryRoute) {
-      const title = `Historique - Produit ${productId} - KHP`;
+      const title = `History - Product ${productId} - KHP`;
       return title;
     }
 
-    const title = `Produit ${productId} - KHP`;
+    const title = `Product ${productId} - KHP`;
     return title;
   }
 

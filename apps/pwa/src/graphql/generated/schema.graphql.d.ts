@@ -97,7 +97,7 @@ export type Ingredient = {
   /** Ingredient name. */
   name: Scalars['String']['output'];
   /** Unit of measurement for the ingredient. */
-  unit: Scalars['String']['output'];
+  unit: UnitEnum;
   quantities: Array<IngredientQuantity>;
   /** The company that owns this ingredient. */
   company: Company;
@@ -236,6 +236,63 @@ export type LocationTypePaginator = {
   data: Array<LocationType>;
 };
 
+/** Représente une perte d'ingrédient ou de préparation. */
+export type Loss = {
+  __typename?: 'Loss';
+  /** Identifiant unique. */
+  id: Scalars['ID']['output'];
+  /** Type d'entité concernée par cette perte (ingredient ou preparation). */
+  lossable_type: Scalars['String']['output'];
+  /** ID de l'entité concernée. */
+  lossable_id: Scalars['ID']['output'];
+  /** L'emplacement où la perte a eu lieu. */
+  location: Location;
+  /** L'entreprise à laquelle appartient cette perte. */
+  company: Company;
+  /** L'utilisateur qui a enregistré la perte. */
+  user?: Maybe<User>;
+  /** Quantité perdue. */
+  quantity: Scalars['Float']['output'];
+  /** Raison de la perte. */
+  reason?: Maybe<Scalars['String']['output']>;
+  /** Date et heure de création de la perte. */
+  created_at: Scalars['DateTime']['output'];
+  /** Date et heure de dernière mise à jour de la perte. */
+  updated_at: Scalars['DateTime']['output'];
+};
+
+export type LossOrderByClause = {
+  field: LossOrderByField;
+  order: SortOrder;
+};
+
+export enum LossOrderByField {
+  Id = 'ID',
+  Quantity = 'QUANTITY',
+  CreatedAt = 'CREATED_AT',
+  UpdatedAt = 'UPDATED_AT'
+}
+
+/** A paginated list of Loss items. */
+export type LossPaginator = {
+  __typename?: 'LossPaginator';
+  /** Pagination information about the list of items. */
+  paginatorInfo: PaginatorInfo;
+  /** A list of Loss items. */
+  data: Array<Loss>;
+};
+
+/** Type représentant une unité de mesure */
+export type MeasurementUnitType = {
+  __typename?: 'MeasurementUnitType';
+  /** Valeur utilisée en interne (ex: 'kg', 'L') */
+  value: Scalars['String']['output'];
+  /** Libellé français (ex: 'Kilogramme (kg)') */
+  label: Scalars['String']['output'];
+  /** Catégorie de l'unité (masse, volume ou unité) */
+  category: Scalars['String']['output'];
+};
+
 /** Représente un produit alimentaire issu d'OpenFoodFacts */
 export type OpenFoodFactsProduct = {
   __typename?: 'OpenFoodFactsProduct';
@@ -304,7 +361,7 @@ export type Preparation = {
   /** Preparation name. */
   name: Scalars['String']['output'];
   /** Unit of measurement for the preparation. */
-  unit: Scalars['String']['output'];
+  unit: UnitEnum;
   /** The company that produces this preparation. */
   company: Company;
   entities: Array<PreparationEntity>;
@@ -384,6 +441,8 @@ export type Query = {
   location?: Maybe<Location>;
   /** Trouve un type de localisation spécifique (seulement s'il appartient à l'entreprise actuelle). */
   locationType?: Maybe<LocationType>;
+  /** Liste les unités de mesure disponibles */
+  measurementUnits: Array<MeasurementUnitType>;
   /** Trouve une preparation (et seulement si elle appartient à ma company) */
   preparation?: Maybe<Preparation>;
   /** Find a single user by an identifying attribute. */
@@ -398,6 +457,8 @@ export type Query = {
   locations: LocationPaginator;
   /** Liste les types de localisation pour l'entreprise actuelle. */
   locationTypes: LocationTypePaginator;
+  /** Liste les pertes pour l'entreprise actuelle. */
+  losses: LossPaginator;
   /** Liste les preparations de ma company uniquement */
   preparations: PreparationPaginator;
   /** Liste les mouvements de stock pour l'entreprise actuelle. */
@@ -474,7 +535,7 @@ export type QueryCompaniesArgs = {
 
 export type QueryIngredientsArgs = {
   search?: InputMaybe<Scalars['String']['input']>;
-  unit?: InputMaybe<Scalars['String']['input']>;
+  unit?: InputMaybe<UnitEnum>;
   locationIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   categoryIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   orderBy?: InputMaybe<Array<OrderByClause>>;
@@ -501,9 +562,21 @@ export type QueryLocationTypesArgs = {
 };
 
 
+export type QueryLossesArgs = {
+  trackable_type?: InputMaybe<Scalars['String']['input']>;
+  trackable_id?: InputMaybe<Scalars['ID']['input']>;
+  location_id?: InputMaybe<Scalars['ID']['input']>;
+  start_date?: InputMaybe<Scalars['DateTime']['input']>;
+  end_date?: InputMaybe<Scalars['DateTime']['input']>;
+  orderBy?: InputMaybe<Array<OrderByClause>>;
+  first?: Scalars['Int']['input'];
+  page?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type QueryPreparationsArgs = {
   search?: InputMaybe<Scalars['String']['input']>;
-  unit?: InputMaybe<Scalars['String']['input']>;
+  unit?: InputMaybe<UnitEnum>;
   locationIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   categoryIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   orderBy?: InputMaybe<Array<OrderByClause>>;
@@ -604,6 +677,24 @@ export enum Trashed {
   With = 'WITH',
   /** Only return non-trashed results. */
   Without = 'WITHOUT'
+}
+
+export enum UnitEnum {
+  Kilogram = 'KILOGRAM',
+  Hectogram = 'HECTOGRAM',
+  Decagram = 'DECAGRAM',
+  Gram = 'GRAM',
+  Decigram = 'DECIGRAM',
+  Centigram = 'CENTIGRAM',
+  Milligram = 'MILLIGRAM',
+  Kilolitre = 'KILOLITRE',
+  Hectolitre = 'HECTOLITRE',
+  Decalitre = 'DECALITRE',
+  Litre = 'LITRE',
+  Decilitre = 'DECILITRE',
+  Centilitre = 'CENTILITRE',
+  Millilitre = 'MILLILITRE',
+  Unit = 'UNIT'
 }
 
 /** Account of a person who uses this application. */

@@ -93,7 +93,7 @@ type Ingredient {
   name: String!
 
   """Unit of measurement for the ingredient."""
-  unit: String!
+  unit: UnitEnum!
   quantities: [IngredientQuantity!]!
 
   """The company that owns this ingredient."""
@@ -252,6 +252,72 @@ type LocationTypePaginator {
   data: [LocationType!]!
 }
 
+"""Représente une perte d'ingrédient ou de préparation."""
+type Loss {
+  """Identifiant unique."""
+  id: ID!
+
+  """Type d'entité concernée par cette perte (ingredient ou preparation)."""
+  lossable_type: String!
+
+  """ID de l'entité concernée."""
+  lossable_id: ID!
+
+  """L'emplacement où la perte a eu lieu."""
+  location: Location!
+
+  """L'entreprise à laquelle appartient cette perte."""
+  company: Company!
+
+  """L'utilisateur qui a enregistré la perte."""
+  user: User
+
+  """Quantité perdue."""
+  quantity: Float!
+
+  """Raison de la perte."""
+  reason: String
+
+  """Date et heure de création de la perte."""
+  created_at: DateTime!
+
+  """Date et heure de dernière mise à jour de la perte."""
+  updated_at: DateTime!
+}
+
+input LossOrderByClause {
+  field: LossOrderByField!
+  order: SortOrder!
+}
+
+enum LossOrderByField {
+  ID
+  QUANTITY
+  CREATED_AT
+  UPDATED_AT
+}
+
+"""A paginated list of Loss items."""
+type LossPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of Loss items."""
+  data: [Loss!]!
+}
+
+"""Type représentant une unité de mesure"""
+type MeasurementUnitType {
+  """Valeur utilisée en interne (ex: 'kg', 'L')"""
+  value: String!
+
+  """Libellé français (ex: 'Kilogramme (kg)')"""
+  label: String!
+
+  """Catégorie de l'unité (masse, volume ou unité)"""
+  category: String!
+}
+
 """Représente un produit alimentaire issu d'OpenFoodFacts"""
 type OpenFoodFactsProduct {
   barcode: String
@@ -335,7 +401,7 @@ type Preparation {
   name: String!
 
   """Unit of measurement for the preparation."""
-  unit: String!
+  unit: UnitEnum!
 
   """The company that produces this preparation."""
   company: Company!
@@ -458,6 +524,9 @@ type Query {
     name: String
   ): LocationType
 
+  """Liste les unités de mesure disponibles"""
+  measurementUnits: [MeasurementUnitType!]!
+
   """Trouve une preparation (et seulement si elle appartient à ma company)"""
   preparation(id: ID, name: String): Preparation
 
@@ -501,9 +570,7 @@ type Query {
   ingredients(
     """Filter by a search term. Accepts SQL LIKE wildcards `%` and `_`."""
     search: String
-
-    """Filter by unit of measurement. Accepts SQL LIKE wildcards `%` and `_`."""
-    unit: String
+    unit: UnitEnum
 
     """Filtrer par un ou plusieurs identifiants d'emplacements."""
     locationIds: [ID!]
@@ -561,6 +628,22 @@ type Query {
     page: Int
   ): LocationTypePaginator!
 
+  """Liste les pertes pour l'entreprise actuelle."""
+  losses(
+    trackable_type: String
+    trackable_id: ID
+    location_id: ID
+    start_date: DateTime
+    end_date: DateTime
+    orderBy: [OrderByClause!]
+
+    """Limits number of fetched items."""
+    first: Int! = 10
+
+    """The offset from which items are returned."""
+    page: Int
+  ): LossPaginator!
+
   """Liste les preparations de ma company uniquement"""
   preparations(
     """
@@ -569,7 +652,7 @@ type Query {
     search: String
 
     """Filtre par unité de mesure avec opérateur LIKE."""
-    unit: String
+    unit: UnitEnum
 
     """Filtrer par un ou plusieurs identifiants d'emplacements."""
     locationIds: [ID!]
@@ -719,6 +802,24 @@ enum Trashed {
 
   """Only return non-trashed results."""
   WITHOUT
+}
+
+enum UnitEnum {
+  KILOGRAM
+  HECTOGRAM
+  DECAGRAM
+  GRAM
+  DECIGRAM
+  CENTIGRAM
+  MILLIGRAM
+  KILOLITRE
+  HECTOLITRE
+  DECALITRE
+  LITRE
+  DECILITRE
+  CENTILITRE
+  MILLILITRE
+  UNIT
 }
 
 """Account of a person who uses this application."""
