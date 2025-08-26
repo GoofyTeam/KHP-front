@@ -7,24 +7,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
+import { GetIngredientQuery } from "../graphql/getProduct.gql";
 
 const formatQuantity = (quantity: number): string => {
   return parseFloat(quantity.toFixed(3)).toString();
 };
 
-interface Location {
-  id: string;
-  name: string;
-  locationType?: {
-    id: string;
-    name: string;
-    is_default: boolean;
-  };
-}
-
 interface IngredientQuantity {
   quantity: number;
-  location: Location;
+  location: NonNullable<GetIngredientQuery["ingredient"]>["quantities"][number]["location"];
 }
 
 interface LocationSelectorProps {

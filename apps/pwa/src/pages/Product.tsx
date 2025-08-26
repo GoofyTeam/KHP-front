@@ -103,7 +103,7 @@ export default function ProductPage() {
 
         <div className="flex flex-col gap-4">
           <LocationSelect
-            quantities={(product.quantities || []) as any}
+            quantities={product.quantities}
             value={selectedLocation}
             onValueChange={setSelectedLocation}
             placeholder="Select a location"
@@ -140,7 +140,7 @@ export default function ProductPage() {
         </Link>
       </div>
       <HistoryTable
-        data={(product.stockMovements || []) as any}
+        data={product.stockMovements || []}
         showHeader={false}
         unit={product.unit}
       />

@@ -805,21 +805,21 @@ enum Trashed {
 }
 
 enum UnitEnum {
-  KILOGRAM
-  HECTOGRAM
-  DECAGRAM
-  GRAM
-  DECIGRAM
-  CENTIGRAM
-  MILLIGRAM
-  KILOLITRE
-  HECTOLITRE
-  DECALITRE
-  LITRE
-  DECILITRE
-  CENTILITRE
-  MILLILITRE
-  UNIT
+  kg
+  hg
+  dag
+  g
+  dg
+  cg
+  mg
+  kL
+  hL
+  daL
+  L
+  dL
+  cL
+  mL
+  unit
 }
 
 """Account of a person who uses this application."""
