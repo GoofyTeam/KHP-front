@@ -1,24 +1,8 @@
 import { create } from "zustand";
+import { GetIngredientQuery } from "../graphql/getProduct.gql";
 
-interface ProductData {
-  id: string;
-  name: string;
-  unit: string;
-  image_url?: string | null;
-  categories: Array<{ name: string }>;
-  quantities?: Array<{
-    quantity: number;
-    location: {
-      id: string;
-      name: string;
-      locationType?: {
-        id: string;
-        name: string;
-        is_default: boolean;
-      };
-    };
-  }>;
-}
+// Utiliser les types GraphQL générés
+type ProductData = NonNullable<GetIngredientQuery["ingredient"]>;
 
 interface ProductStore {
   currentProduct: ProductData | null;

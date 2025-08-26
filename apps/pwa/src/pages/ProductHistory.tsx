@@ -19,7 +19,6 @@ interface ProductData {
   unit: string;
 }
 
-// Utiliser les types GraphQL générés
 type StockMovement = NonNullable<
   GetIngredientQuery["ingredient"]
 >["stockMovements"][number];
@@ -65,7 +64,6 @@ export default function ProductHistoryPage() {
     currentFilter,
   });
 
-  // Extract available locations from stock movements and adapt for LocationSelect
   const availableLocations = useMemo(() => {
     const locationsMap = new Map();
     stockMovements.forEach((movement) => {
@@ -78,18 +76,15 @@ export default function ProductHistoryPage() {
     return locations;
   }, [stockMovements]);
 
-  // Adapt locations for LocationSelect component (requires IngredientQuantity format)
   const locationQuantities = useMemo(() => {
     return availableLocations.map((location) => ({
       quantity: stockMovements.filter((m) => m.location?.id === location.id)
-        .length, // Use movement count as "quantity"
+        .length,
       location: location,
     }));
   }, [availableLocations, stockMovements]);
 
-  // Filter movements by location
   const filteredMovements = useMemo(() => {
-    // Always show all movements if "all" is selected OR if no specific location is selected
     if (!selectedLocationId || selectedLocationId === "all") {
       return stockMovements;
     }
@@ -99,10 +94,7 @@ export default function ProductHistoryPage() {
     );
   }, [stockMovements, selectedLocationId]);
 
-  // Generate list of available months from all data (we'll need a separate call for this)
   const getAvailableMonths = useCallback(async () => {
-    // For now, generate some recent months - in production you'd want to call
-    // the backend to get available months for this product
     const months = [];
     const now = new Date();
     for (let i = 0; i < 12; i++) {
@@ -173,7 +165,7 @@ export default function ProductHistoryPage() {
 
   return (
     <div className="pb-20">
-      <div className="flex flex-col gap-4 p-2">
+      <div className="sticky top-16 z-90 flex flex-col gap-4 p-2 bg-khp-background">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold">{product.name}</h2>
           <Button

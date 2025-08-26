@@ -13,6 +13,7 @@ import { Button } from "@workspace/ui/components/button";
 import { NotebookPen } from "lucide-react";
 import { useEffect, useState } from "react";
 import { GetIngredientQuery } from "../graphql/getProduct.gql";
+import { ImagePlaceholder } from "../components/ImagePlaceholder";
 
 // Inférer les types depuis GraphQL
 type ProductData = NonNullable<GetIngredientQuery["ingredient"]>;
@@ -182,6 +183,11 @@ export default function ProductPage() {
             View all
           </Link>
         </div>
+        <HistoryTable
+          data={product.stockMovements || []}
+          showHeader={false}
+          unit={product.unit}
+        />
         <div className="flex justify-center p-6">
           <Button
             variant="khp-default"
@@ -202,30 +208,6 @@ export default function ProductPage() {
           </Button>
         </div>
       </div>
-      <HistoryTable
-        data={product.stockMovements || []}
-        showHeader={false}
-        unit={product.unit}
-      />
-      <div className="flex justify-center p-6">
-        <Button
-          variant="khp-default"
-          className="pointer-events-auto "
-          size="xl"
-          onClick={() => {
-            navigate({
-              to: "/handle-item",
-              search: {
-                mode: "manual",
-                type: "add",
-              },
-            });
-          }}
-        >
-          <NotebookPen strokeWidth={2} className="text-white !h-5 !w-5" />{" "}
-          <span className="text-xl">Edit product</span>
-        </Button>
-      </div>
-    </div>
+    </>
   );
 }
