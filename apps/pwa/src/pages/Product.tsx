@@ -28,6 +28,21 @@ export default function ProductPage() {
 
   const [selectedLocation, setSelectedLocation] = useState<string>("all");
 
+  useEffect(() => {
+    if (product?.name) {
+      document.title = `${product.name} - KHP`;
+    }
+    return () => {
+      document.title = "KHP";
+    };
+  }, [product?.name]);
+
+  useEffect(() => {
+    if (product?.quantities?.length === 1) {
+      setSelectedLocation(product.quantities[0].location.id);
+    }
+  }, [product?.quantities]);
+
   if (!product) {
     return <div>Loading...</div>;
   }
@@ -71,21 +86,6 @@ export default function ProductPage() {
     }
   })();
 
-  useEffect(() => {
-    if (product?.name) {
-      document.title = `${product.name} - KHP`;
-    }
-    return () => {
-      document.title = "KHP";
-    };
-  }, [product?.name]);
-
-  useEffect(() => {
-    if (product.quantities?.length === 1) {
-      setSelectedLocation(product.quantities[0].location.id);
-    }
-  }, [product.quantities]);
-
   return (
     <div>
       <div className="p-6 flex flex-col gap-4 ">
@@ -103,7 +103,7 @@ export default function ProductPage() {
 
         <div className="flex flex-col gap-4">
           <LocationSelect
-            quantities={product.quantities as any}
+            quantities={(product.quantities || []) as any}
             value={selectedLocation}
             onValueChange={setSelectedLocation}
             placeholder="Select a location"
@@ -140,7 +140,7 @@ export default function ProductPage() {
         </Link>
       </div>
       <HistoryTable
-        data={product.stockMovements as any}
+        data={(product.stockMovements || []) as any}
         showHeader={false}
         unit={product.unit}
       />
