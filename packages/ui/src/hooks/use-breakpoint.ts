@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useDebounce } from "@uidotdev/usehooks";
 
 type Breakpoint = "sm" | "md" | "lg" | "xl" | "2xl";
 
@@ -13,21 +14,18 @@ const breakpoints = {
 };
 
 export function useBreakpoint(breakpoint: Breakpoint): boolean {
-  const [isAboveBreakpoint, setIsAboveBreakpoint] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(0);
+  const debouncedWidth = useDebounce(windowWidth, 100);
 
   useEffect(() => {
     const checkBreakpoint = () => {
-      setIsAboveBreakpoint(window.innerWidth >= breakpoints[breakpoint]);
+      setWindowWidth(window.innerWidth);
     };
 
-    // Check initially
     checkBreakpoint();
-
-    // Add event listener
     window.addEventListener("resize", checkBreakpoint);
-
     return () => window.removeEventListener("resize", checkBreakpoint);
-  }, [breakpoint]);
+  }, []);
 
-  return isAboveBreakpoint;
+  return debouncedWidth >= breakpoints[breakpoint];
 }

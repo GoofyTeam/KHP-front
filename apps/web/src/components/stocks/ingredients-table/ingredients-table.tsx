@@ -12,9 +12,7 @@ import {
 } from "@tanstack/react-table";
 
 import { Skeleton } from "@workspace/ui/components/skeleton";
-import { Card, CardContent } from "@workspace/ui/components/card";
-import { Button } from "@workspace/ui/components/button";
-import { AlertTriangle } from "lucide-react";
+
 
 import { GetIngredientsDocument } from "@/graphql/generated/graphql";
 import { useStocksStore } from "@/stores/stocks-store";
@@ -53,20 +51,7 @@ export function IngredientsTable() {
   };
 
   if (error) {
-    return (
-      <Card className="max-w-md mx-auto mt-8">
-        <CardContent className="flex flex-col items-center space-y-4 pt-6">
-          <AlertTriangle className="h-12 w-12 text-destructive" />
-          <div className="text-center">
-            <h3 className="text-lg font-semibold">Loading Error</h3>
-            <p className="text-sm text-muted-foreground">{error.message}</p>
-          </div>
-          <Button onClick={() => window.location.reload()} variant="outline">
-            Try Again
-          </Button>
-        </CardContent>
-      </Card>
-    );
+    throw new Error(error.message || "Failed to load ingredients");
   }
 
   return (

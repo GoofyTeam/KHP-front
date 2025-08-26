@@ -74,7 +74,7 @@ export default function StocksFilters({
       search: debouncedSearchTerm,
       categoryIds: debouncedCategories,
     });
-  }, [debouncedSearchTerm, debouncedCategories]);
+  }, [debouncedSearchTerm, debouncedCategories, setFilters]);
 
   return (
     <div className="flex items-center justify-between space-x-2">

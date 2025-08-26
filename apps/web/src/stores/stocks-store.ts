@@ -24,7 +24,7 @@ const initialFilters: FilterState = {
   categoryIds: [],
 };
 
-export const useStocksStore = create<StocksStore>((set, get) => ({
+export const useStocksStore = create<StocksStore>((set) => ({
   // Initial state
   filters: initialFilters,
   isRegisterLostMode: false,

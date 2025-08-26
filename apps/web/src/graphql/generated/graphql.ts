@@ -680,21 +680,21 @@ export enum Trashed {
 }
 
 export enum UnitEnum {
-  Centigram = 'CENTIGRAM',
-  Centilitre = 'CENTILITRE',
-  Decagram = 'DECAGRAM',
-  Decalitre = 'DECALITRE',
-  Decigram = 'DECIGRAM',
-  Decilitre = 'DECILITRE',
-  Gram = 'GRAM',
-  Hectogram = 'HECTOGRAM',
-  Hectolitre = 'HECTOLITRE',
-  Kilogram = 'KILOGRAM',
-  Kilolitre = 'KILOLITRE',
-  Litre = 'LITRE',
-  Milligram = 'MILLIGRAM',
-  Millilitre = 'MILLILITRE',
-  Unit = 'UNIT'
+  L = 'L',
+  CL = 'cL',
+  Cg = 'cg',
+  DL = 'dL',
+  DaL = 'daL',
+  Dag = 'dag',
+  Dg = 'dg',
+  G = 'g',
+  HL = 'hL',
+  Hg = 'hg',
+  KL = 'kL',
+  Kg = 'kg',
+  ML = 'mL',
+  Mg = 'mg',
+  Unit = 'unit'
 }
 
 /** Account of a person who uses this application. */
