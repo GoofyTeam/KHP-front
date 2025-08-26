@@ -93,7 +93,7 @@ type Ingredient {
   name: String!
 
   """Unit of measurement for the ingredient."""
-  unit: String!
+  unit: UnitEnum!
   quantities: [IngredientQuantity!]!
 
   """The company that owns this ingredient."""
@@ -306,6 +306,18 @@ type LossPaginator {
   data: [Loss!]!
 }
 
+"""Type représentant une unité de mesure"""
+type MeasurementUnitType {
+  """Valeur utilisée en interne (ex: 'kg', 'L')"""
+  value: String!
+
+  """Libellé français (ex: 'Kilogramme (kg)')"""
+  label: String!
+
+  """Catégorie de l'unité (masse, volume ou unité)"""
+  category: String!
+}
+
 """Représente un produit alimentaire issu d'OpenFoodFacts"""
 type OpenFoodFactsProduct {
   barcode: String
@@ -389,7 +401,7 @@ type Preparation {
   name: String!
 
   """Unit of measurement for the preparation."""
-  unit: String!
+  unit: UnitEnum!
 
   """The company that produces this preparation."""
   company: Company!
@@ -512,6 +524,9 @@ type Query {
     name: String
   ): LocationType
 
+  """Liste les unités de mesure disponibles"""
+  measurementUnits: [MeasurementUnitType!]!
+
   """Trouve une preparation (et seulement si elle appartient à ma company)"""
   preparation(id: ID, name: String): Preparation
 
@@ -555,18 +570,13 @@ type Query {
   ingredients(
     """Filter by a search term. Accepts SQL LIKE wildcards `%` and `_`."""
     search: String
-
-    """Filter by unit of measurement. Accepts SQL LIKE wildcards `%` and `_`."""
-    unit: String
+    unit: UnitEnum
 
     """Filtrer par un ou plusieurs identifiants d'emplacements."""
     locationIds: [ID!]
 
     """Filtrer par une ou plusieurs catégories."""
     categoryIds: [ID!]
-
-    """Options de tri des ingrédients"""
-    orderBy: [OrderByClause!]
 
     """Options de tri des ingrédients"""
     orderBy: [OrderByClause!]
@@ -642,16 +652,13 @@ type Query {
     search: String
 
     """Filtre par unité de mesure avec opérateur LIKE."""
-    unit: String
+    unit: UnitEnum
 
     """Filtrer par un ou plusieurs identifiants d'emplacements."""
     locationIds: [ID!]
 
     """Filtrer par une ou plusieurs catégories."""
     categoryIds: [ID!]
-
-    """Options de tri des préparations"""
-    orderBy: [OrderByClause!]
 
     """Options de tri des préparations"""
     orderBy: [OrderByClause!]
@@ -795,6 +802,24 @@ enum Trashed {
 
   """Only return non-trashed results."""
   WITHOUT
+}
+
+enum UnitEnum {
+  KILOGRAM
+  HECTOGRAM
+  DECAGRAM
+  GRAM
+  DECIGRAM
+  CENTIGRAM
+  MILLIGRAM
+  KILOLITRE
+  HECTOLITRE
+  DECALITRE
+  LITRE
+  DECILITRE
+  CENTILITRE
+  MILLILITRE
+  UNIT
 }
 
 """Account of a person who uses this application."""

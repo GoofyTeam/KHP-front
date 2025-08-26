@@ -38,17 +38,11 @@ const defaultConfig: SidebarConfig = {
       icon: "Home",
       activePatterns: ["/dashboard"],
     },
-    {
-      title: "Account",
-      url: "/account",
-      icon: "User",
-      activePatterns: ["/account"],
-    },
   ],
   // Pages où la sidebar est ouverte par défaut
   defaultOpenPages: ["/dashboard"],
   // Pages où la sidebar est fermée par défaut
-  defaultClosedPages: ["/account"],
+  defaultClosedPages: [""],
 };
 
 const getIcon = (iconName: string): LucideIcon => {

@@ -8,12 +8,10 @@ import {
   SidebarTrigger,
 } from "@workspace/ui/components/sidebar";
 
-// Fonction pour déterminer l'état par défaut de la sidebar
 const getSidebarDefaultState = (currentPath: string): boolean => {
   const defaultOpenPages = ["/dashboard"];
-  const defaultClosedPages = ["/account"];
+  const defaultClosedPages = [""];
 
-  // Vérifier si la page courante est dans la liste des pages fermées par défaut
   if (
     defaultClosedPages.some(
       (page) => currentPath === page || currentPath.startsWith(page + "/")
@@ -22,7 +20,6 @@ const getSidebarDefaultState = (currentPath: string): boolean => {
     return false;
   }
 
-  // Vérifier si la page courante est dans la liste des pages ouvertes par défaut
   if (
     defaultOpenPages.some(
       (page) => currentPath === page || currentPath.startsWith(page + "/")
@@ -31,7 +28,6 @@ const getSidebarDefaultState = (currentPath: string): boolean => {
     return true;
   }
 
-  // Par défaut, sidebar ouverte
   return true;
 };
 
