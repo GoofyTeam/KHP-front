@@ -26,8 +26,6 @@ interface NavigationItem {
 
 interface SidebarConfig {
   navigation: NavigationItem[];
-  defaultOpenPages?: string[];
-  defaultClosedPages?: string[];
 }
 
 const defaultConfig: SidebarConfig = {
@@ -38,11 +36,13 @@ const defaultConfig: SidebarConfig = {
       icon: "Home",
       activePatterns: ["/dashboard"],
     },
+    {
+      title: "Stocks",
+      url: "/stocks",
+      icon: "Package",
+      activePatterns: ["/stocks"],
+    },
   ],
-  // Pages où la sidebar est ouverte par défaut
-  defaultOpenPages: ["/dashboard"],
-  // Pages où la sidebar est fermée par défaut
-  defaultClosedPages: [""],
 };
 
 const getIcon = (iconName: string): LucideIcon => {

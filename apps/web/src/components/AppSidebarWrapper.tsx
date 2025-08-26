@@ -10,7 +10,7 @@ import {
 
 const getSidebarDefaultState = (currentPath: string): boolean => {
   const defaultOpenPages = ["/dashboard"];
-  const defaultClosedPages = [""];
+  const defaultClosedPages = ["/stocks"];
 
   if (
     defaultClosedPages.some(
@@ -46,7 +46,7 @@ export function AppSidebarWrapper({ children }: AppSidebarWrapperProps) {
         <header className="bg-background sticky top-0 flex shrink-0 items-center gap-2 border-b p-4 md:hidden">
           <SidebarTrigger className="-ml-1" />
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4">{children}</div>
+        <div className="flex flex-1 flex-col gap-4 ">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );
