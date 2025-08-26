@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select";
 import { Filter, X, Loader2 } from "lucide-react";
+import { GetIngredientQuery } from "../graphql/getProduct.gql";
 
 interface ProductData {
   id: string;
@@ -18,22 +19,10 @@ interface ProductData {
   unit: string;
 }
 
-interface StockMovement {
-  id: string;
-  type: string;
-  quantity: number;
-  quantity_before?: number | null;
-  quantity_after?: number | null;
-  created_at?: string;
-  location?: {
-    id: string;
-    name: string;
-  };
-  user?: {
-    id: string;
-    name: string;
-  };
-}
+// Utiliser les types GraphQL générés
+type StockMovement = NonNullable<
+  GetIngredientQuery["ingredient"]
+>["stockMovements"][number];
 
 interface LoaderData {
   product: ProductData;
