@@ -51,7 +51,8 @@ export const Route = createFileRoute("/_protected/handle-item")({
     const categories = categoriesQuery.categories.data || [];
 
     const productToFetch = internalId ?? barcode;
-    if (!productToFetch) throw new Error("Product identifier is required");
+    if (!productToFetch && mode !== "manual")
+      throw new Error("Product identifier is required");
 
     const productData = await handleScanType(mode, productToFetch);
 

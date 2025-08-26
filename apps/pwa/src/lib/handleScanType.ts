@@ -38,7 +38,7 @@ const toStringArray = (value: unknown): string[] => {
 
 const handleScanType = async (
   mode: handleItemSearch["mode"],
-  productId: string
+  productId: string | undefined
 ) => {
   let wantedData: WantedDataType = {
     product_image: "",
