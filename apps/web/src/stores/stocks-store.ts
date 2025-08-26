@@ -1,83 +1,72 @@
-import React from "react";
+import { create } from "zustand";
 
-interface FilterState {
+export interface FilterState {
   search: string;
   categoryIds: string[];
 }
 
 interface StocksStore {
+  // State
   filters: FilterState;
   isRegisterLostMode: boolean;
-  subscribers: Set<() => void>;
+
+  // Actions
+  setFilters: (filters: FilterState) => void;
+  setIsRegisterLostMode: (mode: boolean) => void;
+  updateSearch: (search: string) => void;
+  updateCategoryIds: (categoryIds: string[]) => void;
+  resetFilters: () => void;
+  toggleRegisterLostMode: () => void;
 }
 
-class StocksStoreClass {
-  private state: StocksStore = {
-    filters: {
-      search: "",
-      categoryIds: [],
-    },
-    isRegisterLostMode: false,
-    subscribers: new Set(),
-  };
-
-  subscribe(callback: () => void) {
-    this.state.subscribers.add(callback);
-    return () => {
-      this.state.subscribers.delete(callback);
-    };
-  }
-
-  private notify() {
-    this.state.subscribers.forEach((callback) => callback());
-  }
-
-  getState() {
-    return this.state;
-  }
-
-  setFilters(filters: FilterState) {
-    this.state = {
-      ...this.state,
-      filters: { ...filters },
-    };
-    this.notify();
-  }
-
-  setIsRegisterLostMode(mode: boolean) {
-    this.state = {
-      ...this.state,
-      isRegisterLostMode: mode,
-    };
-    this.notify();
-  }
-}
-
-export const stocksStore = new StocksStoreClass();
-
-export const useStocksStore = () => {
-  const [state, setState] = React.useState(stocksStore.getState());
-
-  React.useEffect(() => {
-    const unsubscribe = stocksStore.subscribe(() => {
-      const newState = stocksStore.getState();
-      setState(newState);
-    });
-    return unsubscribe;
-  }, []);
-
-  const setFilters = React.useCallback((filters: FilterState) => {
-    stocksStore.setFilters(filters);
-  }, []);
-
-  const setIsRegisterLostMode = React.useCallback((mode: boolean) => {
-    stocksStore.setIsRegisterLostMode(mode);
-  }, []);
-
-  return {
-    filters: state.filters,
-    isRegisterLostMode: state.isRegisterLostMode,
-    setFilters,
-    setIsRegisterLostMode,
-  };
+const initialFilters: FilterState = {
+  search: "",
+  categoryIds: [],
 };
+
+export const useStocksStore = create<StocksStore>((set, get) => ({
+  // Initial state
+  filters: initialFilters,
+  isRegisterLostMode: false,
+
+  // Actions
+  setFilters: (filters) => set({ filters: { ...filters } }),
+
+  setIsRegisterLostMode: (mode) => set({ isRegisterLostMode: mode }),
+
+  updateSearch: (search) =>
+    set((state) => ({
+      filters: { ...state.filters, search },
+    })),
+
+  updateCategoryIds: (categoryIds) =>
+    set((state) => ({
+      filters: { ...state.filters, categoryIds },
+    })),
+
+  resetFilters: () => set({ filters: { ...initialFilters } }),
+
+  toggleRegisterLostMode: () =>
+    set((state) => ({
+      isRegisterLostMode: !state.isRegisterLostMode,
+    })),
+}));
+
+// Selectors optimisés pour éviter les re-renders inutiles
+export const useFilters = () => useStocksStore((state) => state.filters);
+export const useSearch = () => useStocksStore((state) => state.filters.search);
+export const useCategoryIds = () =>
+  useStocksStore((state) => state.filters.categoryIds);
+export const useIsRegisterLostMode = () =>
+  useStocksStore((state) => state.isRegisterLostMode);
+
+// Actions selectors
+export const useStocksActions = () =>
+  useStocksStore((state) => ({
+    setFilters: state.setFilters,
+    setIsRegisterLostMode: state.setIsRegisterLostMode,
+    updateSearch: state.updateSearch,
+    updateCategoryIds: state.updateCategoryIds,
+    resetFilters: state.resetFilters,
+    toggleRegisterLostMode: state.toggleRegisterLostMode,
+  }));
