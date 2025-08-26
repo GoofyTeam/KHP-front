@@ -74,10 +74,12 @@ function HandleItem() {
           name: values.product_name,
           unit: values.product_units,
           categories: [values.product_category],
-          quantities: values.stockEntries.map((entry: HandleItem["stockEntries"][number]) => ({
-            quantity: parseInt(entry.quantity),
-            location_id: entry.location,
-          })),
+          quantities: values.stockEntries.map(
+            (entry: HandleItem["stockEntries"][number]) => ({
+              quantity: parseInt(entry.quantity),
+              location_id: entry.location,
+            })
+          ),
         });
 
         navigate({
@@ -93,10 +95,12 @@ function HandleItem() {
           name: values.product_name,
           unit: values.product_units,
           categories: [values.product_category],
-          quantities: values.stockEntries.map((entry: HandleItem["stockEntries"][number]) => ({
-            quantity: parseInt(entry.quantity),
-            location_id: entry.location,
-          })),
+          quantities: values.stockEntries.map(
+            (entry: HandleItem["stockEntries"][number]) => ({
+              quantity: parseInt(entry.quantity),
+              location_id: entry.location,
+            })
+          ),
         });
 
         navigate({
@@ -216,11 +220,16 @@ function HandleItem() {
                           </SelectItem>
                         ))}
                       {categories &&
-                        categories.map((categorie: { id: string; name: string }) => (
-                          <SelectItem key={categorie.id} value={categorie.name}>
-                            {categorie.name}
-                          </SelectItem>
-                        ))}
+                        categories.map(
+                          (categorie: { id: string; name: string }) => (
+                            <SelectItem
+                              key={categorie.id}
+                              value={categorie.name}
+                            >
+                              {categorie.name}
+                            </SelectItem>
+                          )
+                        )}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -270,7 +279,7 @@ function HandleItem() {
                   )}
                 />
 
-                {/* Localisation */}
+                {/* Location */}
                 <FormField
                   control={form.control}
                   name={`stockEntries.${index}.location`}
@@ -287,11 +296,13 @@ function HandleItem() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {availableLocations.map((location: { id: string; name: string }) => (
-                            <SelectItem key={location.id} value={location.id}>
-                              {location.name}
-                            </SelectItem>
-                          ))}
+                          {availableLocations.map(
+                            (location: { id: string; name: string }) => (
+                              <SelectItem key={location.id} value={location.id}>
+                                {location.name}
+                              </SelectItem>
+                            )
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />

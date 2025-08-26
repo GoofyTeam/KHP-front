@@ -1,0 +1,39 @@
+query GetIngredient($id: ID!) {
+  ingredient(id: $id) {
+    id
+    name
+    unit
+    image_url
+    categories {
+      name
+    }
+    quantities {
+      quantity
+      location {
+        id
+        name
+        locationType {
+          id
+          name
+          is_default
+        }
+      }
+    }
+    stockMovements {
+      id
+      type
+      quantity
+      quantity_before
+      quantity_after
+      created_at
+      location {
+        id
+        name
+      }
+      user {
+        id
+        name
+      }
+    }
+  }
+}

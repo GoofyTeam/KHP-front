@@ -1,51 +1,90 @@
-import { Link, useNavigate, useParams } from "@tanstack/react-router";
+import {
+  Link,
+  useLoaderData,
+  useNavigate,
+  useParams,
+} from "@tanstack/react-router";
 import { StockStatus } from "@workspace/ui/components/stock-status";
-import { HistoryTable, type HistoryEntry } from "../components/history-table";
+import { HistoryTable } from "../components/history-table";
+import { LocationSelect } from "../components/LocationSelect";
 import { Button } from "@workspace/ui/components/button";
 import { NotebookPen } from "lucide-react";
+import { useEffect, useState } from "react";
+import { GetIngredientQuery } from "../graphql/getProduct.gql";
+
+// Inférer les types depuis GraphQL
+type ProductData = NonNullable<GetIngredientQuery["ingredient"]>;
+
+const formatQuantity = (quantity: number): string => {
+  return parseFloat(quantity.toFixed(3)).toString();
+};
 
 export default function ProductPage() {
   const navigate = useNavigate();
   const { id } = useParams({ from: "/_protected/products/$id" });
+  const product = useLoaderData({
+    from: "/_protected/products/$id",
+  }) as ProductData;
 
-  const historyData: HistoryEntry[] = [
-    {
-      id: "1",
-      type: "add",
-      quantity: 8.0,
-      date: "24/09/2025",
-    },
-    {
-      id: "2",
-      type: "remove",
-      quantity: 0.25,
-      date: "12/09/2025",
-    },
-    {
-      id: "3",
-      type: "add",
-      quantity: 8.0,
-      date: "24/09/2025",
-    },
-    {
-      id: "4",
-      type: "add",
-      quantity: 8.0,
-      date: "24/09/2025",
-    },
-    {
-      id: "5",
-      type: "add",
-      quantity: 8.0,
-      date: "24/09/2025",
-    },
-    {
-      id: "6",
-      type: "add",
-      quantity: 8.0,
-      date: "24/09/2025",
-    },
-  ];
+  const [selectedLocation, setSelectedLocation] = useState<string>("all");
+
+  useEffect(() => {
+    if (product?.name) {
+      document.title = `${product.name} - KHP`;
+    }
+    return () => {
+      document.title = "KHP";
+    };
+  }, [product?.name]);
+
+  useEffect(() => {
+    if (product?.quantities?.length === 1) {
+      setSelectedLocation(product.quantities[0].location.id);
+    }
+  }, [product?.quantities]);
+
+  if (!product) {
+    return <div>Loading...</div>;
+  }
+
+  // Calcul direct du stock total depuis les données GraphQL
+  const totalQuantity =
+    product.quantities?.reduce((sum, qty) => sum + qty.quantity, 0) || 0;
+
+  // Calcul direct du stock à afficher
+  const displayStock = (() => {
+    if (selectedLocation === "all") {
+      return {
+        quantity: totalQuantity,
+        status:
+          totalQuantity > 5
+            ? "in-stock"
+            : totalQuantity > 0
+              ? "low-stock"
+              : "out-of-stock",
+      } as const;
+    } else {
+      const locationQty = product.quantities?.find(
+        (qty) => qty.location.id === selectedLocation
+      );
+      if (!locationQty) {
+        return {
+          quantity: 0,
+          status: "out-of-stock",
+        } as const;
+      }
+
+      return {
+        quantity: locationQty.quantity,
+        status:
+          locationQty.quantity > 5
+            ? "in-stock"
+            : locationQty.quantity > 0
+              ? "low-stock"
+              : "out-of-stock",
+      } as const;
+    }
+  })();
 
   return (
     <div>
@@ -61,9 +100,32 @@ export default function ProductPage() {
           <h2 className="text-2xl font-semibold">Nom du produit</h2>
           <p>Categorie : Aliments en conserve</p>
         </div>
-        <div className="flex justify-between gap-1 items-center">
-          <p>Quantity : 17 KG</p>
-          <StockStatus variant="in-stock" showLabel={false} />
+
+        <div className="flex flex-col gap-4">
+          <LocationSelect
+            quantities={product.quantities}
+            value={selectedLocation}
+            onValueChange={setSelectedLocation}
+            placeholder="Select a location"
+            label="Available stock"
+            unit={product?.unit || "units"}
+            showAllOption={true}
+            allOptionLabel="All locations"
+            className="w-full"
+          />
+
+          <div className="flex justify-between items-center">
+            <div className="flex flex-col">
+              <p className="text-xl font-bold text-foreground">
+                {formatQuantity(displayStock.quantity)}{" "}
+                {product?.unit || "units"}
+              </p>
+              <p className="text-sm text-muted-foreground font-medium">
+                Available stock
+              </p>
+            </div>
+            <StockStatus variant={displayStock.status} showLabel={false} />
+          </div>
         </div>
       </div>
 
@@ -77,7 +139,11 @@ export default function ProductPage() {
           View all
         </Link>
       </div>
-      <HistoryTable data={historyData} showHeader={false} />
+      <HistoryTable
+        data={product.stockMovements || []}
+        showHeader={false}
+        unit={product.unit}
+      />
       <div className="flex justify-center p-6">
         <Button
           variant="khp-default"

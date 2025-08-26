@@ -28,6 +28,11 @@ import {
   LocationTypeOrderByField,
   LocationTypeOrderByOrderByClause,
   LocationTypePaginator,
+  Loss,
+  LossOrderByClause,
+  LossOrderByField,
+  LossPaginator,
+  MeasurementUnitType,
   OpenFoodFactsProduct,
   OrderByClause,
   OrderByRelationAggregateFunction,
@@ -54,6 +59,7 @@ import {
   QueryIngredientsArgs,
   QueryLocationsArgs,
   QueryLocationTypesArgs,
+  QueryLossesArgs,
   QueryPreparationsArgs,
   QueryStockMovementsArgs,
   QueryUsersArgs,
@@ -63,6 +69,7 @@ import {
   StockMovementOrderByField,
   StockMovementPaginator,
   Trashed,
+  UnitEnum,
   User,
   UserPaginator
 } from 'generated/schema.graphql';

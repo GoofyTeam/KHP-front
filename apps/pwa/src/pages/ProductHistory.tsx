@@ -1,140 +1,314 @@
-import { HistoryTable, type HistoryEntry } from "../components/history-table";
+import { useLoaderData, useNavigate } from "@tanstack/react-router";
+import { useState, useCallback, useEffect, useMemo } from "react";
+import { HistoryTable } from "../components/history-table";
+import { LocationSelect } from "../components/LocationSelect";
+import { Button } from "@workspace/ui/components/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
+import { Filter, X, Loader2 } from "lucide-react";
+
+interface ProductData {
+  id: string;
+  name: string;
+  unit: string;
+}
+
+interface StockMovement {
+  id: string;
+  type: string;
+  quantity: number;
+  quantity_before?: number | null;
+  quantity_after?: number | null;
+  created_at?: string;
+  location?: {
+    id: string;
+    name: string;
+  };
+  user?: {
+    id: string;
+    name: string;
+  };
+}
+
+interface LoaderData {
+  product: ProductData;
+  stockMovements: StockMovement[];
+  paginatorInfo: {
+    hasMorePages: boolean;
+    currentPage: number;
+    total: number;
+    count: number;
+  };
+  currentFilter: string;
+  currentSelectedMonth?: string;
+}
+
+type FilterPreset = "all" | "today" | "week" | "month";
 
 export default function ProductHistoryPage() {
-  const fullHistoryData: HistoryEntry[] = [
-    {
-      id: "1",
-      type: "add",
-      quantity: 8.0,
-      date: "24/09/2025",
+  const loaderData = useLoaderData({
+    from: "/_protected/products/$id_/history",
+  }) as LoaderData;
+
+  const navigate = useNavigate();
+
+  const [showFilters, setShowFilters] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [selectedLocationId, setSelectedLocationId] = useState<string>("all");
+
+  const {
+    product,
+    stockMovements,
+    paginatorInfo,
+    currentFilter,
+    currentSelectedMonth,
+  } = loaderData;
+
+  console.log("🎯 ProductHistory data:", {
+    product,
+    stockMovements,
+    paginatorInfo,
+    currentFilter,
+  });
+
+  // Extract available locations from stock movements and adapt for LocationSelect
+  const availableLocations = useMemo(() => {
+    const locationsMap = new Map();
+    stockMovements.forEach((movement) => {
+      if (movement.location) {
+        locationsMap.set(movement.location.id, movement.location);
+      }
+    });
+    const locations = Array.from(locationsMap.values());
+
+    return locations;
+  }, [stockMovements]);
+
+  // Adapt locations for LocationSelect component (requires IngredientQuantity format)
+  const locationQuantities = useMemo(() => {
+    return availableLocations.map((location) => ({
+      quantity: stockMovements.filter((m) => m.location?.id === location.id)
+        .length, // Use movement count as "quantity"
+      location: location,
+    }));
+  }, [availableLocations, stockMovements]);
+
+  // Filter movements by location
+  const filteredMovements = useMemo(() => {
+    // Always show all movements if "all" is selected OR if no specific location is selected
+    if (!selectedLocationId || selectedLocationId === "all") {
+      return stockMovements;
+    }
+
+    return stockMovements.filter(
+      (movement) => movement.location?.id === selectedLocationId
+    );
+  }, [stockMovements, selectedLocationId]);
+
+  // Generate list of available months from all data (we'll need a separate call for this)
+  const getAvailableMonths = useCallback(async () => {
+    // For now, generate some recent months - in production you'd want to call
+    // the backend to get available months for this product
+    const months = [];
+    const now = new Date();
+    for (let i = 0; i < 12; i++) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push({
+        key: `${date.getFullYear()}-${date.getMonth()}`,
+        label: date.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+        }),
+      });
+    }
+    return months;
+  }, []);
+
+  const [availableMonths, setAvailableMonths] = useState<
+    Array<{ key: string; label: string }>
+  >([]);
+
+  useEffect(() => {
+    getAvailableMonths().then(setAvailableMonths);
+  }, [getAvailableMonths]);
+
+  const handleFilterChange = useCallback(
+    async (newFilter: FilterPreset, newSelectedMonth?: string) => {
+      setIsNavigating(true);
+
+      const searchParams: { filter: FilterPreset; selectedMonth?: string } = {
+        filter: newFilter,
+      };
+
+      if (
+        newFilter === "month" &&
+        newSelectedMonth &&
+        newSelectedMonth !== "all"
+      ) {
+        searchParams.selectedMonth = newSelectedMonth;
+      }
+
+      try {
+        await navigate({
+          to: ".",
+          search: searchParams,
+        });
+      } finally {
+        setIsNavigating(false);
+      }
     },
-    {
-      id: "2",
-      type: "remove",
-      quantity: 0.25,
-      date: "12/09/2025",
-    },
-    {
-      id: "3",
-      type: "add",
-      quantity: 8.0,
-      date: "24/09/2025",
-    },
-    {
-      id: "4",
-      type: "add",
-      quantity: 8.0,
-      date: "24/09/2025",
-    },
-    {
-      id: "5",
-      type: "add",
-      quantity: 8.0,
-      date: "24/09/2025",
-    },
-    {
-      id: "6",
-      type: "add",
-      quantity: 8.0,
-      date: "24/09/2025",
-    },
-    {
-      id: "7",
-      type: "remove",
-      quantity: 2.5,
-      date: "10/09/2025",
-    },
-    {
-      id: "8",
-      type: "add",
-      quantity: 15.0,
-      date: "08/09/2025",
-    },
-    {
-      id: "9",
-      type: "remove",
-      quantity: 1.0,
-      date: "05/09/2025",
-    },
-    {
-      id: "10",
-      type: "add",
-      quantity: 10.0,
-      date: "01/09/2025",
-    },
-    {
-      id: "11",
-      type: "remove",
-      quantity: 3.0,
-      date: "28/08/2025",
-    },
-    {
-      id: "12",
-      type: "add",
-      quantity: 20.0,
-      date: "25/08/2025",
-    },
-    {
-      id: "13",
-      type: "add",
-      quantity: 5.0,
-      date: "22/08/2025",
-    },
-    {
-      id: "14",
-      type: "remove",
-      quantity: 1.5,
-      date: "20/08/2025",
-    },
-    {
-      id: "15",
-      type: "add",
-      quantity: 12.0,
-      date: "18/08/2025",
-    },
-    {
-      id: "16",
-      type: "remove",
-      quantity: 0.5,
-      date: "15/08/2025",
-    },
-    {
-      id: "17",
-      type: "add",
-      quantity: 7.0,
-      date: "12/08/2025",
-    },
-    {
-      id: "18",
-      type: "remove",
-      quantity: 2.0,
-      date: "10/08/2025",
-    },
-    {
-      id: "19",
-      type: "add",
-      quantity: 18.0,
-      date: "08/08/2025",
-    },
-    {
-      id: "20",
-      type: "remove",
-      quantity: 4.0,
-      date: "05/08/2025",
-    },
-  ];
+    [navigate]
+  );
+
+  const handlePresetChange = (preset: FilterPreset) => {
+    handleFilterChange(preset);
+  };
+
+  const handleMonthChange = (month: string) => {
+    handleFilterChange("month", month);
+  };
+
+  const clearFilters = () => {
+    setSelectedLocationId("all");
+    handleFilterChange("all");
+  };
+
+  const handleLocationChange = (locationId: string) => {
+    setSelectedLocationId(locationId);
+  };
 
   return (
     <div className="pb-20">
-      <div className="flex flex-col gap-4 p-6">
+      <div className="flex flex-col gap-4 p-2">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">Product Name</h2>
+          <h2 className="text-xl font-semibold">{product.name}</h2>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center gap-2"
+            disabled={isNavigating}
+          >
+            {isNavigating ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Filter className="h-4 w-4" />
+            )}
+            Filters
+          </Button>
         </div>
+
+        {showFilters && (
+          <div className="border rounded-lg p-4 bg-muted/20 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                Filter by Date
+              </h3>
+              {(currentFilter !== "all" || selectedLocationId !== "all") && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearFilters}
+                  className="flex items-center gap-1 h-6 px-2 text-xs"
+                  disabled={isNavigating}
+                >
+                  <X className="h-3 w-3" />
+                  Clear
+                </Button>
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {[
+                { key: "all", label: "All time" },
+                { key: "today", label: "Today" },
+                { key: "week", label: "This week" },
+                { key: "month", label: "By month" },
+              ].map(({ key, label }) => (
+                <Button
+                  key={key}
+                  variant={currentFilter === key ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handlePresetChange(key as FilterPreset)}
+                  className="text-xs"
+                  disabled={isNavigating}
+                >
+                  {label}
+                </Button>
+              ))}
+            </div>
+
+            {currentFilter === "month" && availableMonths.length > 0 && (
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground">
+                    Select Month
+                  </label>
+                  <Select
+                    value={currentSelectedMonth || "all"}
+                    onValueChange={handleMonthChange}
+                    disabled={isNavigating}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Choose a month" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All months</SelectItem>
+                      {availableMonths.map(({ key, label }) => (
+                        <SelectItem key={key} value={key}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+
+            {/* Location Filter */}
+            {locationQuantities.length > 0 && (
+              <div className="border-t pt-4">
+                <LocationSelect
+                  quantities={locationQuantities}
+                  value={selectedLocationId}
+                  onValueChange={handleLocationChange}
+                  label="Filter by Location"
+                  placeholder="Choose a location"
+                  unit="movements"
+                  showAllOption={true}
+                  allOptionLabel="All locations"
+                  className="text-sm"
+                />
+              </div>
+            )}
+
+            <div className="text-xs text-muted-foreground">
+              Showing {filteredMovements.length} of {stockMovements.length}{" "}
+              movements
+              {paginatorInfo.total > stockMovements.length && (
+                <span> of {paginatorInfo.total} total</span>
+              )}
+              {isNavigating && (
+                <span className="ml-2 text-muted-foreground/70">
+                  <Loader2 className="h-3 w-3 animate-spin inline mr-1" />
+                  Loading...
+                </span>
+              )}
+            </div>
+          </div>
+        )}
       </div>
+
       <HistoryTable
-        data={fullHistoryData}
+        data={filteredMovements}
         showHeader={true}
         limitHeight={false}
+        unit={product.unit}
       />
     </div>
   );

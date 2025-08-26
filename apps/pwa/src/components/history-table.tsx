@@ -1,14 +1,8 @@
 import { ArrowUp, ArrowDown } from "lucide-react";
+import { format } from "date-fns";
+import { GetIngredientQuery } from "../graphql/getProduct.gql";
 
 import { cn } from "@workspace/ui/lib/utils";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@workspace/ui/components/table";
 
 export type HistoryEntry = {
   id: string;
@@ -17,11 +11,34 @@ export type HistoryEntry = {
   date: string;
 };
 
+type EnrichedHistoryEntry = {
+  id: string;
+  type: "add" | "remove";
+  quantity: number;
+  date: string;
+  location?: {
+    id: string;
+    name: string;
+  };
+};
+
+type StockMovement = NonNullable<
+  GetIngredientQuery["ingredient"]
+>["stockMovements"][number];
+
 interface HistoryTableProps {
-  data: HistoryEntry[];
+  data: HistoryEntry[] | StockMovement[];
   className?: string;
   showHeader?: boolean;
   limitHeight?: boolean;
+  unit?: string;
+}
+
+function isStockMovement(
+  data: HistoryEntry[] | StockMovement[]
+): data is StockMovement[] {
+  if (data.length === 0) return false;
+  return "created_at" in data[0] && "quantity_before" in data[0];
 }
 
 export function HistoryTable({
@@ -29,58 +46,121 @@ export function HistoryTable({
   className,
   showHeader = true,
   limitHeight = true,
+  unit = "KG",
 }: HistoryTableProps) {
+  // Use stock movements directly if available, otherwise use legacy format
+  const isStockMovements = isStockMovement(data);
+  const historyEntries = isStockMovements ? data : (data as HistoryEntry[]);
+
+  if (historyEntries.length === 0) {
+    return (
+      <div className={cn("w-full", className)}>
+        <div className="flex flex-col items-center justify-center py-12 px-6">
+          <div className="w-16 h-16 rounded-full bg-muted/30 flex items-center justify-center mb-4">
+            <ArrowUp className="h-8 w-8 text-muted-foreground/50" />
+          </div>
+          <p className="text-muted-foreground text-center text-base font-medium">
+            No history available.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={cn("w-full", className)}>
-      <div className="border overflow-hidden">
-        <div
-          className={cn(
-            limitHeight &&
-              "max-h-[15vh] [@media(min-height:600px)]:max-h-[20vh] [@media(min-height:700px)]:max-h-[25vh] [@media(min-height:800px)]:max-h-[30vh] overflow-y-auto"
-          )}
-        >
-          <Table>
-            {showHeader && (
-              <TableHeader className="sticky top-0  bg-background">
-                <TableRow>
-                  <TableHead className="w-[50px]"></TableHead>
-                  <TableHead>Quantity</TableHead>
-                  <TableHead>Date</TableHead>
-                </TableRow>
-              </TableHeader>
-            )}
-            <TableBody>
-              {data.length ? (
-                data.map((entry, index) => (
-                  <TableRow
-                    key={entry.id}
-                    className={cn(index === data.length - 1 && "border-b-0")}
-                  >
-                    <TableCell className="flex justify-center w-[50px]">
-                      {entry.type === "add" ? (
-                        <ArrowUp className="h-5 w-5 text-khp-primary" />
-                      ) : (
-                        <ArrowDown className="h-5 w-5 text-khp-error" />
-                      )}
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {entry.quantity} KG
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {entry.date}
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={3} className="h-24 text-center">
-                    Aucun historique disponible.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+      {showHeader && (
+        <div className="px-6 py-3 border-b bg-muted/20">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            Movement History
+          </h3>
         </div>
+      )}
+      <div
+        className={cn(
+          "divide-y divide-border/50",
+          limitHeight &&
+            "max-h-[40vh] [@media(min-height:600px)]:max-h-[45vh] [@media(min-height:700px)]:max-h-[50vh] [@media(min-height:800px)]:max-h-[55vh] overflow-y-auto"
+        )}
+      >
+        {historyEntries.map((entry) => {
+          // Handle both StockMovement and HistoryEntry formats
+          const entryData: EnrichedHistoryEntry = isStockMovements
+            ? {
+                id: (entry as StockMovement).id,
+                type:
+                  (entry as StockMovement).type === "addition"
+                    ? "add"
+                    : "remove",
+                quantity: Math.abs((entry as StockMovement).quantity),
+                date: (entry as StockMovement).created_at
+                  ? format(
+                      new Date((entry as StockMovement).created_at!),
+                      "dd/MM/yyyy"
+                    )
+                  : "",
+                location: (entry as StockMovement).location,
+              }
+            : {
+                ...(entry as HistoryEntry),
+                location: undefined,
+              };
+
+          return (
+            <div
+              key={entryData.id}
+              className={cn(
+                "flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors duration-200 active:bg-muted/50",
+                "touch-manipulation min-h-[64px]"
+              )}
+            >
+              <div
+                className={cn(
+                  "flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center",
+                  entryData.type === "add"
+                    ? "bg-khp-primary/10 text-khp-primary"
+                    : "bg-khp-error/10 text-khp-error"
+                )}
+              >
+                {entryData.type === "add" ? (
+                  <ArrowUp className="h-5 w-5" strokeWidth={2.5} />
+                ) : (
+                  <ArrowDown className="h-5 w-5" strokeWidth={2.5} />
+                )}
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-base font-semibold text-foreground">
+                    {entryData.quantity}
+                  </span>
+                  <span className="text-sm font-medium text-muted-foreground uppercase">
+                    {unit}
+                  </span>
+                </div>
+                <div className="text-sm text-muted-foreground mt-0.5">
+                  {entryData.type === "add"
+                    ? "Added to stock"
+                    : "Removed from stock"}
+                  {entryData.location && (
+                    <>
+                      {" • "}
+                      <span className="font-medium text-khp-primary">
+                        {entryData.location.name}
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex-shrink-0 text-right">
+                <div className="text-sm font-medium text-foreground">
+                  {entryData.date}
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
