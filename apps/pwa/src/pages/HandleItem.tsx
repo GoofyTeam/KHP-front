@@ -73,6 +73,10 @@ function HandleItem() {
       product_category: product?.product_category?.[0],
       product_units:
         product?.product_units != null ? product.product_units.toString() : "",
+      quantityPerUnit:
+        product?.product_base_quantity != null
+          ? product.product_base_quantity.toString()
+          : "",
       stockEntries:
         type !== "update"
           ? [
@@ -113,7 +117,7 @@ function HandleItem() {
         } else {
           console.log("send as json");
           await api.post("/api/ingredients", {
-            image_url: "",
+            image_url: product?.product_image || undefined,
             name: values.product_name,
             unit: values.product_units,
             base_quantity: parseInt(values.quantityPerUnit),
