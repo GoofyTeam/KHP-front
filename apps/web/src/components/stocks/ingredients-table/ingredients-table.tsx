@@ -13,7 +13,6 @@ import {
 
 import { Skeleton } from "@workspace/ui/components/skeleton";
 
-
 import { GetIngredientsDocument } from "@/graphql/generated/graphql";
 import { useStocksStore } from "@/stores/stocks-store";
 import { useIngredientsColumns } from "./ingredients-columns";
