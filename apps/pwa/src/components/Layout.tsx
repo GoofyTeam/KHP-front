@@ -76,18 +76,7 @@ export function Layout({ children, className }: LayoutProps) {
   );
 
   const handleGoBack = () => {
-    if (isHistoryRoute && productId) {
-      router.navigate({
-        to: "/products/$id",
-        params: { id: productId },
-      });
-    } else if (productId && !isHistoryRoute) {
-      router.navigate({
-        to: "/inventory",
-      });
-    } else {
-      router.history.back();
-    }
+    router.history.back();
   };
 
   const shouldShowBackButton = !PAGES_WITHOUT_BACK_BUTTON.includes(

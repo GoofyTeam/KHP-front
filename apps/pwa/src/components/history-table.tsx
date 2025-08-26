@@ -1,4 +1,5 @@
 import { ArrowUp, ArrowDown } from "lucide-react";
+import { format } from "date-fns";
 
 import { cn } from "@workspace/ui/lib/utils";
 
@@ -47,11 +48,7 @@ interface HistoryTableProps {
 
 function formatDate(value?: string): string {
   if (!value) return "";
-  const d = new Date(value);
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = d.getFullYear();
-  return `${day}/${month}/${year}`;
+  return format(new Date(value), "dd/MM/yyyy");
 }
 
 function isStockMovement(

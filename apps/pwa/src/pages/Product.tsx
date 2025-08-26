@@ -10,60 +10,10 @@ import { LocationSelect } from "../components/LocationSelect";
 import { Button } from "@workspace/ui/components/button";
 import { NotebookPen } from "lucide-react";
 import { useEffect, useState } from "react";
+import { GetIngredientQuery } from "../graphql/getProduct.gql";
 
-interface LocationStock {
-  locationId: string;
-  locationName: string;
-  quantity: number;
-  unit: string;
-  locationType?: {
-    id: string;
-    name: string;
-    is_default: boolean;
-  };
-}
-
-interface StockSummary {
-  totalQuantity: number;
-  locations: LocationStock[];
-  unit: string;
-}
-
-interface ProductData {
-  id: string;
-  name: string;
-  unit: string;
-  image_url?: string | null;
-  categories: Array<{ name: string }>;
-  quantities?: Array<{
-    quantity: number;
-    location: {
-      id: string;
-      name: string;
-      locationType?: {
-        id: string;
-        name: string;
-        is_default: boolean;
-      };
-    };
-  }>;
-  stockMovements?: Array<{
-    id: string;
-    type: string;
-    quantity: number;
-    quantity_before?: number | null;
-    quantity_after?: number | null;
-    created_at?: string;
-    location?: {
-      id: string;
-      name: string;
-    };
-    user?: {
-      id: string;
-      name: string;
-    };
-  }>;
-}
+// Inférer les types depuis GraphQL
+type ProductData = NonNullable<GetIngredientQuery["ingredient"]>;
 
 const formatQuantity = (quantity: number): string => {
   return parseFloat(quantity.toFixed(3)).toString();
@@ -76,73 +26,19 @@ export default function ProductPage() {
     from: "/_protected/products/$id",
   }) as ProductData;
 
+  const [selectedLocation, setSelectedLocation] = useState<string>("all");
+
   if (!product) {
     return <div>Loading...</div>;
   }
 
-  const [selectedLocation, setSelectedLocation] = useState<string>("all");
+  // Calcul direct du stock total depuis les données GraphQL
+  const totalQuantity =
+    product.quantities?.reduce((sum, qty) => sum + qty.quantity, 0) || 0;
 
-  const getStockData = (): StockSummary => {
-    if (product && product.quantities && product.quantities.length > 0) {
-      const locationStocks: LocationStock[] = product.quantities.map(
-        (qty: {
-          quantity: number;
-          location: {
-            id: string;
-            name: string;
-            locationType?: {
-              id: string;
-              name: string;
-              is_default: boolean;
-            };
-          };
-        }) => ({
-          locationId: qty.location.id,
-          locationName: qty.location.name,
-          quantity: parseFloat(qty.quantity.toFixed(3)),
-          unit: product.unit,
-          locationType: qty.location.locationType,
-        })
-      );
-
-      return {
-        totalQuantity: locationStocks.reduce(
-          (total, loc) => total + loc.quantity,
-          0
-        ),
-        unit: product.unit,
-        locations: locationStocks,
-      };
-    }
-
-    return {
-      totalQuantity: 5,
-      unit: product?.unit || "units",
-      locations: [
-        {
-          locationId: "1",
-          locationName: "Fridge",
-          quantity: 2,
-          unit: product?.unit || "units",
-        },
-        {
-          locationId: "2",
-          locationName: "Freezer",
-          quantity: 3,
-          unit: product?.unit || "units",
-        },
-      ],
-    };
-  };
-
-  const stockData = getStockData();
-
-  const getDisplayStock = (): {
-    quantity: number;
-    status: "in-stock" | "low-stock" | "out-of-stock";
-  } => {
+  // Calcul direct du stock à afficher
+  const displayStock = (() => {
     if (selectedLocation === "all") {
-      const totalQuantity = stockData.totalQuantity;
       return {
         quantity: totalQuantity,
         status:
@@ -151,31 +47,29 @@ export default function ProductPage() {
             : totalQuantity > 0
               ? "low-stock"
               : "out-of-stock",
-      };
+      } as const;
     } else {
-      const location = stockData.locations.find(
-        (loc) => loc.locationId === selectedLocation
+      const locationQty = product.quantities?.find(
+        (qty) => qty.location.id === selectedLocation
       );
-      if (!location) {
+      if (!locationQty) {
         return {
           quantity: 0,
           status: "out-of-stock",
-        };
+        } as const;
       }
 
       return {
-        quantity: location.quantity,
+        quantity: locationQty.quantity,
         status:
-          location.quantity > 5
+          locationQty.quantity > 5
             ? "in-stock"
-            : location.quantity > 0
+            : locationQty.quantity > 0
               ? "low-stock"
               : "out-of-stock",
-      };
+      } as const;
     }
-  };
-
-  const displayStock = getDisplayStock();
+  })();
 
   useEffect(() => {
     if (product?.name) {
@@ -187,21 +81,10 @@ export default function ProductPage() {
   }, [product?.name]);
 
   useEffect(() => {
-    if (stockData.locations.length === 1) {
-      setSelectedLocation(stockData.locations[0].locationId);
+    if (product.quantities?.length === 1) {
+      setSelectedLocation(product.quantities[0].location.id);
     }
-  }, [stockData.locations]);
-
-  const historyData = product.stockMovements
-    ? product.stockMovements
-        .slice()
-        .sort(
-          (a, b) =>
-            new Date(b.created_at || "").getTime() -
-            new Date(a.created_at || "").getTime()
-        )
-        .slice(0, 6)
-    : [];
+  }, [product.quantities]);
 
   return (
     <div>
@@ -220,7 +103,7 @@ export default function ProductPage() {
 
         <div className="flex flex-col gap-4">
           <LocationSelect
-            quantities={product.quantities || []}
+            quantities={product.quantities as any}
             value={selectedLocation}
             onValueChange={setSelectedLocation}
             placeholder="Select a location"
@@ -257,9 +140,9 @@ export default function ProductPage() {
         </Link>
       </div>
       <HistoryTable
-        data={historyData}
+        data={product.stockMovements as any}
         showHeader={false}
-        unit={product?.unit || "units"}
+        unit={product.unit}
       />
       <div className="flex justify-center p-6">
         <Button

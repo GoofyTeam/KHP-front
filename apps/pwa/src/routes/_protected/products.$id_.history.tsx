@@ -23,7 +23,6 @@ export const Route = createFileRoute("/_protected/products/$id_/history")({
     const { id } = params;
     const { filter, selectedMonth } = deps;
 
-    // Get product info with stockMovements
     const productData = await graphqlRequest<GetIngredientQuery>(
       GetIngredient,
       {
@@ -37,36 +36,38 @@ export const Route = createFileRoute("/_protected/products/$id_/history")({
       throw new Error("Product not found");
     }
 
-    const allStockMovements = productData.ingredient.stockMovements || [];
+    const allStockMovements: Array<{
+      id: string;
+      type: string;
+      quantity: number;
+      created_at?: string;
+      location?: { id: string; name: string };
+    }> = productData.ingredient.stockMovements || [];
 
-    // Apply frontend filtering for now
-    const getFilteredMovements = (
-      movements: any[],
-      filterType: string,
-      monthKey?: string
-    ) => {
-      if (filterType === "all") return movements;
+    const filteredMovements = (() => {
+      if (filter === "all") return allStockMovements;
 
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-      return movements.filter((movement) => {
+      return allStockMovements.filter((movement) => {
         if (!movement.created_at) return false;
         const movementDate = new Date(movement.created_at);
 
-        switch (filterType) {
+        switch (filter) {
           case "today":
             return (
               movementDate >= today &&
               movementDate < new Date(today.getTime() + 24 * 60 * 60 * 1000)
             );
-          case "week":
+          case "week": {
             const weekStart = new Date(today);
             weekStart.setDate(today.getDate() - today.getDay());
             return movementDate >= weekStart && movementDate <= now;
-          case "month":
-            if (monthKey && monthKey !== "all") {
-              const [year, month] = monthKey.split("-").map(Number);
+          }
+          case "month": {
+            if (selectedMonth && selectedMonth !== "all") {
+              const [year, month] = selectedMonth.split("-").map(Number);
               return (
                 movementDate.getFullYear() === year &&
                 movementDate.getMonth() === month
@@ -78,17 +79,12 @@ export const Route = createFileRoute("/_protected/products/$id_/history")({
               1
             );
             return movementDate >= currentMonthStart && movementDate <= now;
+          }
           default:
             return true;
         }
       });
-    };
-
-    const filteredMovements = getFilteredMovements(
-      allStockMovements,
-      filter,
-      selectedMonth
-    );
+    })();
 
     // Sort by created_at descending
     const sortedMovements = filteredMovements.sort(
