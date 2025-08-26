@@ -20,12 +20,14 @@ import {
 interface NavigationItem {
   title: string;
   url: string;
-  icon: string; // Nom de l'icône Lucide React
-  isActive?: boolean;
+  icon: string;
+  activePatterns?: string[];
 }
 
 interface SidebarConfig {
   navigation: NavigationItem[];
+  defaultOpenPages?: string[];
+  defaultClosedPages?: string[];
 }
 
 const defaultConfig: SidebarConfig = {
@@ -34,15 +36,19 @@ const defaultConfig: SidebarConfig = {
       title: "Dashboard",
       url: "/dashboard",
       icon: "Home",
-      isActive: true,
+      activePatterns: ["/dashboard"],
     },
     {
-      title: "Stocks",
-      url: "/stocks",
-      icon: "Package",
-      isActive: false,
+      title: "Account",
+      url: "/account",
+      icon: "User",
+      activePatterns: ["/account"],
     },
   ],
+  // Pages où la sidebar est ouverte par défaut
+  defaultOpenPages: ["/dashboard"],
+  // Pages où la sidebar est fermée par défaut
+  defaultClosedPages: ["/account"],
 };
 
 const getIcon = (iconName: string): LucideIcon => {
@@ -50,20 +56,31 @@ const getIcon = (iconName: string): LucideIcon => {
   return iconsMap[iconName] || Icons.HelpCircle;
 };
 
+const isRouteActive = (currentPath: string, item: NavigationItem): boolean => {
+  if (item.activePatterns && item.activePatterns.length > 0) {
+    return item.activePatterns.some((pattern) => {
+      if (pattern.endsWith("/*")) {
+        const basePattern = pattern.slice(0, -2);
+        return currentPath.startsWith(basePattern);
+      }
+      return currentPath === pattern || currentPath.startsWith(pattern + "/");
+    });
+  }
+
+  return currentPath === item.url || currentPath.startsWith(item.url + "/");
+};
+
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   config?: SidebarConfig;
+  pathname?: string;
 }
 
 export function AppSidebar({
   config = defaultConfig,
+  pathname = "/dashboard",
   ...props
 }: AppSidebarProps) {
   const { toggleSidebar } = useSidebar();
-  const [activeItem, setActiveItem] = React.useState<NavigationItem | null>(
-    config.navigation.find((item) => item.isActive) ||
-      config.navigation[0] ||
-      null
-  );
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -73,7 +90,7 @@ export function AppSidebar({
             <SidebarMenuButton
               size="lg"
               onClick={toggleSidebar}
-              className="cursor-pointer hover:bg-sidebar-accent"
+              className="cursor-pointer hover:bg-khp-primary/10"
             >
               <Square className="size-8 text-gray-400" />
               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -91,16 +108,24 @@ export function AppSidebar({
             <SidebarMenu>
               {config.navigation.map((item) => {
                 const ItemIcon = getIcon(item.icon);
+                const isActive = isRouteActive(pathname, item);
+
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       size="lg"
                       tooltip={item.title}
-                      onClick={() => setActiveItem(item)}
-                      isActive={activeItem?.title === item.title}
+                      isActive={isActive}
                       asChild
                     >
-                      <a href={item.url}>
+                      <a
+                        href={item.url}
+                        className={`relative transition-all duration-200 ease-in-out active:scale-95 ${
+                          !isActive
+                            ? "hover:!bg-transparent hover:!text-current before:absolute before:inset-0 before:border before:border-transparent before:rounded-md before:transition-colors before:duration-200 hover:before:border-khp-primary"
+                            : ""
+                        }`}
+                      >
                         <ItemIcon className="size-5" />
                         <span>{item.title}</span>
                       </a>
@@ -114,7 +139,7 @@ export function AppSidebar({
       </SidebarContent>
 
       <SidebarFooter>
-        {/* TODO: Ajouter le button hors ligne/en ligne */}
+        {/* TODO: Ajouter le button page compte utilisateur*/}
       </SidebarFooter>
     </Sidebar>
   );
