@@ -9,15 +9,14 @@ import {
   GetCategories,
   type GetCategoriesQuery,
 } from "../../graphql/getCategories.gql";
-import {
-  GetItemResult,
-  type GetItemResultQuery,
-} from "../../graphql/getItemResult.gql";
 
-type handleItemSearch = {
-  mode: "scan" | "manual" | "db" | "update";
-  type: "add" | "remove";
+import handleScanType from "../../lib/handleScanType";
+
+export type handleItemSearch = {
+  type: "add" | "remove" | "update";
+  mode: "barcode" | "internalId" | "manual";
   barcode?: string;
+  internalId?: string;
 };
 
 export const Route = createFileRoute("/_protected/handle-item")({
@@ -26,60 +25,42 @@ export const Route = createFileRoute("/_protected/handle-item")({
       mode: (search.mode as handleItemSearch["mode"]) ?? "manual",
       type: (search.type as handleItemSearch["type"]) ?? "add",
       barcode: (search.barcode as string) ?? undefined,
+      internalId: (search.internalId as string) ?? undefined,
     };
   },
   loaderDeps: ({ search }) => ({
     mode: search.mode,
     type: search.type,
     barcode: search.barcode,
+    internalId: search.internalId,
   }),
   beforeLoad: async ({ search }) => {
-    if (search.mode === "scan" && !search.barcode) {
-      throw new Error("Barcode is required for scan mode");
+    if (search.mode === "barcode" && !search.barcode) {
+      throw new Error("Barcode is required for barcode mode");
+    }
+
+    if (search.mode === "internalId" && !search.internalId) {
+      throw new Error("Product ID is required for update mode");
     }
   },
-  loader: async ({ deps: { mode, type, barcode } }) => {
+  loader: async ({ deps: { mode, type, barcode, internalId } }) => {
     const locationQuery = await graphqlRequest<GetLocationsQuery>(GetLocations);
     const availableLocations = locationQuery.locations.data || [];
     const categoriesQuery =
       await graphqlRequest<GetCategoriesQuery>(GetCategories);
     const categories = categoriesQuery.categories.data || [];
 
-    if (mode === "scan") {
-      if (!barcode) {
-        //Redirect to scan with error
-        throw new Error("Barcode is required for scan mode");
-      }
-      const variables = {
-        barcode,
-        page: 1,
-      };
+    const productToFetch = internalId ?? barcode;
+    if (!productToFetch) throw new Error("Product identifier is required");
 
-      const result = await graphqlRequest<GetItemResultQuery>(
-        GetItemResult,
-        variables
-      );
-
-      return {
-        mode,
-        type,
-        barcode,
-        product: result.search,
-        availableLocations,
-        categories,
-      };
-    } else if (mode === "update") {
-      // Handle fetching by product ID for update
-    } else if (mode === "db") {
-      // Handle fetching by product ID from the database
-    }
+    const productData = await handleScanType(mode, productToFetch);
 
     return {
-      mode,
-      type,
-      barcode: undefined,
-      product: null,
       availableLocations,
+      categories,
+      product: productData,
+      type,
+      productId: productToFetch,
     };
   },
   component: HandleItem,

@@ -1,9 +1,4 @@
-import {
-  Link,
-  useLoaderData,
-  useNavigate,
-  useParams,
-} from "@tanstack/react-router";
+import { Link, useLoaderData, useParams } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 import { useProduct } from "../stores/product-store";
 import { StockStatus } from "@workspace/ui/components/stock-status";
@@ -23,7 +18,6 @@ const formatQuantity = (quantity: number): string => {
 };
 
 export default function ProductPage() {
-  const navigate = useNavigate();
   const { id } = useParams({ from: "/_protected/products/$id" });
   const loaderData = useLoaderData({
     from: "/_protected/products/$id",
@@ -191,20 +185,17 @@ export default function ProductPage() {
         <div className="flex justify-center p-6">
           <Button
             variant="khp-default"
-            className="pointer-events-auto "
+            className="pointer-events-auto"
             size="xl"
-            onClick={() => {
-              navigate({
-                to: "/handle-item",
-                search: {
-                  mode: "manual",
-                  type: "add",
-                },
-              });
-            }}
+            asChild
           >
-            <NotebookPen strokeWidth={2} className="text-white !h-5 !w-5" />{" "}
-            <span className="text-xl">Edit product</span>
+            <Link
+              to="/handle-item"
+              search={{ type: "update", internalId: id, mode: "internalId" }}
+            >
+              <NotebookPen strokeWidth={2} className="text-white !h-5 !w-5" />{" "}
+              <span className="text-xl">Edit product</span>
+            </Link>
           </Button>
         </div>
       </div>

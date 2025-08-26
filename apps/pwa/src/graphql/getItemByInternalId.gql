@@ -1,0 +1,12 @@
+query getItemByInternalId($id: ID) {
+  ingredient(id: $id) {
+    id
+    image_url
+    name
+    categories {
+      name
+      id
+    }
+    unit
+  }
+}
