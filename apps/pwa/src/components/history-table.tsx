@@ -46,11 +46,6 @@ interface HistoryTableProps {
   unit?: string;
 }
 
-function formatDate(value?: string): string {
-  if (!value) return "";
-  return format(new Date(value), "dd/MM/yyyy");
-}
-
 function isStockMovement(
   data: HistoryEntry[] | StockMovement[]
 ): data is StockMovement[] {
@@ -110,7 +105,12 @@ export function HistoryTable({
                     ? "add"
                     : "remove",
                 quantity: Math.abs((entry as StockMovement).quantity),
-                date: formatDate((entry as StockMovement).created_at),
+                date: (entry as StockMovement).created_at
+                  ? format(
+                      new Date((entry as StockMovement).created_at!),
+                      "dd/MM/yyyy"
+                    )
+                  : "",
                 location: (entry as StockMovement).location,
               }
             : {
