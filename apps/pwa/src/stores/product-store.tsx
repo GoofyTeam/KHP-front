@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import { create } from "zustand";
 
 interface ProductData {
   id: string;
@@ -20,39 +20,16 @@ interface ProductData {
   }>;
 }
 
-interface ProductStoreContext {
+interface ProductStore {
   currentProduct: ProductData | null;
   setCurrentProduct: (product: ProductData | null) => void;
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
 }
 
-const ProductContext = createContext<ProductStoreContext | undefined>(
-  undefined
-);
-
-export function ProductProvider({ children }: { children: React.ReactNode }) {
-  const [currentProduct, setCurrentProduct] = useState<ProductData | null>(
-    null
-  );
-  const [isLoading, setIsLoading] = useState(false);
-
-  const value = {
-    currentProduct,
-    setCurrentProduct,
-    isLoading,
-    setIsLoading,
-  };
-
-  return (
-    <ProductContext.Provider value={value}>{children}</ProductContext.Provider>
-  );
-}
-
-export function useProduct() {
-  const context = useContext(ProductContext);
-  if (context === undefined) {
-    throw new Error("useProduct must be used within a ProductProvider");
-  }
-  return context;
-}
+export const useProduct = create<ProductStore>((set) => ({
+  currentProduct: null,
+  setCurrentProduct: (product) => set({ currentProduct: product }),
+  isLoading: false,
+  setIsLoading: (loading) => set({ isLoading: loading }),
+}));

@@ -28,6 +28,11 @@ import {
   LocationTypeOrderByField,
   LocationTypeOrderByOrderByClause,
   LocationTypePaginator,
+  Loss,
+  LossOrderByClause,
+  LossOrderByField,
+  LossPaginator,
+  MeasurementUnitType,
   OpenFoodFactsProduct,
   OrderByClause,
   OrderByRelationAggregateFunction,
@@ -54,6 +59,7 @@ import {
   QueryIngredientsArgs,
   QueryLocationsArgs,
   QueryLocationTypesArgs,
+  QueryLossesArgs,
   QueryPreparationsArgs,
   QueryStockMovementsArgs,
   QueryUsersArgs,
@@ -63,6 +69,7 @@ import {
   StockMovementOrderByField,
   StockMovementPaginator,
   Trashed,
+  UnitEnum,
   User,
   UserPaginator
 } from 'generated/schema.graphql';
@@ -72,7 +79,7 @@ export type GetIngredientQueryVariables = Exact<{
 }>;
 
 
-export type GetIngredientQuery = { __typename?: 'Query', ingredient?: { __typename?: 'Ingredient', id: string, name: string, unit: string, image_url?: string | null, categories: Array<{ __typename?: 'Category', name: string }>, quantities: Array<{ __typename?: 'IngredientQuantity', quantity: number, location: { __typename?: 'Location', id: string, name: string, locationType?: { __typename?: 'LocationType', id: string, name: string, is_default: boolean } | null } }> } | null };
+export type GetIngredientQuery = { __typename?: 'Query', ingredient?: { __typename?: 'Ingredient', id: string, name: string, unit: UnitEnum, image_url?: string | null, categories: Array<{ __typename?: 'Category', name: string }>, quantities: Array<{ __typename?: 'IngredientQuantity', quantity: number, location: { __typename?: 'Location', id: string, name: string, locationType?: { __typename?: 'LocationType', id: string, name: string, is_default: boolean } | null } }> } | null };
 
 
 export const GetIngredient = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetIngredient"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ingredient"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"unit"}},{"kind":"Field","name":{"kind":"Name","value":"image_url"}},{"kind":"Field","name":{"kind":"Name","value":"categories"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"quantities"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"quantity"}},{"kind":"Field","name":{"kind":"Name","value":"location"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"locationType"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"is_default"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetIngredientQuery, GetIngredientQueryVariables>;
