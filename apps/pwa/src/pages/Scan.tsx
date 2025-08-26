@@ -48,7 +48,7 @@ export default function ScanPage() {
     navigate({
       to: "/handle-item",
       search: {
-        mode: "scan",
+        mode: "barcode",
         type: "add",
         barcode,
       },

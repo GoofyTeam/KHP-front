@@ -38,6 +38,7 @@ const handleItemSchema = z
     product_name: z.string().nonempty("Product name is required"),
     product_category: z.string().nonempty("Category is required"),
     product_units: z.string().nonempty("Units are required"),
+    quantityPerUnit: z.string().nonempty("Quantity per unit is required"),
     stockEntries: z.array(stockEntrySchema).optional(),
   })
   .superRefine((data, ctx) => {
@@ -93,15 +94,36 @@ function HandleItem() {
   async function onSubmit(values: z.infer<typeof handleItemSchema>) {
     if (type === "add" && values.stockEntries) {
       try {
-        await api.post("/api/ingredients", {
-          name: values.product_name,
-          unit: values.product_units,
-          categories: [values.product_category],
-          quantities: values.stockEntries.map((entry: StockEntry) => ({
-            quantity: parseInt(entry.quantity),
-            location_id: entry.location,
-          })),
-        });
+        if (values.image) {
+          const formData = new FormData();
+          formData.append("name", values.product_name);
+          formData.append("unit", values.product_units);
+          formData.append("categories[]", values.product_category);
+          formData.append("base_quantity", values.quantityPerUnit);
+          formData.append("image", values.image);
+          values.stockEntries.forEach((entry: StockEntry, index: number) => {
+            formData.append(`quantities[${index}][quantity]`, entry.quantity);
+            formData.append(
+              `quantities[${index}][location_id]`,
+              entry.location
+            );
+          });
+
+          await api.post("/api/ingredients", formData);
+        } else {
+          console.log("send as json");
+          await api.post("/api/ingredients", {
+            image_url: "",
+            name: values.product_name,
+            unit: values.product_units,
+            base_quantity: parseInt(values.quantityPerUnit),
+            categories: [values.product_category],
+            quantities: values.stockEntries.map((entry: StockEntry) => ({
+              quantity: parseInt(entry.quantity),
+              location_id: entry.location,
+            })),
+          });
+        }
 
         navigate({
           to: "/inventory",
@@ -133,7 +155,7 @@ function HandleItem() {
 
         navigate({
           to: "/products/$id",
-          params: { id: productId },
+          params: { id: productId! },
           replace: true,
         });
       } catch (error) {
@@ -239,7 +261,7 @@ function HandleItem() {
               </FormItem>
             )}
           />
-          <div className="grid grid-cols-2 gap-4 w-full">
+          <div className="grid grid-cols-3 gap-4 w-full">
             <FormField
               control={form.control}
               name="product_category"
@@ -317,6 +339,24 @@ function HandleItem() {
                       ))}
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="quantityPerUnit"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel className="text-lg">Quantity/unit</FormLabel>
+                  <FormControl>
+                    <Input
+                      variant="khp-default-pwa"
+                      className="w-full"
+                      {...field}
+                      disabled={type === "remove"}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
