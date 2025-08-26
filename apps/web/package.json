@@ -12,16 +12,17 @@
     "codegen": "npm run introspect && graphql-codegen --config codegen.ts"
   },
   "dependencies": {
-    "@workspace/ui": "*",
-    "date-fns": "^4.1.0",
     "@apollo/client": "^3.13.9",
     "@apollo/client-integration-nextjs": "^0.12.3",
+    "@workspace/ui": "*",
+    "date-fns": "^4.1.0",
+    "get-graphql-schema": "^2.1.2",
     "graphql": "^16.11.0",
     "js-cookie": "^3.0.5",
     "next": "15.3.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "get-graphql-schema": "^2.1.2"
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

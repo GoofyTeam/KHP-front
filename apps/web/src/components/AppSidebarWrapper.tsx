@@ -8,12 +8,10 @@ import {
   SidebarTrigger,
 } from "@workspace/ui/components/sidebar";
 
-// Fonction pour déterminer l'état par défaut de la sidebar
 const getSidebarDefaultState = (currentPath: string): boolean => {
   const defaultOpenPages = ["/dashboard"];
-  const defaultClosedPages = ["/account"];
+  const defaultClosedPages = ["/stocks"];
 
-  // Vérifier si la page courante est dans la liste des pages fermées par défaut
   if (
     defaultClosedPages.some(
       (page) => currentPath === page || currentPath.startsWith(page + "/")
@@ -22,7 +20,6 @@ const getSidebarDefaultState = (currentPath: string): boolean => {
     return false;
   }
 
-  // Vérifier si la page courante est dans la liste des pages ouvertes par défaut
   if (
     defaultOpenPages.some(
       (page) => currentPath === page || currentPath.startsWith(page + "/")
@@ -31,7 +28,6 @@ const getSidebarDefaultState = (currentPath: string): boolean => {
     return true;
   }
 
-  // Par défaut, sidebar ouverte
   return true;
 };
 
@@ -50,7 +46,7 @@ export function AppSidebarWrapper({ children }: AppSidebarWrapperProps) {
         <header className="bg-background sticky top-0 flex shrink-0 items-center gap-2 border-b p-4 md:hidden">
           <SidebarTrigger className="-ml-1" />
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4">{children}</div>
+        <div className="flex flex-1 flex-col gap-4 ">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );
