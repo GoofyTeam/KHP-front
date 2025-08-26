@@ -119,8 +119,9 @@ function HandleItem() {
 
           formData.append("categories[]", values.product_category);
           formData.append("image", values.image);
+          formData.append("_method", "PUT");
 
-          await api.put(`/api/ingredients/${productId}`, formData);
+          await api.post(`/api/ingredients/${productId}`, formData);
         } else {
           console.log("send as json");
           await api.put(`/api/ingredients/${productId}`, {
