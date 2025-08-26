@@ -25,27 +25,40 @@ import { useRef, useState, type ChangeEvent } from "react";
 import { Minus, Plus, Image } from "lucide-react";
 import api from "../lib/api";
 import { cn } from "@workspace/ui/lib/utils";
+import { getAllMeasurementUnits } from "../types/mesurmentsUnitEnum";
 
 const stockEntrySchema = z.object({
   quantity: z.string().nonempty("Quantity required"),
   location: z.string().nonempty("Location required"),
 });
-const handleItemSchema = z.object({
-  image: z.instanceof(File).optional(),
-  product_name: z.string().nonempty("Product name is required"),
-  product_category: z.string().nonempty("Category is required"),
-  product_units: z.string().nonempty("Units are required"),
-  stockEntries: z
-    .array(stockEntrySchema)
-    .min(1, "At least one stock entry is required"),
-});
+const handleItemSchema = z
+  .object({
+    type: z.enum(["add", "update", "remove"]),
+    image: z.instanceof(File).optional(),
+    product_name: z.string().nonempty("Product name is required"),
+    product_category: z.string().nonempty("Category is required"),
+    product_units: z.string().nonempty("Units are required"),
+    stockEntries: z.array(stockEntrySchema).optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.type !== "update") {
+      if (!data.stockEntries || data.stockEntries.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "At least one stock entry is required",
+        });
+      }
+    }
+  });
 type HandleItem = z.infer<typeof handleItemSchema>;
+type StockEntry = NonNullable<HandleItem["stockEntries"]>[number];
 
 function HandleItem() {
   const navigate = useNavigate();
-  const { product, type, availableLocations, categories } = useLoaderData({
-    from: "/_protected/handle-item",
-  });
+  const { product, type, availableLocations, categories, productId } =
+    useLoaderData({
+      from: "/_protected/handle-item",
+    });
 
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -53,13 +66,23 @@ function HandleItem() {
   const form = useForm<z.infer<typeof handleItemSchema>>({
     resolver: zodResolver(handleItemSchema),
     defaultValues: {
+      type: type,
       image: undefined,
-      product_name: product?.product_name || "",
-      product_category: product?.categories?.[0] || "",
-      product_units: product?.unit != null ? product.unit.toString() : "",
-      stockEntries: [
-        { quantity: product?.base_quantity?.toString(), location: undefined },
-      ],
+      product_name: product?.product_name,
+      product_category: product?.product_category?.[0],
+      product_units:
+        product?.product_units != null ? product.product_units.toString() : "",
+      stockEntries:
+        type !== "update"
+          ? [
+              {
+                quantity: product?.product_base_quantity
+                  ? product.product_base_quantity.toString()
+                  : "",
+                location: "",
+              },
+            ]
+          : undefined,
     },
   });
   const { fields, append, remove } = useFieldArray({
@@ -68,18 +91,16 @@ function HandleItem() {
   });
 
   async function onSubmit(values: z.infer<typeof handleItemSchema>) {
-    if (type === "add") {
+    if (type === "add" && values.stockEntries) {
       try {
         await api.post("/api/ingredients", {
           name: values.product_name,
           unit: values.product_units,
           categories: [values.product_category],
-          quantities: values.stockEntries.map(
-            (entry: HandleItem["stockEntries"][number]) => ({
-              quantity: parseInt(entry.quantity),
-              location_id: entry.location,
-            })
-          ),
+          quantities: values.stockEntries.map((entry: StockEntry) => ({
+            quantity: parseInt(entry.quantity),
+            location_id: entry.location,
+          })),
         });
 
         navigate({
@@ -89,18 +110,44 @@ function HandleItem() {
       } catch (error) {
         console.error("Error adding ingredient:", error);
       }
-    } else if (type === "remove") {
+    } else if (type === "update") {
+      try {
+        if (values.image) {
+          const formData = new FormData();
+          formData.append("name", values.product_name);
+          formData.append("unit", values.product_units);
+
+          formData.append("categories[]", values.product_category);
+          formData.append("image", values.image);
+
+          await api.put(`/api/ingredients/${productId}`, formData);
+        } else {
+          console.log("send as json");
+          await api.put(`/api/ingredients/${productId}`, {
+            name: values.product_name,
+            unit: values.product_units,
+            categories: [values.product_category],
+          });
+        }
+
+        navigate({
+          to: "/products/$id",
+          params: { id: productId },
+          replace: true,
+        });
+      } catch (error) {
+        console.error("Error updating ingredient:", error);
+      }
+    } else if (type === "remove" && values.stockEntries) {
       try {
         await api.post("/api/ingredients", {
           name: values.product_name,
           unit: values.product_units,
           categories: [values.product_category],
-          quantities: values.stockEntries.map(
-            (entry: HandleItem["stockEntries"][number]) => ({
-              quantity: parseInt(entry.quantity),
-              location_id: entry.location,
-            })
-          ),
+          quantities: values.stockEntries.map((entry: StockEntry) => ({
+            quantity: parseInt(entry.quantity),
+            location_id: entry.location,
+          })),
         });
 
         navigate({
@@ -116,9 +163,9 @@ function HandleItem() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[75svh] my-4">
       <Form {...form}>
-        {filePreview || product?.imageUrl ? (
+        {filePreview || product?.product_image ? (
           <img
-            src={filePreview || product?.imageUrl || ""}
+            src={filePreview || product?.product_image || ""}
             alt={form.getValues().product_name || "Product Image"}
             className="aspect-square object-contain max-w-1/2 w-full my-6"
             onClick={() => inputRef.current?.click()}
@@ -209,26 +256,36 @@ function HandleItem() {
                     </FormControl>
                     <SelectContent>
                       {product &&
-                        product.categories &&
-                        product.categories.length > 0 &&
-                        product.categories.map((category: string | null) => (
-                          <SelectItem
-                            key={category || "default"}
-                            value={category || ""}
-                          >
-                            {category || "Uncategorized"}
-                          </SelectItem>
-                        ))}
-                      {categories &&
-                        categories.map(
-                          (categorie: { id: string; name: string }) => (
+                        product.product_category &&
+                        product.product_category.length > 0 &&
+                        product.product_category.map(
+                          (category: string | null) => (
                             <SelectItem
-                              key={categorie.id}
-                              value={categorie.name}
+                              key={category || "default"}
+                              value={category || ""}
                             >
-                              {categorie.name}
+                              {category || "Uncategorized"}
                             </SelectItem>
                           )
+                        )}
+                      {categories &&
+                        categories.map(
+                          (categorie: { id: string; name: string }) => {
+                            if (
+                              product?.product_category &&
+                              product.product_category.includes(categorie.name)
+                            ) {
+                              return null;
+                            }
+                            return (
+                              <SelectItem
+                                key={categorie.id}
+                                value={categorie.name}
+                              >
+                                {categorie.name}
+                              </SelectItem>
+                            );
+                          }
                         )}
                     </SelectContent>
                   </Select>
@@ -242,103 +299,114 @@ function HandleItem() {
               render={({ field }) => (
                 <FormItem className="w-full">
                   <FormLabel className="text-lg">Units</FormLabel>
-                  <FormControl>
-                    <Input
-                      variant="khp-default-pwa"
-                      className="w-full"
-                      disabled={type === "remove"}
-                      {...field}
-                    />
-                  </FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="w-full border-khp-primary rounded-md px-4 py-6 truncate">
+                        <SelectValue placeholder="Select units" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {getAllMeasurementUnits().map((unit) => (
+                        <SelectItem key={unit.value} value={unit.value}>
+                          {unit.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
 
-          <div className="space-y-4 w-full">
-            <h3 className="text-lg font-medium">
-              {type === "remove"
-                ? "Register the loss of the ingredient"
-                : "Stock entries"}
-            </h3>
-            {fields.map((field: (typeof fields)[number], index: number) => (
-              <div key={field.id} className="grid grid-cols-2 gap-4">
-                {/* Quantité */}
-                <FormField
-                  control={form.control}
-                  name={`stockEntries.${index}.quantity`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Quantity</FormLabel>
-                      <FormControl>
-                        <Input {...field} variant="khp-default-pwa" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Location */}
-                <FormField
-                  control={form.control}
-                  name={`stockEntries.${index}.location`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Location</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
+          {type !== "update" && (
+            <div className="space-y-4 w-full">
+              <h3 className="text-lg font-medium">
+                {type === "remove"
+                  ? "Register the loss of the ingredient"
+                  : "Stock entries"}
+              </h3>
+              {fields.map((field: (typeof fields)[number], index: number) => (
+                <div key={field.id} className="grid grid-cols-2 gap-4">
+                  {/* Quantité */}
+                  <FormField
+                    control={form.control}
+                    name={`stockEntries.${index}.quantity`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Quantity</FormLabel>
                         <FormControl>
-                          <SelectTrigger className="w-full border-khp-primary rounded-md px-4 py-6 truncate">
-                            <SelectValue placeholder="Select location" />
-                          </SelectTrigger>
+                          <Input {...field} variant="khp-default-pwa" />
                         </FormControl>
-                        <SelectContent>
-                          {availableLocations.map(
-                            (location: { id: string; name: string }) => (
-                              <SelectItem key={location.id} value={location.id}>
-                                {location.name}
-                              </SelectItem>
-                            )
-                          )}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            ))}
-          </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-          <div
-            className={cn(
-              "grid grid-cols-2 gap-4 w-full",
-              type === "remove" ? "hidden" : ""
-            )}
-          >
-            <Button
-              type="button"
-              variant="khp-destructive"
-              size="lg"
-              className="w-full my-4"
-              disabled={fields.length <= 1}
-              onClick={() => remove(fields.length - 1)}
-            >
-              <Minus />
-            </Button>
-            <Button
-              type="button"
-              variant="khp-outline"
-              size="lg"
-              className="w-full my-4"
-              onClick={() => append({ quantity: "", location: "" })}
-            >
-              <Plus />
-            </Button>
-          </div>
+                  {/* Localisation */}
+                  <FormField
+                    control={form.control}
+                    name={`stockEntries.${index}.location`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Location</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-full border-khp-primary rounded-md px-4 py-6 truncate">
+                              <SelectValue placeholder="Select location" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {availableLocations.map(
+                              (location: { id: string; name: string }) => (
+                                <SelectItem
+                                  key={location.id}
+                                  value={location.id}
+                                >
+                                  {location.name}
+                                </SelectItem>
+                              )
+                            )}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {type === "add" && (
+            <div className={cn("grid grid-cols-2 gap-4 w-full")}>
+              <Button
+                type="button"
+                variant="khp-destructive"
+                size="lg"
+                className="w-full my-4"
+                disabled={fields.length <= 1}
+                onClick={() => remove(fields.length - 1)}
+              >
+                <Minus />
+              </Button>
+              <Button
+                type="button"
+                variant="khp-outline"
+                size="lg"
+                className="w-full my-4"
+                onClick={() => append({ quantity: "", location: "" })}
+              >
+                <Plus />
+              </Button>
+            </div>
+          )}
 
           <Button
             type="submit"
@@ -346,7 +414,9 @@ function HandleItem() {
             size="xl"
             className="w-full my-4"
           >
-            {type === "remove" ? "Register loss" : "Save"}
+            {type === "add" && "Add new entries"}
+            {type === "update" && "Update"}
+            {type === "remove" && "Register loss"}
           </Button>
         </form>
       </Form>
