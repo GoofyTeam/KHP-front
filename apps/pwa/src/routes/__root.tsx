@@ -9,6 +9,7 @@ import { Helmet } from "react-helmet-async";
 import api from "../lib/api";
 import { Layout } from "../components/Layout";
 import NotFoundPage from "../pages/NotFound";
+import { ProductProvider } from "../stores/product-store";
 
 function NotFoundComponent() {
   return (
@@ -119,13 +120,13 @@ function RootComponent() {
   }
 
   return (
-    <>
+    <ProductProvider>
       <Helmet>
         <title>{documentTitle}</title>
       </Helmet>
       <Layout>
         <Outlet />
       </Layout>
-    </>
+    </ProductProvider>
   );
 }

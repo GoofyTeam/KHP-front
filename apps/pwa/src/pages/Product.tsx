@@ -4,11 +4,13 @@ import {
   useNavigate,
   useParams,
 } from "@tanstack/react-router";
+import { Helmet } from "react-helmet-async";
+import { useProduct } from "../stores/product-store";
 import { StockStatus } from "@workspace/ui/components/stock-status";
 import { HistoryTable } from "../components/history-table";
 import { LocationSelect } from "../components/LocationSelect";
 import { Button } from "@workspace/ui/components/button";
-import { NotebookPen } from "lucide-react";
+import { NotebookPen, Image } from "lucide-react";
 import { useEffect, useState } from "react";
 import { GetIngredientQuery } from "../graphql/getProduct.gql";
 
@@ -27,135 +29,20 @@ export default function ProductPage() {
   }) as ProductData;
 
   const [selectedLocation, setSelectedLocation] = useState<string>("all");
-
-  const getStockData = (): StockSummary => {
-    if (product.quantities && product.quantities.length > 0) {
-      const locationStocks: LocationStock[] = product.quantities.map(
-        (qty: {
-          quantity: number;
-          location: {
-            id: string;
-            name: string;
-            locationType?: {
-              id: string;
-              name: string;
-              is_default: boolean;
-            };
-          };
-        }) => ({
-          locationId: qty.location.id,
-          locationName: qty.location.name,
-          quantity: qty.quantity,
-          unit: product.unit,
-          locationType: qty.location.locationType,
-        })
-      );
-
-      return {
-        totalQuantity: locationStocks.reduce(
-          (total, loc) => total + loc.quantity,
-          0
-        ),
-        unit: product.unit,
-        locations: locationStocks,
-      };
-    }
-
-    return {
-      totalQuantity: 5,
-      unit: product.unit,
-      locations: [
-        {
-          locationId: "1",
-          locationName: "Fridge",
-          quantity: 2,
-          unit: product.unit,
-        },
-        {
-          locationId: "2",
-          locationName: "Freezer",
-          quantity: 3,
-          unit: product.unit,
-        },
-      ],
-    };
-  };
-
-  const stockData = getStockData();
-
-  const getDisplayStock = (): {
-    quantity: number;
-    status: "in-stock" | "low-stock" | "out-of-stock";
-  } => {
-    if (selectedLocation === "all") {
-      const totalQuantity = stockData.totalQuantity;
-      return {
-        quantity: totalQuantity,
-        status:
-          totalQuantity > 5
-            ? "in-stock"
-            : totalQuantity > 0
-              ? "low-stock"
-              : "out-of-stock",
-      };
-    } else {
-      const location = stockData.locations.find(
-        (loc) => loc.locationId === selectedLocation
-      );
-      if (!location) {
-        return {
-          quantity: 0,
-          status: "out-of-stock",
-        };
-      }
-
-      return {
-        quantity: location.quantity,
-        status:
-          location.quantity > 5
-            ? "in-stock"
-            : location.quantity > 0
-              ? "low-stock"
-              : "out-of-stock",
-      };
-    }
-  };
-
-  const displayStock = getDisplayStock();
+  const { setCurrentProduct } = useProduct();
 
   useEffect(() => {
-    if (product?.name) {
-      document.title = `${product.name} - KHP`;
-    }
+    setCurrentProduct(product);
+
     return () => {
-      document.title = "KHP";
+      setCurrentProduct(null);
     };
-  }, [product?.name]);
+  }, [product, setCurrentProduct]);
 
-  const [selectedLocation, setSelectedLocation] = useState<string>("all");
-
-  useEffect(() => {
-    if (product?.name) {
-      document.title = `${product.name} - KHP`;
-    }
-    return () => {
-      document.title = "KHP";
-    };
-  }, [product?.name]);
-
-  useEffect(() => {
-    if (product?.quantities?.length === 1) {
-      setSelectedLocation(product.quantities[0].location.id);
-    }
-  }, [product?.quantities]);
-
-  if (!product) {
-    return <div>Loading...</div>;
-  }
-
-  // Calcul direct du stock total depuis les données GraphQL
+  // Calcul direct du stock total
   const totalQuantity =
     product.quantities?.reduce((sum, qty) => sum + qty.quantity, 0) || 0;
+  const locations = product.quantities || [];
 
   // Calcul direct du stock à afficher
   const displayStock = (() => {
@@ -170,7 +57,7 @@ export default function ProductPage() {
               : "out-of-stock",
       } as const;
     } else {
-      const locationQty = product.quantities?.find(
+      const locationQty = locations.find(
         (qty) => qty.location.id === selectedLocation
       );
       if (!locationQty) {
@@ -192,8 +79,18 @@ export default function ProductPage() {
     }
   })();
 
+  useEffect(() => {
+    if (locations.length === 1) {
+      setSelectedLocation(locations[0].location.id);
+    }
+  }, [locations]);
+
   if (!product) {
-    return <div>Product not found</div>;
+    navigate({
+      to: "/inventory",
+      replace: true,
+    });
+    return null;
   }
 
   return (
@@ -242,20 +139,38 @@ export default function ProductPage() {
                 Available stock
               </p>
             </div>
-            <StockStatus variant={displayStock.status} showLabel={false} />
           </div>
         </div>
-      </div>
 
-      <div className="flex justify-between items-center gap-2 px-6 py-2">
-        <h3 className="text-lg font-semibold">History:</h3>
-        <Link
-          to="/products/$id/history"
-          params={{ id }}
-          className="text-sm text-khp-primary underline underline-offset-2 cursor-pointer"
-        >
-          View all
-        </Link>
+        <div className="flex justify-between items-center gap-2 px-6 py-2">
+          <h3 className="text-lg font-semibold">History:</h3>
+          <Link
+            to="/products/$id/history"
+            params={{ id }}
+            className="text-sm text-khp-primary underline underline-offset-2 cursor-pointer"
+          >
+            View all
+          </Link>
+        </div>
+        <div className="flex justify-center p-6">
+          <Button
+            variant="khp-default"
+            className="pointer-events-auto "
+            size="xl"
+            onClick={() => {
+              navigate({
+                to: "/handle-item",
+                search: {
+                  mode: "manual",
+                  type: "add",
+                },
+              });
+            }}
+          >
+            <NotebookPen strokeWidth={2} className="text-white !h-5 !w-5" />{" "}
+            <span className="text-xl">Edit product</span>
+          </Button>
+        </div>
       </div>
       <HistoryTable
         data={product.stockMovements || []}

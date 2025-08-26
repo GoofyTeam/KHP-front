@@ -8,12 +8,25 @@ import {
 
 export const Route = createFileRoute("/_protected/products/$id")({
   loader: async ({ params }) => {
-    const { id } = params;
-    const data = await graphqlRequest<GetIngredientQuery>(GetIngredient, {
-      id,
-    });
-    
-    return data.ingredient;
+    try {
+      const result = await graphqlRequest<GetIngredientQuery>(GetIngredient, {
+        id: params.id,
+      });
+
+      if (!result.ingredient) {
+        throw new Error(`Product with ID ${params.id} not found`);
+      }
+
+      return {
+        data: result.ingredient,
+        meta: {
+          id: params.id,
+          loadedAt: new Date().toISOString(),
+        },
+      };
+    } catch (error) {
+      throw error;
+    }
   },
   component: ProductPage,
 });

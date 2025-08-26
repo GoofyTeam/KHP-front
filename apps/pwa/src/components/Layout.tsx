@@ -3,6 +3,7 @@ import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { ArrowLeft } from "lucide-react";
 import { useRouter, useLocation, useMatch } from "@tanstack/react-router";
+import { useProduct } from "../stores/product-store";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -43,6 +44,7 @@ function getPageTitle(
 export function Layout({ children, className }: LayoutProps) {
   const router = useRouter();
   const location = useLocation();
+  const { currentProduct } = useProduct();
 
   const productMatch = useMatch({
     from: "/_protected/products/$id",
@@ -57,15 +59,7 @@ export function Layout({ children, className }: LayoutProps) {
   const productId = productMatch?.params?.id || historyMatch?.params?.id;
   const isHistoryRoute = Boolean(historyMatch);
 
-  let productName: string | null = null;
-  try {
-    if (productMatch) {
-      const loaderData = productMatch.loaderData as { name?: string };
-      productName = loaderData?.name || null;
-    }
-  } catch {
-    productName = null;
-  }
+  const productName = currentProduct?.name || null;
 
   const title = getPageTitle(
     location.pathname,
