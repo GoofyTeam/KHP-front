@@ -7,9 +7,6 @@ import {
 import { IngredientDetails } from "../../../../components/ingredient/ingredient-details";
 import { IngredientStockDisplay } from "../../../../components/ingredient/ingredient-stock-display";
 import { MovementHistory } from "../../../../components/ingredient/movement-history";
-import Link from "next/link";
-import { Button } from "@workspace/ui/components/button";
-import { Edit } from "lucide-react";
 
 interface IngredientPageProps {
   params: Promise<{
