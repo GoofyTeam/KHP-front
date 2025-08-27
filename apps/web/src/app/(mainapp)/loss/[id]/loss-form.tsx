@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2, AlertTriangle, CheckCircle } from "lucide-react";
+import { toast } from "@workspace/ui/components/sonner";
+
+import { Trash2, AlertTriangle } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { QuantityInput } from "@/components/quantity-input";
 import { LocationSelector } from "@/components/LocationSelect";
@@ -29,10 +31,6 @@ export function LossForm({ ingredient }: LossFormProps) {
   const [selectedLocationIndex, setSelectedLocationIndex] = useState("");
   const [reason, setReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<{
-    type: "success" | "error";
-    message: string;
-  } | null>(null);
 
   const getLossQuantity = () => {
     if (lossValue.length === 0) return 0;
@@ -58,34 +56,22 @@ export function LossForm({ ingredient }: LossFormProps) {
     if (!isValid || !selectedLocation) return;
 
     setIsSubmitting(true);
-    setSubmitStatus(null);
-
-    // Debug logs
-    console.log("=== LOSS SUBMISSION DEBUG ===");
-    console.log("Selected location:", selectedLocation);
-    console.log("Available quantity:", selectedLocation.quantity);
-    console.log("Loss quantity:", lossQuantity);
-    console.log("Loss value (string):", lossValue);
-    console.log("Ingredient ID:", ingredient.id);
-    console.log("Location ID:", selectedLocation.location.id);
 
     try {
       const lossData = {
         trackable_id: parseInt(ingredient.id),
         trackable_type: "ingredient" as const,
         location_id: parseInt(selectedLocation.location.id),
-        quantity: Number(lossQuantity.toFixed(3)), // Arrondir à 3 décimales et convertir en Number
+        quantity: Number(lossQuantity.toFixed(3)),
         reason: reason.trim(),
       };
-
-      console.log("Data being sent to API:", lossData);
 
       const result = await createLoss(lossData);
 
       if (result.success) {
-        setSubmitStatus({
-          type: "success",
-          message: "Perte enregistrée avec succès",
+        toast.success("Succès", {
+          description: "Perte enregistrée avec succès",
+          duration: 3000,
         });
 
         setLossValue("");
@@ -96,13 +82,16 @@ export function LossForm({ ingredient }: LossFormProps) {
           router.push(`/ingredient/${ingredient.id}`);
         }, 1500);
       } else {
-        setSubmitStatus({
-          type: "error",
-          message: result.message || "Erreur lors de l'enregistrement",
+        toast.error("Erreur", {
+          description: result.message || "Erreur lors de l'enregistrement",
+          duration: 5000,
         });
       }
-    } catch (error) {
-      setSubmitStatus({ type: "error", message: "Erreur de connexion" });
+    } catch {
+      toast.error("Erreur", {
+        description: "Erreur de connexion",
+        duration: 5000,
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -192,26 +181,7 @@ export function LossForm({ ingredient }: LossFormProps) {
       </div>
 
       <div>
-        {submitStatus ? (
-          <div
-            className={`p-4 rounded-lg border ${
-              submitStatus.type === "success"
-                ? "bg-green-50 border-green-200 text-green-800"
-                : "bg-red-50 border-red-200 text-red-800"
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              {submitStatus.type === "success" ? (
-                <CheckCircle className="w-5 h-5" />
-              ) : (
-                <AlertTriangle className="w-5 h-5" />
-              )}
-              <span className="text-sm font-medium">
-                {submitStatus.message}
-              </span>
-            </div>
-          </div>
-        ) : hasExcessiveLoss && selectedLocation ? (
+        {hasExcessiveLoss && selectedLocation ? (
           <div className="w-full p-4 bg-khp-error/10 border border-khp-error/30 rounded-lg">
             <div className="flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-khp-error mt-0.5 flex-shrink-0" />
@@ -228,18 +198,16 @@ export function LossForm({ ingredient }: LossFormProps) {
             </div>
           </div>
         ) : (
-          <>
-            <Button
-              variant="destructive"
-              size="xl"
-              className="w-full py-4 px-6 text-base font-semibold"
-              onClick={handleSubmit}
-              disabled={!isValid || isSubmitting}
-            >
-              <Trash2 className="w-5 h-5 mr-3" />
-              {isSubmitting ? "Recording Loss..." : "Add Loss"}
-            </Button>
-          </>
+          <Button
+            variant="destructive"
+            size="xl"
+            className="w-full py-4 px-6 text-base font-semibold"
+            onClick={handleSubmit}
+            disabled={!isValid || isSubmitting}
+          >
+            <Trash2 className="w-5 h-5 mr-3" />
+            {isSubmitting ? "Recording Loss..." : "Add Loss"}
+          </Button>
         )}
       </div>
     </>

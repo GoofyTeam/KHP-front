@@ -7,10 +7,13 @@ import {
 import { LossDetails } from "@/components/loss/loss-details";
 import { LossForm } from "./loss-form";
 
+// Avoid static generation rendering for this page
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 interface LossPageProps {
   params: Promise<{
     id: string;
-    j: any;
   }>;
 }
 
@@ -23,8 +26,7 @@ async function fetchIngredient(
   });
 
   if (error) {
-    console.error("GraphQL error:", error);
-    throw error;
+    throw new Error(`Erreur GraphQL: ${error.message}`);
   }
 
   if (!data?.ingredient) {
@@ -45,7 +47,7 @@ export default async function LossPage({ params }: LossPageProps) {
 
   return (
     <div className="w-full flex flex-col lg:flex-row gap-8 p-4 lg:p-8">
-      <div className="flex flex-col gap-8 justify-center items-center w-full lg:w-1/2">
+      <div className="flex flex-col gap-8 justify-start items-center w-full lg:w-1/2">
         <LossDetails ingredient={ingredient} />
       </div>
       <div className="w-full lg:w-1/2 flex flex-col justify-center items-center mb-10 lg:mb-0">

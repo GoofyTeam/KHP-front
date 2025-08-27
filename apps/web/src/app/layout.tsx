@@ -3,6 +3,7 @@ import "@workspace/ui/globals.css";
 import type { Metadata } from "next";
 import { Roboto, Roboto_Mono } from "next/font/google";
 import { ApolloWrapper } from "./ApolloWrapper";
+import { Toaster } from "@workspace/ui/components/sonner";
 
 const robotoSans = Roboto({
   variable: "--font-roboto-sans",
@@ -46,6 +47,7 @@ export default function RootLayout({
         className={`${robotoSans.variable} ${robotoMono.variable} antialiased`}
       >
         <ApolloWrapper>{children}</ApolloWrapper>
+        <Toaster richColors />
       </body>
     </html>
   );
