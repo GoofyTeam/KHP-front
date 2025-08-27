@@ -64,6 +64,11 @@ export function LocationSelector({
     );
   }
 
+  // Trier les quantités par ordre décroissant (plus remplies en haut)
+  const sortedQuantities = [...quantities].sort(
+    (a, b) => b.quantity - a.quantity
+  );
+
   const selectedQuantity = value ? quantities[parseInt(value)] : null;
 
   return (
@@ -90,24 +95,28 @@ export function LocationSelector({
             )}
           </SelectTrigger>
           <SelectContent className="max-h-72">
-            {quantities.map((q, index: number) => (
-              <SelectItem
-                key={index}
-                value={index.toString()}
-                className="!h-14 !min-h-14 !py-4 !px-4 text-base font-medium cursor-pointer hover:bg-khp-primary/10 focus:bg-khp-primary/15 transition-colors touch-manipulation"
-              >
-                <div className="flex flex-col w-full">
-                  <span className="font-medium text-khp-text-primary">
-                    {q.location.name}
-                  </span>
-                  {q.quantity > 0 && (
-                    <span className="text-sm text-khp-text-secondary mt-1">
-                      {q.quantity} {unit}
+            {sortedQuantities.map((q, sortedIndex: number) => {
+              // Trouver l'index original pour la valeur
+              const originalIndex = quantities.findIndex((orig) => orig === q);
+              return (
+                <SelectItem
+                  key={originalIndex}
+                  value={originalIndex.toString()}
+                  className="!h-14 !min-h-14 !py-4 !px-4 text-base font-medium cursor-pointer hover:bg-khp-primary/10 focus:bg-khp-primary/15 transition-colors touch-manipulation"
+                >
+                  <div className="flex flex-col w-full">
+                    <span className="font-medium text-khp-text-primary">
+                      {q.location.name}
                     </span>
-                  )}
-                </div>
-              </SelectItem>
-            ))}
+                    {q.quantity > 0 && (
+                      <span className="text-sm text-khp-text-secondary mt-1">
+                        {q.quantity} {unit}
+                      </span>
+                    )}
+                  </div>
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
       </div>

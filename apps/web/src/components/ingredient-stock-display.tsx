@@ -40,14 +40,14 @@ export function IngredientStockDisplay({
 
   return (
     <>
-      <div className="space-y-4 w-full lg:w-3/4 max-w-md">
+      <div className="space-y-4 w-full">
         <div className="mb-4 ">
           <LocationSelector
             quantities={ingredient.quantities}
             value={selectedLocationIndex}
             onValueChange={setSelectedLocationIndex}
-            placeholder="Choisir un emplacement"
-            label="Emplacement"
+            placeholder="Choose a location"
+            label="Location"
             unit={ingredient.unit}
           />
         </div>
@@ -68,7 +68,7 @@ export function IngredientStockDisplay({
             <div className="text-xl font-semibold text-khp-primary">
               {ingredient.quantities.length}
             </div>
-            <div className="text-sm text-khp-text-secondary">Emplacements</div>
+            <div className="text-sm text-khp-text-secondary">Locations</div>
           </div>
 
           <div className="bg-white rounded-lg px-4 py-3 border border-khp-border">
@@ -76,7 +76,7 @@ export function IngredientStockDisplay({
               {formatQuantity(totalStock)}
               <span className="text-sm ml-1">{ingredient.unit}</span>
             </div>
-            <div className="text-sm text-khp-text-secondary">Stock total</div>
+            <div className="text-sm text-khp-text-secondary">Total stock</div>
           </div>
         </div>
       </div>

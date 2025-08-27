@@ -1,14 +1,16 @@
 import { notFound } from "next/navigation";
 import { query } from "@/lib/ApolloClient";
-import { GetIngredientDocument } from "@/graphql/generated/graphql";
-import type { Ingredient } from "../../../../types/stocks";
+import {
+  GetIngredientDocument,
+  GetIngredientQuery,
+} from "@/graphql/generated/graphql";
 import Link from "next/link";
 import Image from "next/image";
 import { CategoryBadge } from "../../../../components/category-badge";
 import { Button } from "@workspace/ui/components/button";
 import { MovementHistory } from "../../../../components/movement-history";
 import { IngredientStockDisplay } from "../../../../components/ingredient-stock-display";
-import { IngredientHeader } from "../../../../components/ingredient-header";
+import { ImagePlaceholder } from "@workspace/ui/components/image-placeholder";
 
 interface IngredientPageProps {
   params: Promise<{
@@ -16,7 +18,9 @@ interface IngredientPageProps {
   }>;
 }
 
-async function fetchIngredient(id: string): Promise<Ingredient> {
+async function fetchIngredient(
+  id: string
+): Promise<NonNullable<GetIngredientQuery["ingredient"]>> {
   try {
     const { data, error } = await query({
       query: GetIngredientDocument,
@@ -60,11 +64,10 @@ export default async function IngredientPage({ params }: IngredientPageProps) {
 
   return (
     <>
-      <IngredientHeader />
       <div className="w-full flex flex-col lg:flex-row gap-8">
         {/* Colonne 1 */}
         <div className="flex flex-col gap-8 justify-center items-center w-full lg:w-1/2">
-          <div className="text-center space-y-4 w-full lg:w-3/4 max-w-md">
+          <div className="text-center space-y-4 w-full max-w-lg">
             <h1 className="text-3xl lg:text-5xl font-bold text-khp-text-primary leading-tight">
               {ingredient.name}
             </h1>
@@ -78,24 +81,15 @@ export default async function IngredientPage({ params }: IngredientPageProps) {
                   alt={ingredient.name}
                   width={200}
                   height={200}
-                  className="w-full h-full  transition-transform duration-300"
+                  className="w-full h-full object-cover transition-transform duration-300"
                   unoptimized={process.env.NODE_ENV === "development"}
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                  <div className="text-center text-white">
-                    <div className="text-2xl font-bold mb-2">HEINZ</div>
-                    <div className="text-lg">BAKED</div>
-                    <div className="text-lg">BEANS</div>
-                    <div className="text-sm mt-2">
-                      in Delicious Tomato Sauce
-                    </div>
-                  </div>
-                </div>
+                <ImagePlaceholder className="w-full h-full rounded-lg" />
               )}
             </div>
           </div>
-          <div className="mt-8 w-full lg:w-3/4 max-w-md">
+          <div className="mt-8 w-full lg:w-3/4 max-w-lg">
             <Link href={`/ingredient/${id}/move`}>
               <Button variant="khp-outline" size="xl-full">
                 Move Quantity
@@ -106,9 +100,8 @@ export default async function IngredientPage({ params }: IngredientPageProps) {
 
         {/* Colonne 2 */}
         <div className="w-full lg:w-1/2 flex flex-col justify-center items-center mb-10 lg:mb-0">
-          <IngredientStockDisplay ingredient={ingredient} />
-
-          <div className="w-full lg:w-3/4 max-w-md">
+          <div className="w-full lg:w-3/4 max-w-lg">
+            <IngredientStockDisplay ingredient={ingredient} />
             <MovementHistory
               movements={ingredient.stockMovements || []}
               unit={ingredient.unit}
