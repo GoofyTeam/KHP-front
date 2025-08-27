@@ -10,7 +10,7 @@ import {
 
 const getSidebarDefaultState = (currentPath: string): boolean => {
   const defaultOpenPages = ["/dashboard"];
-  const defaultClosedPages = ["/stocks", "/ingredient", "settings"];
+  const defaultClosedPages = ["/stocks", "/ingredient", "settings", "/loss"];
 
   if (
     defaultClosedPages.some(

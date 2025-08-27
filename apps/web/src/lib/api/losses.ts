@@ -1,8 +1,8 @@
-import { httpClient } from "../httpClient";
+import { httpClient, RequestData } from "../httpClient";
 
-interface LossData {
-  lossable_id: number;
-  lossable_type: "ingredient" | "preparation";
+interface LossData extends RequestData {
+  trackable_id: number;
+  trackable_type: "ingredient" | "preparation";
   location_id: number;
   quantity: number;
   reason: string;
@@ -18,7 +18,7 @@ export async function createLoss(lossData: LossData): Promise<LossResponse> {
     console.log("Attempting to create loss with data:", lossData);
 
     // Use the existing HttpClient which handles CSRF automatically
-    const result = await httpClient.post<any>("/losses", lossData);
+    const result = await httpClient.post<any>("/api/losses", lossData);
 
     console.log("Loss creation successful:", result);
     return { success: true };

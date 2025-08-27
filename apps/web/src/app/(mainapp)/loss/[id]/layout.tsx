@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
-
-import { AppSidebar } from "@workspace/ui/components/app-sidebar";
 import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@workspace/ui/components/sidebar";
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@workspace/ui/components/breadcrumb";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "KHP | Loss Details",
@@ -13,32 +15,44 @@ export const metadata: Metadata = {
     "Gestion des pertes - Visualisez et gérez les détails des pertes",
 };
 
-export default function LossLayout({
-  children,
-}: Readonly<{
+interface LossLayoutProps {
   children: React.ReactNode;
-}>) {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export default async function LossLayout({
+  children,
+  params,
+}: LossLayoutProps) {
+  const { id } = await params;
   return (
-    <main className="min-h-screen">
-      <SidebarProvider>
-        <AppSidebar />
-        <SidebarInset>
-          <header className="bg-background sticky top-0 z-10 flex shrink-0 items-center gap-2 border-b p-4 md:hidden">
-            <SidebarTrigger className="-ml-1" />
-            <h1 className="text-lg font-semibold">Loss Details</h1>
-          </header>
-
-          <div className="hidden md:block border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="flex h-14 items-center px-6">
-              <h1 className="text-xl font-semibold">Loss Management</h1>
-            </div>
-          </div>
-
-          <div className="h-full flex items-center justify-center ">
-            {children}
-          </div>
-        </SidebarInset>
-      </SidebarProvider>
-    </main>
+    <div className="flex flex-col h-full">
+      <header className="border-b border-khp-secondary bg-background sticky top-0 z-10 mb-4">
+        <div className="px-6 py-4 space-y-3">
+          <Breadcrumb>
+            <BreadcrumbList className="text-xl font-semibold">
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/stocks">Stocks</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href={`/ingredient/${id}`}>Ingredient</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>loss</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
+      </header>
+      <div className="flex-1 overflow-auto p-4">{children}</div>
+    </div>
   );
 }
