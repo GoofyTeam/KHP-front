@@ -10,6 +10,7 @@ import { LossForm } from "./loss-form";
 interface LossPageProps {
   params: Promise<{
     id: string;
+    j: any;
   }>;
 }
 
@@ -42,18 +43,14 @@ export default async function LossPage({ params }: LossPageProps) {
 
   const ingredient = await fetchIngredient(id);
 
-  const totalStock =
-    ingredient.quantities?.reduce((sum, q) => sum + (q?.quantity || 0), 0) || 0;
-
   return (
     <div className="w-full flex flex-col lg:flex-row gap-8 p-4 lg:p-8">
-
       <div className="flex flex-col gap-8 justify-center items-center w-full lg:w-1/2">
         <LossDetails ingredient={ingredient} />
       </div>
       <div className="w-full lg:w-1/2 flex flex-col justify-center items-center mb-10 lg:mb-0">
         <div className="w-full max-w-md mx-auto lg:mx-0 space-y-6">
-          <LossForm ingredient={ingredient} totalStock={totalStock} />
+          <LossForm ingredient={ingredient} />
         </div>
       </div>
     </div>

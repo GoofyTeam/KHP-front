@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Trash2, AlertTriangle, CheckCircle } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { QuantityInput } from "@/components/quantity-input";
@@ -20,10 +21,10 @@ type IngredientData = NonNullable<GetIngredientQuery["ingredient"]>;
 
 interface LossFormProps {
   ingredient: IngredientData;
-  totalStock: number;
 }
 
-export function LossForm({ ingredient, totalStock }: LossFormProps) {
+export function LossForm({ ingredient }: LossFormProps) {
+  const router = useRouter();
   const [lossValue, setLossValue] = useState("");
   const [selectedLocationIndex, setSelectedLocationIndex] = useState("");
   const [reason, setReason] = useState("");
@@ -59,24 +60,41 @@ export function LossForm({ ingredient, totalStock }: LossFormProps) {
     setIsSubmitting(true);
     setSubmitStatus(null);
 
+    // Debug logs
+    console.log("=== LOSS SUBMISSION DEBUG ===");
+    console.log("Selected location:", selectedLocation);
+    console.log("Available quantity:", selectedLocation.quantity);
+    console.log("Loss quantity:", lossQuantity);
+    console.log("Loss value (string):", lossValue);
+    console.log("Ingredient ID:", ingredient.id);
+    console.log("Location ID:", selectedLocation.location.id);
+
     try {
-      const result = await createLoss({
+      const lossData = {
         trackable_id: parseInt(ingredient.id),
-        trackable_type: "ingredient",
+        trackable_type: "ingredient" as const,
         location_id: parseInt(selectedLocation.location.id),
-        quantity: lossQuantity,
+        quantity: Number(lossQuantity.toFixed(3)), // Arrondir à 3 décimales et convertir en Number
         reason: reason.trim(),
-      });
+      };
+
+      console.log("Data being sent to API:", lossData);
+
+      const result = await createLoss(lossData);
 
       if (result.success) {
         setSubmitStatus({
           type: "success",
           message: "Perte enregistrée avec succès",
         });
-        // Reset form
+
         setLossValue("");
         setSelectedLocationIndex("");
         setReason("");
+
+        setTimeout(() => {
+          router.push(`/ingredient/${ingredient.id}`);
+        }, 1500);
       } else {
         setSubmitStatus({
           type: "error",
@@ -92,7 +110,6 @@ export function LossForm({ ingredient, totalStock }: LossFormProps) {
 
   return (
     <>
-      {/* Location Selector */}
       <LocationSelector
         quantities={availableLocations}
         value={selectedLocationIndex}
@@ -174,7 +191,6 @@ export function LossForm({ ingredient, totalStock }: LossFormProps) {
         </div>
       </div>
 
-      {/* Status Messages, Alerts ou Add Loss Button */}
       <div>
         {submitStatus ? (
           <div
