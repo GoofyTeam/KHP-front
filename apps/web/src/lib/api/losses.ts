@@ -15,49 +15,42 @@ interface LossResponse {
 
 export async function createLoss(lossData: LossData): Promise<LossResponse> {
   try {
-    console.log("Attempting to create loss with data:", lossData);
-
     // Use the existing HttpClient which handles CSRF automatically
-    console.log("API URL being called:", `/api/losses`);
-    const result = await httpClient.post<any>("/api/losses", lossData);
+    await httpClient.post("/api/losses", lossData);
 
-    console.log("Loss creation successful:", result);
     return { success: true };
-  } catch (error: any) {
-    console.error("Error creating loss:", error);
-    console.error("Full error object:", JSON.stringify(error, null, 2));
-
+  } catch (error: unknown) {
     // Parse error message from HttpClient
-    if (error.message) {
+    if (error instanceof Error && error.message) {
       if (error.message.includes("400")) {
         return {
           success: false,
-          message: "Stock insuffisant ou localisation inappropriée",
+          message: "Insufficient stock or inappropriate location",
         };
       }
 
       if (error.message.includes("401")) {
-        return { success: false, message: "Non authentifié" };
+        return { success: false, message: "Unauthorized" };
       }
 
       if (error.message.includes("422")) {
         return {
           success: false,
-          message: "Validation échouée: données invalides",
+          message: "Validation failed: invalid data",
         };
       }
 
       if (error.message.includes("Session expired")) {
         return {
           success: false,
-          message: "Session expirée, veuillez actualiser la page",
+          message: "Session expired, please refresh the page",
         };
       }
     }
 
     return {
       success: false,
-      message: "Erreur lors de l'enregistrement de la perte",
+      message: "Error saving the loss",
     };
   }
 }

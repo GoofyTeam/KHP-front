@@ -92,6 +92,8 @@ export type CompanyPaginator = {
 
 export type Ingredient = {
   __typename?: 'Ingredient';
+  /** Quantity for one unit of the ingredient. */
+  base_quantity: Scalars['Float']['output'];
   categories: Array<Category>;
   /** The company that owns this ingredient. */
   company: Company;
@@ -300,6 +302,7 @@ export type OpenFoodFactsProduct = {
   base_quantity?: Maybe<Scalars['Float']['output']>;
   categories?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   imageUrl?: Maybe<Scalars['String']['output']>;
+  ingredient_id?: Maybe<Scalars['ID']['output']>;
   is_already_in_database?: Maybe<Scalars['Boolean']['output']>;
   product_name?: Maybe<Scalars['String']['output']>;
   unit?: Maybe<Scalars['String']['output']>;
