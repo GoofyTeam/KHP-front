@@ -21,7 +21,7 @@ export function IngredientDetails({ ingredient }: IngredientDetailsProps) {
             {ingredient.name}
           </h1>
           <Link href={`/ingredient/${ingredient.id}/edit`}>
-            <Button variant="ghost" size="icon" title="Modifier l'ingrédient">
+            <Button variant="ghost" size="icon" title="Edit ingredient">
               <Edit className="h-4 w-4 text-khp-text-secondary" />
             </Button>
           </Link>
