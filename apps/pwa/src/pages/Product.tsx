@@ -27,7 +27,7 @@ export default function ProductPage() {
   const { id } = useParams({ from: "/_protected/products/$id" });
   const loaderData = useLoaderData({
     from: "/_protected/products/$id",
-  }) as { data: ProductData; meta: any };
+  }) as { data: ProductData; meta: unknown };
 
   const product = loaderData?.data;
 
@@ -148,7 +148,7 @@ export default function ProductPage() {
 
           <div className="flex flex-col gap-4">
             <LocationSelect
-              quantities={product.quantities as any}
+              quantities={product.quantities || []}
               value={selectedLocation}
               onValueChange={setSelectedLocation}
               placeholder="Select a location"
