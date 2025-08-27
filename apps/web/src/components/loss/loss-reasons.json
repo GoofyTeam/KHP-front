@@ -1,0 +1,30 @@
+[
+  {
+    "value": "Expired",
+    "label": "Expired"
+  },
+  {
+    "value": "Broken",
+    "label": "Broken"
+  },
+  {
+    "value": "Spilled",
+    "label": "Spilled"
+  },
+  {
+    "value": "Contaminated",
+    "label": "Contaminated"
+  },
+  {
+    "value": "Damaged",
+    "label": "Damaged"
+  },
+  {
+    "value": "Lost",
+    "label": "Lost"
+  },
+  {
+    "value": "Other",
+    "label": "Other"
+  }
+]

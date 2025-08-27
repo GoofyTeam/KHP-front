@@ -38,7 +38,8 @@ export function QuantityInput({
     const numValue = parseFloat(val) || 0;
     if (numValue === 0) return "";
 
-    return val.replace(/\.?0+$/, "");
+    // Ne supprimer que les zéros après une décimale, pas les zéros entiers
+    return val.replace(/\.0+$/, "");
   };
 
   useEffect(() => {
@@ -136,8 +137,10 @@ export function QuantityInput({
 
       <div className="w-full">
         <div
-          className={`relative border-2 rounded-xl py-4 px-6 bg-white ${
-            disabled ? "border-gray-300" : "border-khp-primary"
+          className={`relative border-2 rounded-xl py-4 px-6 ${
+            disabled
+              ? "border-khp-secondary bg-khp-background-secondary"
+              : "border-khp-primary bg-white"
           }`}
         >
           <input
@@ -160,11 +163,13 @@ export function QuantityInput({
         </div>
 
         <div className="mt-2 text-xs text-khp-text-secondary text-center">
-          {isFocused
-            ? "Type your quantity directly (ex: 6.5)"
-            : displayValue
-              ? `${formatDisplayValue(value)} ${unit?.toLowerCase() || ""}`
-              : "Click to enter a quantity"}
+          {disabled
+            ? "Please select a location first"
+            : isFocused
+              ? "Type your quantity directly (ex: 6.5)"
+              : displayValue
+                ? `${formatDisplayValue(value)} ${unit?.toLowerCase() || ""}`
+                : "Click to enter a quantity"}
         </div>
       </div>
     </div>
