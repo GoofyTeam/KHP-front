@@ -67,10 +67,6 @@ export function MoveQuantityForm({
 
   const destinationQuantities = [...existingDestinations, ...newDestinations];
 
-  const selectedDestinationLocation = formData.destinationLocationIndex
-    ? destinationQuantities[parseInt(formData.destinationLocationIndex)]
-    : null;
-
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setError(null);

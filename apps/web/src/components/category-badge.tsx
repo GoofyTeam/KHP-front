@@ -17,11 +17,8 @@ export function CategoryBadge({ categories }: CategoryBadgeProps) {
   const category = categories[0];
 
   return (
-    <Link
-      href={`/category/${category.id}`}
-      className="inline-block px-4 py-2 bg-khp-background-secondary text-khp-text-secondary rounded-full text-sm font-medium hover:bg-khp-primary hover:text-white transition-colors duration-200"
-    >
+    <span className="inline-block px-4 py-2 bg-khp-background-secondary text-khp-text-secondary rounded-full text-sm font-medium">
       {category.name}
-    </Link>
+    </span>
   );
 }

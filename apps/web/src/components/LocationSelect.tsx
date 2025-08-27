@@ -95,7 +95,7 @@ export function LocationSelector({
             )}
           </SelectTrigger>
           <SelectContent className="max-h-72">
-            {sortedQuantities.map((q, sortedIndex: number) => {
+            {sortedQuantities.map((q) => {
               // Trouver l'index original pour la valeur
               const originalIndex = quantities.findIndex((orig) => orig === q);
               return (

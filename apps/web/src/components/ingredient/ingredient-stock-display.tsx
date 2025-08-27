@@ -1,12 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { LocationSelector } from "./LocationSelect";
-import type { Ingredient, IngredientQuantity } from "../types/stocks";
-import { formatQuantity } from "../lib/formatQuantity";
+import { LocationSelector } from "../LocationSelect";
+import { formatQuantity } from "../../lib/formatQuantity";
+import { GetIngredientQuery } from "@/graphql/generated/graphql";
+
+type IngredientData = NonNullable<GetIngredientQuery["ingredient"]>;
+type IngredientQuantity = IngredientData["quantities"][number];
 
 interface IngredientStockDisplayProps {
-  ingredient: Ingredient;
+  ingredient: IngredientData;
 }
 
 export function IngredientStockDisplay({

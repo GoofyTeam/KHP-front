@@ -18,7 +18,7 @@ interface MovePageProps {
 
 async function fetchIngredient(id: string): Promise<Ingredient> {
   try {
-    const { data, loading, error } = await query({
+    const { data, error } = await query({
       query: GetIngredientDocument,
       variables: { id },
     });

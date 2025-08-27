@@ -26,7 +26,8 @@ export default function NotFound() {
           </h1>
 
           <p className="text-gray-600 mb-6">
-            L'ingrédient que vous recherchez n'existe pas ou a été supprimé.
+            L&apos;ingrédient que vous recherchez n&apos;existe pas ou a été
+            supprimé.
           </p>
 
           <Link
