@@ -13,10 +13,10 @@ const formatQuantity = (quantity: number): string => {
   return parseFloat(quantity.toFixed(3)).toString();
 };
 
-interface IngredientQuantity {
-  quantity: number;
-  location: NonNullable<GetIngredientQuery["ingredient"]>["quantities"][number]["location"];
-}
+// Utiliser les types GraphQL générés
+type IngredientQuantity = NonNullable<
+  GetIngredientQuery["ingredient"]
+>["quantities"][number];
 
 interface LocationSelectorProps {
   quantities: IngredientQuantity[];
@@ -79,6 +79,34 @@ export function LocationSelect({
     quantities.reduce((sum, q) => sum + q.quantity, 0).toFixed(3)
   );
 
+  // Remove duplicates by location ID, keeping the one with highest quantity
+  const uniqueQuantities = quantities.reduce(
+    (acc, current) => {
+      const existing = acc.find(
+        (item) => item.location.id === current.location.id
+      );
+      if (!existing) {
+        acc.push(current);
+      } else if (current.quantity > existing.quantity) {
+        // Replace with the one that has higher quantity
+        const index = acc.indexOf(existing);
+        acc[index] = current;
+      }
+      return acc;
+    },
+    [] as typeof quantities
+  );
+
+  // Sort quantities: non-empty first, then empty, then by name
+  const sortedQuantities = [...uniqueQuantities].sort((a, b) => {
+    // First, sort by quantity (non-empty first)
+    if (a.quantity > 0 && b.quantity === 0) return -1;
+    if (a.quantity === 0 && b.quantity > 0) return 1;
+
+    // Then sort by name alphabetically
+    return a.location.name.localeCompare(b.location.name);
+  });
+
   return (
     <div className={`space-y-2 ${className}`}>
       <h3 className="text-base font-semibold text-gray-900">{label}</h3>
@@ -128,9 +156,9 @@ export function LocationSelect({
               </div>
             </SelectItem>
           )}
-          {quantities.map((q, index) => (
+          {sortedQuantities.map((q) => (
             <SelectItem
-              key={`${q.location.id}-${index}`}
+              key={q.location.id}
               value={q.location.id}
               className="min-h-[56px] py-4 px-4 text-base font-medium cursor-pointer hover:bg-khp-primary/10 focus:bg-khp-primary/20 transition-colors touch-manipulation"
             >
