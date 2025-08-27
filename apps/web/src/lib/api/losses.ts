@@ -18,12 +18,14 @@ export async function createLoss(lossData: LossData): Promise<LossResponse> {
     console.log("Attempting to create loss with data:", lossData);
 
     // Use the existing HttpClient which handles CSRF automatically
+    console.log("API URL being called:", `/api/losses`);
     const result = await httpClient.post<any>("/api/losses", lossData);
 
     console.log("Loss creation successful:", result);
     return { success: true };
   } catch (error: any) {
     console.error("Error creating loss:", error);
+    console.error("Full error object:", JSON.stringify(error, null, 2));
 
     // Parse error message from HttpClient
     if (error.message) {

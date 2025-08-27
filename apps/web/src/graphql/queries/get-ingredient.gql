@@ -4,12 +4,6 @@ query GetIngredient($id: ID!) {
     name
     unit
     image_url
-    created_at
-    updated_at
-    category {
-      id
-      name
-    }
     quantities {
       quantity
       location {
@@ -20,13 +14,24 @@ query GetIngredient($id: ID!) {
         }
       }
     }
+    categories {
+      id
+      name
+    }
     stockMovements {
+      id
+      type
+      quantity
       quantity_before
       quantity_after
-      type
       created_at
       location {
         id
+        name
+      }
+      user {
+        id
+        name
       }
     }
   }
