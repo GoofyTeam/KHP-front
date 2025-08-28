@@ -30,7 +30,6 @@ export function MoveQuantityForm({
     quantityOTP: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
   const availableSourceQuantities = ingredient.quantities.filter(
@@ -65,17 +64,15 @@ export function MoveQuantityForm({
 
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    setError(null);
   };
 
   const validateForm = (): string | null => {
-    if (!formData.sourceLocationIndex) {
-      return "Please select a source location";
-    }
-    if (!formData.destinationLocationIndex) {
-      return "Please select a destination location";
-    }
-    if (moveQuantity <= 0) {
+    // Only show quantity error if user has entered something invalid (not just empty/0)
+    if (
+      formData.quantityOTP &&
+      formData.quantityOTP.trim() !== "" &&
+      moveQuantity <= 0
+    ) {
       return "Please enter a valid quantity";
     }
     if (moveQuantity > maxQuantity) {
@@ -89,12 +86,10 @@ export function MoveQuantityForm({
 
     const validationError = validateForm();
     if (validationError) {
-      setError(validationError);
       return;
     }
 
     setIsSubmitting(true);
-    setError(null);
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -106,7 +101,6 @@ export function MoveQuantityForm({
       }, 2000);
     } catch (err) {
       console.error("Error moving quantity:", err);
-      setError("An error occurred during the move. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -164,38 +158,115 @@ export function MoveQuantityForm({
         />
       </div>
 
-      {error && (
-        <div className="flex items-center space-x-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-          <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
-          <p className="text-sm text-red-700">{error}</p>
+      <div className="border-khp-border pt-4">
+        {/* Move Summary Panel - Always visible */}
+        <div className="mt-4 p-3 bg-khp-background-secondary rounded-lg border border-khp-border">
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-khp-text-secondary">
+              Current Stock{" "}
+              {selectedSourceLocation
+                ? `(${selectedSourceLocation.location.name})`
+                : ""}
+              :
+            </span>
+            <span className="font-medium text-khp-text-primary">
+              {selectedSourceLocation ? selectedSourceLocation.quantity : 0}{" "}
+              {ingredient.unit}
+            </span>
+          </div>
+          <div className="flex justify-between items-center mt-1">
+            <span className="text-sm text-khp-text-secondary">
+              Move Quantity:
+            </span>
+            <span className="font-medium text-khp-primary">
+              {moveQuantity.toFixed(3)} {ingredient.unit}
+            </span>
+          </div>
+          <div className="flex justify-between items-center mt-1 pt-1 border-t border-khp-border">
+            <span className="text-sm font-medium text-khp-text-primary">
+              Remaining at Source:
+            </span>
+            <span
+              className={`font-bold ${selectedSourceLocation && selectedSourceLocation.quantity - moveQuantity < 0 ? "text-khp-error" : "text-khp-primary"}`}
+            >
+              {selectedSourceLocation
+                ? Math.max(
+                    0,
+                    selectedSourceLocation.quantity - moveQuantity
+                  ).toFixed(3)
+                : (0 - moveQuantity).toFixed(3)}{" "}
+              {ingredient.unit}
+            </span>
+          </div>
+          {formData.destinationLocationIndex && (
+            <div className="flex justify-between items-center mt-1">
+              <span className="text-sm font-medium text-khp-text-primary">
+                New Total at Destination:
+              </span>
+              <span className="font-bold text-khp-success">
+                {(() => {
+                  const selectedDestination =
+                    destinationQuantities[
+                      parseInt(formData.destinationLocationIndex)
+                    ];
+                  const currentDestinationQuantity =
+                    selectedDestination?.quantity || 0;
+                  return (currentDestinationQuantity + moveQuantity).toFixed(3);
+                })()}{" "}
+                {ingredient.unit}
+              </span>
+            </div>
+          )}
         </div>
-      )}
-      {moveQuantity > 0 && moveQuantity > maxQuantity && (
-        <div className="flex items-center space-x-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-          <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
-          <p className="text-sm text-red-700 mb-0">
-            The quantity to move ({moveQuantity.toFixed(3)} {ingredient.unit})
-            exceeds the available quantity ({maxQuantity} {ingredient.unit})
-          </p>
-        </div>
-      )}
+      </div>
 
-      <div className="flex space-x-4 pt-4">
-        <Button
-          variant="khp-default"
-          size="xl-full"
-          type="submit"
-          disabled={
-            isSubmitting ||
-            !formData.sourceLocationIndex ||
-            !formData.destinationLocationIndex ||
-            moveQuantity <= 0 ||
-            moveQuantity > maxQuantity
+      {/* Error display or Button - errors replace the button */}
+      <div>
+        {(() => {
+          const validationError = validateForm();
+          const hasExcessiveMove =
+            moveQuantity > 0 && moveQuantity > maxQuantity;
+
+          if (validationError || hasExcessiveMove) {
+            return (
+              <div className="w-full p-4 bg-khp-error/10 border border-khp-error/30 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-khp-error mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-khp-error">
+                      {validationError ||
+                        `Cannot move - exceeds available stock`}
+                    </p>
+                    {hasExcessiveMove && selectedSourceLocation && (
+                      <p className="text-xs text-khp-error/80 mt-1">
+                        You cannot move more than{" "}
+                        {selectedSourceLocation.quantity} {ingredient.unit}{" "}
+                        available in {selectedSourceLocation.location.name}.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
           }
-          className="flex-1"
-        >
-          {isSubmitting ? "Moving..." : "Move"}
-        </Button>
+
+          return (
+            <Button
+              variant="khp-default"
+              size="xl"
+              className="w-full py-4 px-6 text-base font-semibold"
+              type="submit"
+              disabled={
+                isSubmitting ||
+                !formData.sourceLocationIndex ||
+                !formData.destinationLocationIndex ||
+                moveQuantity <= 0
+              }
+            >
+              {isSubmitting ? "Moving..." : "Move Quantity"}
+            </Button>
+          );
+        })()}
       </div>
     </form>
   );
