@@ -191,7 +191,12 @@ export default function ProductPage() {
           >
             <Link
               to="/handle-item"
-              search={{ type: "update", internalId: id, mode: "internalId" }}
+              search={{
+                type: "update-product",
+                internalId: id,
+                mode: "internalId",
+                scanMode: "stock-mode",
+              }}
             >
               <NotebookPen strokeWidth={2} className="text-white !h-5 !w-5" />{" "}
               <span className="text-xl">Edit product</span>

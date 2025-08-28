@@ -8,5 +8,13 @@ query getItemByInternalId($id: ID) {
       id
     }
     unit
+    base_quantity
+    quantities {
+      location {
+        id
+        name
+      }
+      quantity
+    }
   }
 }

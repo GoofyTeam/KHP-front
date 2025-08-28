@@ -98,6 +98,8 @@ export type Ingredient = {
   name: Scalars['String']['output'];
   /** Unit of measurement for the ingredient. */
   unit: UnitEnum;
+  /** Quantity for one unit of the ingredient. */
+  base_quantity: Scalars['Float']['output'];
   quantities: Array<IngredientQuantity>;
   /** The company that owns this ingredient. */
   company: Company;
@@ -303,6 +305,7 @@ export type OpenFoodFactsProduct = {
   categories?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   imageUrl?: Maybe<Scalars['String']['output']>;
   is_already_in_database?: Maybe<Scalars['Boolean']['output']>;
+  ingredient_id?: Maybe<Scalars['ID']['output']>;
 };
 
 /** Allows ordering a list of records. */

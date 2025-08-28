@@ -76,6 +76,9 @@ export const MeasurementUnit = {
         return "Centilitre (cL)";
       case "mL":
         return "Millilitre (mL)";
+
+      case "unit":
+        return "Unit (unit)";
       default:
         return "null";
     }

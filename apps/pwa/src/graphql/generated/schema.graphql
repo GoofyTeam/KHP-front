@@ -94,6 +94,9 @@ type Ingredient {
 
   """Unit of measurement for the ingredient."""
   unit: UnitEnum!
+
+  """Quantity for one unit of the ingredient."""
+  base_quantity: Float!
   quantities: [IngredientQuantity!]!
 
   """The company that owns this ingredient."""
@@ -327,6 +330,7 @@ type OpenFoodFactsProduct {
   categories: [String]
   imageUrl: String
   is_already_in_database: Boolean
+  ingredient_id: ID
 }
 
 """Allows ordering a list of records."""

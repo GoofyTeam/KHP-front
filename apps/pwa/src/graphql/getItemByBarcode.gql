@@ -6,5 +6,7 @@ query getItemByBarcode($barcode: String, $page: Int!) {
     product_name
     categories
     unit
+    is_already_in_database
+    ingredient_id
   }
 }

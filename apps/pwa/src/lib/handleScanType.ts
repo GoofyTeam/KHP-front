@@ -6,15 +6,20 @@ import {
   GetItemByInternalId,
   GetItemByInternalIdQuery,
 } from "../graphql/getItemByInternalId.gql";
-import { handleItemSearch } from "../routes/_protected/handle-item";
+import { HandleItemSearch } from "../routes/_protected/handle-item";
 import { graphqlRequest } from "./graph-client";
 
-type WantedDataType = {
+export type WantedDataType = {
   product_image: string;
   product_name: string;
   product_category: string[];
   product_units: string;
   product_base_quantity?: string;
+  product_already_in_database?: boolean;
+  product_internal_id?: string;
+  quantities?: NonNullable<
+    GetItemByInternalIdQuery["ingredient"]
+  >["quantities"];
 };
 
 const toStringArray = (value: unknown): string[] => {
@@ -37,7 +42,7 @@ const toStringArray = (value: unknown): string[] => {
 };
 
 const handleScanType = async (
-  mode: handleItemSearch["mode"],
+  mode: HandleItemSearch["mode"],
   productId: string | undefined
 ) => {
   let wantedData: WantedDataType = {
@@ -67,6 +72,9 @@ const handleScanType = async (
       product_category: toStringArray(result.search.categories),
       product_units: result.search.unit ?? "",
       product_base_quantity,
+      product_already_in_database:
+        result.search.is_already_in_database ?? false,
+      product_internal_id: result.search.ingredient_id ?? undefined,
     };
   } else if (mode === "internalId") {
     const result = await graphqlRequest<GetItemByInternalIdQuery>(
@@ -86,6 +94,10 @@ const handleScanType = async (
       product_name: result.ingredient.name ?? "",
       product_category: toStringArray(categories),
       product_units: result.ingredient.unit ?? "",
+      product_already_in_database: true,
+      product_internal_id: result.ingredient.id ?? undefined,
+      product_base_quantity: result.ingredient.base_quantity.toString(),
+      quantities: result.ingredient.quantities,
     };
   } else if (mode === "manual") {
     wantedData = {
@@ -93,6 +105,8 @@ const handleScanType = async (
       product_name: "",
       product_category: [],
       product_units: "",
+      product_already_in_database: false,
+      product_internal_id: undefined,
     };
   }
 
