@@ -43,15 +43,11 @@ export function MoveQuantityForm({
 
   const maxQuantity = selectedSourceLocation?.quantity || 0;
 
-  const getQuantityFromOTP = () => {
-    if (!formData.quantityOTP || formData.quantityOTP.length === 0) return 0;
+  const moveQuantity =
+    !formData.quantityOTP || formData.quantityOTP.length === 0
+      ? 0
+      : parseFloat(formData.quantityOTP) || 0;
 
-    return parseFloat(formData.quantityOTP) || 0;
-  };
-
-  const moveQuantity = getQuantityFromOTP();
-
-  // Get destinations: existing locations with quantities + empty locations
   const existingDestinations = ingredient.quantities.filter(
     (q) => q.location.id !== selectedSourceLocation?.location.id
   );

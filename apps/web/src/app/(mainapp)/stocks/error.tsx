@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent } from "@workspace/ui/components/card";
+import Link from "next/link";
 
 interface ErrorProps {
   error: Error & { digest?: string };
@@ -38,11 +39,11 @@ export default function StocksError({ error, reset }: ErrorProps) {
               Try Again
             </Button>
             <Button
-              onClick={() => (window.location.href = "/dashboard")}
+              asChild
               variant="default"
               className="bg-khp-primary text-primary-foreground hover:bg-khp-primary/90"
             >
-              Go to Dashboard
+              <Link href="/dashboard">Go to Dashboard</Link>
             </Button>
           </div>
         </CardContent>

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent } from "@workspace/ui/components/card";
+import Link from "next/link";
 
 interface ErrorProps {
   error: Error & { digest?: string };
@@ -11,11 +11,6 @@ interface ErrorProps {
 }
 
 export default function IngredientError({ error, reset }: ErrorProps) {
-  useEffect(() => {
-    // Log l'erreur pour le monitoring
-    console.error("Ingredient page error:", error);
-  }, [error]);
-
   return (
     <div className="flex h-full w-full items-center justify-center p-4">
       <Card className="max-w-md w-full">
@@ -38,11 +33,11 @@ export default function IngredientError({ error, reset }: ErrorProps) {
               Try Again
             </Button>
             <Button
-              onClick={() => (window.location.href = "/dashboard")}
+              asChild
               variant="default"
               className="bg-khp-primary text-primary-foreground hover:bg-khp-primary/90"
             >
-              Go to Dashboard
+              <Link href="/dashboard">Go to Dashboard</Link>
             </Button>
           </div>
         </CardContent>

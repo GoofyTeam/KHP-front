@@ -1,3 +1,4 @@
+import { Button } from "@workspace/ui/components/button";
 import Link from "next/link";
 
 export default function NotFound() {
@@ -22,20 +23,21 @@ export default function NotFound() {
           </div>
 
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Ingrédient introuvable
+            Ingredient Not Found
           </h1>
 
           <p className="text-gray-600 mb-6">
-            L&apos;ingrédient que vous recherchez n&apos;existe pas ou a été
-            supprimé.
+            The ingredient you are looking for does not exist or has been
+            deleted.
           </p>
 
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+          <Button
+            asChild
+            variant="default"
+            className="bg-khp-primary text-primary-foreground hover:bg-khp-primary/90"
           >
-            Retour au tableau de bord
-          </Link>
+            <Link href="/dashboard">Go to Dashboard</Link>
+          </Button>
         </div>
       </div>
     </div>

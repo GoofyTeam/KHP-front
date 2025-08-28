@@ -1,9 +1,5 @@
 import { notFound } from "next/navigation";
-import { query } from "@/lib/ApolloClient";
-import {
-  GetIngredientDocument,
-  GetIngredientQuery,
-} from "@/graphql/generated/graphql";
+import { fetchIngredient } from "@/queries/ingredient-query";
 import { IngredientDetails } from "../../../../components/ingredient/ingredient-details";
 import { IngredientStockDisplay } from "../../../../components/ingredient/ingredient-stock-display";
 import { MovementHistory } from "../../../../components/ingredient/movement-history";
@@ -12,26 +8,6 @@ interface IngredientPageProps {
   params: Promise<{
     id: string;
   }>;
-}
-
-async function fetchIngredient(
-  id: string
-): Promise<NonNullable<GetIngredientQuery["ingredient"]>> {
-  const { data, error } = await query({
-    query: GetIngredientDocument,
-    variables: { id },
-  });
-
-  if (error) {
-    console.error("GraphQL error:", error);
-    throw error;
-  }
-
-  if (!data?.ingredient) {
-    notFound();
-  }
-
-  return data.ingredient;
 }
 
 export default async function IngredientPage({ params }: IngredientPageProps) {

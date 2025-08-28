@@ -1,5 +1,9 @@
-import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
-import { registerApolloClient } from "@apollo/client-integration-nextjs";
+import { HttpLink } from "@apollo/client";
+import {
+  registerApolloClient,
+  ApolloClient,
+  InMemoryCache,
+} from "@apollo/client-integration-nextjs";
 import { headers } from "next/headers";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
