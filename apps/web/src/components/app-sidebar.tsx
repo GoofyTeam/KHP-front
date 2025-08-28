@@ -3,6 +3,9 @@
 import * as React from "react";
 import { LucideIcon, Square } from "lucide-react";
 import * as Icons from "lucide-react";
+import Link from "next/link";
+import { NavUser } from "./nav-user";
+import { httpClient } from "@/lib/httpClient";
 
 import {
   Sidebar,
@@ -67,14 +70,47 @@ const isRouteActive = (currentPath: string, item: NavigationItem): boolean => {
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   config?: SidebarConfig;
   pathname?: string;
+  user?: {
+    name: string;
+    email: string;
+    avatar: string;
+  };
 }
 
 export function AppSidebar({
   config = defaultConfig,
   pathname = "/dashboard",
+  user,
   ...props
 }: AppSidebarProps) {
   const { toggleSidebar } = useSidebar();
+  const [userData, setUserData] = React.useState<any>(null);
+
+  // Fetch user data on component mount
+  React.useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await httpClient.get("/api/user");
+        console.log("User data response:", response);
+        setUserData(response);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  const fallback = {
+    name: "A",
+    email: "",
+  };
+  const currentUser = userData?.user
+    ? {
+        name: userData.user.name,
+        email: userData.user.email,
+      }
+    : user || fallback;
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -112,7 +148,7 @@ export function AppSidebar({
                       isActive={isActive}
                       asChild
                     >
-                      <a
+                      <Link
                         href={item.url}
                         className={`relative transition-all duration-200 ease-in-out active:scale-95 ${
                           !isActive
@@ -122,7 +158,7 @@ export function AppSidebar({
                       >
                         <ItemIcon className="size-5" />
                         <span>{item.title}</span>
-                      </a>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
@@ -133,7 +169,7 @@ export function AppSidebar({
       </SidebarContent>
 
       <SidebarFooter>
-        {/* TODO: Ajouter le button page compte utilisateur*/}
+        <NavUser user={currentUser} />
       </SidebarFooter>
     </Sidebar>
   );
