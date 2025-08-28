@@ -4,6 +4,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { ArrowLeft } from "lucide-react";
 import { useRouter, useLocation, useMatch } from "@tanstack/react-router";
 import { useProduct } from "../stores/product-store";
+import { useHandleItemStore } from "../stores/handleitem-store";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -16,43 +17,29 @@ const PAGE_TITLES: Record<string, string> = {
   "/inventory": "Inventory",
   "/login": "Login",
   "/scan": "Scan",
-  "/handle-item": "Handle Item",
   "/404": "Page Not Found",
 };
-
-function getPageTitle(
-  pathname: string,
-  productId?: string | null,
-  isHistoryRoute?: boolean,
-  productName?: string | null
-): string {
-  if (PAGE_TITLES[pathname]) {
-    return PAGE_TITLES[pathname];
-  }
-
-  if (productId) {
-    const displayName = productName || `Product ${productId}`;
-    if (isHistoryRoute) {
-      return `History - ${displayName}`;
-    }
-    return displayName;
-  }
-
-  return "";
-}
 
 export function Layout({ children, className }: LayoutProps) {
   const router = useRouter();
   const location = useLocation();
   const { currentProduct } = useProduct();
+  const handleItemTitle = useHandleItemStore((state) => state.pageTitle);
 
   const productMatch = useMatch({
     from: "/_protected/products/$id",
     shouldThrow: false,
   });
-
   const historyMatch = useMatch({
     from: "/_protected/products/$id_/history",
+    shouldThrow: false,
+  });
+  const handleItemMatch = useMatch({
+    from: "/_protected/handle-item",
+    shouldThrow: false,
+  });
+  const scanMatch = useMatch({
+    from: "/_protected/scan/$scanType",
     shouldThrow: false,
   });
 
@@ -61,12 +48,16 @@ export function Layout({ children, className }: LayoutProps) {
 
   const productName = currentProduct?.name || null;
 
-  const title = getPageTitle(
-    location.pathname,
-    productId,
-    isHistoryRoute,
-    productName
-  );
+  let title: string;
+  if (handleItemMatch) {
+    title = handleItemTitle;
+  } else if (productId && isHistoryRoute) {
+    title = `History of ${productName || "Product"}`;
+  } else if (productId) {
+    title = productName || "Product Details";
+  } else {
+    title = PAGE_TITLES[location.pathname] || "";
+  }
 
   const handleGoBack = () => {
     router.history.back();
@@ -78,7 +69,12 @@ export function Layout({ children, className }: LayoutProps) {
 
   return (
     <div className={cn("min-h-screen bg-khp-background", className)}>
-      <header className="bg-khp-primary text-khp-text-on-primary shadow-sm h-16 sticky top-0 z-10">
+      <header
+        className={cn(
+          "bg-khp-primary text-khp-text-on-primary shadow-sm h-16 sticky top-0 z-10",
+          scanMatch && "hidden"
+        )}
+      >
         <div className="mx-auto flex max-w-7xl items-center px-4 sm:px-6 lg:px-8 h-full">
           <div className="flex items-center gap-2 w-full">
             {shouldShowBackButton && (

@@ -20,9 +20,9 @@ const buttonVariants = cva(
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         "khp-default":
-          "bg-khp-primary text-khp-text-on-primary hover:bg-khp-primary-hover !h-[48px] px-6 rounded-xl",
+          "bg-khp-primary text-khp-text-on-primary hover:bg-khp-primary-hover rounded-xl",
         "khp-destructive":
-          "bg-khp-error text-khp-text-on-primary hover:bg-khp-error/90 !h-[48px] px-6 rounded-xl",
+          "bg-khp-error text-khp-text-on-primary hover:bg-khp-error/90 rounded-xl",
         "khp-outline":
           "border border-khp-primary bg-transparent text-khp-primary hover:bg-khp-primary/10",
       },

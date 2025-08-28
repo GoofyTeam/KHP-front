@@ -8,7 +8,7 @@ import InventoryRow from "../components/inventory-row";
 import { Input } from "@workspace/ui/components/input";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@workspace/ui/components/button";
-import { ScanBarcode } from "lucide-react";
+import { ScanBarcode, Trash2 } from "lucide-react";
 import type { GetCompanyProductsQuery } from "../graphql/getCompanyProducts.gql";
 
 function InventoryPage() {
@@ -45,12 +45,10 @@ function InventoryPage() {
     if (pageIndex === 1) {
       setAllItems(data);
     } else {
-      setAllItems(
-        (prev: GetCompanyProductsQuery["ingredients"]["data"]) => [
-          ...prev,
-          ...data,
-        ]
-      );
+      setAllItems((prev: GetCompanyProductsQuery["ingredients"]["data"]) => [
+        ...prev,
+        ...data,
+      ]);
     }
   }, [data, pageIndex]);
 
@@ -89,11 +87,18 @@ function InventoryPage() {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
 
-        <Button variant="khp-default" asChild>
-          <Link to="/scan">
-            <ScanBarcode size={32} />
-          </Link>
-        </Button>
+        <div className="flex gap-x-2">
+          <Button variant="khp-default" asChild className="!h-auto">
+            <Link to="/scan/$scanType" params={{ scanType: "add-product" }}>
+              <ScanBarcode size={32} />
+            </Link>
+          </Button>
+          <Button variant="khp-destructive" asChild className="!h-auto">
+            <Link to="/scan/$scanType" params={{ scanType: "remove-quantity" }}>
+              <Trash2 size={32} />
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {allItems.map(
