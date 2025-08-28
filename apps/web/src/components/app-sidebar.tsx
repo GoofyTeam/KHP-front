@@ -67,14 +67,28 @@ const isRouteActive = (currentPath: string, item: NavigationItem): boolean => {
   return currentPath === item.url || currentPath.startsWith(item.url + "/");
 };
 
+interface User {
+  name: string;
+  email: string;
+  avatar: string;
+}
+
+interface ApiUserResponse {
+  user: {
+    id: number;
+    name: string;
+    email: string;
+    company_id: number;
+    created_at: string;
+    updated_at: string;
+    email_verified_at: string;
+  };
+}
+
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   config?: SidebarConfig;
   pathname?: string;
-  user?: {
-    name: string;
-    email: string;
-    avatar: string;
-  };
+  user?: User;
 }
 
 export function AppSidebar({
@@ -84,13 +98,13 @@ export function AppSidebar({
   ...props
 }: AppSidebarProps) {
   const { toggleSidebar } = useSidebar();
-  const [userData, setUserData] = React.useState<any>(null);
+  const [userData, setUserData] = React.useState<ApiUserResponse | null>(null);
 
   // Fetch user data on component mount
   React.useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await httpClient.get("/api/user");
+        const response = await httpClient.get<ApiUserResponse>("/api/user");
         console.log("User data response:", response);
         setUserData(response);
       } catch (error) {
