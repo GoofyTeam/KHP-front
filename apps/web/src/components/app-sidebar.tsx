@@ -105,7 +105,7 @@ export function AppSidebar({
     const fetchUserData = async () => {
       try {
         const response = await httpClient.get<ApiUserResponse>("/api/user");
-        console.log("User data response:", response);
+
         setUserData(response);
       } catch (error) {
         console.error("Error fetching user data:", error);
