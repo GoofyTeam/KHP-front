@@ -288,6 +288,13 @@ type Loss {
   updated_at: DateTime!
 }
 
+"""Statistiques des pertes par type."""
+type LossesStats {
+  ingredient: Float!
+  preparation: Float!
+  total: Float!
+}
+
 input LossOrderByClause {
   field: LossOrderByField!
   order: SortOrder!
@@ -527,6 +534,7 @@ type Query {
     """Recherche par nom du type."""
     name: String
   ): LocationType
+  lossesStats(start_date: DateTime, end_date: DateTime): LossesStats!
 
   """Liste les unités de mesure disponibles"""
   measurementUnits: [MeasurementUnitType!]!

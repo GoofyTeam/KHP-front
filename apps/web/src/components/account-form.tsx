@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
-import { Separator } from "@workspace/ui/components/separator";
 import { CheckCircleIcon, Loader2Icon, Eye, EyeOff } from "lucide-react";
 import { httpClient } from "@/lib/httpClient";
 import { useUserStore } from "@/stores/user-store";
