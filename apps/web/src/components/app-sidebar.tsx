@@ -5,7 +5,7 @@ import { LucideIcon, Square } from "lucide-react";
 import * as Icons from "lucide-react";
 import Link from "next/link";
 import { NavUser } from "./nav-user";
-import { httpClient } from "@/lib/httpClient";
+import { useUserStore } from "@/stores/user-store";
 
 import {
   Sidebar,
@@ -79,17 +79,7 @@ interface User {
   avatar: string;
 }
 
-interface ApiUserResponse {
-  user: {
-    id: number;
-    name: string;
-    email: string;
-    company_id: number;
-    created_at: string;
-    updated_at: string;
-    email_verified_at: string;
-  };
-}
+// Removed local API response typing in favor of centralized store
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   config?: SidebarConfig;
@@ -104,31 +94,16 @@ export function AppSidebar({
   ...props
 }: AppSidebarProps) {
   const { toggleSidebar } = useSidebar();
-  const [userData, setUserData] = React.useState<ApiUserResponse | null>(null);
-
-  // Fetch user data on component mount
-  React.useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await httpClient.get<ApiUserResponse>("/api/user");
-
-        setUserData(response);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-
-    fetchUserData();
-  }, []);
+  const { user: storeUser } = useUserStore();
 
   const fallback = {
-    name: "A",
+    name: "",
     email: "",
   };
-  const currentUser = userData?.user
+  const currentUser = storeUser
     ? {
-        name: userData.user.name,
-        email: userData.user.email,
+        name: storeUser.name,
+        email: storeUser.email,
       }
     : user || fallback;
 
