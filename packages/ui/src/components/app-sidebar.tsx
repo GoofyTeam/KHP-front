@@ -40,7 +40,7 @@ const defaultConfig: SidebarConfig = {
       title: "Stocks",
       url: "/stocks",
       icon: "Package",
-      activePatterns: ["/stocks"],
+      activePatterns: ["/stocks", "/ingredient"],
     },
   ],
 };

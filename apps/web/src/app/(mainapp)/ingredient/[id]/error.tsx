@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent } from "@workspace/ui/components/card";
@@ -11,12 +10,7 @@ interface ErrorProps {
   reset: () => void;
 }
 
-export default function StocksError({ error, reset }: ErrorProps) {
-  useEffect(() => {
-    // Log l'erreur pour le monitoring
-    console.error("Stocks page error:", error);
-  }, [error]);
-
+export default function IngredientError({ error, reset }: ErrorProps) {
   return (
     <div className="flex h-full w-full items-center justify-center p-4">
       <Card className="max-w-md w-full">
@@ -26,7 +20,7 @@ export default function StocksError({ error, reset }: ErrorProps) {
             <h3 className="text-lg font-semibold">Something went wrong!</h3>
             <p className="text-sm text-muted-foreground">
               {error.message ||
-                "An error occurred while loading the stocks page."}
+                "An error occurred while loading the ingredient page."}
             </p>
             {process.env.NODE_ENV === "development" && error.digest && (
               <p className="text-xs text-muted-foreground font-mono">
