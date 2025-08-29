@@ -1,119 +1,111 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { CheckCircleIcon, Loader2Icon, Eye, EyeOff } from "lucide-react";
-import { httpClient } from "@/lib/httpClient";
+import {
+  updatePasswordAction,
+  updateUserInfoAction,
+} from "@/app/(mainapp)/settings/account/actions";
 import { useUserStore } from "@/stores/user-store";
 
-export function AccountForm() {
+type User = {
+  id?: number;
+  name?: string;
+  email?: string;
+  company_id?: number;
+};
+
+type ProfileFormValues = {
+  name: string;
+  email: string;
+};
+
+type PasswordFormValues = {
+  current_password: string;
+  new_password: string;
+  new_password_confirmation: string;
+};
+
+export function AccountForm({ user }: { user: User }) {
   const [isLoading, setIsLoading] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const { user, fetchUser, setUser } = useUserStore();
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    company: "",
-    companyId: "",
-    lastUpdated: "",
-  });
 
   const [pwdLoading, setPwdLoading] = useState(false);
   const [pwdSaved, setPwdSaved] = useState(false);
   const [pwdError, setPwdError] = useState<string | null>(null);
-  const [pwdData, setPwdData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
+
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      setFormData((prev) => ({
-        ...prev,
-        name: user.name ?? "",
-        email: user.email ?? "",
-        companyId: user.company_id ? String(user.company_id) : "",
-      }));
-    }
-  }, [user]);
+  const [isPending, startTransition] = useTransition();
+  const { fetchUser } = useUserStore();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const profileForm = useForm<ProfileFormValues>({
+    defaultValues: {
+      name: user?.name ?? "",
+      email: user?.email ?? "",
+    },
+  });
+
+  const passwordForm = useForm<PasswordFormValues>({
+    defaultValues: {
+      current_password: "",
+      new_password: "",
+      new_password_confirmation: "",
+    },
+  });
+
+  const onProfileSubmit = (values: ProfileFormValues) => {
     setIsLoading(true);
     setSaved(false);
     setSaveError(null);
 
-    try {
-      await httpClient.put("/api/user/update/info", {
-        name: formData.name,
-        email: formData.email,
-      });
-
-      if (user) {
-        setUser({ ...user, name: formData.name, email: formData.email });
+    startTransition(async () => {
+      const res = await updateUserInfoAction(values);
+      if (!res.success) {
+        setSaveError(res.error || "Unable to update profile.");
+      } else {
+        await fetchUser(true);
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
       }
-      await fetchUser(true);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    } catch (error) {
-      console.error("Error updating user data:", error);
-      setSaveError(
-        error instanceof Error ? error.message : "Unable to update profile."
-      );
-    } finally {
       setIsLoading(false);
-    }
+    });
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const handlePasswordChange = (field: string, value: string) => {
-    setPwdData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const handlePasswordSubmit = async () => {
-    setPwdError(null);
-    if (!pwdData.currentPassword || !pwdData.newPassword) {
+  const onPasswordSubmit = (values: PasswordFormValues) => {
+    if (!values.current_password || !values.new_password) {
       setPwdError("Please fill all password fields.");
       return;
     }
-    if (pwdData.newPassword !== pwdData.confirmPassword) {
+    if (values.new_password !== values.new_password_confirmation) {
       setPwdError("Passwords do not match.");
       return;
     }
 
     setPwdLoading(true);
     setPwdSaved(false);
-    try {
-      await httpClient.put("/api/user/update/password", {
-        current_password: pwdData.currentPassword,
-        new_password: pwdData.newPassword,
-        new_password_confirmation: pwdData.confirmPassword,
-      });
-      setPwdSaved(true);
-      setPwdData({ currentPassword: "", newPassword: "", confirmPassword: "" });
-      setTimeout(() => setPwdSaved(false), 3000);
-    } catch (error) {
-      console.error("Error updating password:", error);
-      setPwdError("Unable to update password. Please try again.");
-    } finally {
+    setPwdError(null);
+
+    startTransition(async () => {
+      const res = await updatePasswordAction(values);
+      if (!res.success) {
+        setPwdError(
+          res.error || "Unable to update password. Please try again."
+        );
+      } else {
+        setPwdSaved(true);
+        passwordForm.reset();
+        setTimeout(() => setPwdSaved(false), 3000);
+      }
       setPwdLoading(false);
-    }
+    });
   };
 
   return (
@@ -122,7 +114,10 @@ export function AccountForm() {
         <h3 className="text-base font-medium text-khp-text-primary mb-4">
           Profile
         </h3>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form
+          onSubmit={profileForm.handleSubmit(onProfileSubmit)}
+          className="space-y-6"
+        >
           <div>
             <Label
               htmlFor="name"
@@ -133,11 +128,10 @@ export function AccountForm() {
             <Input
               id="name"
               type="text"
-              value={formData.name}
-              onChange={(e) => handleInputChange("name", e.target.value)}
-              disabled={isLoading}
+              disabled={isLoading || isPending}
               className="w-full !h-14 text-base border-khp-primary focus:bg-khp-primary/5 transition-all px-4 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary"
               placeholder="Enter your full name"
+              {...profileForm.register("name")}
             />
           </div>
 
@@ -151,11 +145,10 @@ export function AccountForm() {
             <Input
               id="email"
               type="email"
-              value={formData.email}
-              onChange={(e) => handleInputChange("email", e.target.value)}
-              disabled={isLoading}
+              disabled={isLoading || isPending}
               className="w-full !h-14 text-base border-khp-primary focus:bg-khp-primary/5 transition-all px-4 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary"
               placeholder="Enter your email address"
+              {...profileForm.register("email")}
             />
           </div>
 
@@ -174,12 +167,12 @@ export function AccountForm() {
             ) : (
               <Button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || isPending}
                 variant="khp-default"
                 size="xl"
                 className="w-full disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? (
+                {isLoading || isPending ? (
                   <div className="flex items-center justify-center">
                     <Loader2Icon className="animate-spin -ml-1 mr-2 h-4 w-4" />
                     Saving changes...
@@ -197,10 +190,7 @@ export function AccountForm() {
           Password
         </h3>
         <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handlePasswordSubmit();
-          }}
+          onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
           className="space-y-6"
         >
           <div>
@@ -214,13 +204,10 @@ export function AccountForm() {
               <Input
                 id="current_password"
                 type={showCurrent ? "text" : "password"}
-                value={pwdData.currentPassword}
-                onChange={(e) =>
-                  handlePasswordChange("currentPassword", e.target.value)
-                }
-                disabled={pwdLoading}
+                disabled={pwdLoading || isPending}
                 className="w-full !h-14 text-base border-khp-primary focus:bg-khp-primary/5 transition-all px-4 pr-10 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary"
                 placeholder="Enter current password"
+                {...passwordForm.register("current_password")}
               />
               <button
                 type="button"
@@ -248,13 +235,10 @@ export function AccountForm() {
               <Input
                 id="new_password"
                 type={showNew ? "text" : "password"}
-                value={pwdData.newPassword}
-                onChange={(e) =>
-                  handlePasswordChange("newPassword", e.target.value)
-                }
-                disabled={pwdLoading}
+                disabled={pwdLoading || isPending}
                 className="w-full !h-14 text-base border-khp-primary focus:bg-khp-primary/5 transition-all px-4 pr-10 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary"
                 placeholder="Enter new password"
+                {...passwordForm.register("new_password")}
               />
               <button
                 type="button"
@@ -282,13 +266,10 @@ export function AccountForm() {
               <Input
                 id="confirm_password"
                 type={showConfirm ? "text" : "password"}
-                value={pwdData.confirmPassword}
-                onChange={(e) =>
-                  handlePasswordChange("confirmPassword", e.target.value)
-                }
-                disabled={pwdLoading}
+                disabled={pwdLoading || isPending}
                 className="w-full !h-14 text-base border-khp-primary focus:bg-khp-primary/5 transition-all px-4 pr-10 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary"
                 placeholder="Confirm new password"
+                {...passwordForm.register("new_password_confirmation")}
               />
               <button
                 type="button"
@@ -320,12 +301,12 @@ export function AccountForm() {
             ) : (
               <Button
                 type="submit"
-                disabled={pwdLoading}
+                disabled={pwdLoading || isPending}
                 variant="khp-default"
                 size="xl"
                 className="w-full disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {pwdLoading ? (
+                {pwdLoading || isPending ? (
                   <div className="flex items-center justify-center">
                     <Loader2Icon className="animate-spin -ml-1 mr-2 h-4 w-4" />
                     Updating password...
