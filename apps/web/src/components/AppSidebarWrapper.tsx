@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { AppSidebar } from "@workspace/ui/components/app-sidebar";
+import { AppSidebar } from "./app-sidebar";
 import {
   SidebarInset,
   SidebarProvider,
@@ -10,7 +10,7 @@ import {
 
 const getSidebarDefaultState = (currentPath: string): boolean => {
   const defaultOpenPages = ["/dashboard"];
-  const defaultClosedPages = ["/stocks", "/ingredient"];
+  const defaultClosedPages = ["/stocks", "/ingredient", "settings"];
 
   if (
     defaultClosedPages.some(
