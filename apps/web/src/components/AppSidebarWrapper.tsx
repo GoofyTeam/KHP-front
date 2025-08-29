@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { AppSidebar } from "./app-sidebar";
 import {
@@ -7,6 +8,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@workspace/ui/components/sidebar";
+import { useUserStore } from "@/stores/user-store";
 
 const getSidebarDefaultState = (currentPath: string): boolean => {
   const defaultOpenPages = ["/dashboard"];
@@ -38,6 +40,11 @@ interface AppSidebarWrapperProps {
 export function AppSidebarWrapper({ children }: AppSidebarWrapperProps) {
   const pathname = usePathname();
   const defaultOpen = getSidebarDefaultState(pathname);
+  const { fetchUser } = useUserStore();
+
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
