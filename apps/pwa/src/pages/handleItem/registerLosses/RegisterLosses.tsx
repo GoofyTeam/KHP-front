@@ -4,19 +4,27 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@workspace/ui/components/form";
 import { useForm } from "react-hook-form";
 import z from "zod";
-import { handleAddQuantitySchema } from "./handleAddQuantitySchema";
 import { useLoaderData, useSearch } from "@tanstack/react-router";
 import { LocationSelect } from "@workspace/ui/components/location-select";
 import { QuantityInput } from "@workspace/ui/components/quantity-input";
 import { Button } from "@workspace/ui/components/button";
-import { router } from "../../../main";
-import { addQuantitySubmit } from "./add-quantity";
+import { registerLossesSchema } from "./registerLossesSchema";
+import { registerLossesSubmit } from "./register-losses";
+import { WantedDataType } from "../../../lib/handleScanType";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
 
-function HandleAddQuantity() {
+function RegisterLosses() {
   const { internalId, barcode, mode, scanMode } = useSearch({
     from: "/_protected/handle-item",
   });
@@ -24,32 +32,32 @@ function HandleAddQuantity() {
     from: "/_protected/handle-item",
   });
 
-  const form = useForm<z.infer<typeof handleAddQuantitySchema>>({
-    resolver: zodResolver(handleAddQuantitySchema),
+  const form = useForm<z.infer<typeof registerLossesSchema>>({
+    resolver: zodResolver(registerLossesSchema),
     defaultValues: {
       type,
       product_id: product.product_internal_id || internalId || "",
       location_id: "",
       quantity: "",
+      lossableType: "ingredient",
+      reason: "",
     },
   });
 
-  async function onSubmit(values: z.infer<typeof handleAddQuantitySchema>) {
-    await addQuantitySubmit(values);
+  async function onSubmit(values: z.infer<typeof registerLossesSchema>) {
+    await registerLossesSubmit(values);
   }
 
-  if (!product.quantities) {
-    router.navigate({
-      to: "/handle-item",
-      search: {
-        mode,
-        type: "add-product",
-        scanMode,
-        ...(barcode ? { barcode } : {}),
-        ...(internalId ? { internalId } : {}),
-      },
-      replace: true,
-    });
+  const getTotalQuantity = (product: WantedDataType) => {
+    if (!product.quantities) return 0;
+    return product.quantities.reduce(
+      (total, qty) => total + (qty.quantity || 0),
+      0
+    );
+  };
+
+  if (!product.quantities || getTotalQuantity(product) <= 0) {
+    //TODO: handle when no quantities available
     return null;
   }
 
@@ -90,7 +98,7 @@ function HandleAddQuantity() {
                   placeholder="Select location"
                   label="Locations"
                   unit={product.product_units || ""}
-                  hideEmptyLocations={false}
+                  hideEmptyLocations={true}
                   showAllOption={false}
                   allOptionLabel="All locations"
                   displayAllQuantity={true}
@@ -105,7 +113,7 @@ function HandleAddQuantity() {
                 <FormItem>
                   <FormControl>
                     <QuantityInput
-                      title="Move"
+                      title="Quantity lost"
                       value={field.value}
                       onChange={field.onChange}
                       unit={product.product_units || ""}
@@ -116,10 +124,37 @@ function HandleAddQuantity() {
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name="reason"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel className="text-lg">Reason for loss</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="w-full border-khp-primary rounded-md px-4 py-6 truncate">
+                        <SelectValue placeholder="Select a reason" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="expired">Expired</SelectItem>
+                      <SelectItem value="damaged">Damaged</SelectItem>
+                      <SelectItem value="theft">Theft</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
-          <Button type="submit" className="w-full" variant="khp-default">
-            Add Quantity
+          <Button type="submit" className="w-full" variant="khp-destructive">
+            Register the loss
           </Button>
         </form>
       </Form>
@@ -127,4 +162,4 @@ function HandleAddQuantity() {
   );
 }
 
-export default HandleAddQuantity;
+export default RegisterLosses;
