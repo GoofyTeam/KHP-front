@@ -284,6 +284,14 @@ export type LossPaginator = {
   paginatorInfo: PaginatorInfo;
 };
 
+/** Statistiques des pertes par type. */
+export type LossesStats = {
+  __typename?: 'LossesStats';
+  ingredient: Scalars['Float']['output'];
+  preparation: Scalars['Float']['output'];
+  total: Scalars['Float']['output'];
+};
+
 /** Type représentant une unité de mesure */
 export type MeasurementUnitType = {
   __typename?: 'MeasurementUnitType';
@@ -450,6 +458,7 @@ export type Query = {
   locations: LocationPaginator;
   /** Liste les pertes pour l'entreprise actuelle. */
   losses: LossPaginator;
+  lossesStats: LossesStats;
   /** Liste les unités de mesure disponibles */
   measurementUnits: Array<MeasurementUnitType>;
   /** Trouve une preparation (et seulement si elle appartient à ma company) */
@@ -499,12 +508,14 @@ export type QueryCompanyArgs = {
 
 
 export type QueryIngredientArgs = {
+  barcode?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
 };
 
 
 export type QueryIngredientsArgs = {
+  barcode?: InputMaybe<Scalars['String']['input']>;
   categoryIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   first?: Scalars['Int']['input'];
   locationIds?: InputMaybe<Array<Scalars['ID']['input']>>;
@@ -554,6 +565,12 @@ export type QueryLossesArgs = {
   start_date?: InputMaybe<Scalars['DateTime']['input']>;
   trackable_id?: InputMaybe<Scalars['ID']['input']>;
   trackable_type?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryLossesStatsArgs = {
+  end_date?: InputMaybe<Scalars['DateTime']['input']>;
+  start_date?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
 
