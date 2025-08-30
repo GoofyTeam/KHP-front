@@ -3,15 +3,15 @@ import { Helmet } from "react-helmet-async";
 import { useProduct } from "../stores/product-store";
 import { StockStatus } from "@workspace/ui/components/stock-status";
 import { HistoryTable } from "../components/history-table";
-import { LocationSelect } from "../components/LocationSelect";
 import { Button } from "@workspace/ui/components/button";
 import { NotebookPen } from "lucide-react";
 import { useEffect, useState } from "react";
-import { GetIngredientQuery } from "../graphql/getProduct.gql";
+import { GetProductQuery } from "../graphql/getProduct.gql";
 import { ImagePlaceholder } from "../components/ImagePlaceholder";
+import { LocationSelect } from "@workspace/ui/components/location-select";
 
 // Inférer les types depuis GraphQL
-type ProductData = NonNullable<GetIngredientQuery["ingredient"]>;
+type ProductData = NonNullable<GetProductQuery["ingredient"]>;
 
 const formatQuantity = (quantity: number): string => {
   return parseFloat(quantity.toFixed(3)).toString();
@@ -144,13 +144,14 @@ export default function ProductPage() {
             <LocationSelect
               quantities={product.quantities || []}
               value={selectedLocation}
-              onValueChange={setSelectedLocation}
-              placeholder="Select a location"
-              label="Available stock"
+              onValueChange={(val) => setSelectedLocation(val)}
+              placeholder="Select location"
+              label="Locations"
               unit={product.unit}
+              hideEmptyLocations={false}
               showAllOption={true}
               allOptionLabel="All locations"
-              className="w-full"
+              displayAllQuantity={true}
             />
 
             <div className="flex justify-between items-center p-4">

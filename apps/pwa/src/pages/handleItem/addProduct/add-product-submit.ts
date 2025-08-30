@@ -73,10 +73,4 @@ export const addProductSubmit = async (
   router.navigate({
     to: "/inventory",
   });
-  /* router.navigate({
-    to,
-    params: {
-      ...(to === "/products/$id" ? { id: internalId! } : {}),
-    },
-  }); */
 };
