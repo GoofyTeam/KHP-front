@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { Button } from "@workspace/ui/components/button";
 import { AlertCircle, CheckCircle } from "lucide-react";
 import type { Ingredient, Location } from "../types/stocks";
-import { QuantityInput } from "./quantity-input";
-import { LocationSelector } from "./LocationSelect";
+import { LocationSelect } from "@workspace/ui/components/location-select";
+import { QuantityInput } from "@workspace/ui/components/quantity-input";
 
 interface MoveQuantityFormProps {
   ingredient: Ingredient;
@@ -124,7 +124,7 @@ export function MoveQuantityForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6 ">
       <div className="space-y-2">
-        <LocationSelector
+        {/*  <LocationSelect
           quantities={availableSourceQuantities}
           value={formData.sourceLocationIndex}
           onValueChange={(value) =>
@@ -133,6 +133,20 @@ export function MoveQuantityForm({
           placeholder="Choose a source location"
           label="From"
           unit={ingredient.unit}
+        /> */}
+        <LocationSelect
+          quantities={ingredient.quantities}
+          value={formData.sourceLocationIndex}
+          onValueChange={(value) =>
+            handleInputChange("sourceLocationIndex", value)
+          }
+          placeholder="Choose a source location"
+          label="From"
+          unit={ingredient.unit}
+          hideEmptyLocations={false}
+          showAllOption={true}
+          allOptionLabel="All locations"
+          displayAllQuantity={true}
         />
       </div>
 
@@ -146,7 +160,7 @@ export function MoveQuantityForm({
       />
 
       <div className="space-y-2">
-        <LocationSelector
+        <LocationSelect
           quantities={destinationQuantities}
           value={formData.destinationLocationIndex}
           onValueChange={(value) =>
@@ -155,6 +169,10 @@ export function MoveQuantityForm({
           placeholder="Choose a destination location"
           label="To"
           unit={ingredient.unit}
+          hideEmptyLocations={false}
+          showAllOption={true}
+          allOptionLabel="All locations"
+          displayAllQuantity={true}
         />
       </div>
 

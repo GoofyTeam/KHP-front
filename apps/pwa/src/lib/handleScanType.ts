@@ -1,11 +1,11 @@
 import {
-  GetItemByBarcode,
-  GetItemByBarcodeQuery,
-} from "../graphql/getItemByBarcode.gql";
+  GetIngredient,
+  GetIngredientQuery,
+} from "../graphql/getIngredient.gql";
 import {
-  GetItemByInternalId,
-  GetItemByInternalIdQuery,
-} from "../graphql/getItemByInternalId.gql";
+  OpenFoodFactsProxy,
+  OpenFoodFactsProxyQuery,
+} from "../graphql/openFoodFactsProxy.gql";
 import { HandleItemSearch } from "../routes/_protected/handle-item";
 import { graphqlRequest } from "./graph-client";
 
@@ -17,9 +17,7 @@ export type WantedDataType = {
   product_base_quantity?: string;
   product_already_in_database?: boolean;
   product_internal_id?: string;
-  quantities?: NonNullable<
-    GetItemByInternalIdQuery["ingredient"]
-  >["quantities"];
+  quantities?: NonNullable<GetIngredientQuery["ingredient"]>["quantities"];
 };
 
 const toStringArray = (value: unknown): string[] => {
@@ -53,9 +51,37 @@ const handleScanType = async (
   };
 
   if (mode === "barcode") {
-    const result = await graphqlRequest<GetItemByBarcodeQuery>(
-      GetItemByBarcode,
-      { barcode: productId, page: 1 }
+    //First we need to fetch by barcode with classic query, then if nothing found,
+    // we call the OpenFoodFacts endpoint
+    const resultByBarcode = await graphqlRequest<GetIngredientQuery>(
+      GetIngredient,
+      { barcode: productId! }
+    );
+    if (resultByBarcode.ingredient) {
+      const categories =
+        resultByBarcode.ingredient.categories?.map((cat) => cat?.name ?? "") ??
+        [];
+
+      wantedData = {
+        product_image: resultByBarcode.ingredient.image_url ?? "",
+        product_name: resultByBarcode.ingredient.name ?? "",
+        product_category: toStringArray(categories),
+        product_units: resultByBarcode.ingredient.unit ?? "",
+        product_already_in_database: true,
+        product_internal_id: resultByBarcode.ingredient.id ?? undefined,
+        product_base_quantity:
+          resultByBarcode.ingredient.base_quantity.toString(),
+        quantities: resultByBarcode.ingredient.quantities,
+      };
+      return wantedData;
+    }
+
+    const result = await graphqlRequest<OpenFoodFactsProxyQuery>(
+      OpenFoodFactsProxy,
+      {
+        barcode: productId,
+        page: 1,
+      }
     );
     if (!result.search) {
       throw new Error("Product not found");
@@ -77,10 +103,9 @@ const handleScanType = async (
       product_internal_id: result.search.ingredient_id ?? undefined,
     };
   } else if (mode === "internalId") {
-    const result = await graphqlRequest<GetItemByInternalIdQuery>(
-      GetItemByInternalId,
-      { id: productId }
-    );
+    const result = await graphqlRequest<GetIngredientQuery>(GetIngredient, {
+      id: productId,
+    });
 
     if (!result.ingredient) {
       throw new Error("Product not found");
