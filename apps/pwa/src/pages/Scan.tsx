@@ -163,7 +163,6 @@ export default function ScanPage() {
             <Tabs
               value={scanMode}
               onValueChange={(value) => {
-                console.log(value);
                 setScanMode(value as ScanModeType);
               }}
             >
