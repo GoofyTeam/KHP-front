@@ -1,35 +1,30 @@
 "use server";
 
 import { cookies, headers } from "next/headers";
+import { httpClient } from "@/lib/httpClient";
 
 type ActionResult<T = unknown> =
   | { success: true; data?: T }
   | { success: false; error: string };
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  (process.env.NODE_ENV === "production" ? "https://dash.goofykhp.fr" : null);
 
-async function getBaseUrl() {
-  if (API_URL) return API_URL;
+async function getServerHeaders() {
   const h = await headers();
-  const proto = h.get("x-forwarded-proto") ?? "http";
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  return `${proto}://${host}`;
-}
-
-async function getXsrfHeader() {
   const c = await cookies();
-  const token = c.get("XSRF-TOKEN")?.value;
-  if (!token) return {} as Record<string, string>;
-  try {
-    return { "X-XSRF-TOKEN": decodeURIComponent(token) } as Record<
-      string,
-      string
-    >;
-  } catch {
-    return { "X-XSRF-TOKEN": token } as Record<string, string>;
+  const cookieHeader = h.get("cookie") ?? "";
+  const rawXsrf = c.get("XSRF-TOKEN")?.value;
+  let xsrfHeader: Record<string, string> = {};
+  if (rawXsrf) {
+    try {
+      xsrfHeader = { "X-XSRF-TOKEN": decodeURIComponent(rawXsrf) };
+    } catch {
+      xsrfHeader = { "X-XSRF-TOKEN": rawXsrf };
+    }
   }
+  return {
+    Cookie: cookieHeader,
+    ...xsrfHeader,
+  } as Record<string, string>;
 }
 
 export async function updateUserInfoAction(input: {
@@ -37,30 +32,19 @@ export async function updateUserInfoAction(input: {
   email: string;
 }): Promise<ActionResult> {
   try {
-    const cookieHeader = (await headers()).get("cookie") ?? "";
-    const baseUrl = await getBaseUrl();
-    const res = await fetch(
-      new URL("/api/user/update/info", baseUrl).toString(),
-      {
-        method: "PUT",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Cookie: cookieHeader,
-          ...(await getXsrfHeader()),
-        },
-        body: JSON.stringify(input),
-        cache: "no-store",
-      }
-    );
+    console.log("🔄 updateUserInfoAction called with:", input);
+    const headers = await getServerHeaders();
+    console.log("📤 Headers:", headers);
 
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      return { success: false, error: text || res.statusText };
-    }
+    const result = await httpClient.put<any>("/api/user/update/info", input, {
+      headers,
+      cache: "no-store",
+    });
 
+    console.log("✅ API response:", result);
     return { success: true };
   } catch (e) {
+    console.error("❌ updateUserInfoAction error:", e);
     return {
       success: false,
       error: e instanceof Error ? e.message : "Unknown error",
@@ -74,27 +58,10 @@ export async function updatePasswordAction(input: {
   new_password_confirmation: string;
 }): Promise<ActionResult> {
   try {
-    const cookieHeader = (await headers()).get("cookie") ?? "";
-    const baseUrl = await getBaseUrl();
-    const res = await fetch(
-      new URL("/api/user/update/password", baseUrl).toString(),
-      {
-        method: "PUT",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Cookie: cookieHeader,
-          ...(await getXsrfHeader()),
-        },
-        body: JSON.stringify(input),
-        cache: "no-store",
-      }
-    );
-
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      return { success: false, error: text || res.statusText };
-    }
+    await httpClient.put("/api/user/update/password", input, {
+      headers: await getServerHeaders(),
+      cache: "no-store",
+    });
 
     return { success: true };
   } catch (e) {
