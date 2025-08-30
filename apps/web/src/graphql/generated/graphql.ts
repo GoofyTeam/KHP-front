@@ -508,12 +508,14 @@ export type QueryCompanyArgs = {
 
 
 export type QueryIngredientArgs = {
+  barcode?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
 };
 
 
 export type QueryIngredientsArgs = {
+  barcode?: InputMaybe<Scalars['String']['input']>;
   categoryIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   first?: Scalars['Int']['input'];
   locationIds?: InputMaybe<Array<Scalars['ID']['input']>>;

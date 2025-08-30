@@ -513,6 +513,9 @@ type Query {
 
     """Search by ingredient name."""
     name: String
+
+    """Search by ingredient barcode."""
+    barcode: String
   ): Ingredient
 
   """Find a single location (only if it belongs to the current company)."""
@@ -592,6 +595,9 @@ type Query {
 
     """Options de tri des ingrédients"""
     orderBy: [OrderByClause!]
+
+    """Get ingredient by its barcode."""
+    barcode: String
 
     """Limits number of fetched items."""
     first: Int! = 10
