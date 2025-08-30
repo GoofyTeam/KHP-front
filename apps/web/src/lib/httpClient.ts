@@ -5,12 +5,14 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL
     : null;
 
 const isBrowser = typeof window !== "undefined";
+const isServer = !isBrowser;
 
 export interface User {
   id: number;
   name: string;
   email: string;
   company_id?: number;
+  updated_at?: string;
 }
 
 export interface AuthResponse {
@@ -20,6 +22,15 @@ export interface AuthResponse {
 
 export interface RequestData {
   [key: string]: unknown;
+}
+
+interface ServerHeaders {
+  Cookie?: string;
+  "X-XSRF-TOKEN"?: string;
+  Authorization?: string;
+  Referer?: string;
+  "User-Agent"?: string;
+  Origin?: string;
 }
 
 class HttpClient {
@@ -59,7 +70,7 @@ class HttpClient {
       }
 
       const token = this.extractTokenFromCookie();
-      
+
       if (token) {
         this.xsrfToken = token;
         return token;
@@ -97,7 +108,111 @@ class HttpClient {
   }
 
   /**
-   * Generic request method to handle all HTTP methods.
+   * Get server-side headers using Next.js headers() and cookies()
+   */
+  private async getServerHeaders(): Promise<ServerHeaders> {
+    if (isBrowser) return {};
+
+    try {
+      // Dynamically import Next.js functions only on server
+      const { headers, cookies } = await import("next/headers");
+
+      const headersList = await headers();
+      const cookieStore = await cookies();
+
+      const serverHeaders: ServerHeaders = {};
+
+      // Forward essential headers
+      const cookie = headersList.get("cookie");
+      if (cookie) {
+        serverHeaders.Cookie = cookie;
+      }
+
+      // Get XSRF token from cookies
+      const xsrfCookie = cookieStore.get("XSRF-TOKEN");
+      if (xsrfCookie?.value) {
+        try {
+          serverHeaders["X-XSRF-TOKEN"] = decodeURIComponent(xsrfCookie.value);
+        } catch {
+          serverHeaders["X-XSRF-TOKEN"] = xsrfCookie.value;
+        }
+      }
+
+      // Check for Bearer token in HTTP-only cookie
+      const authToken = cookieStore.get("auth_token");
+      if (authToken?.value) {
+        serverHeaders.Authorization = `Bearer ${authToken.value}`;
+      }
+
+      // Forward important request headers
+      const referer = headersList.get("referer");
+      if (referer) {
+        serverHeaders.Referer = referer;
+      }
+
+      const userAgent = headersList.get("user-agent");
+      if (userAgent) {
+        serverHeaders["User-Agent"] = userAgent;
+      }
+
+      const origin = headersList.get("origin");
+      if (origin) {
+        serverHeaders.Origin = origin;
+      }
+
+      return serverHeaders;
+    } catch (error) {
+      console.warn("Failed to get server headers:", error);
+      return {};
+    }
+  }
+
+  /**
+   * Detect authentication strategy and prepare headers
+   */
+  private async prepareHeaders(
+    method: string,
+    options: RequestInit = {}
+  ): Promise<Record<string, string>> {
+    const baseHeaders: Record<string, string> = {
+      Accept: "application/json",
+      "X-Requested-With": "XMLHttpRequest", // Laravel expects this
+    };
+
+    if (isServer) {
+      // Server-side: use Next.js headers and cookies
+      const serverHeaders = await this.getServerHeaders();
+      return {
+        ...baseHeaders,
+        "Content-Type": "application/json",
+        ...serverHeaders,
+        ...(options.headers as Record<string, string>),
+      };
+    }
+
+    // Browser-side: handle CSRF and check for FormData
+    const isFormData = options.body instanceof FormData;
+
+    if (!isFormData) {
+      baseHeaders["Content-Type"] = "application/json";
+    }
+
+    // Get CSRF token for non-GET requests
+    if (method !== "GET") {
+      const xsrfToken = await this.getCsrfToken();
+      if (xsrfToken) {
+        baseHeaders["X-XSRF-TOKEN"] = xsrfToken;
+      }
+    }
+
+    return {
+      ...baseHeaders,
+      ...(options.headers as Record<string, string>),
+    };
+  }
+
+  /**
+   * Generic request method to handle all HTTP methods with intelligent context detection.
    */
   private async request<T, D extends RequestData = RequestData>(
     method: "GET" | "POST" | "PUT" | "DELETE",
@@ -105,45 +220,88 @@ class HttpClient {
     data?: D,
     options: RequestInit = {}
   ): Promise<T> {
-    let xsrfToken: string | null = null;
-
-    if (method !== "GET" && isBrowser) {
-      xsrfToken = await this.getCsrfToken();
-      if (!xsrfToken) {
-        console.warn("CSRF token is not available, proceeding without it.");
-      }
-    }
-
     try {
-      const res = await fetch(`${API_URL}${endpoint}`, {
+      const headers = await this.prepareHeaders(method, options);
+
+      // Prepare body - handle FormData vs JSON
+      let body: string | FormData | undefined;
+      if (data) {
+        if (data instanceof FormData) {
+          body = data;
+        } else {
+          body = JSON.stringify(data);
+        }
+      }
+
+      const requestConfig: RequestInit = {
         method,
         credentials: "include",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          ...(xsrfToken ? { "X-XSRF-TOKEN": xsrfToken } : {}),
-          ...options.headers,
-        },
-        body: data ? JSON.stringify(data) : undefined,
+        headers,
+        body,
+        cache: options.cache || (isServer ? "no-store" : "default"),
         ...options,
-      });
+      };
+
+      const res = await fetch(`${API_URL}${endpoint}`, requestConfig);
 
       if (!res.ok) {
-        if (res.status === 419) {
+        // Handle CSRF token expiration
+        if (res.status === 419 && isBrowser) {
           this.resetCsrfToken();
           throw new Error("Session expired, please refresh the page.");
         }
 
-        const errorText = await res.text().catch(() => null);
+        // Handle authentication errors
+        if (res.status === 401) {
+          throw new Error("Authentication required. Please log in.");
+        }
 
+        // Handle validation errors
+        if (res.status === 422) {
+          const errorData = await res.json().catch(() => null);
+          if (errorData?.errors) {
+            const firstError = Object.values(errorData.errors)[0];
+            throw new Error(
+              Array.isArray(firstError) ? firstError[0] : String(firstError)
+            );
+          }
+        }
+
+        const errorText = await res.text().catch(() => null);
         throw new Error(`${res.status}: ${errorText || res.statusText}`);
       }
 
-      return res.json() as Promise<T>;
+      // Handle empty responses
+      const contentType = res.headers.get("content-type");
+      const contentLength = res.headers.get("content-length");
+
+      // If no content or content-length is 0, return empty object
+      if (contentLength === "0" || !contentType?.includes("application/json")) {
+        return {} as T;
+      }
+
+      const text = await res.text();
+
+      // Handle empty text response
+      if (!text.trim()) {
+        return {} as T;
+      }
+
+      try {
+        return JSON.parse(text) as T;
+      } catch (parseError) {
+        return {} as T;
+      }
     } catch (error) {
-      if (error instanceof Error && error.message.includes("Session expired")) {
+      // Reset CSRF token on session expiration
+      if (
+        error instanceof Error &&
+        error.message.includes("Session expired") &&
+        isBrowser
+      ) {
         this.resetCsrfToken();
       }
+
       throw error;
     }
   }
