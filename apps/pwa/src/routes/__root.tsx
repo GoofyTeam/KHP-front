@@ -47,12 +47,19 @@ export const Route = createRootRoute({
   notFoundComponent: NotFoundComponent,
 });
 
-const PAGES_WITHOUT_LAYOUT = ["/scan", "/login"];
+const PAGES_WITHOUT_LAYOUT = [
+  "/scan/$scanType",
+  "/scan/add",
+  "/scan/remove",
+  "/login",
+];
 
 const PAGE_DOCUMENT_TITLES: Record<string, string> = {
   "/inventory": "Inventory - KHP",
   "/login": "Connexion - KHP",
-  "/scan": "Scanner - KHP",
+  "/scan/$scanType": "Scanner - KHP",
+  "/scan/add": "Scanner - KHP",
+  "/scan/remove": "Scanner - KHP",
   "/handle-item": "Traiter l'article - KHP",
   "/404": "Page not found - KHP",
 };

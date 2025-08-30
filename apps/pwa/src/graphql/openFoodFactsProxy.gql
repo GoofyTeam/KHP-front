@@ -1,4 +1,4 @@
-query getItemResult($barcode: String, $page: Int!) {
+query openFoodFactsProxy($barcode: String, $page: Int!) {
   search(barcode: $barcode, page: $page) {
     barcode
     base_quantity
@@ -6,5 +6,7 @@ query getItemResult($barcode: String, $page: Int!) {
     product_name
     categories
     unit
+    is_already_in_database
+    ingredient_id
   }
 }

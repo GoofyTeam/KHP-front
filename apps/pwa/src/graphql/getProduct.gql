@@ -1,4 +1,4 @@
-query GetIngredient($id: ID!) {
+query getProduct($id: ID!) {
   ingredient(id: $id) {
     id
     name

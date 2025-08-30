@@ -1,29 +1,23 @@
-import {
-  Link,
-  useLoaderData,
-  useNavigate,
-  useParams,
-} from "@tanstack/react-router";
+import { Link, useLoaderData, useParams } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 import { useProduct } from "../stores/product-store";
 import { StockStatus } from "@workspace/ui/components/stock-status";
 import { HistoryTable } from "../components/history-table";
-import { LocationSelect } from "../components/LocationSelect";
 import { Button } from "@workspace/ui/components/button";
 import { NotebookPen } from "lucide-react";
 import { useEffect, useState } from "react";
-import { GetIngredientQuery } from "../graphql/getProduct.gql";
+import { GetProductQuery } from "../graphql/getProduct.gql";
 import { ImagePlaceholder } from "../components/ImagePlaceholder";
+import { LocationSelect } from "@workspace/ui/components/location-select";
 
 // Inférer les types depuis GraphQL
-type ProductData = NonNullable<GetIngredientQuery["ingredient"]>;
+type ProductData = NonNullable<GetProductQuery["ingredient"]>;
 
 const formatQuantity = (quantity: number): string => {
   return parseFloat(quantity.toFixed(3)).toString();
 };
 
 export default function ProductPage() {
-  const navigate = useNavigate();
   const { id } = useParams({ from: "/_protected/products/$id" });
   const loaderData = useLoaderData({
     from: "/_protected/products/$id",
@@ -150,13 +144,14 @@ export default function ProductPage() {
             <LocationSelect
               quantities={product.quantities || []}
               value={selectedLocation}
-              onValueChange={setSelectedLocation}
-              placeholder="Select a location"
-              label="Available stock"
+              onValueChange={(val) => setSelectedLocation(val)}
+              placeholder="Select location"
+              label="Locations"
               unit={product.unit}
+              hideEmptyLocations={false}
               showAllOption={true}
               allOptionLabel="All locations"
-              className="w-full"
+              displayAllQuantity={true}
             />
 
             <div className="flex justify-between items-center p-4">
@@ -191,20 +186,22 @@ export default function ProductPage() {
         <div className="flex justify-center p-6">
           <Button
             variant="khp-default"
-            className="pointer-events-auto "
+            className="pointer-events-auto"
             size="xl"
-            onClick={() => {
-              navigate({
-                to: "/handle-item",
-                search: {
-                  mode: "manual",
-                  type: "add",
-                },
-              });
-            }}
+            asChild
           >
-            <NotebookPen strokeWidth={2} className="text-white !h-5 !w-5" />{" "}
-            <span className="text-xl">Edit product</span>
+            <Link
+              to="/handle-item"
+              search={{
+                type: "update-product",
+                internalId: id,
+                mode: "internalId",
+                scanMode: "stock-mode",
+              }}
+            >
+              <NotebookPen strokeWidth={2} className="text-white !h-5 !w-5" />{" "}
+              <span className="text-xl">Edit product</span>
+            </Link>
           </Button>
         </div>
       </div>

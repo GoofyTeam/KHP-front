@@ -98,6 +98,8 @@ export type Ingredient = {
   name: Scalars['String']['output'];
   /** Unit of measurement for the ingredient. */
   unit: UnitEnum;
+  /** Quantity for one unit of the ingredient. */
+  base_quantity: Scalars['Float']['output'];
   quantities: Array<IngredientQuantity>;
   /** The company that owns this ingredient. */
   company: Company;
@@ -261,6 +263,14 @@ export type Loss = {
   updated_at: Scalars['DateTime']['output'];
 };
 
+/** Statistiques des pertes par type. */
+export type LossesStats = {
+  __typename?: 'LossesStats';
+  ingredient: Scalars['Float']['output'];
+  preparation: Scalars['Float']['output'];
+  total: Scalars['Float']['output'];
+};
+
 export type LossOrderByClause = {
   field: LossOrderByField;
   order: SortOrder;
@@ -303,6 +313,7 @@ export type OpenFoodFactsProduct = {
   categories?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   imageUrl?: Maybe<Scalars['String']['output']>;
   is_already_in_database?: Maybe<Scalars['Boolean']['output']>;
+  ingredient_id?: Maybe<Scalars['ID']['output']>;
 };
 
 /** Allows ordering a list of records. */
@@ -441,6 +452,7 @@ export type Query = {
   location?: Maybe<Location>;
   /** Trouve un type de localisation spécifique (seulement s'il appartient à l'entreprise actuelle). */
   locationType?: Maybe<LocationType>;
+  lossesStats: LossesStats;
   /** Liste les unités de mesure disponibles */
   measurementUnits: Array<MeasurementUnitType>;
   /** Trouve une preparation (et seulement si elle appartient à ma company) */
@@ -491,6 +503,7 @@ export type QueryCompanyArgs = {
 export type QueryIngredientArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  barcode?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -503,6 +516,12 @@ export type QueryLocationArgs = {
 export type QueryLocationTypeArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryLossesStatsArgs = {
+  start_date?: InputMaybe<Scalars['DateTime']['input']>;
+  end_date?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
 
@@ -539,6 +558,7 @@ export type QueryIngredientsArgs = {
   locationIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   categoryIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   orderBy?: InputMaybe<Array<OrderByClause>>;
+  barcode?: InputMaybe<Scalars['String']['input']>;
   first?: Scalars['Int']['input'];
   page?: InputMaybe<Scalars['Int']['input']>;
 };

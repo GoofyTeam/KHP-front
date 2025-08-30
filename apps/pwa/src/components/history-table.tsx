@@ -1,6 +1,6 @@
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { format } from "date-fns";
-import { GetIngredientQuery } from "../graphql/getProduct.gql";
+import { GetProductQuery } from "../graphql/getProduct.gql";
 
 import { cn } from "@workspace/ui/lib/utils";
 
@@ -23,7 +23,7 @@ type EnrichedHistoryEntry = {
 };
 
 type StockMovement = NonNullable<
-  GetIngredientQuery["ingredient"]
+  GetProductQuery["ingredient"]
 >["stockMovements"][number];
 
 interface HistoryTableProps {
