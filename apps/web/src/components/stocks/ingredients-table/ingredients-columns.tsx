@@ -11,11 +11,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
-import type { Ingredient } from "@/types/stocks";
+import type { GetIngredientsQuery } from "@/graphql/generated/graphql";
+
+type IngredientRow = GetIngredientsQuery["ingredients"]["data"][number];
 
 export function useIngredientsColumns(
   isRegisterLostMode: boolean
-): ColumnDef<Ingredient>[] {
+): ColumnDef<IngredientRow>[] {
   return useMemo(
     () => [
       {
@@ -65,27 +67,17 @@ export function useIngredientsColumns(
         cell: ({ row }) => <div>{row.getValue("unit")}</div>,
       },
       {
-        accessorKey: "categories",
+        accessorKey: "category",
         header: "Category",
         cell: ({ row }) => {
-          const ingredient = row.original;
-          const firstCategory = ingredient.categories[0];
-          const remainingCount = ingredient.categories.length - 1;
-
-          return (
+          const { category } = row.original;
+          return category ? (
             <div className="flex items-center gap-1">
-              {firstCategory && (
-                <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-secondary">
-                  {firstCategory.name}
-                </span>
-              )}
-              {remainingCount > 0 && (
-                <span className="text-xs text-muted-foreground">
-                  +{remainingCount}
-                </span>
-              )}
+              <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-secondary">
+                {category.name}
+              </span>
             </div>
-          );
+          ) : null;
         },
       },
       {

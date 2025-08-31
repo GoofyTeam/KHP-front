@@ -1,4 +1,5 @@
 import { HttpLink } from "@apollo/client";
+import { setContext } from "@apollo/client/link/context";
 import {
   registerApolloClient,
   ApolloClient,
@@ -17,25 +18,55 @@ export const { getClient, query, PreloadQuery } = registerApolloClient(
     const nextHeaders = await headers();
     const cookieHeader = nextHeaders.get("cookie") || "";
 
+    const xsrfLink = setContext(async (_, { headers: hdrs }) => {
+      try {
+        // Read XSRF token from cookies on the server
+        const { cookies } = await import("next/headers");
+        const cookieStore = await cookies();
+        const xsrf = cookieStore.get("XSRF-TOKEN")?.value;
+
+        let token = xsrf || "";
+        try {
+          if (token) token = decodeURIComponent(token);
+        } catch {
+          // keep raw token
+        }
+
+        return {
+          headers: {
+            ...hdrs,
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            ...(token ? { "X-XSRF-TOKEN": token } : {}),
+          },
+        };
+      } catch {
+        return {
+          headers: {
+            ...hdrs,
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        };
+      }
+    });
+
+    const httpLink = new HttpLink({
+      uri: `${API_URL}/graphql`,
+      credentials: "include",
+      fetch: (uri, options) =>
+        fetch(uri, {
+          ...options,
+          headers: {
+            ...options?.headers,
+            cookie: cookieHeader,
+          },
+        }),
+    });
+
     return new ApolloClient({
       cache: new InMemoryCache(),
-      link: new HttpLink({
-        // this needs to be an absolute url, as relative urls cannot be used in SSR
-        uri: `${API_URL}/graphql`,
-        credentials: "include", // include cookies for CSRF protection
-        headers: {
-          Accept: "application/json", // or any other value you want to specify
-          "Content-Type": "application/json", // ensure the content type is set correctly
-        },
-        fetch: (uri, options) =>
-          fetch(uri, {
-            ...options,
-            headers: {
-              ...options?.headers,
-              cookie: cookieHeader,
-            },
-          }),
-      }),
+      link: xsrfLink.concat(httpLink),
     });
   }
 );
