@@ -5,8 +5,17 @@ import { useForm } from "react-hook-form";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
-import { CheckCircleIcon, Loader2Icon, Eye, EyeOff } from "lucide-react";
 import {
+  CheckCircleIcon,
+  Loader2Icon,
+  Eye,
+  EyeOff,
+  LogOut,
+  User,
+  Lock,
+} from "lucide-react";
+import {
+  logoutAction,
   updatePasswordAction,
   updateUserInfoAction,
 } from "@/app/(mainapp)/settings/account/actions";
@@ -17,6 +26,7 @@ type User = {
   name?: string;
   email?: string;
   company_id?: number;
+  updated_at?: string;
 };
 
 type ProfileFormValues = {
@@ -43,6 +53,8 @@ export function AccountForm({ user }: { user: User }) {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
+  const [logoutLoading, setLogoutLoading] = useState(false);
+
   const [isPending, startTransition] = useTransition();
   const { fetchUser } = useUserStore();
 
@@ -67,15 +79,90 @@ export function AccountForm({ user }: { user: User }) {
     setSaveError(null);
 
     startTransition(async () => {
-      const res = await updateUserInfoAction(values);
-      if (!res.success) {
-        setSaveError(res.error || "Unable to update profile.");
-      } else {
-        await fetchUser(true);
-        setSaved(true);
-        setTimeout(() => setSaved(false), 3000);
+      try {
+        const changedFields: { name?: string; email?: string } = {};
+
+        if (values.name !== user?.name) {
+          changedFields.name = values.name;
+        }
+
+        if (values.email !== user?.email) {
+          changedFields.email = values.email;
+        }
+        if (Object.keys(changedFields).length === 0) {
+          setSaved(true);
+          setTimeout(() => setSaved(false), 3000);
+          return;
+        }
+
+        const res = await updateUserInfoAction(changedFields);
+
+        if (!res.success) {
+          setSaveError(res.error || "Unable to update profile.");
+        } else {
+          if (
+            res.data &&
+            typeof res.data === "object" &&
+            "user" in res.data &&
+            res.data.user
+          ) {
+            const updatedUser = res.data.user as User;
+
+            const nameUpdated =
+              !changedFields.name || updatedUser.name === changedFields.name;
+            const emailUpdated =
+              !changedFields.email || updatedUser.email === changedFields.email;
+            const timestampChanged =
+              updatedUser.updated_at !== user?.updated_at;
+
+            if (!nameUpdated || !emailUpdated || !timestampChanged) {
+              const errors = [];
+              if (!nameUpdated)
+                errors.push(
+                  `Name: expected "${changedFields.name}", got "${updatedUser.name}"`
+                );
+              if (!emailUpdated)
+                errors.push(
+                  `Email: expected "${changedFields.email}", got "${updatedUser.email}"`
+                );
+              if (!timestampChanged)
+                errors.push("No timestamp change detected");
+
+              setSaveError(`Update failed: ${errors.join(", ")}`);
+              return;
+            }
+            const { setUser } = useUserStore.getState();
+            setUser({
+              id: updatedUser.id || 0,
+              name: updatedUser.name || "",
+              email: updatedUser.email || "",
+              company_id: updatedUser.company_id,
+              updated_at: updatedUser.updated_at,
+            });
+            profileForm.reset({
+              name: updatedUser.name || "",
+              email: updatedUser.email || "",
+            });
+          } else {
+            await fetchUser(true);
+
+            const userStore = useUserStore.getState();
+            if (userStore.user) {
+              profileForm.reset({
+                name: userStore.user.name || "",
+                email: userStore.user.email || "",
+              });
+            }
+          }
+
+          setSaved(true);
+          setTimeout(() => setSaved(false), 3000);
+        }
+      } catch (error) {
+        setSaveError("An unexpected error occurred. Please try again.");
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     });
   };
 
@@ -108,60 +195,90 @@ export function AccountForm({ user }: { user: User }) {
     });
   };
 
+  const onLogout = () => {
+    setLogoutLoading(true);
+
+    startTransition(async () => {
+      try {
+        const res = await logoutAction();
+        if (res.success) {
+          window.location.href = "/login";
+        } else {
+          console.error("Logout failed:", res.error);
+        }
+      } catch (error) {
+        console.error("Logout error:", error);
+      } finally {
+        setLogoutLoading(false);
+      }
+    });
+  };
+
   return (
-    <div className=" flex gap-8">
-      <div className="bg-khp-surface rounded-lg shadow-sm border  p-6 w-1/2">
-        <h3 className="text-base font-medium text-khp-text-primary mb-4">
-          Profile
-        </h3>
+    <div className="max-w-2xl mx-auto space-y-8">
+      <div className="bg-khp-surface rounded-2xl shadow-lg border border-khp-primary/20 overflow-hidden">
+        <div className="bg-gradient-to-r from-khp-primary/5 to-khp-primary/10 px-6 py-5 border-b border-khp-primary/20">
+          <h3 className="text-lg font-semibold text-khp-text-primary flex items-center gap-3">
+            <div className="w-8 h-8 bg-khp-primary/20 rounded-full flex items-center justify-center">
+              <User className="h-4 w-4 text-khp-primary" />
+            </div>
+            Profile Information
+          </h3>
+          <p className="text-sm text-khp-text-secondary mt-1">
+            Update your account details and personal information
+          </p>
+        </div>
+
         <form
           onSubmit={profileForm.handleSubmit(onProfileSubmit)}
-          className="space-y-6"
+          className="p-6 space-y-6"
         >
-          <div>
-            <Label
-              htmlFor="name"
-              className="block text-sm font-medium text-khp-text-primary mb-2"
-            >
-              Full name
-            </Label>
-            <Input
-              id="name"
-              type="text"
-              disabled={isLoading || isPending}
-              className="w-full !h-14 text-base border-khp-primary focus:bg-khp-primary/5 transition-all px-4 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary"
-              placeholder="Enter your full name"
-              {...profileForm.register("name")}
-            />
+          <div className="space-y-4">
+            <div>
+              <Label
+                htmlFor="name"
+                className="block text-sm font-semibold text-khp-text-primary mb-3"
+              >
+                Full name
+              </Label>
+              <Input
+                id="name"
+                type="text"
+                disabled={isLoading || isPending}
+                className="w-full h-12 text-base border-2 border-khp-primary/20 rounded-md focus:border-khp-primary focus:bg-khp-primary/5 transition-all duration-200 px-4 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary shadow-sm"
+                placeholder="Enter your full name"
+                {...profileForm.register("name")}
+              />
+            </div>
+
+            <div>
+              <Label
+                htmlFor="email"
+                className="block text-sm font-semibold text-khp-text-primary mb-3"
+              >
+                Email address
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                disabled={isLoading || isPending}
+                className="w-full h-12 text-base border-2 border-khp-primary/20 rounded-md focus:border-khp-primary focus:bg-khp-primary/5 transition-all duration-200 px-4 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary shadow-sm"
+                placeholder="Enter your email address"
+                {...profileForm.register("email")}
+              />
+            </div>
           </div>
 
-          <div>
-            <Label
-              htmlFor="email"
-              className="block text-sm font-medium text-khp-text-primary mb-2"
-            >
-              Email address
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              disabled={isLoading || isPending}
-              className="w-full !h-14 text-base border-khp-primary focus:bg-khp-primary/5 transition-all px-4 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary"
-              placeholder="Enter your email address"
-              {...profileForm.register("email")}
-            />
-          </div>
-
-          <div className="pt-2">
+          <div className="pt-4">
             {saved ? (
-              <div className="flex items-center justify-center gap-2 p-3 bg-khp-background-secondary border border-khp-primary rounded-lg">
-                <CheckCircleIcon className="h-4 w-4 text-khp-primary" />
-                <span className="text-khp-text-primary text-sm font-medium">
+              <div className="flex items-center justify-center gap-3 p-4 bg-green-50 border-2 border-green-200 rounded-xl">
+                <CheckCircleIcon className="h-5 w-5 text-green-600" />
+                <span className="text-green-700 text-sm font-semibold">
                   Changes saved successfully
                 </span>
               </div>
             ) : saveError ? (
-              <div className="p-3 text-center border border-red-500/50 bg-red-500/10 text-red-600 rounded-md text-sm">
+              <div className="p-4 text-center border-2 border-red-200 bg-red-50 text-red-700 rounded-xl text-sm font-medium">
                 {saveError}
               </div>
             ) : (
@@ -169,12 +286,11 @@ export function AccountForm({ user }: { user: User }) {
                 type="submit"
                 disabled={isLoading || isPending}
                 variant="khp-default"
-                size="xl"
-                className="w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                size="xl-full"
               >
                 {isLoading || isPending ? (
-                  <div className="flex items-center justify-center">
-                    <Loader2Icon className="animate-spin -ml-1 mr-2 h-4 w-4" />
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2Icon className="animate-spin h-4 w-4" />
                     Saving changes...
                   </div>
                 ) : (
@@ -185,117 +301,129 @@ export function AccountForm({ user }: { user: User }) {
           </div>
         </form>
       </div>
-      <div className="bg-khp-surface rounded-lg shadow-sm border  p-6 w-1/2">
-        <h3 className="text-base font-medium text-khp-text-primary mb-4">
-          Password
-        </h3>
+
+      <div className="bg-khp-surface rounded-2xl shadow-lg border border-khp-primary/10 overflow-hidden">
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 px-6 py-5 border-b border-amber-200/50">
+          <h3 className="text-lg font-semibold text-khp-text-primary flex items-center gap-3">
+            <div className="w-8 h-8 bg-amber-200/50 rounded-full flex items-center justify-center">
+              <Lock className="w-4 h-4 text-amber-600" />
+            </div>
+            Security Settings
+          </h3>
+          <p className="text-sm text-khp-text-secondary mt-1">
+            Change your password to keep your account secure
+          </p>
+        </div>
+
         <form
           onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
-          className="space-y-6"
+          className="p-6 space-y-6"
         >
-          <div>
-            <Label
-              htmlFor="current_password"
-              className="block text-sm font-medium text-khp-text-primary mb-2"
-            >
-              Current password
-            </Label>
-            <div className="relative">
-              <Input
-                id="current_password"
-                type={showCurrent ? "text" : "password"}
-                disabled={pwdLoading || isPending}
-                className="w-full !h-14 text-base border-khp-primary focus:bg-khp-primary/5 transition-all px-4 pr-10 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary"
-                placeholder="Enter current password"
-                {...passwordForm.register("current_password")}
-              />
-              <button
-                type="button"
-                onClick={() => setShowCurrent((s) => !s)}
-                className="absolute inset-y-0 right-3 flex items-center text-khp-text-secondary hover:text-khp-text-primary"
-                aria-label={showCurrent ? "Hide password" : "Show password"}
+          <div className="space-y-4">
+            <div>
+              <Label
+                htmlFor="current_password"
+                className="block text-sm font-semibold text-khp-text-primary mb-3"
               >
-                {showCurrent ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </button>
+                Current password
+              </Label>
+              <div className="relative">
+                <Input
+                  id="current_password"
+                  type={showCurrent ? "text" : "password"}
+                  disabled={pwdLoading || isPending}
+                  className="w-full h-12 text-base border-2 border-khp-primary/20 rounded-md focus:border-khp-primary focus:bg-khp-primary/5 transition-all duration-200 px-4 pr-12 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary shadow-sm"
+                  placeholder="Enter current password"
+                  {...passwordForm.register("current_password")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrent((s) => !s)}
+                  className="absolute inset-y-0 right-3 flex items-center text-khp-text-secondary hover:text-khp-text-primary transition-colors duration-200 p-1 rounded-lg hover:bg-khp-primary/20"
+                  aria-label={showCurrent ? "Hide password" : "Show password"}
+                >
+                  {showCurrent ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <Label
+                htmlFor="new_password"
+                className="block text-sm font-semibold text-khp-text-primary mb-3"
+              >
+                New password
+              </Label>
+              <div className="relative">
+                <Input
+                  id="new_password"
+                  type={showNew ? "text" : "password"}
+                  disabled={pwdLoading || isPending}
+                  className="w-full h-12 text-base border-2 border-khp-primary/20 rounded-md focus:border-khp-primary focus:bg-khp-primary/5 transition-all duration-200 px-4 pr-12 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary shadow-sm"
+                  placeholder="Enter new password"
+                  {...passwordForm.register("new_password")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNew((s) => !s)}
+                  className="absolute inset-y-0 right-3 flex items-center text-khp-text-secondary hover:text-khp-text-primary transition-colors duration-200 p-1 rounded-lg hover:bg-khp-primary/10"
+                  aria-label={showNew ? "Hide password" : "Show password"}
+                >
+                  {showNew ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <Label
+                htmlFor="confirm_password"
+                className="block text-sm font-semibold text-khp-text-primary mb-3"
+              >
+                Confirm password
+              </Label>
+              <div className="relative">
+                <Input
+                  id="confirm_password"
+                  type={showConfirm ? "text" : "password"}
+                  disabled={pwdLoading || isPending}
+                  className="w-full h-12 text-base border-2 border-khp-primary/20 rounded-md focus:border-khp-primary focus:bg-khp-primary/5 transition-all duration-200 px-4 pr-12 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary shadow-sm"
+                  placeholder="Confirm new password"
+                  {...passwordForm.register("new_password_confirmation")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm((s) => !s)}
+                  className="absolute inset-y-0 right-3 flex items-center text-khp-text-secondary hover:text-khp-text-primary transition-colors duration-200 p-1 rounded-lg hover:bg-khp-primary/10"
+                  aria-label={showConfirm ? "Hide password" : "Show password"}
+                >
+                  {showConfirm ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
             </div>
           </div>
 
-          <div>
-            <Label
-              htmlFor="new_password"
-              className="block text-sm font-medium text-khp-text-primary mb-2"
-            >
-              New password
-            </Label>
-            <div className="relative">
-              <Input
-                id="new_password"
-                type={showNew ? "text" : "password"}
-                disabled={pwdLoading || isPending}
-                className="w-full !h-14 text-base border-khp-primary focus:bg-khp-primary/5 transition-all px-4 pr-10 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary"
-                placeholder="Enter new password"
-                {...passwordForm.register("new_password")}
-              />
-              <button
-                type="button"
-                onClick={() => setShowNew((s) => !s)}
-                className="absolute inset-y-0 right-3 flex items-center text-khp-text-secondary hover:text-khp-text-primary"
-                aria-label={showNew ? "Hide password" : "Show password"}
-              >
-                {showNew ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <Label
-              htmlFor="confirm_password"
-              className="block text-sm font-medium text-khp-text-primary mb-2"
-            >
-              Confirm password
-            </Label>
-            <div className="relative">
-              <Input
-                id="confirm_password"
-                type={showConfirm ? "text" : "password"}
-                disabled={pwdLoading || isPending}
-                className="w-full !h-14 text-base border-khp-primary focus:bg-khp-primary/5 transition-all px-4 pr-10 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary"
-                placeholder="Confirm new password"
-                {...passwordForm.register("new_password_confirmation")}
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirm((s) => !s)}
-                className="absolute inset-y-0 right-3 flex items-center text-khp-text-secondary hover:text-khp-text-primary"
-                aria-label={showConfirm ? "Hide password" : "Show password"}
-              >
-                {showConfirm ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          <div className="pt-2">
+          <div className="pt-4">
             {pwdSaved ? (
-              <div className="flex items-center justify-center gap-2 p-3 bg-khp-background-secondary border border-khp-primary rounded-lg">
-                <CheckCircleIcon className="h-4 w-4 text-khp-primary" />
-                <span className="text-khp-text-primary text-sm font-medium">
+              <div className="flex items-center justify-center gap-3 p-4 bg-green-50 border-2 border-green-200 rounded-xl">
+                <CheckCircleIcon className="h-5 w-5 text-green-600" />
+                <span className="text-green-700 text-sm font-semibold">
                   Password updated successfully
                 </span>
               </div>
             ) : pwdError ? (
-              <div className="p-3 text-center border border-red-500/50 bg-red-500/10 text-red-600 rounded-md text-sm">
+              <div className="p-4 text-center border-2 border-red-200 bg-red-50 text-red-700 rounded-xl text-sm font-medium">
                 {pwdError}
               </div>
             ) : (
@@ -303,12 +431,11 @@ export function AccountForm({ user }: { user: User }) {
                 type="submit"
                 disabled={pwdLoading || isPending}
                 variant="khp-default"
-                size="xl"
-                className="w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                size="xl-full"
               >
                 {pwdLoading || isPending ? (
-                  <div className="flex items-center justify-center">
-                    <Loader2Icon className="animate-spin -ml-1 mr-2 h-4 w-4" />
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2Icon className="animate-spin h-4 w-4" />
                     Updating password...
                   </div>
                 ) : (
@@ -318,6 +445,41 @@ export function AccountForm({ user }: { user: User }) {
             )}
           </div>
         </form>
+      </div>
+
+      <div className="bg-khp-surface rounded-2xl shadow-lg border border-khp-primary/10 overflow-hidden">
+        <div className="bg-gradient-to-r from-khp-primary/5 to-khp-primary/10 px-6 py-5 border-b border-khp-primary/10">
+          <h3 className="text-lg font-semibold text-khp-text-primary flex items-center gap-3">
+            <div className="w-8 h-8 bg-khp-error/20 rounded-full flex items-center justify-center">
+              <LogOut className="w-4 h-4 text-khp-error" />
+            </div>
+            Logout
+          </h3>
+          <p className="text-sm text-khp-text-secondary mt-1">
+            Disconnect from your account and end your session
+          </p>
+        </div>
+
+        <div className="p-6">
+          <Button
+            onClick={onLogout}
+            disabled={logoutLoading || isPending}
+            variant="khp-destructive"
+            size="xl-full"
+          >
+            {logoutLoading || isPending ? (
+              <div className="flex items-center justify-center gap-2">
+                <Loader2Icon className="animate-spin h-4 w-4" />
+                Logging out...
+              </div>
+            ) : (
+              <div className="flex items-center justify-center gap-2">
+                <LogOut className="w-4 h-4" />
+                Logout
+              </div>
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   );
