@@ -19,10 +19,10 @@ import {
 } from "@workspace/ui/components/select";
 import { cn } from "@workspace/ui/lib/utils";
 import { useState, useRef, ChangeEvent } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import z from "zod";
 import { getAllMeasurementUnits } from "../../../types/mesurmentsUnitEnum";
-import { Minus, Plus, Image } from "lucide-react";
+import { Image } from "lucide-react";
 import { handleUpdateProductSchema } from "./handleUpdateProductSchema";
 import { updateProductSubmit } from "./update-product";
 
@@ -147,38 +147,19 @@ function HandleUpdateProduct() {
                       <SelectTrigger className="w-full border-khp-primary rounded-md px-4 py-6 truncate">
                         <SelectValue
                           placeholder={
-                            product.product_category?.[0] || "Select category"
+                            product.product_category.name || "Select a category"
                           }
                         />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {product &&
-                        product.product_category &&
-                        product.product_category.length > 0 &&
-                        product.product_category.map(
-                          (category: string | null) => (
-                            <SelectItem
-                              key={category || "default"}
-                              value={category || ""}
-                            >
-                              {category || "Uncategorized"}
-                            </SelectItem>
-                          )
-                        )}
                       {categories &&
                         categories.map(
                           (categorie: { id: string; name: string }) => {
-                            if (
-                              product?.product_category &&
-                              product.product_category.includes(categorie.name)
-                            ) {
-                              return null;
-                            }
                             return (
                               <SelectItem
                                 key={categorie.id}
-                                value={categorie.name}
+                                value={categorie.id}
                               >
                                 {categorie.name}
                               </SelectItem>

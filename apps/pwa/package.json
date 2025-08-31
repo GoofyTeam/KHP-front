@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "generate-pwa-assets": "pwa-assets-generator",
-    "introspect": "get-graphql-schema http://localhost:8000/graphql > src/graphql/generated/schema.graphql"
+    "introspect": "get-graphql-schema https://back.goofykhp.fr/graphql > src/graphql/generated/schema.graphql"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.10",

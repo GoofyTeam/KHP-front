@@ -74,7 +74,7 @@ function HandleAddQuantity() {
               {product.product_name || "Unnamed Product"}
             </h2>
             <p className="text-center text-gray-600">
-              Category: {product.product_category || "Uncategorized"}
+              Category: {product.product_category.name || "Uncategorized"}
             </p>
           </div>
 

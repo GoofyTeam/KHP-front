@@ -12,7 +12,7 @@ import { graphqlRequest } from "./graph-client";
 export type WantedDataType = {
   product_image: string;
   product_name: string;
-  product_category: string[];
+  product_category: NonNullable<GetIngredientQuery["ingredient"]>["category"];
   product_units: string;
   product_base_quantity?: string;
   product_already_in_database?: boolean;
@@ -20,7 +20,7 @@ export type WantedDataType = {
   quantities?: NonNullable<GetIngredientQuery["ingredient"]>["quantities"];
 };
 
-const toStringArray = (value: unknown): string[] => {
+/* const toStringArray = (value: unknown): string[] => {
   if (!value) return [];
 
   if (typeof value === "string") {
@@ -37,7 +37,7 @@ const toStringArray = (value: unknown): string[] => {
   }
 
   return [];
-};
+}; */
 
 const handleScanType = async (
   mode: HandleItemSearch["mode"],
@@ -46,7 +46,10 @@ const handleScanType = async (
   let wantedData: WantedDataType = {
     product_image: "",
     product_name: "",
-    product_category: [],
+    product_category: {
+      id: "",
+      name: "",
+    },
     product_units: "",
   };
 
@@ -58,14 +61,10 @@ const handleScanType = async (
       { barcode: productId! }
     );
     if (resultByBarcode.ingredient) {
-      const categories =
-        resultByBarcode.ingredient.categories?.map((cat) => cat?.name ?? "") ??
-        [];
-
       wantedData = {
         product_image: resultByBarcode.ingredient.image_url ?? "",
         product_name: resultByBarcode.ingredient.name ?? "",
-        product_category: toStringArray(categories),
+        product_category: resultByBarcode.ingredient.category,
         product_units: resultByBarcode.ingredient.unit ?? "",
         product_already_in_database: true,
         product_internal_id: resultByBarcode.ingredient.id ?? undefined,
@@ -95,7 +94,10 @@ const handleScanType = async (
     wantedData = {
       product_image: result.search.imageUrl ?? "",
       product_name: result.search.product_name ?? "",
-      product_category: toStringArray(result.search.categories),
+      product_category: {
+        id: "",
+        name: "",
+      },
       product_units: result.search.unit ?? "",
       product_base_quantity,
       product_already_in_database:
@@ -111,13 +113,10 @@ const handleScanType = async (
       throw new Error("Product not found");
     }
 
-    const categories =
-      result.ingredient.categories?.map((cat) => cat?.name ?? "") ?? [];
-
     wantedData = {
       product_image: result.ingredient.image_url ?? "",
       product_name: result.ingredient.name ?? "",
-      product_category: toStringArray(categories),
+      product_category: result.ingredient.category,
       product_units: result.ingredient.unit ?? "",
       product_already_in_database: true,
       product_internal_id: result.ingredient.id ?? undefined,
@@ -128,18 +127,21 @@ const handleScanType = async (
     wantedData = {
       product_image: "",
       product_name: "",
-      product_category: [],
+      product_category: {
+        id: "",
+        name: "",
+      },
       product_units: "",
       product_already_in_database: false,
       product_internal_id: undefined,
     };
   }
 
-  wantedData.product_category = Array.from(
+  /* wantedData.product_category = Array.from(
     new Set(
       wantedData.product_category.map((cat) => cat.trim()).filter(Boolean)
     )
-  );
+  ); */
 
   return wantedData;
 };

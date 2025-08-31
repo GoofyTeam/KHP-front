@@ -32,6 +32,8 @@ export type Category = {
   preparations: Array<Preparation>;
   /** The company that owns this category. */
   company: Company;
+  /** Shelf life durations by location type. */
+  shelfLives: Array<CategoryShelfLife>;
   /** When the Category was created. */
   created_at: Scalars['DateTime']['output'];
   /** When the Category was last updated. */
@@ -45,6 +47,14 @@ export type CategoryPaginator = {
   paginatorInfo: PaginatorInfo;
   /** A list of Category items. */
   data: Array<Category>;
+};
+
+export type CategoryShelfLife = {
+  __typename?: 'CategoryShelfLife';
+  /** The location type for this shelf life. */
+  locationType: LocationType;
+  /** Shelf life in hours for the category at this location type. */
+  shelf_life_hours: Scalars['Int']['output'];
 };
 
 export type Company = {
@@ -103,7 +113,7 @@ export type Ingredient = {
   quantities: Array<IngredientQuantity>;
   /** The company that owns this ingredient. */
   company: Company;
-  categories: Array<Category>;
+  category: Category;
   image_url?: Maybe<Scalars['String']['output']>;
   /** Historique des mouvements de stock pour cet ingrédient */
   stockMovements: Array<StockMovement>;
@@ -365,6 +375,23 @@ export type PaginatorInfo = {
   total: Scalars['Int']['output'];
 };
 
+export type Perishable = {
+  __typename?: 'Perishable';
+  id: Scalars['ID']['output'];
+  ingredient: Ingredient;
+  location: Location;
+  quantity: Scalars['Float']['output'];
+  expiration_at: Scalars['DateTime']['output'];
+  created_at: Scalars['DateTime']['output'];
+  updated_at: Scalars['DateTime']['output'];
+};
+
+export enum PerishableFilter {
+  Fresh = 'FRESH',
+  Soon = 'SOON',
+  Expired = 'EXPIRED'
+}
+
 export type Preparation = {
   __typename?: 'Preparation';
   /** Unique primary key. */
@@ -455,6 +482,8 @@ export type Query = {
   lossesStats: LossesStats;
   /** Liste les unités de mesure disponibles */
   measurementUnits: Array<MeasurementUnitType>;
+  perishables: Array<Perishable>;
+  nonPerishableIngredients: Array<Ingredient>;
   /** Trouve une preparation (et seulement si elle appartient à ma company) */
   preparation?: Maybe<Preparation>;
   /** Find a single user by an identifying attribute. */
@@ -522,6 +551,11 @@ export type QueryLocationTypeArgs = {
 export type QueryLossesStatsArgs = {
   start_date?: InputMaybe<Scalars['DateTime']['input']>;
   end_date?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+
+export type QueryPerishablesArgs = {
+  filter?: InputMaybe<PerishableFilter>;
 };
 
 

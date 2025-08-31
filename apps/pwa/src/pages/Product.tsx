@@ -132,12 +132,7 @@ export default function ProductPage() {
           </div>
           <div className="flex flex-col gap-1 ">
             <h2 className="text-2xl font-semibold">{product.name}</h2>
-            <p>
-              Category:{" "}
-              {product.categories
-                ?.map((cat: { name: string }) => cat.name)
-                .join(", ") || "Unspecified"}
-            </p>
+            <p>Category: {product.category?.name || "Uncategorized"}</p>
           </div>
 
           <div className="flex flex-col gap-4">

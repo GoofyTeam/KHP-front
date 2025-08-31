@@ -3,7 +3,7 @@ query getIngredient($id: ID, $barcode: String) {
     id
     image_url
     name
-    categories {
+    category {
       name
       id
     }

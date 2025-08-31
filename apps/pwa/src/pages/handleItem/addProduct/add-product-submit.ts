@@ -12,7 +12,7 @@ const addProductFormData = async (
   const formData = new FormData();
   formData.append("name", values.product_name);
   formData.append("unit", values.product_units);
-  formData.append("categories[]", values.product_category);
+  formData.append("category_id", values.product_category);
   formData.append("base_quantity", values.quantityPerUnit);
 
   if (values.image) {
@@ -46,7 +46,7 @@ const addProductJsonData = async (
     name: values.product_name,
     unit: values.product_units,
     base_quantity: parseInt(values.quantityPerUnit),
-    categories: [values.product_category],
+    category_id: values.product_category,
     ...(values.stockEntries && {
       quantities: values.stockEntries.map((entry: StockEntry) => ({
         quantity: parseInt(entry.quantity),

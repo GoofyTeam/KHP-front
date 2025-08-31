@@ -25,7 +25,7 @@ import {
 } from "@workspace/ui/components/select";
 
 function RegisterLosses() {
-  const { internalId, barcode, mode, scanMode } = useSearch({
+  const { internalId } = useSearch({
     from: "/_protected/handle-item",
   });
   const { product, type } = useLoaderData({
@@ -82,7 +82,7 @@ function RegisterLosses() {
               {product.product_name || "Unnamed Product"}
             </h2>
             <p className="text-center text-gray-600">
-              Category: {product.product_category || "Uncategorized"}
+              Category: {product.product_category.name || "Uncategorized"}
             </p>
           </div>
 

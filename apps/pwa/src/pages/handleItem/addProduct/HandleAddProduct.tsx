@@ -43,7 +43,10 @@ function HandleAddProduct() {
       type: type,
       image: undefined,
       product_name: product?.product_name,
-      product_category: product?.product_category?.[0],
+      product_category:
+        product?.product_category.id && product?.product_category.id !== ""
+          ? product?.product_category.id
+          : undefined,
       product_units:
         product?.product_units != null ? product.product_units.toString() : "",
       quantityPerUnit:
@@ -163,32 +166,13 @@ function HandleAddProduct() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {product &&
-                        product.product_category &&
-                        product.product_category.length > 0 &&
-                        product.product_category.map(
-                          (category: string | null) => (
-                            <SelectItem
-                              key={category || "default"}
-                              value={category || ""}
-                            >
-                              {category || "Uncategorized"}
-                            </SelectItem>
-                          )
-                        )}
                       {categories &&
                         categories.map(
                           (categorie: { id: string; name: string }) => {
-                            if (
-                              product?.product_category &&
-                              product.product_category.includes(categorie.name)
-                            ) {
-                              return null;
-                            }
                             return (
                               <SelectItem
                                 key={categorie.id}
-                                value={categorie.name}
+                                value={categorie.id}
                               >
                                 {categorie.name}
                               </SelectItem>

@@ -14,6 +14,9 @@ type Category {
   """The company that owns this category."""
   company: Company!
 
+  """Shelf life durations by location type."""
+  shelfLives: [CategoryShelfLife!]!
+
   """When the Category was created."""
   created_at: DateTime!
 
@@ -28,6 +31,14 @@ type CategoryPaginator {
 
   """A list of Category items."""
   data: [Category!]!
+}
+
+type CategoryShelfLife {
+  """The location type for this shelf life."""
+  locationType: LocationType!
+
+  """Shelf life in hours for the category at this location type."""
+  shelf_life_hours: Int!
 }
 
 type Company {
@@ -101,7 +112,7 @@ type Ingredient {
 
   """The company that owns this ingredient."""
   company: Company!
-  categories: [Category!]!
+  category: Category!
   image_url: String
 
   """Historique des mouvements de stock pour cet ingrédient"""
@@ -404,6 +415,22 @@ type PaginatorInfo {
   total: Int!
 }
 
+type Perishable {
+  id: ID!
+  ingredient: Ingredient!
+  location: Location!
+  quantity: Float!
+  expiration_at: DateTime!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+enum PerishableFilter {
+  FRESH
+  SOON
+  EXPIRED
+}
+
 type Preparation {
   """Unique primary key."""
   id: ID!
@@ -541,6 +568,8 @@ type Query {
 
   """Liste les unités de mesure disponibles"""
   measurementUnits: [MeasurementUnitType!]!
+  perishables(filter: PerishableFilter = FRESH): [Perishable!]!
+  nonPerishableIngredients: [Ingredient!]!
 
   """Trouve une preparation (et seulement si elle appartient à ma company)"""
   preparation(id: ID, name: String): Preparation
