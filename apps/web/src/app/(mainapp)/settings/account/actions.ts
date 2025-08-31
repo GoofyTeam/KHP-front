@@ -14,7 +14,10 @@ export async function updateUserInfoAction(input: {
 }): Promise<ActionResult> {
   try {
     // Le HttpClient intelligent gère automatiquement les headers côté serveur
-    const result = await httpClient.put<any>("/api/user/update/info", input);
+    const result = await httpClient.put<unknown>(
+      "/api/user/update/info",
+      input
+    );
     return { success: true, data: result };
   } catch (e) {
     // Si c'est une erreur de validation, essayer de parser le message
@@ -34,9 +37,7 @@ export async function updateUserInfoAction(input: {
             };
           }
         }
-      } catch (parseError) {
-        // Ignore parsing errors
-      }
+      } catch {}
     }
 
     return {
@@ -75,9 +76,7 @@ export async function updatePasswordAction(input: {
             };
           }
         }
-      } catch (parseError) {
-        // Ignore parsing errors
-      }
+      } catch {}
     }
 
     return {
@@ -90,9 +89,7 @@ export async function updatePasswordAction(input: {
 export async function logoutAction(): Promise<ActionResult> {
   try {
     await httpClient.post("/api/logout");
-  } catch (e) {
-    // Ignore API failure and proceed to clear cookies locally
-  }
+  } catch {}
 
   try {
     const cookieStore = await cookies();
