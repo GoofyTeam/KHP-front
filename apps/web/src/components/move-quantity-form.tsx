@@ -4,18 +4,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@workspace/ui/components/button";
 import { AlertCircle, CheckCircle } from "lucide-react";
-import {
-  LocationItem,
-  LocationSelect,
-} from "@workspace/ui/components/location-select";
-import { QuantityInput } from "@workspace/ui/components/quantity-input";
-import { GetIngredientQuery } from "@/graphql/generated/graphql";
+import type { GetIngredientQuery } from "@/graphql/generated/graphql";
+import type { LocationRow } from "@/queries/locations-query";
+import { QuantityInput } from "./quantity-input";
+import { LocationSelector } from "./LocationSelect";
+import { moveIngredientQuantityAction } from "@/app/(mainapp)/ingredient/actions";
 
 type IngredientData = NonNullable<GetIngredientQuery["ingredient"]>;
 
 interface MoveQuantityFormProps {
   ingredient: IngredientData;
-  allLocations: LocationItem[];
+  allLocations: LocationRow[];
 }
 
 interface FormData {
@@ -36,6 +35,7 @@ export function MoveQuantityForm({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const availableSourceQuantities = ingredient.quantities.filter(
     (q) => q.quantity > 0
@@ -95,9 +95,30 @@ export function MoveQuantityForm({
     }
 
     setIsSubmitting(true);
+    setApiError(null);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const selectedDestination = formData.destinationLocationIndex
+        ? destinationQuantities[parseInt(formData.destinationLocationIndex)]
+        : null;
+
+      if (!selectedSourceLocation || !selectedDestination) {
+        setApiError("Please select both source and destination.");
+        return;
+      }
+
+      const res = await moveIngredientQuantityAction({
+        ingredientId: ingredient.id,
+        from_location_id: selectedSourceLocation.location
+          .id as unknown as string,
+        to_location_id: selectedDestination.location.id as unknown as string,
+        quantity: Number(moveQuantity),
+      });
+
+      if (!res.success) {
+        setApiError(res.error || "Unable to move quantity.");
+        return;
+      }
 
       setSuccess(true);
 
@@ -106,6 +127,7 @@ export function MoveQuantityForm({
       }, 2000);
     } catch (err) {
       console.error("Error moving quantity:", err);
+      setApiError("An unexpected error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -129,8 +151,8 @@ export function MoveQuantityForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6 ">
       <div className="space-y-2">
-        <LocationSelect
-          quantities={ingredient.quantities}
+        <LocationSelector
+          quantities={availableSourceQuantities}
           value={formData.sourceLocationIndex}
           onValueChange={(value) =>
             handleInputChange("sourceLocationIndex", value)
@@ -138,10 +160,6 @@ export function MoveQuantityForm({
           placeholder="Choose a source location"
           label="From"
           unit={ingredient.unit}
-          hideEmptyLocations={false}
-          showAllOption={true}
-          allOptionLabel="All locations"
-          displayAllQuantity={true}
         />
       </div>
 
@@ -155,7 +173,7 @@ export function MoveQuantityForm({
       />
 
       <div className="space-y-2">
-        <LocationSelect
+        <LocationSelector
           quantities={destinationQuantities}
           value={formData.destinationLocationIndex}
           onValueChange={(value) =>
@@ -164,10 +182,6 @@ export function MoveQuantityForm({
           placeholder="Choose a destination location"
           label="To"
           unit={ingredient.unit}
-          hideEmptyLocations={false}
-          showAllOption={true}
-          allOptionLabel="All locations"
-          displayAllQuantity={true}
         />
       </div>
 
@@ -280,6 +294,16 @@ export function MoveQuantityForm({
             </Button>
           );
         })()}
+        {apiError && (
+          <div className="mt-3 w-full p-4 bg-khp-error/10 border border-khp-error/30 rounded-lg">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-khp-error mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-khp-error">{apiError}</p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </form>
   );
