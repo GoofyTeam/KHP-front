@@ -124,7 +124,7 @@ export default function ProductPage() {
               <img
                 src={product.image_url}
                 alt={product.name}
-                className="aspect-square object-contain max-w-1/2 w-full"
+                className="aspect-square object-cover max-w-1/2 w-full my-6 rounded-md"
               />
             ) : (
               <ImagePlaceholder className="max-w-1/2 w-full" />

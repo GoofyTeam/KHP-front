@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSearch, useLoaderData } from "@tanstack/react-router";
+import { useSearch, useLoaderData, useNavigate } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/button";
 import {
   Form,
@@ -27,6 +27,7 @@ import { Minus, Plus, Image } from "lucide-react";
 import { handleItemSchema } from "./handleItemSchema";
 
 function HandleAddProduct() {
+  const navigate = useNavigate();
   const { barcode, internalId } = useSearch({
     from: "/_protected/handle-item",
   });
@@ -79,7 +80,7 @@ function HandleAddProduct() {
           <img
             src={filePreview || product?.product_image || ""}
             alt={form.getValues().product_name || "Product Image"}
-            className="aspect-square object-contain max-w-1/2 w-full my-6"
+            className="aspect-square object-cover max-w-1/2 w-full my-6 rounded-md"
             onClick={() => inputRef.current?.click()}
           />
         ) : (
@@ -306,14 +307,30 @@ function HandleAddProduct() {
             </Button>
           </div>
 
-          <Button
-            type="submit"
-            variant="khp-default"
-            size="xl"
-            className="w-full my-4"
-          >
-            Add new item to inventory
-          </Button>
+          <div className="flex flex-col w-full gap-x-2 my-4 gap-y-1">
+            <Button
+              type="submit"
+              variant="khp-default"
+              size="xl"
+              className="w-full my-4"
+              disabled={form.formState.isSubmitting || !form.formState.isDirty}
+            >
+              Add new item to inventory
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="xl"
+              className={cn("w-full", "border-khp-primary")}
+              onClick={() =>
+                navigate({
+                  to: "/inventory",
+                })
+              }
+            >
+              Cancel
+            </Button>
+          </div>
         </form>
       </Form>
     </div>

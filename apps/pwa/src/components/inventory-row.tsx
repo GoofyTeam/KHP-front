@@ -23,7 +23,7 @@ function InventoryRow({
                 ? productDetails.name
                 : `Image not available for ${productDetails.name}`
             }
-            className="w-16 h-16 rounded-md"
+            className="w-16 h-16 rounded-md object-cover"
           />
         ) : (
           <CookingPot className="w-16 h-16 text-khp-primary" />

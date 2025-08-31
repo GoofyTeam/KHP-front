@@ -61,7 +61,7 @@ function HandleUpdateProduct() {
           <img
             src={filePreview || product?.product_image || ""}
             alt={form.getValues().product_name || "Product Image"}
-            className="aspect-square object-contain max-w-1/2 w-full my-6"
+            className="aspect-square object-cover max-w-1/2 w-full my-6 rounded-md"
             onClick={() => inputRef.current?.click()}
           />
         ) : (
@@ -229,6 +229,14 @@ function HandleUpdateProduct() {
               variant="khp-default"
               size="xl"
               className="w-full"
+              disabled={
+                form.formState.isSubmitting ||
+                (!form.formState.dirtyFields.image &&
+                  !form.formState.dirtyFields.product_name &&
+                  !form.formState.dirtyFields.product_category &&
+                  !form.formState.dirtyFields.product_units &&
+                  !form.formState.dirtyFields.quantityPerUnit)
+              }
             >
               Update Product
             </Button>
