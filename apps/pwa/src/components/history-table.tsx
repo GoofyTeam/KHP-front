@@ -55,7 +55,7 @@ export function HistoryTable({
   if (historyEntries.length === 0) {
     return (
       <div className={cn("w-full", className)}>
-        <div className="flex flex-col items-center justify-center py-12 px-6">
+        <div className="flex flex-col items-center justify-center py-12">
           <div className="w-16 h-16 rounded-full bg-muted/30 flex items-center justify-center mb-4">
             <ArrowUp className="h-8 w-8 text-muted-foreground/50" />
           </div>
@@ -70,7 +70,7 @@ export function HistoryTable({
   return (
     <div className={cn("w-full", className)}>
       {showHeader && (
-        <div className="px-6 py-3 border-b bg-muted/20">
+        <div className="py-3 border-b bg-muted/20">
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
             Movement History
           </h3>

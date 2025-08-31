@@ -51,10 +51,10 @@ const tabsTriggerVariants = cva(
           "data-[state=active]:bg-khp-primary/40 hover:bg-khp-primary/60",
       },
       size: {
-        md: "px-3 py-1 text-sm mx-2",
-        lg: "px-4 py-2 text-base mx-3",
-        xl: "px-5 py-3 text-lg mx-4",
-        xxl: "px-6 py-4 text-xl mx-5",
+        md: "px-3 py-1 text-sm",
+        lg: "px-4 py-2 text-base",
+        xl: "px-5 py-3 text-lg",
+        xxl: "px-6 py-4 text-xl",
       },
       fullWidth: {
         true: "flex-1",

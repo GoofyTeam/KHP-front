@@ -4,7 +4,7 @@ import { useProduct } from "../stores/product-store";
 import { StockStatus } from "@workspace/ui/components/stock-status";
 import { HistoryTable } from "../components/history-table";
 import { Button } from "@workspace/ui/components/button";
-import { NotebookPen } from "lucide-react";
+import { NotebookPen, PackageMinus, PackagePlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { GetProductQuery } from "../graphql/getProduct.gql";
 import { ImagePlaceholder } from "../components/ImagePlaceholder";
@@ -117,67 +117,106 @@ export default function ProductPage() {
       <Helmet>
         <title>{product?.name || "Product"} - KHP</title>
       </Helmet>
-      <div>
-        <div className="p-6 flex flex-col gap-4 ">
-          <div className="flex flex-col justify-center items-center">
-            {product.image_url ? (
-              <img
-                src={product.image_url}
-                alt={product.name}
-                className="aspect-square object-cover max-w-1/2 w-full my-6 rounded-md"
-              />
-            ) : (
-              <ImagePlaceholder className="max-w-1/2 w-full" />
-            )}
-          </div>
-          <div className="flex flex-col gap-1 ">
-            <h2 className="text-2xl font-semibold">{product.name}</h2>
-            <p>Category: {product.category?.name || "Uncategorized"}</p>
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <LocationSelect
-              quantities={product.quantities || []}
-              value={selectedLocation}
-              onValueChange={(val) => setSelectedLocation(val)}
-              placeholder="Select location"
-              label="Locations"
-              unit={product.unit}
-              hideEmptyLocations={false}
-              showAllOption={true}
-              allOptionLabel="All locations"
-              displayAllQuantity={true}
+      <div className="p-6 flex flex-col gap-4 ">
+        <div className="flex flex-col justify-center items-center">
+          {product.image_url ? (
+            <img
+              src={product.image_url}
+              alt={product.name}
+              className="aspect-square object-cover max-w-1/2 w-full my-6 rounded-md"
             />
+          ) : (
+            <ImagePlaceholder className="max-w-1/2 w-full" />
+          )}
+        </div>
+        <div className="flex flex-col gap-1 ">
+          <h2 className="text-2xl font-semibold">{product.name}</h2>
+          <p>Category: {product.category?.name || "Uncategorized"}</p>
+        </div>
 
-            <div className="flex justify-between items-center p-4">
-              <div className="flex flex-col">
-                <p className="text-xl font-bold text-foreground">
-                  {formatQuantity(displayStock.quantity)} {product.unit}
-                </p>
-                <p className="text-sm text-muted-foreground font-medium">
-                  Stock disponible
-                </p>
-              </div>
-              <StockStatus variant={displayStock.status} showLabel={false} />
+        <div className="flex flex-col gap-4">
+          <LocationSelect
+            quantities={product.quantities || []}
+            value={selectedLocation}
+            onValueChange={(val) => setSelectedLocation(val)}
+            placeholder="Select location"
+            label="Locations"
+            unit={product.unit}
+            hideEmptyLocations={false}
+            showAllOption={true}
+            allOptionLabel="All locations"
+            displayAllQuantity={true}
+          />
+
+          <div className="flex justify-between items-center py-4">
+            <div className="flex flex-col">
+              <p className="text-xl font-bold text-foreground">
+                {formatQuantity(displayStock.quantity)} {product.unit}
+              </p>
+              <p className="text-sm text-muted-foreground font-medium">
+                Stock disponible
+              </p>
             </div>
+            <StockStatus variant={displayStock.status} showLabel={false} />
           </div>
         </div>
 
-        <div className="flex justify-between items-center gap-2 px-6 py-2">
-          <h3 className="text-lg font-semibold">History:</h3>
-          <Link
-            to="/products/$id/history"
-            params={{ id }}
-            className="text-sm text-khp-primary underline underline-offset-2 cursor-pointer"
+        <div className="grid grid-cols-2 gap-x-4">
+          <Button
+            variant="khp-default"
+            className="pointer-events-auto w-full"
+            size="xl"
+            asChild
           >
-            View all
-          </Link>
+            <Link
+              to="/handle-item"
+              search={{
+                mode: "internalId",
+                type: "add-quantity",
+                scanMode: "stock-mode",
+                internalId: id,
+              }}
+            >
+              <PackagePlus strokeWidth={2} size={128} />
+            </Link>
+          </Button>
+          <Button
+            variant="khp-destructive"
+            className="pointer-events-auto w-full"
+            size="xl"
+            asChild
+          >
+            <Link
+              to="/handle-item"
+              search={{
+                mode: "internalId",
+                type: "remove-quantity",
+                scanMode: "remove-mode",
+                internalId: id,
+              }}
+            >
+              <PackageMinus strokeWidth={2} size={128} />
+            </Link>
+          </Button>
         </div>
-        <HistoryTable
-          data={product.stockMovements || []}
-          showHeader={false}
-          unit={product.unit}
-        />
+
+        <div>
+          <div className="flex justify-between items-center gap-2 py-2">
+            <h3 className="text-lg font-semibold">History:</h3>
+            <Link
+              to="/products/$id/history"
+              params={{ id }}
+              className="text-sm text-khp-primary underline underline-offset-2 cursor-pointer"
+            >
+              View all
+            </Link>
+          </div>
+          <HistoryTable
+            data={product.stockMovements || []}
+            showHeader={false}
+            unit={product.unit}
+          />
+        </div>
         <div className="flex justify-center p-6">
           <Button
             variant="khp-default"

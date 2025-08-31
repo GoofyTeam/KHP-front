@@ -20,6 +20,7 @@ import { useNavigate, useParams } from "@tanstack/react-router";
 import { useNetworkState } from "@uidotdev/usehooks";
 import { Tabs, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
 import z from "zod";
+import { Label } from "@workspace/ui/components/label";
 
 const portraitConstraints = {
   width: { min: 480, ideal: 720 },
@@ -37,7 +38,11 @@ const scanOptions: ScanOptions = {
   delay: 1000,
 };
 
-export const scanModeEnum = z.enum(["stock-mode", "search-mode"]);
+export const scanModeEnum = z.enum([
+  "stock-mode",
+  "search-mode",
+  "remove-mode",
+]);
 type ScanModeType = z.infer<typeof scanModeEnum>;
 
 export default function ScanPage() {
@@ -59,7 +64,7 @@ export default function ScanPage() {
       to: "/handle-item",
       search: {
         mode: "barcode",
-        type,
+        type: scanMode === "remove-mode" ? "remove-quantity" : type,
         barcode,
         scanMode,
       },
@@ -159,7 +164,12 @@ export default function ScanPage() {
         </Button>
 
         {(type === "add-product" || type === "add-quantity") && (
-          <div className="absolute top-25 left-1/2 transform -translate-x-1/2 pointer-events-auto">
+          <div className="absolute top-15 left-1/2 transform -translate-x-1/2 pointer-events-auto">
+            <div className="mb-2 flex flex-col items-center">
+              <Label className="text-white text-lg text-center">
+                Scan mode:
+              </Label>
+            </div>
             <Tabs
               value={scanMode}
               onValueChange={(value) => {
@@ -172,14 +182,21 @@ export default function ScanPage() {
                   variant="khp-default"
                   size="xxl"
                 >
-                  Stock mode
+                  ADD
+                </TabsTrigger>
+                <TabsTrigger
+                  value="remove-mode"
+                  variant="khp-default"
+                  size="xxl"
+                >
+                  REMOVE
                 </TabsTrigger>
                 <TabsTrigger
                   value="search-mode"
                   variant="khp-default"
                   size="xxl"
                 >
-                  Search mode
+                  SEARCH
                 </TabsTrigger>
               </TabsList>
             </Tabs>

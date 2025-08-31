@@ -8,7 +8,7 @@ import InventoryRow from "../components/inventory-row";
 import { Input } from "@workspace/ui/components/input";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@workspace/ui/components/button";
-import { ScanBarcode, Trash2 } from "lucide-react";
+import { ScanBarcode } from "lucide-react";
 import type { GetCompanyProductsQuery } from "../graphql/getCompanyProducts.gql";
 
 function InventoryPage() {
@@ -91,11 +91,6 @@ function InventoryPage() {
           <Button variant="khp-default" asChild className="!h-auto">
             <Link to="/scan/$scanType" params={{ scanType: "add-product" }}>
               <ScanBarcode size={32} />
-            </Link>
-          </Button>
-          <Button variant="khp-destructive" asChild className="!h-auto">
-            <Link to="/scan/$scanType" params={{ scanType: "remove-quantity" }}>
-              <Trash2 size={32} />
             </Link>
           </Button>
         </div>
