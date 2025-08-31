@@ -158,7 +158,7 @@ export function AccountForm({ user }: { user: User }) {
           setSaved(true);
           setTimeout(() => setSaved(false), 3000);
         }
-      } catch (error) {
+      } catch {
         setSaveError("An unexpected error occurred. Please try again.");
       } finally {
         setIsLoading(false);
