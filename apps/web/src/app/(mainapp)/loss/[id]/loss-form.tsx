@@ -9,7 +9,7 @@ import { Button } from "@workspace/ui/components/button";
 import { QuantityInput } from "@/components/quantity-input";
 import { LocationSelector } from "@/components/LocationSelect";
 import { GetIngredientQuery } from "@/graphql/generated/graphql";
-import { createLoss } from "@/lib/api/losses";
+import { createLossAction } from "@/app/(mainapp)/loss/actions";
 import {
   Select,
   SelectContent,
@@ -66,7 +66,7 @@ export function LossForm({ ingredient }: LossFormProps) {
         reason: reason.trim(),
       };
 
-      const result = await createLoss(lossData);
+      const result = await createLossAction(lossData);
 
       if (result.success) {
         toast.success("Succès", {
@@ -83,7 +83,7 @@ export function LossForm({ ingredient }: LossFormProps) {
         }, 1500);
       } else {
         toast.error("Erreur", {
-          description: result.message || "Erreur lors de l'enregistrement",
+          description: result.error || "Erreur lors de l'enregistrement",
           duration: 5000,
         });
       }

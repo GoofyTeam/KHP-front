@@ -14,7 +14,7 @@ query GetIngredient($id: ID!) {
         }
       }
     }
-    categories {
+    category {
       id
       name
     }
