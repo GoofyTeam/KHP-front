@@ -286,12 +286,14 @@ export default function ProductHistoryPage() {
         )}
       </div>
 
-      <HistoryTable
-        data={filteredMovements}
-        showHeader={true}
-        limitHeight={false}
-        unit={product.unit}
-      />
+      <div className="m-2">
+        <HistoryTable
+          data={filteredMovements}
+          showHeader={true}
+          limitHeight={false}
+          unit={product.unit}
+        />
+      </div>
     </div>
   );
 }

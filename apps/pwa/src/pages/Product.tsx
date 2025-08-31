@@ -177,7 +177,11 @@ export default function ProductPage() {
                 internalId: id,
               }}
             >
-              <PackagePlus strokeWidth={2} size={128} />
+              <PackagePlus
+                strokeWidth={1.5}
+                size={128}
+                className="text-white !h-10 !w-10"
+              />
             </Link>
           </Button>
           <Button
@@ -195,7 +199,11 @@ export default function ProductPage() {
                 internalId: id,
               }}
             >
-              <PackageMinus strokeWidth={2} size={128} />
+              <PackageMinus
+                strokeWidth={1.5}
+                size={128}
+                className="text-white !h-10 !w-10"
+              />
             </Link>
           </Button>
         </div>
@@ -212,7 +220,11 @@ export default function ProductPage() {
             </Link>
           </div>
           <HistoryTable
-            data={product.stockMovements || []}
+            data={
+              product.stockMovements?.slice(
+                product.stockMovements.length - 5
+              ) || []
+            }
             showHeader={false}
             unit={product.unit}
           />

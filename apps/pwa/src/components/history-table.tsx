@@ -67,6 +67,17 @@ export function HistoryTable({
     );
   }
 
+  //Reorder data to most recent to oldest
+  historyEntries.sort((a, b) => {
+    const dateA = isStockMovements
+      ? new Date((a as StockMovement).created_at!).getTime()
+      : new Date((a as HistoryEntry).date).getTime();
+    const dateB = isStockMovements
+      ? new Date((b as StockMovement).created_at!).getTime()
+      : new Date((b as HistoryEntry).date).getTime();
+    return dateB - dateA;
+  });
+
   return (
     <div className={cn("w-full", className)}>
       {showHeader && (
