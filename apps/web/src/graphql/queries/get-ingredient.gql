@@ -6,7 +6,7 @@ query GetIngredient($id: ID!) {
     image_url
     created_at
     updated_at
-    categories {
+    category {
       id
       name
     }

@@ -16,6 +16,7 @@ import { Skeleton } from "@workspace/ui/components/skeleton";
 import { GetIngredientsDocument } from "@/graphql/generated/graphql";
 import { useStocksStore } from "@/stores/stocks-store";
 import { useIngredientsColumns } from "./ingredients-columns";
+import type { GetIngredientsQuery } from "@/graphql/generated/graphql";
 
 export function IngredientsTable() {
   const router = useRouter();
@@ -34,7 +35,10 @@ export function IngredientsTable() {
     fetchPolicy: "cache-and-network",
   });
 
-  const ingredients = data?.ingredients?.data || [];
+  const ingredients: GetIngredientsQuery["ingredients"]["data"] = React.useMemo(
+    () => data?.ingredients?.data ?? [],
+    [data?.ingredients?.data]
+  );
 
   const table = useReactTable({
     data: ingredients,
@@ -43,6 +47,7 @@ export function IngredientsTable() {
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    autoResetPageIndex: false,
   });
 
   const handleRowClick = (id: string) => {

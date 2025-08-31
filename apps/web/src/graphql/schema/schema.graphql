@@ -14,6 +14,9 @@ type Category {
   """The company that owns this category."""
   company: Company!
 
+  """Shelf life durations by location type."""
+  shelfLives: [CategoryShelfLife!]!
+
   """When the Category was created."""
   created_at: DateTime!
 
@@ -28,6 +31,14 @@ type CategoryPaginator {
 
   """A list of Category items."""
   data: [Category!]!
+}
+
+type CategoryShelfLife {
+  """The location type for this shelf life."""
+  locationType: LocationType!
+
+  """Shelf life in hours for the category at this location type."""
+  shelf_life_hours: Int!
 }
 
 type Company {
@@ -101,7 +112,7 @@ type Ingredient {
 
   """The company that owns this ingredient."""
   company: Company!
-  categories: [Category!]!
+  category: Category!
   image_url: String
 
   """Historique des mouvements de stock pour cet ingrédient"""
@@ -288,6 +299,13 @@ type Loss {
   updated_at: DateTime!
 }
 
+"""Statistiques des pertes par type."""
+type LossesStats {
+  ingredient: Float!
+  preparation: Float!
+  total: Float!
+}
+
 input LossOrderByClause {
   field: LossOrderByField!
   order: SortOrder!
@@ -395,6 +413,22 @@ type PaginatorInfo {
 
   """Number of total available items."""
   total: Int!
+}
+
+type Perishable {
+  id: ID!
+  ingredient: Ingredient!
+  location: Location!
+  quantity: Float!
+  expiration_at: DateTime!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+enum PerishableFilter {
+  FRESH
+  SOON
+  EXPIRED
 }
 
 type Preparation {
@@ -506,6 +540,9 @@ type Query {
 
     """Search by ingredient name."""
     name: String
+
+    """Search by ingredient barcode."""
+    barcode: String
   ): Ingredient
 
   """Find a single location (only if it belongs to the current company)."""
@@ -527,9 +564,12 @@ type Query {
     """Recherche par nom du type."""
     name: String
   ): LocationType
+  lossesStats(start_date: DateTime, end_date: DateTime): LossesStats!
 
   """Liste les unités de mesure disponibles"""
   measurementUnits: [MeasurementUnitType!]!
+  perishables(filter: PerishableFilter = FRESH): [Perishable!]!
+  nonPerishableIngredients: [Ingredient!]!
 
   """Trouve une preparation (et seulement si elle appartient à ma company)"""
   preparation(id: ID, name: String): Preparation
@@ -584,6 +624,9 @@ type Query {
 
     """Options de tri des ingrédients"""
     orderBy: [OrderByClause!]
+
+    """Get ingredient by its barcode."""
+    barcode: String
 
     """Limits number of fetched items."""
     first: Int! = 10

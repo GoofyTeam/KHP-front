@@ -289,7 +289,7 @@ class HttpClient {
 
       try {
         return JSON.parse(text) as T;
-      } catch (parseError) {
+      } catch {
         return {} as T;
       }
     } catch (error) {

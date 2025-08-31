@@ -1,11 +1,15 @@
 import { query } from "@/lib/ApolloClient";
-import { GetLocationsDocument } from "@/graphql/generated/graphql";
-import type { Location } from "@/types/stocks";
+import {
+  GetLocationsDocument,
+  type GetLocationsQuery,
+} from "@/graphql/generated/graphql";
 
 /**
  * Fetch all available locations
  */
-export async function fetchLocations(): Promise<Location[]> {
+export type LocationRow = GetLocationsQuery["locations"]["data"][number];
+
+export async function fetchLocations(): Promise<LocationRow[]> {
   try {
     const { data, error } = await query({
       query: GetLocationsDocument,

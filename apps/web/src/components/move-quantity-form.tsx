@@ -4,13 +4,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@workspace/ui/components/button";
 import { AlertCircle, CheckCircle } from "lucide-react";
-import type { Ingredient, Location } from "../types/stocks";
+import type { GetIngredientQuery } from "@/graphql/generated/graphql";
+import type { LocationRow } from "@/queries/locations-query";
 import { QuantityInput } from "./quantity-input";
 import { LocationSelector } from "./LocationSelect";
 
+type IngredientData = NonNullable<GetIngredientQuery["ingredient"]>;
+
 interface MoveQuantityFormProps {
-  ingredient: Ingredient;
-  allLocations: Location[];
+  ingredient: IngredientData;
+  allLocations: LocationRow[];
 }
 
 interface FormData {

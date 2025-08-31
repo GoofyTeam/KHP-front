@@ -5,6 +5,10 @@ query GetIngredients($page: Int!, $search: String, $categoryIds: [ID!]) {
       name
       unit
       image_url
+      category {
+        id
+        name
+      }
       quantities {
         quantity
         location {
@@ -14,10 +18,6 @@ query GetIngredients($page: Int!, $search: String, $categoryIds: [ID!]) {
             name
           }
         }
-      }
-      categories {
-        id
-        name
       }
     }
     paginatorInfo {

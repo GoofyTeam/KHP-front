@@ -2,8 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@workspace/ui/components/button";
 import { ImagePlaceholder } from "@workspace/ui/components/image-placeholder";
-import { CategoryBadge } from "../category-badge";
 import { GetIngredientQuery } from "@/graphql/generated/graphql";
+import { CategoryBadge } from "../category-badge";
 import { Edit } from "lucide-react";
 
 type IngredientData = NonNullable<GetIngredientQuery["ingredient"]>;
@@ -27,7 +27,9 @@ export function IngredientDetails({ ingredient }: IngredientDetailsProps) {
           </Link>
         </div>
 
-        <CategoryBadge categories={ingredient.categories} />
+        <CategoryBadge
+          categories={ingredient.category ? [ingredient.category] : []}
+        />
       </div>
 
       <div className="w-full lg:w-3/4 max-w-lg">
