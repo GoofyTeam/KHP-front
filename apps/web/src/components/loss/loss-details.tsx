@@ -16,7 +16,7 @@ export function LossDetails({ ingredient }: LossDetailsProps) {
         <h1 className="text-3xl lg:text-5xl font-bold text-khp-text-primary leading-tight">
           {ingredient.name}
         </h1>
-        <CategoryBadge categories={ingredient.categories} />
+        <CategoryBadge categories={ingredient.category} />
       </div>
 
       <div className="w-full lg:w-3/4 max-w-md">

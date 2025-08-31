@@ -4,15 +4,16 @@ interface Category {
 }
 
 interface CategoryBadgeProps {
-  categories: Category[];
+  categories?: Category[] | Category | null;
 }
 
 export function CategoryBadge({ categories }: CategoryBadgeProps) {
-  if (!categories || categories.length === 0) {
-    return null;
-  }
+  if (!categories) return null;
 
-  const category = categories.find(Boolean) as Category | undefined;
+  const category: Category | undefined = Array.isArray(categories)
+    ? categories.find(Boolean)
+    : categories;
+
   if (!category) return null;
 
   return (
