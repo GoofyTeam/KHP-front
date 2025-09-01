@@ -1,0 +1,8 @@
+query GetMostUsedIngredients {
+  ingredients(orderBy: { column: "withdrawals_this_week_count", order: DESC }) {
+    data {
+      name
+      withdrawals_this_week_count
+    }
+  }
+}
