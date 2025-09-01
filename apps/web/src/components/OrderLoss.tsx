@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { Trash2, NotebookPen } from "lucide-react";
+import { cn } from "@workspace/ui/lib/utils";
 
 export type OrderLossProps = {
   className?: string;
@@ -13,10 +14,6 @@ export type OrderLossProps = {
   ordersHref?: string;
 };
 
-function cx(...classes: Array<string | false | undefined>) {
-  return classes.filter(Boolean).join(" ");
-}
-
 export default function OrderLoss({
   className,
   loading,
@@ -27,7 +24,7 @@ export default function OrderLoss({
 }: OrderLossProps) {
   return (
     <section
-      className={cx(
+      className={cn(
         "rounded-md border border-khp-primary/30 shadow-sm",
         "p-3 md:p-4 flex flex-col w-full",
         className

@@ -3,6 +3,7 @@
 import React, { useMemo } from "react";
 import { AlertTriangle, Info, XCircle, Plus } from "lucide-react";
 import Link from "next/link";
+import { cn } from "@workspace/ui/lib/utils";
 
 // --- Types ------------------------------------------------------------------
 export type ListPanelType = "activity" | "critical" | "low-stock";
@@ -33,9 +34,6 @@ export type ListPanelProps = {
 };
 
 // --- Utilities ---------------------------------------------------------------
-function cx(...classes: (string | undefined | false)[]) {
-  return classes.filter(Boolean).join(" ");
-}
 
 function StatusIcon({ status }: { status?: ListItem["status"] }) {
   switch (status) {
@@ -217,14 +215,14 @@ export function ListPanel({
 
   return (
     <section
-      className={cx(
+      className={cn(
         "rounded-md border border-khp-primary/30 bg-white shadow-sm pt-2 flex flex-col min-h-0",
         className
       )}
       aria-label={title ?? defaultTitles[type]}
     >
       <header className="mb-3 flex items-center justify-between gap-3 px-3 md:px-4 lg:px-5 shrink-0">
-        <h2 className={cx("font-semibold text-slate-900", titleSize)}>
+        <h2 className={cn("font-semibold text-slate-900", titleSize)}>
           {title ?? defaultTitles[type]}
         </h2>
 
@@ -243,7 +241,7 @@ export function ListPanel({
         </div>
       </header>
 
-      <div className={cx("min-h-0 overflow-y-auto")}>
+      <div className={cn("min-h-0 overflow-y-auto")}>
         {data.length === 0 ? (
           <EmptyState label="No items" />
         ) : (
@@ -252,7 +250,7 @@ export function ListPanel({
               <li key={it.id}>
                 <button
                   type="button"
-                  className={cx(
+                  className={cn(
                     "w-full text-left flex items-start gap-3",
                     spacing,
                     "px-3 md:px-4 lg:px-5",
