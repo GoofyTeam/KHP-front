@@ -1,13 +1,9 @@
-query GetLocations($first: Int, $page: Int) {
-  locations(first: $first, page: $page) {
+query GetLocationTypes($first: Int, $page: Int) {
+  locationTypes(first: $first, page: $page) {
     data {
       id
       name
-      locationType {
-        id
-        name
-        is_default
-      }
+      is_default
     }
     paginatorInfo {
       count

@@ -1,6 +1,6 @@
 "use client";
 
-import { User } from "lucide-react";
+import { MapPin, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -18,6 +18,12 @@ const settingsNavItems = [
     description: "Manage your account settings",
     href: "/settings/account",
     icon: User,
+  },
+  {
+    title: "Location",
+    description: "Manage your location settings",
+    href: "/settings/location",
+    icon: MapPin,
   },
 ];
 

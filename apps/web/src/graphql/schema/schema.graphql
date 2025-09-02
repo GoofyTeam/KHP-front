@@ -116,7 +116,7 @@ type Ingredient {
   image_url: String
 
   """Historique des mouvements de stock pour cet ingrédient"""
-  stockMovements: [StockMovement!]!
+  stockMovements(orderBy: [StockMovementOrderByClause!]): [StockMovement!]!
   withdrawals_today_count: Int!
 
   """Number of withdrawals for this ingredient today."""
@@ -337,6 +337,37 @@ type MeasurementUnitType {
 
   """Catégorie de l'unité (masse, volume ou unité)"""
   category: String!
+}
+
+type Menu {
+  id: ID!
+  name: String!
+  items: [MenuItem!]!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type MenuItem {
+  id: ID!
+  location: Location!
+  quantity: Float!
+  unit: UnitEnum!
+  entity: MenuItemEntity!
+}
+
+union MenuItemEntity = Ingredient | Preparation
+
+type MenuOrder {
+  id: ID!
+  status: String!
+  quantity: Int!
+  menu: Menu!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type MenuOrderStats {
+  count: Int!
 }
 
 """Représente un produit alimentaire issu d'OpenFoodFacts"""
@@ -568,6 +599,9 @@ type Query {
 
   """Liste les unités de mesure disponibles"""
   measurementUnits: [MeasurementUnitType!]!
+  menus: [Menu!]!
+  menu(id: ID!): Menu
+  menuOrderStats(start: Date, end: Date): MenuOrderStats!
   perishables(filter: PerishableFilter = FRESH): [Perishable!]!
   nonPerishableIngredients: [Ingredient!]!
 
@@ -811,7 +845,7 @@ type StockMovement {
 """Options de tri pour les mouvements de stock."""
 input StockMovementOrderByClause {
   """Champ sur lequel effectuer le tri."""
-  field: StockMovementOrderByField!
+  column: StockMovementOrderByField!
 
   """Direction du tri."""
   order: SortOrder!
