@@ -313,6 +313,41 @@ export type MeasurementUnitType = {
   category: Scalars['String']['output'];
 };
 
+export type Menu = {
+  __typename?: 'Menu';
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  items: Array<MenuItem>;
+  created_at: Scalars['DateTime']['output'];
+  updated_at: Scalars['DateTime']['output'];
+};
+
+export type MenuItem = {
+  __typename?: 'MenuItem';
+  id: Scalars['ID']['output'];
+  location: Location;
+  quantity: Scalars['Float']['output'];
+  unit: UnitEnum;
+  entity: MenuItemEntity;
+};
+
+export type MenuItemEntity = Ingredient | Preparation;
+
+export type MenuOrder = {
+  __typename?: 'MenuOrder';
+  id: Scalars['ID']['output'];
+  status: Scalars['String']['output'];
+  quantity: Scalars['Int']['output'];
+  menu: Menu;
+  created_at: Scalars['DateTime']['output'];
+  updated_at: Scalars['DateTime']['output'];
+};
+
+export type MenuOrderStats = {
+  __typename?: 'MenuOrderStats';
+  count: Scalars['Int']['output'];
+};
+
 /** Représente un produit alimentaire issu d'OpenFoodFacts */
 export type OpenFoodFactsProduct = {
   __typename?: 'OpenFoodFactsProduct';
@@ -482,6 +517,9 @@ export type Query = {
   lossesStats: LossesStats;
   /** Liste les unités de mesure disponibles */
   measurementUnits: Array<MeasurementUnitType>;
+  menus: Array<Menu>;
+  menu?: Maybe<Menu>;
+  menuOrderStats: MenuOrderStats;
   perishables: Array<Perishable>;
   nonPerishableIngredients: Array<Ingredient>;
   /** Trouve une preparation (et seulement si elle appartient à ma company) */
@@ -551,6 +589,17 @@ export type QueryLocationTypeArgs = {
 export type QueryLossesStatsArgs = {
   start_date?: InputMaybe<Scalars['DateTime']['input']>;
   end_date?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+
+export type QueryMenuArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryMenuOrderStatsArgs = {
+  start?: InputMaybe<Scalars['Date']['input']>;
+  end?: InputMaybe<Scalars['Date']['input']>;
 };
 
 

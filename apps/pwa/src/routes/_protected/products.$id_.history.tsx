@@ -24,8 +24,6 @@ export const Route = createFileRoute("/_protected/products/$id_/history")({
       id,
     });
 
-    console.log("🔍 Product with stockMovements:", productData);
-
     if (!productData.ingredient) {
       throw new Error("Product not found");
     }

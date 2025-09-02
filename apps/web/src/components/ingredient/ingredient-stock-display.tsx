@@ -45,14 +45,6 @@ export function IngredientStockDisplay({
     <>
       <div className="space-y-4 w-full">
         <div className="mb-4 ">
-          {/*  <LocationSelect
-            quantities={ingredient.quantities}
-            value={selectedLocationIndex}
-            onValueChange={setSelectedLocationIndex}
-            placeholder="Choose a location"
-            label="Location"
-            unit={ingredient.unit}
-          /> */}
           <LocationSelect
             quantities={ingredient.quantities || []}
             value={selectedLocationIndex}

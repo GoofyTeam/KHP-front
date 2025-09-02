@@ -4,7 +4,13 @@ import { useProduct } from "../stores/product-store";
 import { StockStatus } from "@workspace/ui/components/stock-status";
 import { HistoryTable } from "../components/history-table";
 import { Button } from "@workspace/ui/components/button";
-import { NotebookPen, PackageMinus, PackagePlus } from "lucide-react";
+import {
+  ArrowRightLeft,
+  NotebookPen,
+  Package,
+  PackageMinus,
+  PackagePlus,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { GetProductQuery } from "../graphql/getProduct.gql";
 import { ImagePlaceholder } from "../components/ImagePlaceholder";
@@ -161,11 +167,11 @@ export default function ProductPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-x-4">
+        <div className="grid grid-cols-3 gap-x-1">
           <Button
             variant="khp-default"
             className="pointer-events-auto w-full"
-            size="xl"
+            size="lg"
             asChild
           >
             <Link
@@ -180,14 +186,40 @@ export default function ProductPage() {
               <PackagePlus
                 strokeWidth={1.5}
                 size={128}
-                className="text-white !h-10 !w-10"
+                className="text-white !h-8 !w-8"
               />
+            </Link>
+          </Button>
+          <Button
+            variant="khp-outline"
+            className="pointer-events-auto w-full"
+            size="lg"
+            asChild
+          >
+            <Link to="/move-quantity" search={{ internalId: id }}>
+              <span className="flex items-center">
+                <Package
+                  strokeWidth={1.5}
+                  size={128}
+                  className="text-khp-primary !h-8 !w-8"
+                />
+                <ArrowRightLeft
+                  strokeWidth={1.5}
+                  size={64}
+                  className="text-khp-primary !h-8 !w-8"
+                />
+                <Package
+                  strokeWidth={1.5}
+                  size={128}
+                  className="text-khp-primary !h-8 !w-8"
+                />
+              </span>
             </Link>
           </Button>
           <Button
             variant="khp-destructive"
             className="pointer-events-auto w-full"
-            size="xl"
+            size="lg"
             asChild
           >
             <Link
@@ -202,7 +234,7 @@ export default function ProductPage() {
               <PackageMinus
                 strokeWidth={1.5}
                 size={128}
-                className="text-white !h-10 !w-10"
+                className="text-white !h-8 !w-8"
               />
             </Link>
           </Button>

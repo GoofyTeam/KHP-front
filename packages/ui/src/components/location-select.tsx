@@ -10,15 +10,26 @@ import {
 import { cn } from "../lib/utils.js";
 import { useMemo } from "react";
 
-interface Location {
+export interface LocationItem {
   id: string;
   name: string;
-  locationType?: { is_default: boolean } | null;
+  locationType?: { is_default?: boolean; name: string } | null;
 }
 
 interface IngredientQuantity {
   quantity: number;
-  location: Location;
+  location: LocationItem;
+}
+
+interface IngredientsForLocationSelect {
+  id: string;
+  name: string;
+  quantities: IngredientQuantity[] | null | undefined;
+}
+
+export interface LocationsFromCompany {
+  name: string;
+  id: string;
 }
 
 interface LocationSelectProps {
@@ -38,6 +49,21 @@ interface LocationSelectProps {
 }
 
 const formatQuantity = (q: number) => parseFloat(q.toFixed(3)).toString();
+
+export const locationSelectMapper = (
+  q: LocationsFromCompany[] | IngredientsForLocationSelect
+) => {
+  if (!Array.isArray(q)) return [];
+
+  return q.map((loc) => ({
+    location: {
+      id: loc.id,
+      name: loc.name,
+      locationType: null,
+    },
+    quantity: 0,
+  }));
+};
 
 export function LocationSelect({
   quantities,

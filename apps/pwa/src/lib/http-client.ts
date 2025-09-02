@@ -114,22 +114,6 @@ export class ImprovedHttpClient {
   }
 
   /**
-   * Helpers de type pour BodyInit
-   */
-  private isFormData(body: unknown): body is FormData {
-    return typeof FormData !== "undefined" && body instanceof FormData;
-  }
-  private isBlob(body: unknown): body is Blob {
-    return typeof Blob !== "undefined" && body instanceof Blob;
-  }
-  private isArrayBuffer(body: unknown): body is ArrayBuffer {
-    return body instanceof ArrayBuffer;
-  }
-  private isArrayBufferView(body: unknown): body is ArrayBufferView {
-    return ArrayBuffer.isView(body as ArrayBufferView);
-  }
-
-  /**
    * Gestion du cache
    * (⚠️ on évite de stringifier les corps binaires/FormData)
    */

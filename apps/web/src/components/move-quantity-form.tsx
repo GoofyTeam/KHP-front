@@ -4,13 +4,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@workspace/ui/components/button";
 import { AlertCircle, CheckCircle } from "lucide-react";
-import type { Ingredient, Location } from "../types/stocks";
-import { LocationSelect } from "@workspace/ui/components/location-select";
+import {
+  LocationItem,
+  LocationSelect,
+} from "@workspace/ui/components/location-select";
 import { QuantityInput } from "@workspace/ui/components/quantity-input";
+import { Ingredient } from "@/graphql/generated/graphql";
 
 interface MoveQuantityFormProps {
   ingredient: Ingredient;
-  allLocations: Location[];
+  allLocations: LocationItem[];
 }
 
 interface FormData {
@@ -124,16 +127,6 @@ export function MoveQuantityForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6 ">
       <div className="space-y-2">
-        {/*  <LocationSelect
-          quantities={availableSourceQuantities}
-          value={formData.sourceLocationIndex}
-          onValueChange={(value) =>
-            handleInputChange("sourceLocationIndex", value)
-          }
-          placeholder="Choose a source location"
-          label="From"
-          unit={ingredient.unit}
-        /> */}
         <LocationSelect
           quantities={ingredient.quantities}
           value={formData.sourceLocationIndex}

@@ -20,25 +20,6 @@ export type WantedDataType = {
   quantities?: NonNullable<GetIngredientQuery["ingredient"]>["quantities"];
 };
 
-/* const toStringArray = (value: unknown): string[] => {
-  if (!value) return [];
-
-  if (typeof value === "string") {
-    return value
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-  }
-
-  if (Array.isArray(value)) {
-    return (value as Array<unknown>)
-      .map((v) => (typeof v === "string" ? v.trim() : ""))
-      .filter(Boolean);
-  }
-
-  return [];
-}; */
-
 const handleScanType = async (
   mode: HandleItemSearch["mode"],
   productId: string | undefined
@@ -54,8 +35,6 @@ const handleScanType = async (
   };
 
   if (mode === "barcode") {
-    //First we need to fetch by barcode with classic query, then if nothing found,
-    // we call the OpenFoodFacts endpoint
     const resultByBarcode = await graphqlRequest<GetIngredientQuery>(
       GetIngredient,
       { barcode: productId! }

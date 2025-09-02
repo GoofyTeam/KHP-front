@@ -77,6 +77,24 @@ export const Route = createFileRoute("/_protected/handle-item")({
       });
     }
 
+    if (
+      scanMode === "remove-mode" &&
+      !productData.product_already_in_database &&
+      barcode
+    ) {
+      redirect({
+        to: "/handle-item",
+        search: {
+          type: "add-product",
+          mode: "barcode",
+          scanMode: "stock-mode",
+          barcode: barcode,
+        },
+        replace: true,
+        throw: true,
+      });
+    }
+
     type =
       productData.product_already_in_database && type === "add-product"
         ? "add-quantity"

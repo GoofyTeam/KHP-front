@@ -1,69 +1,49 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate, useLoaderData } from "@tanstack/react-router";
+import { Button } from "@workspace/ui/components/button";
 import {
   Form,
-  FormControl,
   FormField,
   FormItem,
-  FormLabel,
+  FormControl,
   FormMessage,
 } from "@workspace/ui/components/form";
+import {
+  LocationSelect,
+  locationSelectMapper,
+  LocationsFromCompany,
+} from "@workspace/ui/components/location-select";
+import { QuantityInput } from "@workspace/ui/components/quantity-input";
+import { cn } from "@workspace/ui/lib/utils";
 import { useForm } from "react-hook-form";
 import z from "zod";
-import { useLoaderData, useNavigate, useSearch } from "@tanstack/react-router";
-import { LocationSelect } from "@workspace/ui/components/location-select";
-import { QuantityInput } from "@workspace/ui/components/quantity-input";
-import { Button } from "@workspace/ui/components/button";
-import { registerLossesSchema } from "./registerLossesSchema";
-import { registerLossesSubmit } from "./register-losses";
-import { WantedDataType } from "../../../lib/handleScanType";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@workspace/ui/components/select";
-import { cn } from "@workspace/ui/lib/utils";
+import { moveQuantitySchema } from "./moveQuantitySchema";
+import moveQuantitySubmit from "./move-quantity";
 
-function RegisterLosses() {
+function MoveQuantity() {
   const navigate = useNavigate();
-  const { internalId } = useSearch({
-    from: "/_protected/handle-item",
+  const { product, availableLocations } = useLoaderData({
+    from: "/_protected/move-quantity",
   });
-  const { product, type } = useLoaderData({
-    from: "/_protected/handle-item",
-  });
-
-  const form = useForm<z.infer<typeof registerLossesSchema>>({
-    resolver: zodResolver(registerLossesSchema),
+  const form = useForm<z.infer<typeof moveQuantitySchema>>({
+    resolver: zodResolver(moveQuantitySchema),
     defaultValues: {
-      type,
-      product_id: product.product_internal_id || internalId || "",
-      location_id: "",
+      product_id: product.product_internal_id,
       quantity: "",
-      lossableType: "ingredient",
-      reason: "",
+      source_id: "",
+      destination_id: "",
     },
   });
 
-  const getTotalQuantity = (product: WantedDataType) => {
-    if (!product.quantities) return 0;
-    return product.quantities.reduce(
-      (total, qty) => total + (qty.quantity || 0),
-      0
-    );
+  const onSubmit = async (data: z.infer<typeof moveQuantitySchema>) => {
+    await moveQuantitySubmit(data);
   };
-
-  if (!product.quantities || getTotalQuantity(product) <= 0) {
-    //TODO: handle when no quantities available
-    return null;
-  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[75svh] my-4">
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(registerLossesSubmit)}
+          onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-4 flex flex-col items-center px-4 w-full max-w-md"
         >
           <img
@@ -87,14 +67,14 @@ function RegisterLosses() {
           <div className="w-full">
             <FormField
               control={form.control}
-              name="location_id"
+              name="source_id"
               render={({ field }) => (
                 <LocationSelect
                   quantities={product.quantities || []}
                   value={field.value}
                   onValueChange={field.onChange}
-                  placeholder="Select location"
-                  label="Locations"
+                  placeholder="Select source location"
+                  label="From"
                   unit={product.product_units || ""}
                   hideEmptyLocations={true}
                   showAllOption={false}
@@ -111,7 +91,7 @@ function RegisterLosses() {
                 <FormItem>
                   <FormControl>
                     <QuantityInput
-                      title="Quantity lost"
+                      title="Move"
                       value={field.value}
                       onChange={field.onChange}
                       unit={product.product_units || ""}
@@ -122,31 +102,26 @@ function RegisterLosses() {
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
-              name="reason"
+              name="destination_id"
               render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormLabel className="text-lg">Reason for loss</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="w-full border-khp-primary rounded-md px-4 py-6 truncate">
-                        <SelectValue placeholder="Select a reason" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="expired">Expired</SelectItem>
-                      <SelectItem value="damaged">Damaged</SelectItem>
-                      <SelectItem value="theft">Theft</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
+                <LocationSelect
+                  quantities={
+                    locationSelectMapper(
+                      availableLocations as unknown as LocationsFromCompany[]
+                    ) || []
+                  }
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  placeholder="Select destination location"
+                  label="To"
+                  unit={product.product_units || ""}
+                  hideEmptyLocations={false}
+                  showAllOption={false}
+                  allOptionLabel="All locations"
+                  displayAllQuantity={true}
+                />
               )}
             />
           </div>
@@ -155,15 +130,16 @@ function RegisterLosses() {
             <Button
               type="submit"
               className="w-full"
-              variant="khp-destructive"
+              variant="khp-default"
               disabled={
-                form.formState.isSubmitting ||
-                (!form.formState.dirtyFields.location_id &&
-                  !form.formState.dirtyFields.quantity &&
-                  !form.formState.dirtyFields.reason)
+                form.formState.isSubmitting &&
+                (!form.formState.dirtyFields.product_id ||
+                  !form.formState.dirtyFields.quantity ||
+                  !form.formState.dirtyFields.source_id ||
+                  !form.formState.dirtyFields.destination_id)
               }
             >
-              Register the loss
+              Move this quantity
             </Button>
             <Button
               type="button"
@@ -185,4 +161,4 @@ function RegisterLosses() {
   );
 }
 
-export default RegisterLosses;
+export default MoveQuantity;
