@@ -116,7 +116,7 @@ type Ingredient {
   image_url: String
 
   """Historique des mouvements de stock pour cet ingrédient"""
-  stockMovements: [StockMovement!]!
+  stockMovements(orderBy: [StockMovementOrderByClause!]): [StockMovement!]!
   withdrawals_today_count: Int!
 
   """Number of withdrawals for this ingredient today."""
@@ -272,10 +272,10 @@ type Loss {
   id: ID!
 
   """Type d'entité concernée par cette perte (ingredient ou preparation)."""
-  lossable_type: String!
+  loss_item_type: String!
 
   """ID de l'entité concernée."""
-  lossable_id: ID!
+  loss_item_id: ID!
 
   """L'emplacement où la perte a eu lieu."""
   location: Location!
@@ -711,8 +711,8 @@ type Query {
 
   """Liste les pertes pour l'entreprise actuelle."""
   losses(
-    trackable_type: String
-    trackable_id: ID
+    loss_item_type: String
+    loss_item_id: ID
     location_id: ID
     start_date: DateTime
     end_date: DateTime
@@ -845,7 +845,7 @@ type StockMovement {
 """Options de tri pour les mouvements de stock."""
 input StockMovementOrderByClause {
   """Champ sur lequel effectuer le tri."""
-  field: StockMovementOrderByField!
+  column: StockMovementOrderByField!
 
   """Direction du tri."""
   order: SortOrder!

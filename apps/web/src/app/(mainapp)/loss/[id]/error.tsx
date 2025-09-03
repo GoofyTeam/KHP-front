@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent } from "@workspace/ui/components/card";
@@ -11,11 +11,7 @@ interface ErrorProps {
 }
 
 export default function LossError({ error, reset }: ErrorProps) {
-  useEffect(() => {
-    // Log l'erreur pour le monitoring
-    console.error("Loss page error:", error);
-  }, [error]);
-
+  const router = useRouter();
   return (
     <div className="flex h-full w-full items-center justify-center p-4">
       <Card className="max-w-md w-full">
@@ -38,7 +34,9 @@ export default function LossError({ error, reset }: ErrorProps) {
               Try Again
             </Button>
             <Button
-              onClick={() => (window.location.href = "/stocks")}
+              onClick={() => {
+                router.back();
+              }}
               variant="default"
               className="bg-khp-primary text-primary-foreground hover:bg-khp-primary/90"
             >

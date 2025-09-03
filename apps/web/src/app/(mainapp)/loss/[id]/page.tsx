@@ -1,13 +1,9 @@
 import { notFound } from "next/navigation";
 import { query } from "@/lib/ApolloClient";
-import {
-  GetIngredientDocument,
-  GetIngredientQuery,
-} from "@/graphql/generated/graphql";
+import { GetIngredientDocument } from "@/graphql/generated/graphql";
 import { LossDetails } from "@/components/loss/loss-details";
 import { LossForm } from "./loss-form";
 
-// Avoid static generation rendering for this page
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
@@ -17,9 +13,13 @@ interface LossPageProps {
   }>;
 }
 
-async function fetchIngredient(
-  id: string
-): Promise<NonNullable<GetIngredientQuery["ingredient"]>> {
+export default async function LossPage({ params }: LossPageProps) {
+  const { id } = await params;
+
+  if (!id) {
+    notFound();
+  }
+
   const { data, error } = await query({
     query: GetIngredientDocument,
     variables: { id },
@@ -33,17 +33,7 @@ async function fetchIngredient(
     notFound();
   }
 
-  return data.ingredient;
-}
-
-export default async function LossPage({ params }: LossPageProps) {
-  const { id } = await params;
-
-  if (!id) {
-    notFound();
-  }
-
-  const ingredient = await fetchIngredient(id);
+  const ingredient = data.ingredient;
 
   return (
     <div className="w-full flex flex-col lg:flex-row gap-8 p-4 lg:p-8">
