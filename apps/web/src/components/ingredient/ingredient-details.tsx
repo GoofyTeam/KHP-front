@@ -10,9 +10,13 @@ type IngredientData = NonNullable<GetIngredientQuery["ingredient"]>;
 
 interface IngredientDetailsProps {
   ingredient: IngredientData;
+  showMoveQuantity?: boolean;
 }
 
-export function IngredientDetails({ ingredient }: IngredientDetailsProps) {
+export function IngredientDetails({
+  ingredient,
+  showMoveQuantity = true,
+}: IngredientDetailsProps) {
   return (
     <>
       <div className="text-center space-y-4 w-full max-w-lg relative">
@@ -49,13 +53,15 @@ export function IngredientDetails({ ingredient }: IngredientDetailsProps) {
         </div>
       </div>
 
-      <div className="w-full lg:w-3/4 max-w-lg">
-        <Link href={`/ingredient/${ingredient.id}/move`}>
-          <Button variant="khp-outline" size="xl-full">
-            Move Quantity
-          </Button>
-        </Link>
-      </div>
+      {showMoveQuantity && (
+        <div className="w-full lg:w-3/4 max-w-lg">
+          <Link href={`/ingredient/${ingredient.id}/move`}>
+            <Button variant="khp-outline" size="xl-full">
+              Move Quantity
+            </Button>
+          </Link>
+        </div>
+      )}
     </>
   );
 }
