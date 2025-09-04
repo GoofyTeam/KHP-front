@@ -58,6 +58,12 @@ export default async function middleware(req: NextRequest) {
   const { isAuthenticated, userData } =
     await checkAuthenticationAndGetUser(req);
 
+  if (path === "/") {
+    const target = isAuthenticated ? "/dashboard" : "/login";
+    const url = new URL(target, req.url);
+    return NextResponse.redirect(url);
+  }
+
   if (isProtectedRoute(path) && !isAuthenticated) {
     const url = new URL("/login", req.url);
     url.searchParams.set("from", path);
