@@ -1,49 +1,55 @@
-# Progressive Web App
+# Progressive Web App (Vite + React)
 
-This directory contains a Vite-powered React PWA. The app uses `vite-plugin-pwa` to enable offline capabilities and automatic updates.
+Vite-based PWA using `vite-plugin-pwa` for offline support and updates.
+
+## Prerequisites
+
+`.env` file (a sample exists already):
+
+```env
+VITE_PROJECT_NAME=KHP-front
+VITE_API_URL=http://localhost:8000
+```
 
 ## Development
 
-From the repository root run:
-
-```sh
-npm run dev -w apps/pwa
-```
-
-or start it directly:
-
-```sh
-cd apps/pwa && npm run dev
-```
-
-## Build
-
-```sh
-npm run build -w apps/pwa
-# or
-cd apps/pwa && npm run build
-```
-
-## Preview
-
-```sh
-npm run preview -w apps/pwa
-# or
-cd apps/pwa && npm run preview
-```
-
-### Docker & deployment
-
-The app ships with a Dockerfile. You can build the container manually or via the
-repository `Makefile`:
+From the repo root:
 
 ```bash
-# build image and run it
-make build-pwa
-make start-pwa
+npm run dev:pwa   # uses the dev:host script
 ```
 
-On every push to `main`, the `deploy_pwa.yml` workflow builds and pushes the
-image to GitHub Container Registry.
+Or directly in this folder:
 
-See the [root README](../../README.md) for shared scripts and additional setup instructions.
+```bash
+cd apps/pwa
+npm run dev       # or npm run dev:host to expose on the network
+```
+
+Default port: http://localhost:5173.
+
+### GraphQL Introspection
+
+Before `dev`, the `introspect` command downloads the GraphQL schema from `https://back.goofykhp.fr/graphql` to `src/graphql/generated/schema.graphql`. Network is required on first launch.
+
+## Build & Preview
+
+```bash
+npm run build
+npm run preview   # serves the production build locally
+```
+
+You can also control builds/runs from the root via Turborepo (see root README).
+
+## Docker & Deployment
+
+A `Dockerfile` is provided. Use the root `Makefile`:
+
+```bash
+make build-pwa
+make start-pwa   # maps host 5433 -> container 80
+```
+
+The CI workflow (`deploy_pwa`) can build and publish the image (GHCR) on pushes to `main`.
+
+See the [root README](../../README.md) for shared commands and general setup.

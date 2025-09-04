@@ -1,91 +1,155 @@
-# KHP Frontend Monorepo
+# KHP Front — Frontend Monorepo
 
-This repository is a [Turborepo](https://turbo.build) workspace that hosts two applications and several shared packages.
+A [Turborepo](https://turbo.build) monorepo with two apps (Web and PWA) and several shared packages.
 
-## Repository structure
+## Repository Structure
 
-- `apps/web` – a [Next.js](https://nextjs.org/) web application.
-- `apps/pwa` – a [Vite](https://vitejs.dev/) powered Progressive Web App.
-- `packages/ui` – shared React component library.
-- `packages/eslint-config` – shared ESLint configuration.
-- `packages/typescript-config` – shared TypeScript configuration.
+- `apps/web` — [Next.js](https://nextjs.org/) web application
+- `apps/pwa` — [Vite + React](https://vitejs.dev/) Progressive Web App
+- `packages/ui` — shared React UI library (light design system)
+- `packages/eslint-config` — shared ESLint configuration
+- `packages/typescript-config` — shared TypeScript configurations
+- `packages/graphql` — shared GraphQL artifacts (optional)
 
-All packages use TypeScript and share the same tooling.
+All projects use TypeScript and common tooling.
 
-## Quick start
+## Architecture
+
+```mermaid
+flowchart LR
+  subgraph Apps
+    Web[Next.js Web App]\napps/web
+    PWA[Vite + React PWA]\napps/pwa
+  end
+
+  subgraph Shared Packages
+    UI[@workspace/ui\nReact UI Library]
+    ESLint[@workspace/eslint-config]
+    TS[@workspace/typescript-config]
+    GQL[packages/graphql\nShared artifacts]
+  end
+
+  Backend[(GraphQL API\nhttps://back.goofykhp.fr/graphql)]
+
+  Web --> UI
+  Web --> ESLint
+  Web --> TS
+  PWA --> UI
+  PWA --> ESLint
+  PWA --> TS
+  UI --> ESLint
+  UI --> TS
+  Web --> Backend
+  PWA --> Backend
+```
+
+### Development Flow
+
+```mermaid
+sequenceDiagram
+  participant Dev as Developer
+  participant Turbo as Turborepo
+  participant W as Web (Next.js)
+  participant P as PWA (Vite)
+  participant API as GraphQL API
+
+  Dev->>Turbo: npm run dev
+  Turbo->>W: run dev (introspect + codegen + next dev)
+  Turbo->>P: run dev (introspect + vite)
+  W->>API: get-graphql-schema (introspection)
+  P->>API: get-graphql-schema (introspection)
+  Dev->>W: open http://localhost:3000
+  Dev->>P: open http://localhost:5173
+```
+
+## Requirements
+
+- Node.js >= 18 (repo uses `npm@11`)
+- Network access to fetch the GraphQL schema on first run
+- Docker (optional) to build runtime images
+
+## Setup
 
 ```bash
 npm install
+```
+
+## Environment Variables
+
+- `apps/web` — create `.env` (see `.env.example`):
+  - `NEXT_PUBLIC_API_URL` (e.g. `http://localhost:8000`)
+- `apps/pwa` — `.env` expected:
+  - `VITE_API_URL` (e.g. `http://localhost:8000`)
+  - `VITE_PROJECT_NAME` (e.g. `KHP-front`)
+
+## Development
+
+Start everything with Turborepo:
+
+```bash
 npm run dev
 ```
 
-This installs all dependencies and starts all apps in development mode with Turborepo.
-
-To run an individual application:
+Run a specific app:
 
 ```bash
-cd apps/web && npm run dev    # Next.js web app
-# or
-cd apps/pwa && npm run dev    # Vite PWA
+npm run dev:web   # Next.js
+npm run dev:pwa   # Vite (host exposed)
 ```
 
-## Available scripts
+By default, Web runs at `http://localhost:3000` and PWA at `http://localhost:5173`.
+On first run, both apps introspect `https://back.goofykhp.fr/graphql` to update their local schema files.
 
-The root `package.json` exposes several scripts:
+## Build & Quality
 
-| Script                | Description                        |
-| --------------------- | ---------------------------------- |
-| `npm run build`       | Build all apps and packages        |
-| `npm run dev`         | Start all apps in development mode |
-| `npm run lint`        | Lint all packages                  |
-| `npm run format`      | Format files with Prettier         |
-| `npm run check-types` | Run TypeScript type checks         |
-| `npm run build:web`   | Build only the Next.js web app     |
-| `npm run build:pwa`   | Build only the PWA                 |
+- `npm run build` — build all apps and packages
+- `npm run build:web` / `npm run build:pwa` — targeted builds
+- `npm run lint` — lint the entire workspace
+- `npm run check-types` — TypeScript checks
+- `npm run format` — Prettier (`*.ts, *.tsx, *.md`)
 
-In addition to npm scripts, a `Makefile` provides shortcuts to build and run the
-Docker images for both apps:
+## Docker (optional)
+
+Dockerfiles are provided for both apps. The `Makefile` includes shortcuts:
 
 ```bash
-# build and start both containers
+# Build and start both apps
 make build-and-start
-# build or start a single app
+
+# Web only
 make build-web
-make start-web
+make start-web   # maps host 5432 -> container 3000
+
+# PWA only
+make build-pwa
+make start-pwa   # maps host 5433 -> container 80
 ```
 
-Run `make help` to see all available targets.
+### Runtime Topology
 
-## Tests
+```mermaid
+flowchart TB
+  subgraph Host
+    H1[5432 -> Web Container:3000]
+    H2[5433 -> PWA Container:80]
+  end
+```
 
-There are currently no automated tests, but they are planned for the future.
+## Conventions
 
-## Continuous integration
-
-GitHub Actions handle several automated tasks:
-
-- **runs-linter** runs `npm run lint` on every pull request.
-- **deploy_webapp** builds the web Docker image and pushes it to GHCR when `main` is updated.
-- **deploy_pwa** does the same for the PWA.
-
-## Contributing
-
-Git hooks are managed with [Lefthook](https://github.com/evilmartians/lefthook).
-Run the following after cloning to install them:
+- Git hooks managed by [Lefthook](https://github.com/evilmartians/lefthook):
 
 ```bash
 npx lefthook install
 ```
 
-Commits must follow the format `[KHP-123] feat(scope): message`. The `verify-commit-msg.sh` script checks this automatically.
+- Commit format: `[KHP-123] feat(scope): message` enforced by `verify-commit-msg.sh`.
 
-## Further documentation
+## Per-Project Docs
 
-- [apps/web/README.md](./apps/web/README.md)
-- [apps/pwa/README.md](./apps/pwa/README.md)
-- [packages/eslint-config/README.md](./packages/eslint-config/README.md)
-- [packages/typescript-config/README.md](./packages/typescript-config/README.md)
-
-## Aperçu rapide
-
-Ce dépôt Turborepo contient deux applications (Next.js et une PWA Vite) ainsi que des paquets partagés pour l\'interface utilisateur et les configurations ESLint et TypeScript. Utilisez `npm install` puis `npm run dev` pour commencer.
+- `apps/web` — see `apps/web/README.md`
+- `apps/pwa` — see `apps/pwa/README.md`
+- `packages/ui` — see `packages/ui/README.md`
+- `packages/eslint-config` — see `packages/eslint-config/README.md`
+- `packages/typescript-config` — see `packages/typescript-config/README.md`
+- `packages/graphql` — see `packages/graphql/README.md`

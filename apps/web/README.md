@@ -1,58 +1,81 @@
-# Web App
+# Web Application (Next.js)
 
-This directory contains the Next.js web application for the KHP project. It lives inside the Turborepo workspace defined at the repository root.
+Next.js web app for the KHP project. See the [root README](../../README.md) for workspace-wide commands.
 
-See [the root README](../../README.md) for general workspace commands.
+## Prerequisites
+
+- Node.js >= 18
+- `.env` with at least:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+See `.env.example` for a minimal sample.
 
 ## Development
 
-From the repository root run:
+From the repo root:
 
 ```bash
-npm run dev
+npm run dev:web
 ```
 
-This will run `turbo run dev` and start this application along with any other packages that define a `dev` script. To run only this app:
+Or directly in this folder:
 
 ```bash
 cd apps/web
 npm run dev
 ```
 
-Open <http://localhost:3000> in your browser once the server is running.
+Runs at http://localhost:3000.
 
-## Build
+### GraphQL Introspection & Codegen
 
-Create an optimized production build with:
+This app generates GraphQL artifacts before `dev` and `build`:
+
+- `npm run introspect` fetches the schema from `https://back.goofykhp.fr/graphql` and writes `src/graphql/schema/schema.graphql`.
+- `npm run codegen` (run automatically) executes `graphql-codegen` using `codegen.ts`.
+
+Ensure you have network access on first run.
+
+## Build & Run
+
+Production build:
 
 ```bash
 npm run build
 ```
 
-From the root you can build only this app using a filter:
+Start in production mode:
+
+```bash
+npm run start
+```
+
+From the root you can filter builds:
 
 ```bash
 npm run build --filter=web
 ```
 
-## Available scripts
+## Available Scripts
 
-- `dev` – start Next.js in development mode
-- `build` – produce a production build
-- `start` – run the production server
-- `preview` – build then start the production server
-- `lint` – run ESLint on the project
+- `dev` — Next.js dev mode (+ codegen)
+- `build` — production build (+ codegen)
+- `start` — Next.js production server
+- `preview` — build then start
+- `lint` — run ESLint
+- `introspect` — download remote GraphQL schema
+- `codegen` — generate GraphQL types/operations
 
-### Docker & deployment
+## Docker & Deployment
 
-This app also provides a Dockerfile. You can build and run the container with
-the repository `Makefile`:
+A `Dockerfile` is provided. Use the root `Makefile`:
 
 ```bash
 make build-web
-make start-web
+make start-web   # maps host 5432 -> container 3000
 ```
 
-The `deploy_webapp.yml` workflow builds and publishes the image to GitHub
-Container Registry whenever `main` is pushed.
-
+The CI workflow (`deploy_webapp`) can build and publish the image (GHCR) on pushes to `main`.
