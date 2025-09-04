@@ -6,8 +6,8 @@ import { Button } from "@workspace/ui/components/button";
 import { AlertCircle, CheckCircle } from "lucide-react";
 import type { GetIngredientQuery } from "@/graphql/generated/graphql";
 import type { LocationRow } from "@/queries/locations-query";
-import { QuantityInput } from "./quantity-input";
-import { LocationSelector } from "./LocationSelect";
+import { QuantityInput } from "@workspace/ui/components/quantity-input";
+import { LocationSelect } from "@workspace/ui/components/location-select";
 import { moveIngredientQuantityAction } from "@/app/(mainapp)/ingredient/actions";
 
 type IngredientData = NonNullable<GetIngredientQuery["ingredient"]>;
@@ -109,9 +109,8 @@ export function MoveQuantityForm({
 
       const res = await moveIngredientQuantityAction({
         ingredientId: ingredient.id,
-        from_location_id: selectedSourceLocation.location
-          .id as unknown as string,
-        to_location_id: selectedDestination.location.id as unknown as string,
+        from_location_id: Number(selectedSourceLocation.location.id),
+        to_location_id: Number(selectedDestination.location.id),
         quantity: Number(moveQuantity),
       });
 
@@ -151,7 +150,7 @@ export function MoveQuantityForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6 ">
       <div className="space-y-2">
-        <LocationSelector
+        <LocationSelect
           quantities={availableSourceQuantities}
           value={formData.sourceLocationIndex}
           onValueChange={(value) =>
@@ -173,7 +172,7 @@ export function MoveQuantityForm({
       />
 
       <div className="space-y-2">
-        <LocationSelector
+        <LocationSelect
           quantities={destinationQuantities}
           value={formData.destinationLocationIndex}
           onValueChange={(value) =>
