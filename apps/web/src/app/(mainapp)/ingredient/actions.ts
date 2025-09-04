@@ -6,103 +6,76 @@ type ActionResult<T = unknown> =
   | { success: true; data?: T }
   | { success: false; error: string };
 
-export async function moveIngredientQuantityAction(input: {
-  ingredientId: string | number;
-  from_location_id?: number | string;
-  to_location_id?: number | string;
-  quantity: number;
-}): Promise<ActionResult> {
-  try {
-    const { ingredientId, quantity } = input;
-    const fromCandidate = input.from_location_id ?? null;
-    const toCandidate = input.to_location_id ?? null;
+function handleHttpError<T = unknown>(e: unknown): ActionResult<T> {
+  if (!(e instanceof Error)) {
+    return { success: false, error: "Unknown error" };
+  }
 
-    if (fromCandidate == null || toCandidate == null) {
+  const match = e.message.match(/^(\d{3}):\s*(.*)$/);
+  if (!match) {
+    return { success: false, error: e.message };
+  }
+
+  const status = Number(match[1]);
+  const detail = match[2] || "";
+
+  switch (status) {
+    case 401:
+      return { success: false, error: "Unauthorized" };
+    case 400:
+      return { success: false, error: "Invalid request - check your data" };
+    case 422:
+      return handleValidationError(detail);
+    default:
+      return { success: false, error: detail || e.message };
+  }
+}
+
+function handleValidationError<T = unknown>(detail: string): ActionResult<T> {
+  try {
+    const json = JSON.parse(detail);
+    if (json?.errors) {
+      const [field, messages] = Object.entries(json.errors)[0] as [
+        string,
+        unknown,
+      ];
+      const message = Array.isArray(messages)
+        ? String(messages[0])
+        : String(messages);
       return {
         success: false,
-        error:
-          "Missing required fields: from_location_id and to_location_id are required.",
+        error: `Validation error on ${field}: ${message}`,
       };
     }
+  } catch {}
+  return { success: false, error: "Validation failed" };
+}
 
-    const toInt = (v: number | string): number => {
-      if (typeof v === "number") return v;
-      const parsed = parseInt(v, 10);
-      if (Number.isNaN(parsed)) {
-        throw new Error("Invalid location id value");
-      }
-      return parsed;
-    };
+export interface MoveIngredientInput {
+  ingredientId: string | number;
+  from_location_id: number;
+  to_location_id: number;
+  quantity: number;
+}
+
+export async function moveIngredientQuantityAction(
+  input: MoveIngredientInput
+): Promise<ActionResult> {
+  try {
+    const { ingredientId, from_location_id, to_location_id, quantity } = input;
 
     const payload = {
-      from_location_id: toInt(fromCandidate),
-      to_location_id: toInt(toCandidate),
+      from_location_id,
+      to_location_id,
       quantity,
     };
 
-    let result: unknown;
-    try {
-      result = await httpClient.post<unknown, typeof payload>(
-        `/api/ingredients/${ingredientId}/move-quantity`,
-        payload
-      );
-    } catch (firstError) {
-      if (
-        firstError instanceof Error &&
-        /^(404|405):/.test(firstError.message)
-      ) {
-        result = await httpClient.post<unknown, typeof payload>(
-          `/ingredients/${ingredientId}/move-quantity`,
-          payload
-        );
-      } else {
-        throw firstError;
-      }
-    }
-
-    return { success: true, data: result };
+    await httpClient.post(
+      `/api/ingredients/${ingredientId}/move-quantity`,
+      payload
+    );
+    return { success: true };
   } catch (e) {
-    if (e instanceof Error) {
-      const match = e.message.match(/^(\d{3}):\s*(.*)$/);
-      if (match) {
-        const status = Number(match[1]);
-        const detail = match[2] || "";
-        if (status === 401) {
-          return { success: false, error: "Not authenticated (401)." };
-        }
-        if (status === 404) {
-          return {
-            success: false,
-            error: "Ingredient or location not found (404).",
-          };
-        }
-        if (status === 422) {
-          try {
-            const json = JSON.parse(detail);
-            if (json?.errors) {
-              const [field, messages] = Object.entries(json.errors)[0] as [
-                string,
-                unknown,
-              ];
-              const message = Array.isArray(messages)
-                ? String(messages[0])
-                : String(messages);
-              return {
-                success: false,
-                error: `Validation error on ${field}: ${message}`,
-              };
-            }
-          } catch {}
-          return {
-            success: false,
-            error:
-              "Invalid request (422). Ensure positive quantity and distinct locations.",
-          };
-        }
-        return { success: false, error: detail || e.message };
-      }
-      return { success: false, error: e.message };
-    }
-    return { success: false, error: "Unknown error" };
+    return handleHttpError(e);
   }
 }
