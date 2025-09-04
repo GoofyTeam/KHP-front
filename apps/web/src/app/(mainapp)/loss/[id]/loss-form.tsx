@@ -9,8 +9,8 @@ import { toast } from "@workspace/ui/components/sonner";
 
 import { Trash2, AlertTriangle } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
-import { QuantityInput } from "@/components/quantity-input";
-import { LocationSelector } from "@/components/LocationSelect";
+import { QuantityInput } from "@workspace/ui/components/quantity-input";
+import { LocationSelect } from "@workspace/ui/components/location-select";
 import { GetIngredientQuery } from "@/graphql/generated/graphql";
 import { createLossAction } from "@/app/(mainapp)/loss/actions";
 import {
@@ -139,7 +139,7 @@ export function LossForm({ ingredient }: LossFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <LocationSelector
+                <LocationSelect
                   quantities={availableLocations}
                   value={field.value}
                   onValueChange={field.onChange}
