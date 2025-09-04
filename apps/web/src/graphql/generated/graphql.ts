@@ -338,7 +338,11 @@ export type MeasurementUnitType = {
 export type Menu = {
   __typename?: 'Menu';
   created_at: Scalars['DateTime']['output'];
+  description?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
+  image_url?: Maybe<Scalars['String']['output']>;
+  is_a_la_carte: Scalars['Boolean']['output'];
+  is_available: Scalars['Boolean']['output'];
   items: Array<MenuItem>;
   name: Scalars['String']['output'];
   updated_at: Scalars['DateTime']['output'];
