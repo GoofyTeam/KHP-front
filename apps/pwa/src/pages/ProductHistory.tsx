@@ -1,7 +1,6 @@
 import { useLoaderData, useNavigate } from "@tanstack/react-router";
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { HistoryTable } from "../components/history-table";
-import { LocationSelect } from "../components/LocationSelect";
 import { Button } from "@workspace/ui/components/button";
 import {
   Select,
@@ -11,7 +10,8 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select";
 import { Filter, X, Loader2 } from "lucide-react";
-import { GetIngredientQuery } from "../graphql/getProduct.gql";
+import { GetProductQuery } from "../graphql/getProduct.gql";
+import { LocationSelect } from "@workspace/ui/components/location-select";
 
 interface ProductData {
   id: string;
@@ -20,7 +20,7 @@ interface ProductData {
 }
 
 type StockMovement = NonNullable<
-  GetIngredientQuery["ingredient"]
+  GetProductQuery["ingredient"]
 >["stockMovements"][number];
 
 interface LoaderData {
@@ -258,12 +258,13 @@ export default function ProductHistoryPage() {
                   quantities={locationQuantities}
                   value={selectedLocationId}
                   onValueChange={handleLocationChange}
-                  label="Filter by Location"
-                  placeholder="Choose a location"
-                  unit="movements"
+                  placeholder="Select location"
+                  label="Locations"
+                  unit={product.unit}
+                  hideEmptyLocations={false}
                   showAllOption={true}
                   allOptionLabel="All locations"
-                  className="text-sm"
+                  displayAllQuantity={true}
                 />
               </div>
             )}
@@ -285,12 +286,14 @@ export default function ProductHistoryPage() {
         )}
       </div>
 
-      <HistoryTable
-        data={filteredMovements}
-        showHeader={true}
-        limitHeight={false}
-        unit={product.unit}
-      />
+      <div className="m-2">
+        <HistoryTable
+          data={filteredMovements}
+          showHeader={true}
+          limitHeight={false}
+          unit={product.unit}
+        />
+      </div>
     </div>
   );
 }

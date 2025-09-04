@@ -1,29 +1,29 @@
-import {
-  Link,
-  useLoaderData,
-  useNavigate,
-  useParams,
-} from "@tanstack/react-router";
+import { Link, useLoaderData, useParams } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 import { useProduct } from "../stores/product-store";
 import { StockStatus } from "@workspace/ui/components/stock-status";
 import { HistoryTable } from "../components/history-table";
-import { LocationSelect } from "../components/LocationSelect";
 import { Button } from "@workspace/ui/components/button";
-import { NotebookPen } from "lucide-react";
+import {
+  ArrowRightLeft,
+  NotebookPen,
+  Package,
+  PackageMinus,
+  PackagePlus,
+} from "lucide-react";
 import { useEffect, useState } from "react";
-import { GetIngredientQuery } from "../graphql/getProduct.gql";
+import { GetProductQuery } from "../graphql/getProduct.gql";
 import { ImagePlaceholder } from "../components/ImagePlaceholder";
+import { LocationSelect } from "@workspace/ui/components/location-select";
 
 // Inférer les types depuis GraphQL
-type ProductData = NonNullable<GetIngredientQuery["ingredient"]>;
+type ProductData = NonNullable<GetProductQuery["ingredient"]>;
 
 const formatQuantity = (quantity: number): string => {
   return parseFloat(quantity.toFixed(3)).toString();
 };
 
 export default function ProductPage() {
-  const navigate = useNavigate();
   const { id } = useParams({ from: "/_protected/products/$id" });
   const loaderData = useLoaderData({
     from: "/_protected/products/$id",
@@ -123,88 +123,163 @@ export default function ProductPage() {
       <Helmet>
         <title>{product?.name || "Product"} - KHP</title>
       </Helmet>
-      <div>
-        <div className="p-6 flex flex-col gap-4 ">
-          <div className="flex flex-col justify-center items-center">
-            {product.image_url ? (
-              <img
-                src={product.image_url}
-                alt={product.name}
-                className="aspect-square object-contain max-w-1/2 w-full"
-              />
-            ) : (
-              <ImagePlaceholder className="max-w-1/2 w-full" />
-            )}
-          </div>
-          <div className="flex flex-col gap-1 ">
-            <h2 className="text-2xl font-semibold">{product.name}</h2>
-            <p>
-              Category:{" "}
-              {product.categories
-                ?.map((cat: { name: string }) => cat.name)
-                .join(", ") || "Unspecified"}
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <LocationSelect
-              quantities={product.quantities || []}
-              value={selectedLocation}
-              onValueChange={setSelectedLocation}
-              placeholder="Select a location"
-              label="Available stock"
-              unit={product.unit}
-              showAllOption={true}
-              allOptionLabel="All locations"
-              className="w-full"
+      <div className="p-6 flex flex-col gap-4 ">
+        <div className="flex flex-col justify-center items-center">
+          {product.image_url ? (
+            <img
+              src={product.image_url}
+              alt={product.name}
+              className="aspect-square object-cover max-w-1/2 w-full my-6 rounded-md"
             />
+          ) : (
+            <ImagePlaceholder className="max-w-1/2 w-full" />
+          )}
+        </div>
+        <div className="flex flex-col gap-1 ">
+          <h2 className="text-2xl font-semibold">{product.name}</h2>
+          <p>Category: {product.category?.name || "Uncategorized"}</p>
+        </div>
 
-            <div className="flex justify-between items-center p-4">
-              <div className="flex flex-col">
-                <p className="text-xl font-bold text-foreground">
-                  {formatQuantity(displayStock.quantity)} {product.unit}
-                </p>
-                <p className="text-sm text-muted-foreground font-medium">
-                  Stock disponible
-                </p>
-              </div>
-              <StockStatus variant={displayStock.status} showLabel={false} />
+        <div className="flex flex-col gap-4">
+          <LocationSelect
+            quantities={product.quantities || []}
+            value={selectedLocation}
+            onValueChange={(val) => setSelectedLocation(val)}
+            placeholder="Select location"
+            label="Locations"
+            unit={product.unit}
+            hideEmptyLocations={false}
+            showAllOption={true}
+            allOptionLabel="All locations"
+            displayAllQuantity={true}
+          />
+
+          <div className="flex justify-between items-center py-4">
+            <div className="flex flex-col">
+              <p className="text-xl font-bold text-foreground">
+                {formatQuantity(displayStock.quantity)} {product.unit}
+              </p>
+              <p className="text-sm text-muted-foreground font-medium">
+                Stock disponible
+              </p>
             </div>
+            <StockStatus variant={displayStock.status} showLabel={false} />
           </div>
         </div>
 
-        <div className="flex justify-between items-center gap-2 px-6 py-2">
-          <h3 className="text-lg font-semibold">History:</h3>
-          <Link
-            to="/products/$id/history"
-            params={{ id }}
-            className="text-sm text-khp-primary underline underline-offset-2 cursor-pointer"
+        <div className="grid grid-cols-3 gap-x-1">
+          <Button
+            variant="khp-default"
+            className="pointer-events-auto w-full"
+            size="lg"
+            asChild
           >
-            View all
-          </Link>
+            <Link
+              to="/handle-item"
+              search={{
+                mode: "internalId",
+                type: "add-quantity",
+                scanMode: "stock-mode",
+                internalId: id,
+              }}
+            >
+              <PackagePlus
+                strokeWidth={1.5}
+                size={128}
+                className="text-white !h-8 !w-8"
+              />
+            </Link>
+          </Button>
+          <Button
+            variant="khp-outline"
+            className="pointer-events-auto w-full"
+            size="lg"
+            asChild
+          >
+            <Link to="/move-quantity" search={{ internalId: id }}>
+              <span className="flex items-center">
+                <Package
+                  strokeWidth={1.5}
+                  size={128}
+                  className="text-khp-primary !h-8 !w-8"
+                />
+                <ArrowRightLeft
+                  strokeWidth={1.5}
+                  size={64}
+                  className="text-khp-primary !h-8 !w-8"
+                />
+                <Package
+                  strokeWidth={1.5}
+                  size={128}
+                  className="text-khp-primary !h-8 !w-8"
+                />
+              </span>
+            </Link>
+          </Button>
+          <Button
+            variant="khp-destructive"
+            className="pointer-events-auto w-full"
+            size="lg"
+            asChild
+          >
+            <Link
+              to="/handle-item"
+              search={{
+                mode: "internalId",
+                type: "remove-quantity",
+                scanMode: "remove-mode",
+                internalId: id,
+              }}
+            >
+              <PackageMinus
+                strokeWidth={1.5}
+                size={128}
+                className="text-white !h-8 !w-8"
+              />
+            </Link>
+          </Button>
         </div>
-        <HistoryTable
-          data={product.stockMovements || []}
-          showHeader={false}
-          unit={product.unit}
-        />
+
+        <div>
+          <div className="flex justify-between items-center gap-2 py-2">
+            <h3 className="text-lg font-semibold">History:</h3>
+            <Link
+              to="/products/$id/history"
+              params={{ id }}
+              className="text-sm text-khp-primary underline underline-offset-2 cursor-pointer"
+            >
+              View all
+            </Link>
+          </div>
+          <HistoryTable
+            data={
+              product.stockMovements?.slice(
+                product.stockMovements.length - 5
+              ) || []
+            }
+            showHeader={false}
+            unit={product.unit}
+          />
+        </div>
         <div className="flex justify-center p-6">
           <Button
             variant="khp-default"
-            className="pointer-events-auto "
+            className="pointer-events-auto"
             size="xl"
-            onClick={() => {
-              navigate({
-                to: "/handle-item",
-                search: {
-                  mode: "manual",
-                  type: "add",
-                },
-              });
-            }}
+            asChild
           >
-            <NotebookPen strokeWidth={2} className="text-white !h-5 !w-5" />{" "}
-            <span className="text-xl">Edit product</span>
+            <Link
+              to="/handle-item"
+              search={{
+                type: "update-product",
+                internalId: id,
+                mode: "internalId",
+                scanMode: "stock-mode",
+              }}
+            >
+              <NotebookPen strokeWidth={2} className="text-white !h-5 !w-5" />{" "}
+              <span className="text-xl">Edit product</span>
+            </Link>
           </Button>
         </div>
       </div>

@@ -10,9 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as ProtectedScanRouteImport } from './routes/_protected/scan'
+import { Route as ProtectedMoveQuantityRouteImport } from './routes/_protected/move-quantity'
 import { Route as ProtectedInventoryRouteImport } from './routes/_protected/inventory'
 import { Route as ProtectedHandleItemRouteImport } from './routes/_protected/handle-item'
+import { Route as ProtectedScanScanTypeRouteImport } from './routes/_protected/scan.$scanType'
 import { Route as ProtectedProductsIdRouteImport } from './routes/_protected/products.$id'
 import { Route as ProtectedProductsIdHistoryRouteImport } from './routes/_protected/products.$id_.history'
 
@@ -21,9 +22,9 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProtectedScanRoute = ProtectedScanRouteImport.update({
-  id: '/_protected/scan',
-  path: '/scan',
+const ProtectedMoveQuantityRoute = ProtectedMoveQuantityRouteImport.update({
+  id: '/_protected/move-quantity',
+  path: '/move-quantity',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProtectedInventoryRoute = ProtectedInventoryRouteImport.update({
@@ -34,6 +35,11 @@ const ProtectedInventoryRoute = ProtectedInventoryRouteImport.update({
 const ProtectedHandleItemRoute = ProtectedHandleItemRouteImport.update({
   id: '/_protected/handle-item',
   path: '/handle-item',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProtectedScanScanTypeRoute = ProtectedScanScanTypeRouteImport.update({
+  id: '/_protected/scan/$scanType',
+  path: '/scan/$scanType',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProtectedProductsIdRoute = ProtectedProductsIdRouteImport.update({
@@ -52,16 +58,18 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/handle-item': typeof ProtectedHandleItemRoute
   '/inventory': typeof ProtectedInventoryRoute
-  '/scan': typeof ProtectedScanRoute
+  '/move-quantity': typeof ProtectedMoveQuantityRoute
   '/products/$id': typeof ProtectedProductsIdRoute
+  '/scan/$scanType': typeof ProtectedScanScanTypeRoute
   '/products/$id/history': typeof ProtectedProductsIdHistoryRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/handle-item': typeof ProtectedHandleItemRoute
   '/inventory': typeof ProtectedInventoryRoute
-  '/scan': typeof ProtectedScanRoute
+  '/move-quantity': typeof ProtectedMoveQuantityRoute
   '/products/$id': typeof ProtectedProductsIdRoute
+  '/scan/$scanType': typeof ProtectedScanScanTypeRoute
   '/products/$id/history': typeof ProtectedProductsIdHistoryRoute
 }
 export interface FileRoutesById {
@@ -69,8 +77,9 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_protected/handle-item': typeof ProtectedHandleItemRoute
   '/_protected/inventory': typeof ProtectedInventoryRoute
-  '/_protected/scan': typeof ProtectedScanRoute
+  '/_protected/move-quantity': typeof ProtectedMoveQuantityRoute
   '/_protected/products/$id': typeof ProtectedProductsIdRoute
+  '/_protected/scan/$scanType': typeof ProtectedScanScanTypeRoute
   '/_protected/products/$id_/history': typeof ProtectedProductsIdHistoryRoute
 }
 export interface FileRouteTypes {
@@ -79,24 +88,27 @@ export interface FileRouteTypes {
     | '/login'
     | '/handle-item'
     | '/inventory'
-    | '/scan'
+    | '/move-quantity'
     | '/products/$id'
+    | '/scan/$scanType'
     | '/products/$id/history'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
     | '/handle-item'
     | '/inventory'
-    | '/scan'
+    | '/move-quantity'
     | '/products/$id'
+    | '/scan/$scanType'
     | '/products/$id/history'
   id:
     | '__root__'
     | '/login'
     | '/_protected/handle-item'
     | '/_protected/inventory'
-    | '/_protected/scan'
+    | '/_protected/move-quantity'
     | '/_protected/products/$id'
+    | '/_protected/scan/$scanType'
     | '/_protected/products/$id_/history'
   fileRoutesById: FileRoutesById
 }
@@ -104,8 +116,9 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   ProtectedHandleItemRoute: typeof ProtectedHandleItemRoute
   ProtectedInventoryRoute: typeof ProtectedInventoryRoute
-  ProtectedScanRoute: typeof ProtectedScanRoute
+  ProtectedMoveQuantityRoute: typeof ProtectedMoveQuantityRoute
   ProtectedProductsIdRoute: typeof ProtectedProductsIdRoute
+  ProtectedScanScanTypeRoute: typeof ProtectedScanScanTypeRoute
   ProtectedProductsIdHistoryRoute: typeof ProtectedProductsIdHistoryRoute
 }
 
@@ -118,11 +131,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_protected/scan': {
-      id: '/_protected/scan'
-      path: '/scan'
-      fullPath: '/scan'
-      preLoaderRoute: typeof ProtectedScanRouteImport
+    '/_protected/move-quantity': {
+      id: '/_protected/move-quantity'
+      path: '/move-quantity'
+      fullPath: '/move-quantity'
+      preLoaderRoute: typeof ProtectedMoveQuantityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_protected/inventory': {
@@ -137,6 +150,13 @@ declare module '@tanstack/react-router' {
       path: '/handle-item'
       fullPath: '/handle-item'
       preLoaderRoute: typeof ProtectedHandleItemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_protected/scan/$scanType': {
+      id: '/_protected/scan/$scanType'
+      path: '/scan/$scanType'
+      fullPath: '/scan/$scanType'
+      preLoaderRoute: typeof ProtectedScanScanTypeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_protected/products/$id': {
@@ -160,8 +180,9 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   ProtectedHandleItemRoute: ProtectedHandleItemRoute,
   ProtectedInventoryRoute: ProtectedInventoryRoute,
-  ProtectedScanRoute: ProtectedScanRoute,
+  ProtectedMoveQuantityRoute: ProtectedMoveQuantityRoute,
   ProtectedProductsIdRoute: ProtectedProductsIdRoute,
+  ProtectedScanScanTypeRoute: ProtectedScanScanTypeRoute,
   ProtectedProductsIdHistoryRoute: ProtectedProductsIdHistoryRoute,
 }
 export const routeTree = rootRouteImport

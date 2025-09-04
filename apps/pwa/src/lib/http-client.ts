@@ -37,8 +37,6 @@ export class ImprovedHttpClient {
    * Initialisation CSRF automatique si nécessaire
    */
   async initCSRF(): Promise<void> {
-    //console.log("Initializing CSRF token...");
-    // Si on a déjà un token en cookie, on l'utilise sans appel réseau
     const existing = this.readCookie(this.csrfConfig.cookieName);
     if (existing) {
       this.csrfToken = existing;
@@ -54,7 +52,6 @@ export class ImprovedHttpClient {
         credentials: "include",
         signal: controller.signal,
         headers: {
-          "Content-Type": "application/json",
           ...this.defaultHeaders,
         },
       });
@@ -65,7 +62,6 @@ export class ImprovedHttpClient {
         throw this.createHttpError(res, "CSRF initialization failed");
       }
 
-      // On relit le cookie après le fetch
       this.csrfToken = this.readCookie(this.csrfConfig.cookieName);
       if (!this.csrfToken) {
         throw new Error(`Cookie ${this.csrfConfig.cookieName} not found`);
@@ -119,9 +115,22 @@ export class ImprovedHttpClient {
 
   /**
    * Gestion du cache
+   * (⚠️ on évite de stringifier les corps binaires/FormData)
    */
   private getCacheKey(url: string, options: RequestInit): string {
-    return `${options.method || "GET"}:${url}:${JSON.stringify(options.body || {})}`;
+    const method = options.method || "GET";
+    let bodySig = "";
+
+    if (options.body && typeof options.body === "string") {
+      bodySig = options.body;
+    } else if (!options.body) {
+      bodySig = "";
+    } else {
+      // Pour des Body non string (FormData/Blob/ArrayBuffer…), on ne les met pas dans la clé
+      bodySig = "[binary]";
+    }
+
+    return `${method}:${url}:${bodySig}`;
   }
 
   private getFromCache<T>(key: string): T | null {
@@ -137,7 +146,6 @@ export class ImprovedHttpClient {
   }
 
   private setCache(key: string, data: unknown, ttl = 300000): void {
-    // 5min par défaut
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -158,10 +166,8 @@ export class ImprovedHttpClient {
     } catch (error) {
       if (retries <= 0) throw error;
 
-      // Ne pas retry sur certaines erreurs
       if (error instanceof Error && "status" in error) {
         const httpError = error as HttpError;
-        // On ne retry pas sur les 4xx *sauf* 429
         if (
           httpError.status >= 400 &&
           httpError.status < 500 &&
@@ -171,7 +177,6 @@ export class ImprovedHttpClient {
         }
       }
 
-      // backoff exponentiel
       await new Promise((res) => setTimeout(res, delay));
       return this.withRetry(fn, retries - 1, delay * 2);
     }
@@ -179,6 +184,7 @@ export class ImprovedHttpClient {
 
   /**
    * Méthode générique pour toutes les requêtes
+   * 👉 Fix: détection FormData/Blob/ArrayBuffer, pas de JSON.stringify, pas de Content-Type forcé
    */
   async request<Req = unknown, Res = unknown>(
     options: RequestOptions<Req>,
@@ -209,8 +215,13 @@ export class ImprovedHttpClient {
     }
 
     const url = `${this.baseUrl}${path}`;
+
+    const isFormData =
+      typeof FormData !== "undefined" && body instanceof FormData;
+    const isBlob = typeof Blob !== "undefined" && body instanceof Blob;
+    const isArrayBuffer = body instanceof ArrayBuffer;
+
     const allHeaders: Record<string, string> = {
-      "Content-Type": "application/json",
       ...this.defaultHeaders,
       ...headers,
       ...(this.csrfToken
@@ -218,13 +229,32 @@ export class ImprovedHttpClient {
         : {}),
     };
 
-    // Configuration de la requête
+    // ⚠️ Cas spécial : init CSRF
+    if (path === this.csrfConfig.endpoint) {
+      allHeaders["Content-Type"] = "application/json";
+    } else {
+      // Pour FormData/Blob/ArrayBuffer → ne rien fixer
+      if (isFormData || isBlob || isArrayBuffer) {
+        if ("Content-Type" in allHeaders) delete allHeaders["Content-Type"];
+      } else if (body !== undefined) {
+        // Sinon JSON
+        allHeaders["Content-Type"] = "application/json";
+      }
+    }
+
+    const normalizedBody =
+      body === undefined
+        ? undefined
+        : isFormData || isBlob || isArrayBuffer
+          ? (body as unknown as BodyInit)
+          : JSON.stringify(body);
+
     let requestConfig: RequestInit & { url: string } = {
       url,
       method,
       headers: allHeaders,
       credentials: "include",
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      body: normalizedBody,
       signal,
     };
 
@@ -233,23 +263,20 @@ export class ImprovedHttpClient {
       requestConfig = this.interceptors.request(requestConfig);
     }
 
-    // Gestion du cache pour GET
+    // Gestion du cache pour GET uniquement
     const cacheKey = this.getCacheKey(requestConfig.url, requestConfig);
     if (method === "GET" && cache !== false) {
       const cached = this.getFromCache<Res>(cacheKey);
       if (cached) return cached;
     }
 
-    // Controller pour timeout
+    // Timeout controller
     const controller = new AbortController();
     const timeoutId = setTimeout(
       () => controller.abort(),
       timeout ?? this.timeout
     );
-
-    if (signal) {
-      signal.addEventListener("abort", () => controller.abort());
-    }
+    if (signal) signal.addEventListener("abort", () => controller.abort());
 
     const executeRequest = async (): Promise<Res> => {
       try {
@@ -310,7 +337,6 @@ export class ImprovedHttpClient {
             data = await response.json();
         }
 
-        // Mise en cache pour GET
         if (method === "GET" && cache !== false) {
           this.setCache(cacheKey, data);
         }
@@ -328,7 +354,7 @@ export class ImprovedHttpClient {
     return this.withRetry(executeRequest, retries ?? this.retries);
   }
 
-  // Méthodes de convenance avec support des types de réponse
+  // Méthodes de convenance
   get<Res = unknown>(
     path: string,
     options?: Partial<RequestOptions<undefined>>,
@@ -389,28 +415,36 @@ export class ImprovedHttpClient {
 
   /**
    * Upload de fichiers
+   * - Accepte FormData (recommandé) ou File (auto-emballé)
+   * - Ne force pas Content-Type
    */
   async upload<Res = unknown>(
     path: string,
-    file: File | FormData,
-    options?: Partial<RequestOptions>
+    fileOrForm: File | FormData,
+    options?: Partial<RequestOptions<FormData>>
   ): Promise<Res> {
-    const formData = file instanceof FormData ? file : new FormData();
-    if (file instanceof File) {
-      formData.append("file", file);
+    const formData =
+      fileOrForm instanceof FormData ? fileOrForm : new FormData();
+
+    if (fileOrForm instanceof File) {
+      // nom de champ par défaut "file"
+      formData.append("file", fileOrForm);
     }
 
-    const { headers = {}, ...restOptions } = options || {};
-    // Ne pas définir Content-Type pour FormData (le navigateur le fait automatiquement)
-    delete headers["Content-Type"];
+    const { headers = {}, ...rest } = options ?? {};
+    // Par précaution, on retire Content-Type si fourni
+    if ("Content-Type" in headers) delete headers["Content-Type"];
 
-    return this.request<FormData, Res>({
-      method: "POST",
-      path,
-      body: formData,
-      headers,
-      ...restOptions,
-    } as RequestOptions<FormData>);
+    return this.request<FormData, Res>(
+      {
+        method: HttpMethod.POST,
+        path,
+        body: formData,
+        headers,
+        ...rest,
+      },
+      "json"
+    );
   }
 
   /**

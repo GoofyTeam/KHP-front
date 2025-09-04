@@ -1,10 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import ProductHistoryPage from "../../pages/ProductHistory";
 import { graphqlRequest } from "../../lib/graph-client";
-import {
-  GetIngredient,
-  GetIngredientQuery,
-} from "../../graphql/getProduct.gql";
+import { GetProduct, GetProductQuery } from "../../graphql/getProduct.gql";
 
 import z from "zod";
 
@@ -23,14 +20,9 @@ export const Route = createFileRoute("/_protected/products/$id_/history")({
     const { id } = params;
     const { filter, selectedMonth } = deps;
 
-    const productData = await graphqlRequest<GetIngredientQuery>(
-      GetIngredient,
-      {
-        id,
-      }
-    );
-
-    console.log("🔍 Product with stockMovements:", productData);
+    const productData = await graphqlRequest<GetProductQuery>(GetProduct, {
+      id,
+    });
 
     if (!productData.ingredient) {
       throw new Error("Product not found");

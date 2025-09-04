@@ -45,12 +45,10 @@ function InventoryPage() {
     if (pageIndex === 1) {
       setAllItems(data);
     } else {
-      setAllItems(
-        (prev: GetCompanyProductsQuery["ingredients"]["data"]) => [
-          ...prev,
-          ...data,
-        ]
-      );
+      setAllItems((prev: GetCompanyProductsQuery["ingredients"]["data"]) => [
+        ...prev,
+        ...data,
+      ]);
     }
   }, [data, pageIndex]);
 
@@ -89,11 +87,13 @@ function InventoryPage() {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
 
-        <Button variant="khp-default" asChild>
-          <Link to="/scan">
-            <ScanBarcode size={32} />
-          </Link>
-        </Button>
+        <div className="flex gap-x-2">
+          <Button variant="khp-default" asChild className="!h-auto">
+            <Link to="/scan/$scanType" params={{ scanType: "add-product" }}>
+              <ScanBarcode size={32} />
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {allItems.map(

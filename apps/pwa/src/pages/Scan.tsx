@@ -1,5 +1,5 @@
 import { Button } from "@workspace/ui/components/button";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import "react-barcode-scanner/polyfill";
 
 import {
@@ -16,8 +16,11 @@ import {
   FlashlightOff,
   NotebookPen,
 } from "lucide-react";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useParams } from "@tanstack/react-router";
 import { useNetworkState } from "@uidotdev/usehooks";
+import { Tabs, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
+import z from "zod";
+import { Label } from "@workspace/ui/components/label";
 
 const portraitConstraints = {
   width: { min: 480, ideal: 720 },
@@ -35,10 +38,22 @@ const scanOptions: ScanOptions = {
   delay: 1000,
 };
 
+export const scanModeEnum = z.enum([
+  "stock-mode",
+  "search-mode",
+  "remove-mode",
+]);
+type ScanModeType = z.infer<typeof scanModeEnum>;
+
 export default function ScanPage() {
   const navigate = useNavigate();
   const { online } = useNetworkState();
+  const { scanType: type } = useParams({
+    from: "/_protected/scan/$scanType",
+  });
   const { isTorchSupported, isTorchOn, setIsTorchOn } = useTorch();
+
+  const [scanMode, setScanMode] = useState<ScanModeType>("stock-mode");
 
   const onScan = (value: DetectedBarcode[]) => {
     if (value.length <= 0) return;
@@ -48,9 +63,10 @@ export default function ScanPage() {
     navigate({
       to: "/handle-item",
       search: {
-        mode: "scan",
-        type: "add",
+        mode: "barcode",
+        type: scanMode === "remove-mode" ? "remove-quantity" : type,
         barcode,
+        scanMode,
       },
     });
   };
@@ -99,7 +115,8 @@ export default function ScanPage() {
                 to: "/handle-item",
                 search: {
                   mode: "manual",
-                  type: "add",
+                  type,
+                  scanMode,
                 },
               });
             }}
@@ -108,7 +125,7 @@ export default function ScanPage() {
               strokeWidth={2}
               className="text-white !h-7 !w-7 mr-2"
             />
-            <span className="text-xl">Add Manually</span>
+            <span className="text-xl">Manual mode</span>
           </Button>
         </div>
       </div>
@@ -146,6 +163,46 @@ export default function ScanPage() {
           <ArrowLeft strokeWidth={2} className="text-white !h-7 !w-7" />
         </Button>
 
+        {(type === "add-product" || type === "add-quantity") && (
+          <div className="absolute top-15 left-1/2 transform -translate-x-1/2 pointer-events-auto">
+            <div className="mb-2 flex flex-col items-center">
+              <Label className="text-white text-lg text-center">
+                Scan mode:
+              </Label>
+            </div>
+            <Tabs
+              value={scanMode}
+              onValueChange={(value) => {
+                setScanMode(value as ScanModeType);
+              }}
+            >
+              <TabsList variant="khp-default" autoHeight={true}>
+                <TabsTrigger
+                  value="stock-mode"
+                  variant="khp-default"
+                  size="xxl"
+                >
+                  ADD
+                </TabsTrigger>
+                <TabsTrigger
+                  value="remove-mode"
+                  variant="khp-default"
+                  size="xxl"
+                >
+                  REMOVE
+                </TabsTrigger>
+                <TabsTrigger
+                  value="search-mode"
+                  variant="khp-default"
+                  size="xxl"
+                >
+                  SEARCH
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+        )}
+
         <Button
           variant="khp-default"
           className="absolute bottom-4 left-1/2 transform -translate-x-1/2 pointer-events-auto"
@@ -155,7 +212,8 @@ export default function ScanPage() {
               to: "/handle-item",
               search: {
                 mode: "manual",
-                type: "add",
+                type,
+                scanMode,
               },
             });
           }}

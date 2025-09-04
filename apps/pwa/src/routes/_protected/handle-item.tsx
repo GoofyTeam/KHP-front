@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import HandleItem from "../../pages/HandleItem";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import HandleItem from "../../pages/handleItem/HandleItem";
 import { graphqlRequest } from "../../lib/graph-client";
 import {
   GetLocations,
@@ -9,77 +9,117 @@ import {
   GetCategories,
   type GetCategoriesQuery,
 } from "../../graphql/getCategories.gql";
-import {
-  GetItemResult,
-  type GetItemResultQuery,
-} from "../../graphql/getItemResult.gql";
 
-type handleItemSearch = {
-  mode: "scan" | "manual" | "db" | "update";
-  type: "add" | "remove";
-  barcode?: string;
-};
+import handleScanType from "../../lib/handleScanType";
+import z from "zod";
+import { handleTypes } from "./scan.$scanType";
+import { scanModeEnum } from "../../pages/Scan";
+import { useHandleItemStore } from "../../stores/handleitem-store";
+
+export const handleItemSearchSchema = z.object({
+  type: handleTypes,
+  mode: z.enum(["barcode", "internalId", "manual", "search"]),
+  scanMode: scanModeEnum,
+  barcode: z.string().optional(),
+  internalId: z.string().optional(),
+});
+
+// Type inféré automatiquement à partir du schema Zod
+export type HandleItemSearch = z.infer<typeof handleItemSearchSchema>;
 
 export const Route = createFileRoute("/_protected/handle-item")({
-  validateSearch: (search: Record<string, unknown>): handleItemSearch => {
+  validateSearch: (search: Record<string, unknown>): HandleItemSearch => {
     return {
-      mode: (search.mode as handleItemSearch["mode"]) ?? "manual",
-      type: (search.type as handleItemSearch["type"]) ?? "add",
+      mode: (search.mode as HandleItemSearch["mode"]) ?? "manual",
+      type: (search.type as HandleItemSearch["type"]) ?? "add",
+      scanMode: search.scanMode as HandleItemSearch["scanMode"],
       barcode: (search.barcode as string) ?? undefined,
+      internalId: (search.internalId as string) ?? undefined,
     };
   },
   loaderDeps: ({ search }) => ({
     mode: search.mode,
     type: search.type,
+    scanMode: search.scanMode,
     barcode: search.barcode,
+    internalId: search.internalId,
   }),
   beforeLoad: async ({ search }) => {
-    if (search.mode === "scan" && !search.barcode) {
-      throw new Error("Barcode is required for scan mode");
+    if (search.mode === "barcode" && !search.barcode) {
+      throw new Error("Barcode is required for barcode mode");
+    }
+
+    if (search.mode === "internalId" && !search.internalId) {
+      throw new Error("Product ID is required for update mode");
     }
   },
-  loader: async ({ deps: { mode, type, barcode } }) => {
+  loader: async ({ deps: { mode, type, barcode, internalId, scanMode } }) => {
     const locationQuery = await graphqlRequest<GetLocationsQuery>(GetLocations);
     const availableLocations = locationQuery.locations.data || [];
     const categoriesQuery =
       await graphqlRequest<GetCategoriesQuery>(GetCategories);
     const categories = categoriesQuery.categories.data || [];
 
-    if (mode === "scan") {
-      if (!barcode) {
-        //Redirect to scan with error
-        throw new Error("Barcode is required for scan mode");
-      }
-      const variables = {
-        barcode,
-        page: 1,
-      };
+    const productToFetch = internalId ?? barcode;
+    if (!productToFetch && mode !== "manual")
+      throw new Error("Product identifier is required");
 
-      const result = await graphqlRequest<GetItemResultQuery>(
-        GetItemResult,
-        variables
-      );
+    const productData = await handleScanType(mode, productToFetch);
 
-      return {
-        mode,
-        type,
-        barcode,
-        product: result.search,
-        availableLocations,
-        categories,
-      };
-    } else if (mode === "update") {
-      // Handle fetching by product ID for update
-    } else if (mode === "db") {
-      // Handle fetching by product ID from the database
+    if (scanMode === "search-mode" && productData.product_already_in_database) {
+      redirect({
+        to: "/products/$id",
+        params: {
+          id: productData.product_internal_id!,
+        },
+        replace: true,
+        throw: true,
+      });
     }
 
+    if (
+      scanMode === "remove-mode" &&
+      !productData.product_already_in_database &&
+      barcode
+    ) {
+      redirect({
+        to: "/handle-item",
+        search: {
+          type: "add-product",
+          mode: "barcode",
+          scanMode: "stock-mode",
+          barcode: barcode,
+        },
+        replace: true,
+        throw: true,
+      });
+    }
+
+    type =
+      productData.product_already_in_database && type === "add-product"
+        ? "add-quantity"
+        : type;
+
+    let pageTitle = "Manage your item";
+    if (type === "add-product") {
+      pageTitle = "Add a new product";
+    } else if (type === "add-quantity") {
+      pageTitle = "Add quantity to your product";
+    } else if (type === "remove-quantity") {
+      pageTitle = "Remove quantity from your product";
+    } else if (type === "remove-product") {
+      pageTitle = "Remove your product";
+    } else if (type === "update-product") {
+      pageTitle = "Update your product";
+    }
+    useHandleItemStore.getState().setPageTitle(pageTitle);
+
     return {
-      mode,
-      type,
-      barcode: undefined,
-      product: null,
       availableLocations,
+      categories,
+      product: productData,
+      type,
+      productId: productToFetch,
     };
   },
   component: HandleItem,

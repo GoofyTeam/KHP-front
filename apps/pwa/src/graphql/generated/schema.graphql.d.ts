@@ -32,6 +32,8 @@ export type Category = {
   preparations: Array<Preparation>;
   /** The company that owns this category. */
   company: Company;
+  /** Shelf life durations by location type. */
+  shelfLives: Array<CategoryShelfLife>;
   /** When the Category was created. */
   created_at: Scalars['DateTime']['output'];
   /** When the Category was last updated. */
@@ -45,6 +47,14 @@ export type CategoryPaginator = {
   paginatorInfo: PaginatorInfo;
   /** A list of Category items. */
   data: Array<Category>;
+};
+
+export type CategoryShelfLife = {
+  __typename?: 'CategoryShelfLife';
+  /** The location type for this shelf life. */
+  locationType: LocationType;
+  /** Shelf life in hours for the category at this location type. */
+  shelf_life_hours: Scalars['Int']['output'];
 };
 
 export type Company = {
@@ -98,10 +108,12 @@ export type Ingredient = {
   name: Scalars['String']['output'];
   /** Unit of measurement for the ingredient. */
   unit: UnitEnum;
+  /** Quantity for one unit of the ingredient. */
+  base_quantity: Scalars['Float']['output'];
   quantities: Array<IngredientQuantity>;
   /** The company that owns this ingredient. */
   company: Company;
-  categories: Array<Category>;
+  category: Category;
   image_url?: Maybe<Scalars['String']['output']>;
   /** Historique des mouvements de stock pour cet ingrédient */
   stockMovements: Array<StockMovement>;
@@ -261,6 +273,14 @@ export type Loss = {
   updated_at: Scalars['DateTime']['output'];
 };
 
+/** Statistiques des pertes par type. */
+export type LossesStats = {
+  __typename?: 'LossesStats';
+  ingredient: Scalars['Float']['output'];
+  preparation: Scalars['Float']['output'];
+  total: Scalars['Float']['output'];
+};
+
 export type LossOrderByClause = {
   field: LossOrderByField;
   order: SortOrder;
@@ -293,6 +313,41 @@ export type MeasurementUnitType = {
   category: Scalars['String']['output'];
 };
 
+export type Menu = {
+  __typename?: 'Menu';
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  items: Array<MenuItem>;
+  created_at: Scalars['DateTime']['output'];
+  updated_at: Scalars['DateTime']['output'];
+};
+
+export type MenuItem = {
+  __typename?: 'MenuItem';
+  id: Scalars['ID']['output'];
+  location: Location;
+  quantity: Scalars['Float']['output'];
+  unit: UnitEnum;
+  entity: MenuItemEntity;
+};
+
+export type MenuItemEntity = Ingredient | Preparation;
+
+export type MenuOrder = {
+  __typename?: 'MenuOrder';
+  id: Scalars['ID']['output'];
+  status: Scalars['String']['output'];
+  quantity: Scalars['Int']['output'];
+  menu: Menu;
+  created_at: Scalars['DateTime']['output'];
+  updated_at: Scalars['DateTime']['output'];
+};
+
+export type MenuOrderStats = {
+  __typename?: 'MenuOrderStats';
+  count: Scalars['Int']['output'];
+};
+
 /** Représente un produit alimentaire issu d'OpenFoodFacts */
 export type OpenFoodFactsProduct = {
   __typename?: 'OpenFoodFactsProduct';
@@ -303,6 +358,7 @@ export type OpenFoodFactsProduct = {
   categories?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   imageUrl?: Maybe<Scalars['String']['output']>;
   is_already_in_database?: Maybe<Scalars['Boolean']['output']>;
+  ingredient_id?: Maybe<Scalars['ID']['output']>;
 };
 
 /** Allows ordering a list of records. */
@@ -353,6 +409,23 @@ export type PaginatorInfo = {
   /** Number of total available items. */
   total: Scalars['Int']['output'];
 };
+
+export type Perishable = {
+  __typename?: 'Perishable';
+  id: Scalars['ID']['output'];
+  ingredient: Ingredient;
+  location: Location;
+  quantity: Scalars['Float']['output'];
+  expiration_at: Scalars['DateTime']['output'];
+  created_at: Scalars['DateTime']['output'];
+  updated_at: Scalars['DateTime']['output'];
+};
+
+export enum PerishableFilter {
+  Fresh = 'FRESH',
+  Soon = 'SOON',
+  Expired = 'EXPIRED'
+}
 
 export type Preparation = {
   __typename?: 'Preparation';
@@ -441,8 +514,14 @@ export type Query = {
   location?: Maybe<Location>;
   /** Trouve un type de localisation spécifique (seulement s'il appartient à l'entreprise actuelle). */
   locationType?: Maybe<LocationType>;
+  lossesStats: LossesStats;
   /** Liste les unités de mesure disponibles */
   measurementUnits: Array<MeasurementUnitType>;
+  menus: Array<Menu>;
+  menu?: Maybe<Menu>;
+  menuOrderStats: MenuOrderStats;
+  perishables: Array<Perishable>;
+  nonPerishableIngredients: Array<Ingredient>;
   /** Trouve une preparation (et seulement si elle appartient à ma company) */
   preparation?: Maybe<Preparation>;
   /** Find a single user by an identifying attribute. */
@@ -491,6 +570,7 @@ export type QueryCompanyArgs = {
 export type QueryIngredientArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  barcode?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -503,6 +583,28 @@ export type QueryLocationArgs = {
 export type QueryLocationTypeArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryLossesStatsArgs = {
+  start_date?: InputMaybe<Scalars['DateTime']['input']>;
+  end_date?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+
+export type QueryMenuArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryMenuOrderStatsArgs = {
+  start?: InputMaybe<Scalars['Date']['input']>;
+  end?: InputMaybe<Scalars['Date']['input']>;
+};
+
+
+export type QueryPerishablesArgs = {
+  filter?: InputMaybe<PerishableFilter>;
 };
 
 
@@ -539,6 +641,7 @@ export type QueryIngredientsArgs = {
   locationIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   categoryIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   orderBy?: InputMaybe<Array<OrderByClause>>;
+  barcode?: InputMaybe<Scalars['String']['input']>;
   first?: Scalars['Int']['input'];
   page?: InputMaybe<Scalars['Int']['input']>;
 };

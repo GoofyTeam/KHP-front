@@ -1,10 +1,10 @@
-query GetIngredient($id: ID!) {
+query getProduct($id: ID!) {
   ingredient(id: $id) {
     id
     name
     unit
     image_url
-    categories {
+    category {
       name
     }
     quantities {

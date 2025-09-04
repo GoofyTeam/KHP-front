@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { LocationSelector } from "../LocationSelect";
+import { LocationSelect } from "@workspace/ui/components/location-select";
 import { formatQuantity } from "../../lib/formatQuantity";
 import { GetIngredientQuery } from "@/graphql/generated/graphql";
 
@@ -45,13 +45,17 @@ export function IngredientStockDisplay({
     <>
       <div className="space-y-4 w-full">
         <div className="mb-4 ">
-          <LocationSelector
-            quantities={ingredient.quantities}
+          <LocationSelect
+            quantities={ingredient.quantities || []}
             value={selectedLocationIndex}
             onValueChange={setSelectedLocationIndex}
-            placeholder="Choose a location"
-            label="Location"
+            placeholder="Select location"
+            label="Locations"
             unit={ingredient.unit}
+            hideEmptyLocations={false}
+            showAllOption={true}
+            allOptionLabel="All locations"
+            displayAllQuantity={true}
           />
         </div>
         <div className="bg-khp-primary rounded-lg px-5 py-4 text-white">
