@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
-import { cn } from "../lib/utils.js";
+import { cn } from "@workspace/ui/lib/utils";
 import { useMemo } from "react";
 
 export interface LocationItem {

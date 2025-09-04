@@ -108,6 +108,9 @@ type Ingredient {
 
   """Quantity for one unit of the ingredient."""
   base_quantity: Float!
+
+  """Unit for the base quantity of the ingredient."""
+  base_unit: UnitEnum!
   quantities: [IngredientQuantity!]!
 
   """The company that owns this ingredient."""
@@ -116,7 +119,7 @@ type Ingredient {
   image_url: String
 
   """Historique des mouvements de stock pour cet ingrédient"""
-  stockMovements: [StockMovement!]!
+  stockMovements(orderBy: [StockMovementOrderByClause!]): [StockMovement!]!
   withdrawals_today_count: Int!
 
   """Number of withdrawals for this ingredient today."""
@@ -272,10 +275,10 @@ type Loss {
   id: ID!
 
   """Type d'entité concernée par cette perte (ingredient ou preparation)."""
-  lossable_type: String!
+  loss_item_type: String!
 
   """ID de l'entité concernée."""
-  lossable_id: ID!
+  loss_item_id: ID!
 
   """L'emplacement où la perte a eu lieu."""
   location: Location!
@@ -290,7 +293,7 @@ type Loss {
   quantity: Float!
 
   """Raison de la perte."""
-  reason: String
+  reason: String!
 
   """Date et heure de création de la perte."""
   created_at: DateTime!
@@ -327,6 +330,24 @@ type LossPaginator {
   data: [Loss!]!
 }
 
+"""Raison de perte prédéfinie pour une entreprise."""
+type LossReason {
+  """Identifiant unique."""
+  id: ID!
+
+  """Nom de la raison."""
+  name: String!
+
+  """Entreprise associée."""
+  company: Company!
+
+  """Date de création."""
+  created_at: DateTime!
+
+  """Date de mise à jour."""
+  updated_at: DateTime!
+}
+
 """Type représentant une unité de mesure"""
 type MeasurementUnitType {
   """Valeur utilisée en interne (ex: 'kg', 'L')"""
@@ -337,6 +358,37 @@ type MeasurementUnitType {
 
   """Catégorie de l'unité (masse, volume ou unité)"""
   category: String!
+}
+
+type Menu {
+  id: ID!
+  name: String!
+  items: [MenuItem!]!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type MenuItem {
+  id: ID!
+  location: Location!
+  quantity: Float!
+  unit: UnitEnum!
+  entity: MenuItemEntity!
+}
+
+union MenuItemEntity = Ingredient | Preparation
+
+type MenuOrder {
+  id: ID!
+  status: String!
+  quantity: Int!
+  menu: Menu!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type MenuOrderStats {
+  count: Int!
 }
 
 """Représente un produit alimentaire issu d'OpenFoodFacts"""
@@ -566,8 +618,14 @@ type Query {
   ): LocationType
   lossesStats(start_date: DateTime, end_date: DateTime): LossesStats!
 
+  """Liste les raisons de perte de l'entreprise actuelle."""
+  lossReasons: [LossReason!]!
+
   """Liste les unités de mesure disponibles"""
   measurementUnits: [MeasurementUnitType!]!
+  menus: [Menu!]!
+  menu(id: ID!): Menu
+  menuOrderStats(start: Date, end: Date): MenuOrderStats!
   perishables(filter: PerishableFilter = FRESH): [Perishable!]!
   nonPerishableIngredients: [Ingredient!]!
 
@@ -677,8 +735,8 @@ type Query {
 
   """Liste les pertes pour l'entreprise actuelle."""
   losses(
-    trackable_type: String
-    trackable_id: ID
+    loss_item_type: String
+    loss_item_id: ID
     location_id: ID
     start_date: DateTime
     end_date: DateTime
@@ -792,6 +850,9 @@ type StockMovement {
   """Type de mouvement: 'addition' ou 'withdrawal'."""
   type: String!
 
+  """Raison du mouvement."""
+  reason: String
+
   """Quantité concernée par le mouvement (toujours positive)."""
   quantity: Float!
 
@@ -811,7 +872,7 @@ type StockMovement {
 """Options de tri pour les mouvements de stock."""
 input StockMovementOrderByClause {
   """Champ sur lequel effectuer le tri."""
-  field: StockMovementOrderByField!
+  column: StockMovementOrderByField!
 
   """Direction du tri."""
   order: SortOrder!

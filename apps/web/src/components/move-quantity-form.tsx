@@ -9,10 +9,12 @@ import {
   LocationSelect,
 } from "@workspace/ui/components/location-select";
 import { QuantityInput } from "@workspace/ui/components/quantity-input";
-import { Ingredient } from "@/graphql/generated/graphql";
+import { GetIngredientQuery } from "@/graphql/generated/graphql";
+
+type IngredientData = NonNullable<GetIngredientQuery["ingredient"]>;
 
 interface MoveQuantityFormProps {
-  ingredient: Ingredient;
+  ingredient: IngredientData;
   allLocations: LocationItem[];
 }
 
