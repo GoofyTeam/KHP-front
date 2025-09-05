@@ -128,6 +128,11 @@ export type Ingredient = {
   updated_at: Scalars['DateTime']['output'];
 };
 
+
+export type IngredientStockMovementsArgs = {
+  orderBy?: InputMaybe<Array<StockMovementOrderByClause>>;
+};
+
 export type IngredientOrderByClause = {
   column: IngredientOrderByField;
   order?: SortOrder;
@@ -254,9 +259,9 @@ export type Loss = {
   /** Identifiant unique. */
   id: Scalars['ID']['output'];
   /** Type d'entité concernée par cette perte (ingredient ou preparation). */
-  lossable_type: Scalars['String']['output'];
+  loss_item_type: Scalars['String']['output'];
   /** ID de l'entité concernée. */
-  lossable_id: Scalars['ID']['output'];
+  loss_item_id: Scalars['ID']['output'];
   /** L'emplacement où la perte a eu lieu. */
   location: Location;
   /** L'entreprise à laquelle appartient cette perte. */
@@ -666,8 +671,8 @@ export type QueryLocationTypesArgs = {
 
 
 export type QueryLossesArgs = {
-  trackable_type?: InputMaybe<Scalars['String']['input']>;
-  trackable_id?: InputMaybe<Scalars['ID']['input']>;
+  loss_item_type?: InputMaybe<Scalars['String']['input']>;
+  loss_item_id?: InputMaybe<Scalars['ID']['input']>;
   location_id?: InputMaybe<Scalars['ID']['input']>;
   start_date?: InputMaybe<Scalars['DateTime']['input']>;
   end_date?: InputMaybe<Scalars['DateTime']['input']>;
@@ -747,7 +752,7 @@ export type StockMovement = {
 /** Options de tri pour les mouvements de stock. */
 export type StockMovementOrderByClause = {
   /** Champ sur lequel effectuer le tri. */
-  field: StockMovementOrderByField;
+  column: StockMovementOrderByField;
   /** Direction du tri. */
   order: SortOrder;
 };
