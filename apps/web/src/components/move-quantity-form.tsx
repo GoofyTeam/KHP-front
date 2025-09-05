@@ -4,18 +4,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@workspace/ui/components/button";
 import { AlertCircle, CheckCircle } from "lucide-react";
-import {
-  LocationItem,
-  LocationSelect,
-} from "@workspace/ui/components/location-select";
+import type { GetIngredientQuery } from "@/graphql/generated/graphql";
+import type { LocationRow } from "@/queries/locations-query";
 import { QuantityInput } from "@workspace/ui/components/quantity-input";
-import { GetIngredientQuery } from "@/graphql/generated/graphql";
+import { LocationSelect } from "@workspace/ui/components/location-select";
+import { moveIngredientQuantityAction } from "@/app/(mainapp)/ingredient/actions";
 
 type IngredientData = NonNullable<GetIngredientQuery["ingredient"]>;
 
 interface MoveQuantityFormProps {
   ingredient: IngredientData;
-  allLocations: LocationItem[];
+  allLocations: LocationRow[];
 }
 
 interface FormData {
@@ -36,13 +35,16 @@ export function MoveQuantityForm({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const availableSourceQuantities = ingredient.quantities.filter(
     (q) => q.quantity > 0
   );
 
   const selectedSourceLocation = formData.sourceLocationIndex
-    ? availableSourceQuantities[parseInt(formData.sourceLocationIndex)]
+    ? availableSourceQuantities.find(
+        (q) => q.location.id === formData.sourceLocationIndex
+      )
     : null;
 
   const maxQuantity = selectedSourceLocation?.quantity || 0;
@@ -95,9 +97,31 @@ export function MoveQuantityForm({
     }
 
     setIsSubmitting(true);
+    setApiError(null);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const selectedDestination = formData.destinationLocationIndex
+        ? destinationQuantities.find(
+            (q) => q.location.id === formData.destinationLocationIndex
+          )
+        : null;
+
+      if (!selectedSourceLocation || !selectedDestination) {
+        setApiError("Please select both source and destination.");
+        return;
+      }
+
+      const res = await moveIngredientQuantityAction({
+        ingredientId: ingredient.id,
+        from_location_id: Number(selectedSourceLocation.location.id),
+        to_location_id: Number(selectedDestination.location.id),
+        quantity: Number(moveQuantity),
+      });
+
+      if (!res.success) {
+        setApiError(res.error || "Unable to move quantity.");
+        return;
+      }
 
       setSuccess(true);
 
@@ -106,6 +130,7 @@ export function MoveQuantityForm({
       }, 2000);
     } catch (err) {
       console.error("Error moving quantity:", err);
+      setApiError("An unexpected error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -130,7 +155,7 @@ export function MoveQuantityForm({
     <form onSubmit={handleSubmit} className="space-y-6 ">
       <div className="space-y-2">
         <LocationSelect
-          quantities={ingredient.quantities}
+          quantities={availableSourceQuantities}
           value={formData.sourceLocationIndex}
           onValueChange={(value) =>
             handleInputChange("sourceLocationIndex", value)
@@ -138,10 +163,7 @@ export function MoveQuantityForm({
           placeholder="Choose a source location"
           label="From"
           unit={ingredient.unit}
-          hideEmptyLocations={false}
-          showAllOption={true}
-          allOptionLabel="All locations"
-          displayAllQuantity={true}
+          showAllOption={false}
         />
       </div>
 
@@ -164,10 +186,7 @@ export function MoveQuantityForm({
           placeholder="Choose a destination location"
           label="To"
           unit={ingredient.unit}
-          hideEmptyLocations={false}
-          showAllOption={true}
-          allOptionLabel="All locations"
-          displayAllQuantity={true}
+          showAllOption={false}
         />
       </div>
 
@@ -218,10 +237,9 @@ export function MoveQuantityForm({
               </span>
               <span className="font-bold text-khp-success">
                 {(() => {
-                  const selectedDestination =
-                    destinationQuantities[
-                      parseInt(formData.destinationLocationIndex)
-                    ];
+                  const selectedDestination = destinationQuantities.find(
+                    (q) => q.location.id === formData.destinationLocationIndex
+                  );
                   const currentDestinationQuantity =
                     selectedDestination?.quantity || 0;
                   return (currentDestinationQuantity + moveQuantity).toFixed(3);
@@ -280,6 +298,16 @@ export function MoveQuantityForm({
             </Button>
           );
         })()}
+        {apiError && (
+          <div className="mt-3 w-full p-4 bg-khp-error/10 border border-khp-error/30 rounded-lg">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-khp-error mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-khp-error">{apiError}</p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </form>
   );

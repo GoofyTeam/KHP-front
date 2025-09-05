@@ -363,6 +363,10 @@ type MeasurementUnitType {
 type Menu {
   id: ID!
   name: String!
+  description: String
+  image_url: String
+  is_a_la_carte: Boolean!
+  is_available: Boolean!
   items: [MenuItem!]!
   created_at: DateTime!
   updated_at: DateTime!
