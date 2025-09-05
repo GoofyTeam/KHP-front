@@ -1,127 +1,486 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
-import { Separator } from "@workspace/ui/components/separator";
-import { CheckCircleIcon, Loader2Icon } from "lucide-react";
+import {
+  CheckCircleIcon,
+  Loader2Icon,
+  Eye,
+  EyeOff,
+  LogOut,
+  User,
+  Lock,
+} from "lucide-react";
+import {
+  logoutAction,
+  updatePasswordAction,
+  updateUserInfoAction,
+} from "@/app/(mainapp)/settings/account/actions";
+import { useUserStore } from "@/stores/user-store";
 
-export function AccountForm() {
+type User = {
+  id?: number;
+  name?: string;
+  email?: string;
+  company_id?: number;
+  updated_at?: string;
+};
+
+type ProfileFormValues = {
+  name: string;
+  email: string;
+};
+
+type PasswordFormValues = {
+  current_password: string;
+  new_password: string;
+  new_password_confirmation: string;
+};
+
+export function AccountForm({ user }: { user: User }) {
   const [isLoading, setIsLoading] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "Adrien",
-    email: "adrien@example.com",
-    company: "GoofyTeam",
-    companyId: "2",
-    lastUpdated: "2025-08-21 17:43:01",
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  const [pwdLoading, setPwdLoading] = useState(false);
+  const [pwdSaved, setPwdSaved] = useState(false);
+  const [pwdError, setPwdError] = useState<string | null>(null);
+
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const [logoutLoading, setLogoutLoading] = useState(false);
+
+  const [isPending, startTransition] = useTransition();
+  const { fetchUser } = useUserStore();
+
+  const profileForm = useForm<ProfileFormValues>({
+    defaultValues: {
+      name: user?.name ?? "",
+      email: user?.email ?? "",
+    },
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const passwordForm = useForm<PasswordFormValues>({
+    defaultValues: {
+      current_password: "",
+      new_password: "",
+      new_password_confirmation: "",
+    },
+  });
+
+  const onProfileSubmit = (values: ProfileFormValues) => {
     setIsLoading(true);
     setSaved(false);
+    setSaveError(null);
 
-    setTimeout(() => {
-      setIsLoading(false);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    }, 1500);
+    startTransition(async () => {
+      try {
+        const changedFields: { name?: string; email?: string } = {};
+
+        if (values.name !== user?.name) {
+          changedFields.name = values.name;
+        }
+
+        if (values.email !== user?.email) {
+          changedFields.email = values.email;
+        }
+        if (Object.keys(changedFields).length === 0) {
+          setSaved(true);
+          setTimeout(() => setSaved(false), 3000);
+          return;
+        }
+
+        const res = await updateUserInfoAction(changedFields);
+
+        if (!res.success) {
+          setSaveError(res.error || "Unable to update profile.");
+        } else {
+          if (
+            res.data &&
+            typeof res.data === "object" &&
+            "user" in res.data &&
+            res.data.user
+          ) {
+            const updatedUser = res.data.user as User;
+
+            const nameUpdated =
+              !changedFields.name || updatedUser.name === changedFields.name;
+            const emailUpdated =
+              !changedFields.email || updatedUser.email === changedFields.email;
+            const timestampChanged =
+              updatedUser.updated_at !== user?.updated_at;
+
+            if (!nameUpdated || !emailUpdated || !timestampChanged) {
+              const errors = [];
+              if (!nameUpdated)
+                errors.push(
+                  `Name: expected "${changedFields.name}", got "${updatedUser.name}"`
+                );
+              if (!emailUpdated)
+                errors.push(
+                  `Email: expected "${changedFields.email}", got "${updatedUser.email}"`
+                );
+              if (!timestampChanged)
+                errors.push("No timestamp change detected");
+
+              setSaveError(`Update failed: ${errors.join(", ")}`);
+              return;
+            }
+            const { setUser } = useUserStore.getState();
+            setUser({
+              id: updatedUser.id || 0,
+              name: updatedUser.name || "",
+              email: updatedUser.email || "",
+              company_id: updatedUser.company_id,
+              updated_at: updatedUser.updated_at,
+            });
+            profileForm.reset({
+              name: updatedUser.name || "",
+              email: updatedUser.email || "",
+            });
+          } else {
+            await fetchUser(true);
+
+            const userStore = useUserStore.getState();
+            if (userStore.user) {
+              profileForm.reset({
+                name: userStore.user.name || "",
+                email: userStore.user.email || "",
+              });
+            }
+          }
+
+          setSaved(true);
+          setTimeout(() => setSaved(false), 3000);
+        }
+      } catch {
+        setSaveError("An unexpected error occurred. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    });
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+  const onPasswordSubmit = (values: PasswordFormValues) => {
+    if (!values.current_password || !values.new_password) {
+      setPwdError("Please fill all password fields.");
+      return;
+    }
+    if (values.new_password !== values.new_password_confirmation) {
+      setPwdError("Passwords do not match.");
+      return;
+    }
+
+    setPwdLoading(true);
+    setPwdSaved(false);
+    setPwdError(null);
+
+    startTransition(async () => {
+      const res = await updatePasswordAction(values);
+      if (!res.success) {
+        setPwdError(
+          res.error || "Unable to update password. Please try again."
+        );
+      } else {
+        setPwdSaved(true);
+        passwordForm.reset();
+        setTimeout(() => setPwdSaved(false), 3000);
+      }
+      setPwdLoading(false);
+    });
+  };
+
+  const onLogout = () => {
+    setLogoutLoading(true);
+
+    startTransition(async () => {
+      try {
+        const res = await logoutAction();
+        if (res.success) {
+          window.location.href = "/login";
+        } else {
+          console.error("Logout failed:", res.error);
+        }
+      } catch (error) {
+        console.error("Logout error:", error);
+      } finally {
+        setLogoutLoading(false);
+      }
+    });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {saved && (
-        <div className="flex items-center gap-2 p-3 bg-khp-background-secondary border border-khp-primary rounded-lg">
-          <CheckCircleIcon className="h-4 w-4 text-khp-primary" />
-          <span className="text-khp-text-primary text-sm font-medium">
-            Changes saved successfully
-          </span>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="md:col-span-2">
-          <Label
-            htmlFor="name"
-            className="block text-sm font-medium text-khp-text-primary mb-2"
-          >
-            Full name
-          </Label>
-          <Input
-            id="name"
-            type="text"
-            value={formData.name}
-            onChange={(e) => handleInputChange("name", e.target.value)}
-            disabled={isLoading}
-            className="w-full !h-14 text-base border-khp-primary focus:bg-khp-primary/5 transition-all px-4 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary"
-            placeholder="Enter your full name"
-          />
-        </div>
-
-        <div className="md:col-span-2">
-          <Label
-            htmlFor="email"
-            className="block text-sm font-medium text-khp-text-primary mb-2"
-          >
-            Email address
-          </Label>
-          <Input
-            id="email"
-            type="email"
-            value={formData.email}
-            onChange={(e) => handleInputChange("email", e.target.value)}
-            disabled={isLoading}
-            className="w-full !h-14 text-base border-khp-primary focus:bg-khp-primary/5 transition-all px-4 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary"
-            placeholder="Enter your email address"
-          />
-        </div>
-
-        <Separator className="md:col-span-2" />
-
-        <div className="md:col-span-2 bg-khp-background-secondary rounded-lg p-6 space-y-4">
-          <h3 className="text-base font-medium text-khp-text-primary mb-4">
-            Company
+    <div className="max-w-2xl mx-auto space-y-8 w-full">
+      <div className="bg-khp-surface rounded-2xl shadow-lg border border-khp-primary/20 overflow-hidden w-full">
+        <div className="bg-gradient-to-r from-khp-primary/5 to-khp-primary/10 px-6 py-5 border-b border-khp-primary/20">
+          <h3 className="text-lg font-semibold text-khp-text-primary flex items-center gap-3">
+            <div className="w-8 h-8 bg-khp-primary/20 rounded-full flex items-center justify-center">
+              <User className="h-4 w-4 text-khp-primary" />
+            </div>
+            Profile Information
           </h3>
-          <p className="text-xl font-medium text-khp-text-primary">GoofyTeam</p>
-        </div>
-
-        <div className="md:col-span-2 bg-khp-primary/5 border border-khp-primary/20 rounded-lg p-4">
-          <Label className="block text-sm font-medium text-khp-text-primary mb-2">
-            Last updated
-          </Label>
-          <p className="text-base font-medium text-khp-text-primary">
-            {formData.lastUpdated}
+          <p className="text-sm text-khp-text-secondary mt-1">
+            Update your account details and personal information
           </p>
         </div>
+
+        <form
+          onSubmit={profileForm.handleSubmit(onProfileSubmit)}
+          className="p-6 space-y-6"
+        >
+          <div className="space-y-4">
+            <div>
+              <Label
+                htmlFor="name"
+                className="block text-sm font-semibold text-khp-text-primary mb-3"
+              >
+                Full name
+              </Label>
+              <Input
+                id="name"
+                type="text"
+                disabled={isLoading || isPending}
+                className="w-full h-12 text-base border-2 border-khp-primary/20 rounded-md focus:border-khp-primary focus:bg-khp-primary/5 transition-all duration-200 px-4 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary shadow-sm"
+                placeholder="Enter your full name"
+                {...profileForm.register("name")}
+              />
+            </div>
+
+            <div>
+              <Label
+                htmlFor="email"
+                className="block text-sm font-semibold text-khp-text-primary mb-3"
+              >
+                Email address
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                disabled={isLoading || isPending}
+                className="w-full h-12 text-base border-2 border-khp-primary/20 rounded-md focus:border-khp-primary focus:bg-khp-primary/5 transition-all duration-200 px-4 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary shadow-sm"
+                placeholder="Enter your email address"
+                {...profileForm.register("email")}
+              />
+            </div>
+          </div>
+
+          <div className="pt-4">
+            {saved ? (
+              <div className="flex items-center justify-center gap-3 p-4 bg-green-50 border-2 border-green-200 rounded-xl">
+                <CheckCircleIcon className="h-5 w-5 text-green-600" />
+                <span className="text-green-700 text-sm font-semibold">
+                  Changes saved successfully
+                </span>
+              </div>
+            ) : saveError ? (
+              <div className="p-4 text-center border-2 border-red-200 bg-red-50 text-red-700 rounded-xl text-sm font-medium">
+                {saveError}
+              </div>
+            ) : (
+              <Button
+                type="submit"
+                disabled={isLoading || isPending}
+                variant="khp-default"
+                size="xl-full"
+              >
+                {isLoading || isPending ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2Icon className="animate-spin h-4 w-4" />
+                    Saving changes...
+                  </div>
+                ) : (
+                  "Save changes"
+                )}
+              </Button>
+            )}
+          </div>
+        </form>
       </div>
 
-      <div className="pt-6">
-        <Button
-          type="submit"
-          disabled={isLoading}
-          variant="khp-default"
-          size="xl"
-          className="w-full disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isLoading ? (
-            <div className="flex items-center justify-center">
-              <Loader2Icon className="animate-spin -ml-1 mr-2 h-4 w-4" />
-              Saving changes...
+      <div className="bg-khp-surface rounded-2xl shadow-lg border border-khp-primary/10 overflow-hidden">
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 px-6 py-5 border-b border-amber-200/50">
+          <h3 className="text-lg font-semibold text-khp-text-primary flex items-center gap-3">
+            <div className="w-8 h-8 bg-amber-200/50 rounded-full flex items-center justify-center">
+              <Lock className="w-4 h-4 text-amber-600" />
             </div>
-          ) : (
-            "Save changes"
-          )}
-        </Button>
+            Security Settings
+          </h3>
+          <p className="text-sm text-khp-text-secondary mt-1">
+            Change your password to keep your account secure
+          </p>
+        </div>
+
+        <form
+          onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
+          className="p-6 space-y-6"
+        >
+          <div className="space-y-4">
+            <div>
+              <Label
+                htmlFor="current_password"
+                className="block text-sm font-semibold text-khp-text-primary mb-3"
+              >
+                Current password
+              </Label>
+              <div className="relative">
+                <Input
+                  id="current_password"
+                  type={showCurrent ? "text" : "password"}
+                  disabled={pwdLoading || isPending}
+                  className="w-full h-12 text-base border-2 border-khp-primary/20 rounded-md focus:border-khp-primary focus:bg-khp-primary/5 transition-all duration-200 px-4 pr-12 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary shadow-sm"
+                  placeholder="Enter current password"
+                  {...passwordForm.register("current_password")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrent((s) => !s)}
+                  className="absolute inset-y-0 right-3 flex items-center text-khp-text-secondary hover:text-khp-text-primary transition-colors duration-200 p-1 rounded-lg hover:bg-khp-primary/20"
+                  aria-label={showCurrent ? "Hide password" : "Show password"}
+                >
+                  {showCurrent ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <Label
+                htmlFor="new_password"
+                className="block text-sm font-semibold text-khp-text-primary mb-3"
+              >
+                New password
+              </Label>
+              <div className="relative">
+                <Input
+                  id="new_password"
+                  type={showNew ? "text" : "password"}
+                  disabled={pwdLoading || isPending}
+                  className="w-full h-12 text-base border-2 border-khp-primary/20 rounded-md focus:border-khp-primary focus:bg-khp-primary/5 transition-all duration-200 px-4 pr-12 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary shadow-sm"
+                  placeholder="Enter new password"
+                  {...passwordForm.register("new_password")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNew((s) => !s)}
+                  className="absolute inset-y-0 right-3 flex items-center text-khp-text-secondary hover:text-khp-text-primary transition-colors duration-200 p-1 rounded-lg hover:bg-khp-primary/10"
+                  aria-label={showNew ? "Hide password" : "Show password"}
+                >
+                  {showNew ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <Label
+                htmlFor="confirm_password"
+                className="block text-sm font-semibold text-khp-text-primary mb-3"
+              >
+                Confirm password
+              </Label>
+              <div className="relative">
+                <Input
+                  id="confirm_password"
+                  type={showConfirm ? "text" : "password"}
+                  disabled={pwdLoading || isPending}
+                  className="w-full h-12 text-base border-2 border-khp-primary/20 rounded-md focus:border-khp-primary focus:bg-khp-primary/5 transition-all duration-200 px-4 pr-12 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary shadow-sm"
+                  placeholder="Confirm new password"
+                  {...passwordForm.register("new_password_confirmation")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm((s) => !s)}
+                  className="absolute inset-y-0 right-3 flex items-center text-khp-text-secondary hover:text-khp-text-primary transition-colors duration-200 p-1 rounded-lg hover:bg-khp-primary/10"
+                  aria-label={showConfirm ? "Hide password" : "Show password"}
+                >
+                  {showConfirm ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-4">
+            {pwdSaved ? (
+              <div className="flex items-center justify-center gap-3 p-4 bg-green-50 border-2 border-green-200 rounded-xl">
+                <CheckCircleIcon className="h-5 w-5 text-green-600" />
+                <span className="text-green-700 text-sm font-semibold">
+                  Password updated successfully
+                </span>
+              </div>
+            ) : pwdError ? (
+              <div className="p-4 text-center border-2 border-red-200 bg-red-50 text-red-700 rounded-xl text-sm font-medium">
+                {pwdError}
+              </div>
+            ) : (
+              <Button
+                type="submit"
+                disabled={pwdLoading || isPending}
+                variant="khp-default"
+                size="xl-full"
+              >
+                {pwdLoading || isPending ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2Icon className="animate-spin h-4 w-4" />
+                    Updating password...
+                  </div>
+                ) : (
+                  "Update password"
+                )}
+              </Button>
+            )}
+          </div>
+        </form>
       </div>
-    </form>
+
+      <div className="bg-khp-surface rounded-2xl shadow-lg border border-khp-primary/10 overflow-hidden">
+        <div className="bg-gradient-to-r from-khp-primary/5 to-khp-primary/10 px-6 py-5 border-b border-khp-primary/10">
+          <h3 className="text-lg font-semibold text-khp-text-primary flex items-center gap-3">
+            <div className="w-8 h-8 bg-khp-error/20 rounded-full flex items-center justify-center">
+              <LogOut className="w-4 h-4 text-khp-error" />
+            </div>
+            Logout
+          </h3>
+          <p className="text-sm text-khp-text-secondary mt-1">
+            Disconnect from your account and end your session
+          </p>
+        </div>
+
+        <div className="p-6">
+          <Button
+            onClick={onLogout}
+            disabled={logoutLoading || isPending}
+            variant="khp-destructive"
+            size="xl-full"
+          >
+            {logoutLoading || isPending ? (
+              <div className="flex items-center justify-center gap-2">
+                <Loader2Icon className="animate-spin h-4 w-4" />
+                Logging out...
+              </div>
+            ) : (
+              <div className="flex items-center justify-center gap-2">
+                <LogOut className="w-4 h-4" />
+                Logout
+              </div>
+            )}
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }
