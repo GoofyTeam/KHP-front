@@ -42,7 +42,9 @@ export function MoveQuantityForm({
   );
 
   const selectedSourceLocation = formData.sourceLocationIndex
-    ? availableSourceQuantities[parseInt(formData.sourceLocationIndex)]
+    ? availableSourceQuantities.find(
+        (q) => q.location.id === formData.sourceLocationIndex
+      )
     : null;
 
   const maxQuantity = selectedSourceLocation?.quantity || 0;
@@ -99,7 +101,9 @@ export function MoveQuantityForm({
 
     try {
       const selectedDestination = formData.destinationLocationIndex
-        ? destinationQuantities[parseInt(formData.destinationLocationIndex)]
+        ? destinationQuantities.find(
+            (q) => q.location.id === formData.destinationLocationIndex
+          )
         : null;
 
       if (!selectedSourceLocation || !selectedDestination) {
@@ -159,6 +163,7 @@ export function MoveQuantityForm({
           placeholder="Choose a source location"
           label="From"
           unit={ingredient.unit}
+          showAllOption={false}
         />
       </div>
 
@@ -181,6 +186,7 @@ export function MoveQuantityForm({
           placeholder="Choose a destination location"
           label="To"
           unit={ingredient.unit}
+          showAllOption={false}
         />
       </div>
 
@@ -231,10 +237,9 @@ export function MoveQuantityForm({
               </span>
               <span className="font-bold text-khp-success">
                 {(() => {
-                  const selectedDestination =
-                    destinationQuantities[
-                      parseInt(formData.destinationLocationIndex)
-                    ];
+                  const selectedDestination = destinationQuantities.find(
+                    (q) => q.location.id === formData.destinationLocationIndex
+                  );
                   const currentDestinationQuantity =
                     selectedDestination?.quantity || 0;
                   return (currentDestinationQuantity + moveQuantity).toFixed(3);
