@@ -215,8 +215,8 @@ export function AccountForm({ user }: { user: User }) {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
-      <div className="bg-khp-surface rounded-2xl shadow-lg border border-khp-primary/20 overflow-hidden">
+    <div className="max-w-2xl mx-auto space-y-8 w-full">
+      <div className="bg-khp-surface rounded-2xl shadow-lg border border-khp-primary/20 overflow-hidden w-full">
         <div className="bg-gradient-to-r from-khp-primary/5 to-khp-primary/10 px-6 py-5 border-b border-khp-primary/20">
           <h3 className="text-lg font-semibold text-khp-text-primary flex items-center gap-3">
             <div className="w-8 h-8 bg-khp-primary/20 rounded-full flex items-center justify-center">

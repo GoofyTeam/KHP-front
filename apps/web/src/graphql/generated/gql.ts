@@ -19,6 +19,7 @@ type Documents = {
     "query GetIngredients($page: Int!, $search: String, $categoryIds: [ID!]) {\n  ingredients(page: $page, search: $search, categoryIds: $categoryIds) {\n    data {\n      id\n      name\n      unit\n      image_url\n      category {\n        id\n        name\n      }\n      quantities {\n        quantity\n        location {\n          id\n          name\n          locationType {\n            name\n          }\n        }\n      }\n    }\n    paginatorInfo {\n      count\n      currentPage\n      hasMorePages\n      lastPage\n      perPage\n      total\n      firstItem\n      lastItem\n    }\n  }\n}": typeof types.GetIngredientsDocument,
     "query GetLocations {\n  locations {\n    data {\n      name\n      id\n    }\n  }\n}": typeof types.GetLocationsDocument,
     "query GetMostUsedIngredients {\n  ingredients(orderBy: {column: \"withdrawals_this_week_count\", order: DESC}) {\n    data {\n      name\n      withdrawals_this_week_count\n    }\n  }\n}": typeof types.GetMostUsedIngredientsDocument,
+    "query GetUser {\n  user {\n    id\n    name\n    email\n    company {\n      id\n      name\n    }\n  }\n}": typeof types.GetUserDocument,
 };
 const documents: Documents = {
     "query GetCategories {\n  categories {\n    data {\n      id\n      name\n    }\n  }\n}": types.GetCategoriesDocument,
@@ -26,6 +27,7 @@ const documents: Documents = {
     "query GetIngredients($page: Int!, $search: String, $categoryIds: [ID!]) {\n  ingredients(page: $page, search: $search, categoryIds: $categoryIds) {\n    data {\n      id\n      name\n      unit\n      image_url\n      category {\n        id\n        name\n      }\n      quantities {\n        quantity\n        location {\n          id\n          name\n          locationType {\n            name\n          }\n        }\n      }\n    }\n    paginatorInfo {\n      count\n      currentPage\n      hasMorePages\n      lastPage\n      perPage\n      total\n      firstItem\n      lastItem\n    }\n  }\n}": types.GetIngredientsDocument,
     "query GetLocations {\n  locations {\n    data {\n      name\n      id\n    }\n  }\n}": types.GetLocationsDocument,
     "query GetMostUsedIngredients {\n  ingredients(orderBy: {column: \"withdrawals_this_week_count\", order: DESC}) {\n    data {\n      name\n      withdrawals_this_week_count\n    }\n  }\n}": types.GetMostUsedIngredientsDocument,
+    "query GetUser {\n  user {\n    id\n    name\n    email\n    company {\n      id\n      name\n    }\n  }\n}": types.GetUserDocument,
 };
 
 /**
@@ -62,6 +64,10 @@ export function graphql(source: "query GetLocations {\n  locations {\n    data {
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "query GetMostUsedIngredients {\n  ingredients(orderBy: {column: \"withdrawals_this_week_count\", order: DESC}) {\n    data {\n      name\n      withdrawals_this_week_count\n    }\n  }\n}"): (typeof documents)["query GetMostUsedIngredients {\n  ingredients(orderBy: {column: \"withdrawals_this_week_count\", order: DESC}) {\n    data {\n      name\n      withdrawals_this_week_count\n    }\n  }\n}"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "query GetUser {\n  user {\n    id\n    name\n    email\n    company {\n      id\n      name\n    }\n  }\n}"): (typeof documents)["query GetUser {\n  user {\n    id\n    name\n    email\n    company {\n      id\n      name\n    }\n  }\n}"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};
