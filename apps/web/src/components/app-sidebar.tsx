@@ -79,8 +79,6 @@ interface User {
   avatar: string;
 }
 
-// Removed local API response typing in favor of centralized store
-
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   config?: SidebarConfig;
   pathname?: string;

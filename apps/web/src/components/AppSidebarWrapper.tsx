@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { AppSidebar } from "./app-sidebar";
+import { SettingsMenuButton } from "./settings-sidebar";
 import {
   SidebarInset,
   SidebarProvider,
@@ -42,6 +43,9 @@ export function AppSidebarWrapper({ children }: AppSidebarWrapperProps) {
   const defaultOpen = getSidebarDefaultState(pathname);
   const { fetchUser } = useUserStore();
 
+  // Vérifier si on est sur une page de settings
+  const isSettingsPage = pathname.startsWith("/settings");
+
   useEffect(() => {
     fetchUser();
   }, [fetchUser]);
@@ -52,6 +56,12 @@ export function AppSidebarWrapper({ children }: AppSidebarWrapperProps) {
       <SidebarInset>
         <header className="bg-background sticky top-0 flex shrink-0 items-center gap-2 border-b p-4 md:hidden">
           <SidebarTrigger className="-ml-1" />
+          {/* Bouton des paramètres uniquement sur les pages settings */}
+          {isSettingsPage && (
+            <div className="ml-auto">
+              <SettingsMenuButton />
+            </div>
+          )}
         </header>
         <div className="flex flex-1 flex-col gap-4 ">{children}</div>
       </SidebarInset>

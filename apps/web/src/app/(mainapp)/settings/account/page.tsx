@@ -1,52 +1,44 @@
 import { AccountForm } from "@/components/account-form";
-import { headers } from "next/headers";
+import { query } from "@/lib/ApolloClient";
+import { GetUserDocument } from "@/graphql/generated/graphql";
 
-type User = {
+type AccountFormUser = {
   id?: number;
   name?: string;
   email?: string;
   company_id?: number;
+  updated_at?: string;
 };
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  (process.env.NODE_ENV === "production" ? "https://dash.goofykhp.fr" : null);
+async function getUser(): Promise<AccountFormUser | null> {
+  try {
+    const { data } = await query({
+      query: GetUserDocument,
+      errorPolicy: "all",
+    });
 
-async function getBaseUrl() {
-  if (API_URL) return API_URL;
-  const h = await headers();
-  const proto = h.get("x-forwarded-proto") ?? "http";
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  return `${proto}://${host}`;
-}
+    if (!data?.user) return null;
 
-async function getUser(): Promise<User | null> {
-  const cookieHeader = (await headers()).get("cookie") ?? "";
-  const baseUrl = await getBaseUrl();
-  const res = await fetch(new URL("/api/user", baseUrl).toString(), {
-    method: "GET",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      Cookie: cookieHeader,
-    },
-    cache: "no-store",
-  });
-
-  if (!res.ok) return null;
-
-  const data = await res.json().catch(() => null);
-  if (!data) return null;
-  return "user" in data ? (data.user as User) : (data as User);
+    return {
+      id: parseInt(data.user.id),
+      name: data.user.name,
+      email: data.user.email,
+      company_id: data.user.company
+        ? parseInt(data.user.company.id)
+        : undefined,
+    };
+  } catch {
+    return null;
+  }
 }
 
 export default async function Account() {
   const user = await getUser();
 
   return (
-    <div className="h-full flex items-center justify-center p-4">
+    <div className="h-full flex items-center justify-center lg:p-4">
       <div className="w-full">
-        <div className=" p-8">
+        <div className="lg:p-8">
           <AccountForm user={user ?? { name: "", email: "" }} />
         </div>
       </div>
