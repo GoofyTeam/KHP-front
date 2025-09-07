@@ -2,12 +2,14 @@
 
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
+import { useApolloClient } from "@apollo/client";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { CheckCircleIcon, Loader2Icon } from "lucide-react";
 import { createLocationAction } from "@/app/(mainapp)/settings/location/actions";
 import { LocationTypeSelector } from "./location-type-selector";
+import { GetLocationsDocument } from "@/graphql/generated/graphql";
 
 type LocationFormValues = {
   name: string;
@@ -24,6 +26,7 @@ export function LocationAddForm({ onLocationAdded }: LocationAddFormProps) {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [selectedTypeId, setSelectedTypeId] = useState<string>("");
+  const apolloClient = useApolloClient();
 
   const form = useForm<LocationFormValues>({
     defaultValues: {
@@ -54,6 +57,12 @@ export function LocationAddForm({ onLocationAdded }: LocationAddFormProps) {
           setSaved(true);
           form.reset();
           setSelectedTypeId("");
+
+          // Refetch la query GraphQL pour mettre à jour le cache Apollo
+          await apolloClient.refetchQueries({
+            include: [GetLocationsDocument],
+          });
+
           onLocationAdded?.();
           setTimeout(() => setSaved(false), 3000);
         } else {

@@ -38,6 +38,7 @@ export const LocationsList = forwardRef<LocationsListRef, LocationsListProps>(
         variables: {
           first: 10,
           page: 1,
+          orderBy: [{ column: "updated_at", order: "DESC" }],
         },
         fetchPolicy: "cache-and-network",
         errorPolicy: "all",
@@ -72,6 +73,7 @@ export const LocationsList = forwardRef<LocationsListRef, LocationsListProps>(
           variables: {
             first: 10,
             page: nextPage,
+            orderBy: [{ column: "updated_at", order: "DESC" }],
           },
         });
 
@@ -116,6 +118,7 @@ export const LocationsList = forwardRef<LocationsListRef, LocationsListProps>(
       await refetch({
         first: 10,
         page: 1,
+        orderBy: [{ column: "updated_at", order: "DESC" }],
       });
     }, [refetch]);
 

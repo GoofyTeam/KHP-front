@@ -26,7 +26,7 @@ export async function updateLocationAction(
 ): Promise<ActionResult<Location>> {
   try {
     const result = await httpClient.put<Location>(
-      `/locations/${locationId}`,
+      `/api/location/${locationId}`,
       input
     );
 
@@ -98,7 +98,7 @@ export async function deleteLocationAction(
   locationId: string
 ): Promise<ActionResult> {
   try {
-    await httpClient.delete(`/location/${locationId}`);
+    await httpClient.delete(`/api/location/${locationId}`);
 
     revalidatePath("/settings/location");
     return { success: true };
