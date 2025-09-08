@@ -80,7 +80,7 @@ function HandleAddQuantity() {
             </p>
           </div>
 
-          <div className="w-full">
+          <div className="w-full flex flex-col gap-y-3">
             <FormField
               control={form.control}
               name="location_id"
@@ -107,7 +107,7 @@ function HandleAddQuantity() {
                 <FormItem>
                   <FormControl>
                     <QuantityInput
-                      title="Move"
+                      title="Add quantity"
                       value={field.value}
                       onChange={field.onChange}
                       unit={product.product_units || ""}
@@ -125,11 +125,7 @@ function HandleAddQuantity() {
               type="submit"
               className="w-full"
               variant="khp-default"
-              disabled={
-                form.formState.isSubmitting ||
-                !form.formState.dirtyFields.quantity ||
-                !form.formState.dirtyFields.location_id
-              }
+              disabled={!form.formState.isDirty}
             >
               Add Quantity
             </Button>

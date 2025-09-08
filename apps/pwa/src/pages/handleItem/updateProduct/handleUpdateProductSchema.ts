@@ -8,6 +8,7 @@ export const handleUpdateProductSchema = z.object({
   product_category: z.string().optional(),
   product_units: z.string().optional(),
   quantityPerUnit: z.string().optional(),
+  product_base_unit: z.string().optional(),
 });
 
 export type HandleUpdateProductSchemaType = z.infer<

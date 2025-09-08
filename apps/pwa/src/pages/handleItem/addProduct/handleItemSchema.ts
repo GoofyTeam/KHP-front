@@ -14,6 +14,7 @@ export const handleItemSchema = z
     product_category: z.string().nonempty("Category is required"),
     product_units: z.string().nonempty("Units are required"),
     quantityPerUnit: z.string().nonempty("Quantity per unit is required"),
+    product_base_unit: z.string().nonempty("Base unit is required"),
     stockEntries: z.array(stockEntrySchema).optional(),
   })
   .superRefine((data, ctx) => {
