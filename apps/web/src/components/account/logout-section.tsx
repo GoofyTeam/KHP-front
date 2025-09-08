@@ -17,7 +17,7 @@ export function LogoutSection() {
     try {
       await httpClient.post("/api/logout");
       router.push("/login");
-    } catch (error) {
+    } catch {
       setLogoutLoading(false);
     }
   };

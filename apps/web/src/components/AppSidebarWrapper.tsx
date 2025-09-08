@@ -10,7 +10,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@workspace/ui/components/sidebar";
-import { GetMeDocument, type GetMeQuery } from "@/graphql/generated/graphql";
+import { GetMeDocument } from "@/graphql/generated/graphql";
 
 const getSidebarDefaultState = (currentPath: string): boolean => {
   const defaultOpenPages = ["/dashboard"];
