@@ -42,15 +42,6 @@ function HandleAddQuantity() {
   }
 
   useEffect(() => {
-    console.log("errors", form.formState.errors);
-    console.log("values", form.getValues());
-    console.log("isValid", form.formState.isValid);
-    console.log("dirtyFields", form.formState.dirtyFields);
-    console.log("isDirty", form.formState.isDirty);
-    console.log(
-      "form.formState.isDirty || !form.formState.isValid",
-      !form.formState.isDirty || !form.formState.isValid
-    );
   }, [form]);
 
   if (!product.quantities) {
