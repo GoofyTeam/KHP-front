@@ -5,7 +5,6 @@ import { LucideIcon, Square } from "lucide-react";
 import * as Icons from "lucide-react";
 import Link from "next/link";
 import { NavUser } from "./nav-user";
-import { useUserStore } from "@/stores/user-store";
 
 import {
   Sidebar,
@@ -76,7 +75,6 @@ const isRouteActive = (currentPath: string, item: NavigationItem): boolean => {
 interface User {
   name: string;
   email: string;
-  avatar: string;
 }
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
@@ -92,18 +90,12 @@ export function AppSidebar({
   ...props
 }: AppSidebarProps) {
   const { toggleSidebar } = useSidebar();
-  const { user: storeUser } = useUserStore();
 
   const fallback = {
     name: "",
     email: "",
   };
-  const currentUser = storeUser
-    ? {
-        name: storeUser.name,
-        email: storeUser.email,
-      }
-    : user || fallback;
+  const currentUser = user || fallback;
 
   return (
     <Sidebar collapsible="icon" {...props}>

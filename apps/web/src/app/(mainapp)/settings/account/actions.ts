@@ -70,17 +70,20 @@ export async function updatePasswordAction(input: {
   );
 }
 
-export async function logoutAction(): Promise<ActionResult> {
+export async function logoutAction(forceLogout = false): Promise<ActionResult> {
   try {
     await httpClient.post("/api/logout");
   } catch {}
 
-  try {
-    const cookieStore = await cookies();
-    ["auth_token", "XSRF-TOKEN", "khp_session"].forEach((cookie) =>
-      cookieStore.delete(cookie)
-    );
-  } catch {}
+  // Seulement supprimer les cookies si forceLogout est true
+  if (forceLogout) {
+    try {
+      const cookieStore = await cookies();
+      ["auth_token", "XSRF-TOKEN", "khp_session"].forEach((cookie) =>
+        cookieStore.delete(cookie)
+      );
+    } catch {}
+  }
 
   redirect("/login");
 }

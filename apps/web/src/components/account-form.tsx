@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useId, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useApolloClient, gql } from "@apollo/client";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
+import { Checkbox } from "@workspace/ui/components/checkbox";
 import {
   CheckCircleIcon,
   Loader2Icon,
@@ -19,7 +21,20 @@ import {
   updatePasswordAction,
   updateUserInfoAction,
 } from "@/app/(mainapp)/settings/account/actions";
-import { useUserStore } from "@/stores/user-store";
+
+const GET_ME = gql`
+  query GetMe {
+    me {
+      id
+      name
+      email
+      company {
+        id
+        name
+      }
+    }
+  }
+`;
 
 type User = {
   id?: number;
@@ -41,6 +56,8 @@ type PasswordFormValues = {
 };
 
 export function AccountForm({ user }: { user: User }) {
+  const formId = useId();
+  const apolloClient = useApolloClient();
   const [isLoading, setIsLoading] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -54,9 +71,9 @@ export function AccountForm({ user }: { user: User }) {
   const [showConfirm, setShowConfirm] = useState(false);
 
   const [logoutLoading, setLogoutLoading] = useState(false);
+  const [keepSignedIn, setKeepSignedIn] = useState(true); // Par défaut, rester connecté
 
   const [isPending, startTransition] = useTransition();
-  const { fetchUser } = useUserStore();
 
   const profileForm = useForm<ProfileFormValues>({
     defaultValues: {
@@ -72,6 +89,29 @@ export function AccountForm({ user }: { user: User }) {
       new_password_confirmation: "",
     },
   });
+
+  // Pré-remplir les champs quand les données utilisateur arrivent
+  useEffect(() => {
+    if (user) {
+      profileForm.reset({
+        name: user.name ?? "",
+        email: user.email ?? "",
+      });
+    }
+  }, [user, profileForm]);
+
+  // Charger la préférence "Keep signed in" depuis localStorage
+  useEffect(() => {
+    const savedPreference = localStorage.getItem("keepSignedIn");
+    if (savedPreference !== null) {
+      setKeepSignedIn(savedPreference === "true");
+    }
+  }, []);
+
+  // Sauvegarder la préférence "Keep signed in" dans localStorage
+  useEffect(() => {
+    localStorage.setItem("keepSignedIn", keepSignedIn.toString());
+  }, [keepSignedIn]);
 
   const onProfileSubmit = (values: ProfileFormValues) => {
     setIsLoading(true);
@@ -131,32 +171,26 @@ export function AccountForm({ user }: { user: User }) {
               setSaveError(`Update failed: ${errors.join(", ")}`);
               return;
             }
-            const { setUser } = useUserStore.getState();
-            setUser({
-              id: updatedUser.id || 0,
-              name: updatedUser.name || "",
-              email: updatedUser.email || "",
-              company_id: updatedUser.company_id,
-              updated_at: updatedUser.updated_at,
-            });
+            // Utilisateur mis à jour avec succès
             profileForm.reset({
               name: updatedUser.name || "",
               email: updatedUser.email || "",
             });
           } else {
-            await fetchUser(true);
-
-            const userStore = useUserStore.getState();
-            if (userStore.user) {
-              profileForm.reset({
-                name: userStore.user.name || "",
-                email: userStore.user.email || "",
-              });
-            }
+            // Si pas de données utilisateur dans la réponse, on garde les valeurs actuelles
+            profileForm.reset({
+              name: user?.name || "",
+              email: user?.email || "",
+            });
           }
 
           setSaved(true);
           setTimeout(() => setSaved(false), 3000);
+
+          // Refetch user data to update nav-user.tsx
+          apolloClient.refetchQueries({
+            include: [GET_ME],
+          });
         }
       } catch {
         setSaveError("An unexpected error occurred. Please try again.");
@@ -200,7 +234,8 @@ export function AccountForm({ user }: { user: User }) {
 
     startTransition(async () => {
       try {
-        const res = await logoutAction();
+        // Seulement forcer la déconnexion si l'utilisateur ne veut pas rester connecté
+        const res = await logoutAction(!keepSignedIn);
         if (res.success) {
           window.location.href = "/login";
         } else {
@@ -236,13 +271,13 @@ export function AccountForm({ user }: { user: User }) {
           <div className="space-y-4">
             <div>
               <Label
-                htmlFor="name"
+                htmlFor={`${formId}-name`}
                 className="block text-sm font-semibold text-khp-text-primary mb-3"
               >
                 Full name
               </Label>
               <Input
-                id="name"
+                id={`${formId}-name`}
                 type="text"
                 disabled={isLoading || isPending}
                 className="w-full h-12 text-base border-2 border-khp-primary/20 rounded-md focus:border-khp-primary focus:bg-khp-primary/5 transition-all duration-200 px-4 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary shadow-sm"
@@ -253,13 +288,13 @@ export function AccountForm({ user }: { user: User }) {
 
             <div>
               <Label
-                htmlFor="email"
+                htmlFor={`${formId}-email`}
                 className="block text-sm font-semibold text-khp-text-primary mb-3"
               >
                 Email address
               </Label>
               <Input
-                id="email"
+                id={`${formId}-email`}
                 type="email"
                 disabled={isLoading || isPending}
                 className="w-full h-12 text-base border-2 border-khp-primary/20 rounded-md focus:border-khp-primary focus:bg-khp-primary/5 transition-all duration-200 px-4 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary shadow-sm"
@@ -322,14 +357,14 @@ export function AccountForm({ user }: { user: User }) {
           <div className="space-y-4">
             <div>
               <Label
-                htmlFor="current_password"
+                htmlFor={`${formId}-current-password`}
                 className="block text-sm font-semibold text-khp-text-primary mb-3"
               >
                 Current password
               </Label>
               <div className="relative">
                 <Input
-                  id="current_password"
+                  id={`${formId}-current-password`}
                   type={showCurrent ? "text" : "password"}
                   disabled={pwdLoading || isPending}
                   className="w-full h-12 text-base border-2 border-khp-primary/20 rounded-md focus:border-khp-primary focus:bg-khp-primary/5 transition-all duration-200 px-4 pr-12 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary shadow-sm"
@@ -353,14 +388,14 @@ export function AccountForm({ user }: { user: User }) {
 
             <div>
               <Label
-                htmlFor="new_password"
+                htmlFor={`${formId}-new-password`}
                 className="block text-sm font-semibold text-khp-text-primary mb-3"
               >
                 New password
               </Label>
               <div className="relative">
                 <Input
-                  id="new_password"
+                  id={`${formId}-new-password`}
                   type={showNew ? "text" : "password"}
                   disabled={pwdLoading || isPending}
                   className="w-full h-12 text-base border-2 border-khp-primary/20 rounded-md focus:border-khp-primary focus:bg-khp-primary/5 transition-all duration-200 px-4 pr-12 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary shadow-sm"
@@ -384,14 +419,14 @@ export function AccountForm({ user }: { user: User }) {
 
             <div>
               <Label
-                htmlFor="confirm_password"
+                htmlFor={`${formId}-confirm-password`}
                 className="block text-sm font-semibold text-khp-text-primary mb-3"
               >
                 Confirm password
               </Label>
               <div className="relative">
                 <Input
-                  id="confirm_password"
+                  id={`${formId}-confirm-password`}
                   type={showConfirm ? "text" : "password"}
                   disabled={pwdLoading || isPending}
                   className="w-full h-12 text-base border-2 border-khp-primary/20 rounded-md focus:border-khp-primary focus:bg-khp-primary/5 transition-all duration-200 px-4 pr-12 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary shadow-sm"
@@ -460,7 +495,21 @@ export function AccountForm({ user }: { user: User }) {
           </p>
         </div>
 
-        <div className="p-6">
+        <div className="p-6 space-y-4">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="keep-signed-in"
+              checked={keepSignedIn}
+              onCheckedChange={(checked) => setKeepSignedIn(checked as boolean)}
+            />
+            <Label
+              htmlFor="keep-signed-in"
+              className="text-sm text-khp-text-secondary"
+            >
+              Keep me signed in (stay logged in after closing browser)
+            </Label>
+          </div>
+
           <Button
             onClick={onLogout}
             disabled={logoutLoading || isPending}
