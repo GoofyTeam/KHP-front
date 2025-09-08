@@ -13,13 +13,9 @@ export default async function MenusPage() {
     throw error;
   }
 
-  /*  if (!data?.menus) {
-    return <div>No menus found.</div>;
-  } */
-
   return (
-    <div className="">
-      <DataTable columns={columns} data={data.menus} />
+    <div>
+      <DataTable columns={columns} data={data.menus || []} />
     </div>
   );
 }

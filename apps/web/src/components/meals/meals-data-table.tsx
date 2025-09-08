@@ -172,7 +172,6 @@ export function DataTable<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
-                //If no id or name is present, do not render the row
                 const original = row.original as {
                   id?: string | number;
                   name?: string;

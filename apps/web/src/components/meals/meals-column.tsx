@@ -8,7 +8,6 @@ import Image from "next/image";
 
 export type Meals = NonNullable<GetMenusQuery["menus"]>[number];
 
-export const columnsMapper = () => {};
 
 export const columns: ColumnDef<Meals>[] = [
   {
