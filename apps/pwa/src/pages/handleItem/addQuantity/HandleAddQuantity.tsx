@@ -16,7 +16,6 @@ import { Button } from "@workspace/ui/components/button";
 import { router } from "../../../main";
 import { addQuantitySubmit } from "./add-quantity";
 import { cn } from "@workspace/ui/lib/utils";
-import { useEffect } from "react";
 
 function HandleAddQuantity() {
   const navigate = useNavigate();
@@ -40,9 +39,6 @@ function HandleAddQuantity() {
   async function onSubmit(values: z.infer<typeof handleAddQuantitySchema>) {
     await addQuantitySubmit(values);
   }
-
-  useEffect(() => {
-  }, [form]);
 
   if (!product.quantities) {
     router.navigate({
@@ -129,7 +125,7 @@ function HandleAddQuantity() {
               type="submit"
               className="w-full"
               variant="khp-default"
-              disabled={!form.formState.isDirty || !form.formState.isValid}
+              disabled={!form.formState.isDirty}
             >
               Add Quantity
             </Button>
