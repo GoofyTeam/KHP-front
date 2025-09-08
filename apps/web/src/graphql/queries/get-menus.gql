@@ -1,0 +1,21 @@
+query getMenus {
+  menus {
+    id
+    name
+    image_url
+    description
+    is_a_la_carte
+    is_available
+    created_at
+    updated_at
+    items {
+      id
+      quantity
+      unit
+      location {
+        id
+        name
+      }
+    }
+  }
+}
