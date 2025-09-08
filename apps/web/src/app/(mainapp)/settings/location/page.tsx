@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useApolloClient } from "@apollo/client";
 import {
   LocationsList,
   type LocationsListRef,
@@ -17,9 +18,11 @@ import {
 } from "@workspace/ui/components/card";
 import { Plus, MapPin, Trash2 } from "lucide-react";
 import type { Location } from "@/graphql/generated/graphql";
+import { GetLocationsDocument } from "@/graphql/generated/graphql";
 import { deleteLocationAction } from "./actions";
 
 export default function LocationPage() {
+  const apolloClient = useApolloClient();
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(
     null
   );
@@ -67,7 +70,14 @@ export default function LocationPage() {
     try {
       const result = await deleteLocationAction(locationToDelete.id);
       if (result.success) {
+        // Refetch la query GraphQL pour mettre à jour le cache Apollo
+        await apolloClient.refetchQueries({
+          include: [GetLocationsDocument],
+        });
+
+        // Refresh la liste
         locationsListRef.current?.refresh();
+
         if (selectedLocation?.id === locationToDelete.id) {
           setSelectedLocation(null);
         }
@@ -115,11 +125,8 @@ export default function LocationPage() {
           </Button>
         </div>
       </div>
-
-      {/* Content Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Liste des locations */}
-        <Card className="bg-khp-surface border-khp-border shadow-sm">
+      <div className="flex flex-col-reverse lg:flex-row gap-4">
+        <Card className="bg-khp-surface border-khp-border shadow-sm flex-1 lg:flex-none lg:w-1/2">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-xl font-semibold text-khp-text-primary">
@@ -147,8 +154,7 @@ export default function LocationPage() {
           </CardContent>
         </Card>
 
-        {/* Formulaire */}
-        <Card className="bg-khp-surface border-khp-border shadow-sm">
+        <Card className="bg-khp-surface border-khp-border shadow-sm flex-1 lg:flex-none lg:w-1/2">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-xl font-semibold text-khp-text-primary">
