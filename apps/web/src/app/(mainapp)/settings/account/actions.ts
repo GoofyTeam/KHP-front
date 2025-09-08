@@ -1,53 +1,13 @@
 "use server";
 
 import { httpClient } from "@/lib/httpClient";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-
-type ActionResult<T = unknown> =
-  | { success: true; data?: T }
-  | { success: false; error: string };
-
-function handleError<T = unknown>(
-  error: unknown,
-  prefix = ""
-): ActionResult<T> {
-  if (error instanceof Error && error.message.includes("422")) {
-    try {
-      const errorMatch = error.message.match(/422: (.+)/);
-      if (errorMatch) {
-        const errorData = JSON.parse(errorMatch[1]);
-        if (errorData.errors) {
-          const firstError = Object.values(errorData.errors)[0];
-          const errorMessage = Array.isArray(firstError)
-            ? firstError[0]
-            : String(firstError);
-          return {
-            success: false,
-            error: `${prefix}${errorMessage}`,
-          };
-        }
-      }
-    } catch {}
-  }
-
-  return {
-    success: false,
-    error: error instanceof Error ? error.message : "Unknown error",
-  };
-}
-
-async function executeHttpAction<T>(
-  httpCall: () => Promise<T>,
-  errorPrefix = ""
-): Promise<ActionResult<T>> {
-  try {
-    const result = await httpCall();
-    return { success: true, data: result };
-  } catch (error) {
-    return handleError(error, errorPrefix);
-  }
-}
+import { query } from "@/lib/ApolloClient";
+import { GetMeDocument, type GetMeQuery } from "@/graphql/generated/graphql";
+import {
+  type ActionResult,
+  handleActionError,
+  executeHttpAction,
+} from "@/lib/actionUtils";
 
 export async function updateUserInfoAction(input: {
   name?: string;
@@ -70,20 +30,24 @@ export async function updatePasswordAction(input: {
   );
 }
 
-export async function logoutAction(forceLogout = false): Promise<ActionResult> {
+export async function getUserAction(): Promise<ActionResult<GetMeQuery["me"]>> {
   try {
-    await httpClient.post("/api/logout");
-  } catch {}
+    const { data, error } = await query({
+      query: GetMeDocument,
+      variables: {},
+    });
 
-  // Seulement supprimer les cookies si forceLogout est true
-  if (forceLogout) {
-    try {
-      const cookieStore = await cookies();
-      ["auth_token", "XSRF-TOKEN", "khp_session"].forEach((cookie) =>
-        cookieStore.delete(cookie)
-      );
-    } catch {}
+    if (error) {
+      console.error("GraphQL error:", error);
+      return { success: false, error: "Failed to fetch user data" };
+    }
+
+    if (!data?.me) {
+      return { success: false, error: "User not found" };
+    }
+
+    return { success: true, data: data.me };
+  } catch (error) {
+    return handleActionError(error, "Failed to fetch user: ");
   }
-
-  redirect("/login");
 }

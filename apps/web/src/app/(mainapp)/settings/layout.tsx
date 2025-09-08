@@ -13,7 +13,7 @@ export default function SettingsLayout({
       </div>
       <main className="flex-1 min-w-0 h-full">
         <div className="h-full w-full md:hidden">{children}</div>
-        <ScrollArea className="hidden md:block max-h-[calc(100vh-100px)] h-full w-full">
+        <ScrollArea className="hidden md:block max-h-[calc(100vh-50px)] h-full w-full">
           {children}
         </ScrollArea>
       </main>

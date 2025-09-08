@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import * as React from "react";
-import { useQuery, gql } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { AppSidebar } from "./app-sidebar";
 import { SettingsMenuButton } from "./settings-sidebar";
 import {
@@ -10,6 +10,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@workspace/ui/components/sidebar";
+import { GetMeDocument, type GetMeQuery } from "@/graphql/generated/graphql";
 
 const getSidebarDefaultState = (currentPath: string): boolean => {
   const defaultOpenPages = ["/dashboard"];
@@ -34,20 +35,6 @@ const getSidebarDefaultState = (currentPath: string): boolean => {
   return true;
 };
 
-const GET_ME = gql`
-  query GetMe {
-    me {
-      id
-      name
-      email
-      company {
-        id
-        name
-      }
-    }
-  }
-`;
-
 interface AppSidebarWrapperProps {
   children: React.ReactNode;
 }
@@ -58,7 +45,7 @@ export function AppSidebarWrapper({ children }: AppSidebarWrapperProps) {
 
   const isSettingsPage = pathname.startsWith("/settings");
 
-  const { data } = useQuery(GET_ME, {
+  const { data } = useQuery(GetMeDocument, {
     errorPolicy: "all",
     fetchPolicy: "cache-and-network",
   });
@@ -69,13 +56,6 @@ export function AppSidebarWrapper({ children }: AppSidebarWrapperProps) {
         email: data.me.email,
       }
     : undefined;
-
-  // Console log uniquement le nom de l'utilisateur connecté
-  React.useEffect(() => {
-    if (data?.me) {
-      console.log("User logged:", data.me.name);
-    }
-  }, [data?.me]);
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
