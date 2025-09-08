@@ -16,7 +16,8 @@ export const updateProductSubmit = async (
     !values.product_units &&
     !values.image &&
     !values.product_category &&
-    !values.quantityPerUnit
+    !values.quantityPerUnit &&
+    !values.product_base_unit
   ) {
     return;
   }
@@ -39,6 +40,10 @@ export const updateProductSubmit = async (
 
   if (values.quantityPerUnit) {
     formData.append("quantity_per_unit", values.quantityPerUnit);
+  }
+
+  if (values.product_base_unit) {
+    formData.append("base_unit", values.product_base_unit);
   }
 
   await api.post(`/api/ingredients/${internalId}`, formData);

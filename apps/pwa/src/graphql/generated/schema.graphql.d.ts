@@ -110,6 +110,8 @@ export type Ingredient = {
   unit: UnitEnum;
   /** Quantity for one unit of the ingredient. */
   base_quantity: Scalars['Float']['output'];
+  /** Unit for the base quantity of the ingredient. */
+  base_unit: UnitEnum;
   quantities: Array<IngredientQuantity>;
   /** The company that owns this ingredient. */
   company: Company;
@@ -126,6 +128,11 @@ export type Ingredient = {
   created_at: Scalars['DateTime']['output'];
   /** When the ingredient was last updated. */
   updated_at: Scalars['DateTime']['output'];
+};
+
+
+export type IngredientStockMovementsArgs = {
+  orderBy?: InputMaybe<Array<StockMovementOrderByClause>>;
 };
 
 export type IngredientOrderByClause = {
@@ -254,9 +261,9 @@ export type Loss = {
   /** Identifiant unique. */
   id: Scalars['ID']['output'];
   /** Type d'entité concernée par cette perte (ingredient ou preparation). */
-  lossable_type: Scalars['String']['output'];
+  loss_item_type: Scalars['String']['output'];
   /** ID de l'entité concernée. */
-  lossable_id: Scalars['ID']['output'];
+  loss_item_id: Scalars['ID']['output'];
   /** L'emplacement où la perte a eu lieu. */
   location: Location;
   /** L'entreprise à laquelle appartient cette perte. */
@@ -266,7 +273,7 @@ export type Loss = {
   /** Quantité perdue. */
   quantity: Scalars['Float']['output'];
   /** Raison de la perte. */
-  reason?: Maybe<Scalars['String']['output']>;
+  reason: Scalars['String']['output'];
   /** Date et heure de création de la perte. */
   created_at: Scalars['DateTime']['output'];
   /** Date et heure de dernière mise à jour de la perte. */
@@ -302,6 +309,21 @@ export type LossPaginator = {
   data: Array<Loss>;
 };
 
+/** Raison de perte prédéfinie pour une entreprise. */
+export type LossReason = {
+  __typename?: 'LossReason';
+  /** Identifiant unique. */
+  id: Scalars['ID']['output'];
+  /** Nom de la raison. */
+  name: Scalars['String']['output'];
+  /** Entreprise associée. */
+  company: Company;
+  /** Date de création. */
+  created_at: Scalars['DateTime']['output'];
+  /** Date de mise à jour. */
+  updated_at: Scalars['DateTime']['output'];
+};
+
 /** Type représentant une unité de mesure */
 export type MeasurementUnitType = {
   __typename?: 'MeasurementUnitType';
@@ -317,6 +339,10 @@ export type Menu = {
   __typename?: 'Menu';
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  image_url?: Maybe<Scalars['String']['output']>;
+  is_a_la_carte: Scalars['Boolean']['output'];
+  is_available: Scalars['Boolean']['output'];
   items: Array<MenuItem>;
   created_at: Scalars['DateTime']['output'];
   updated_at: Scalars['DateTime']['output'];
@@ -515,6 +541,8 @@ export type Query = {
   /** Trouve un type de localisation spécifique (seulement s'il appartient à l'entreprise actuelle). */
   locationType?: Maybe<LocationType>;
   lossesStats: LossesStats;
+  /** Liste les raisons de perte de l'entreprise actuelle. */
+  lossReasons: Array<LossReason>;
   /** Liste les unités de mesure disponibles */
   measurementUnits: Array<MeasurementUnitType>;
   menus: Array<Menu>;
@@ -526,6 +554,8 @@ export type Query = {
   preparation?: Maybe<Preparation>;
   /** Find a single user by an identifying attribute. */
   user?: Maybe<User>;
+  /** The currently authenticated user. */
+  me: User;
   /** List categories for the current company. */
   categories: CategoryPaginator;
   /** List multiple companies. */
@@ -666,8 +696,8 @@ export type QueryLocationTypesArgs = {
 
 
 export type QueryLossesArgs = {
-  trackable_type?: InputMaybe<Scalars['String']['input']>;
-  trackable_id?: InputMaybe<Scalars['ID']['input']>;
+  loss_item_type?: InputMaybe<Scalars['String']['input']>;
+  loss_item_id?: InputMaybe<Scalars['ID']['input']>;
   location_id?: InputMaybe<Scalars['ID']['input']>;
   start_date?: InputMaybe<Scalars['DateTime']['input']>;
   end_date?: InputMaybe<Scalars['DateTime']['input']>;
@@ -732,6 +762,8 @@ export type StockMovement = {
   user?: Maybe<User>;
   /** Type de mouvement: 'addition' ou 'withdrawal'. */
   type: Scalars['String']['output'];
+  /** Raison du mouvement. */
+  reason?: Maybe<Scalars['String']['output']>;
   /** Quantité concernée par le mouvement (toujours positive). */
   quantity: Scalars['Float']['output'];
   /** Quantité avant le mouvement. */
@@ -747,7 +779,7 @@ export type StockMovement = {
 /** Options de tri pour les mouvements de stock. */
 export type StockMovementOrderByClause = {
   /** Champ sur lequel effectuer le tri. */
-  field: StockMovementOrderByField;
+  column: StockMovementOrderByField;
   /** Direction du tri. */
   order: SortOrder;
 };

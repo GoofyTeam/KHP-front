@@ -9,6 +9,7 @@ query getIngredient($id: ID, $barcode: String) {
     }
     unit
     base_quantity
+    base_unit
     quantities {
       location {
         id

@@ -38,6 +38,10 @@ function HandleAddProduct() {
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const storageUnitDefault = getAllMeasurementUnits().find(
+    (unit) => unit.value === "unit"
+  )?.value;
+
   const form = useForm<z.infer<typeof handleItemSchema>>({
     resolver: zodResolver(handleItemSchema),
     defaultValues: {
@@ -49,16 +53,18 @@ function HandleAddProduct() {
           ? product?.product_category.id
           : undefined,
       product_units:
-        product?.product_units != null ? product.product_units.toString() : "",
+        product?.product_units != null
+          ? product.product_units.toString()
+          : storageUnitDefault,
       quantityPerUnit:
         product?.product_base_quantity != null
           ? product.product_base_quantity.toString()
           : "",
+      product_base_unit:
+        product?.product_base_unit != null ? product.product_base_unit : "",
       stockEntries: [
         {
-          quantity: product?.product_base_quantity
-            ? product.product_base_quantity.toString()
-            : "",
+          quantity: "",
           location: "",
         },
       ],
@@ -150,7 +156,7 @@ function HandleAddProduct() {
               </FormItem>
             )}
           />
-          <div className="grid grid-cols-3 gap-4 w-full">
+          <div className="grid grid-cols-2 gap-4 w-full">
             <FormField
               control={form.control}
               name="product_category"
@@ -191,7 +197,7 @@ function HandleAddProduct() {
               name="product_units"
               render={({ field }) => (
                 <FormItem className="w-full">
-                  <FormLabel className="text-lg">Units</FormLabel>
+                  <FormLabel className="text-lg">Storage unit</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -213,12 +219,14 @@ function HandleAddProduct() {
                 </FormItem>
               )}
             />
+          </div>
+          <div className="grid grid-cols-2 gap-4 w-full">
             <FormField
               control={form.control}
               name="quantityPerUnit"
               render={({ field }) => (
                 <FormItem className="w-full">
-                  <FormLabel className="text-lg">Quantity/unit</FormLabel>
+                  <FormLabel className="text-lg">Quantity per unit</FormLabel>
                   <FormControl>
                     <Input
                       variant="khp-default-pwa"
@@ -226,6 +234,35 @@ function HandleAddProduct() {
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="product_base_unit"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel className="text-lg">
+                    Base unit for one unit
+                  </FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="w-full border-khp-primary rounded-md px-4 py-6 truncate">
+                        <SelectValue placeholder="Select base unit" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {getAllMeasurementUnits().map((unit) => (
+                        <SelectItem key={unit.value} value={unit.value}>
+                          {unit.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

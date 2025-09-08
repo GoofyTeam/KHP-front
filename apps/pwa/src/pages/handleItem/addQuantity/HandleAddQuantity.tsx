@@ -16,6 +16,7 @@ import { Button } from "@workspace/ui/components/button";
 import { router } from "../../../main";
 import { addQuantitySubmit } from "./add-quantity";
 import { cn } from "@workspace/ui/lib/utils";
+import { useEffect } from "react";
 
 function HandleAddQuantity() {
   const navigate = useNavigate();
@@ -39,6 +40,18 @@ function HandleAddQuantity() {
   async function onSubmit(values: z.infer<typeof handleAddQuantitySchema>) {
     await addQuantitySubmit(values);
   }
+
+  useEffect(() => {
+    console.log("errors", form.formState.errors);
+    console.log("values", form.getValues());
+    console.log("isValid", form.formState.isValid);
+    console.log("dirtyFields", form.formState.dirtyFields);
+    console.log("isDirty", form.formState.isDirty);
+    console.log(
+      "form.formState.isDirty || !form.formState.isValid",
+      !form.formState.isDirty || !form.formState.isValid
+    );
+  }, [form]);
 
   if (!product.quantities) {
     router.navigate({
@@ -80,7 +93,7 @@ function HandleAddQuantity() {
             </p>
           </div>
 
-          <div className="w-full">
+          <div className="w-full flex flex-col gap-y-3">
             <FormField
               control={form.control}
               name="location_id"
@@ -107,7 +120,7 @@ function HandleAddQuantity() {
                 <FormItem>
                   <FormControl>
                     <QuantityInput
-                      title="Move"
+                      title="Add quantity"
                       value={field.value}
                       onChange={field.onChange}
                       unit={product.product_units || ""}
@@ -125,11 +138,7 @@ function HandleAddQuantity() {
               type="submit"
               className="w-full"
               variant="khp-default"
-              disabled={
-                form.formState.isSubmitting ||
-                !form.formState.dirtyFields.quantity ||
-                !form.formState.dirtyFields.location_id
-              }
+              disabled={!form.formState.isDirty || !form.formState.isValid}
             >
               Add Quantity
             </Button>

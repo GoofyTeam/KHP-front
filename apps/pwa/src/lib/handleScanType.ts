@@ -14,6 +14,7 @@ export type WantedDataType = {
   product_name: string;
   product_category: NonNullable<GetIngredientQuery["ingredient"]>["category"];
   product_units: string;
+  product_base_unit: string;
   product_base_quantity?: string;
   product_already_in_database?: boolean;
   product_internal_id?: string;
@@ -32,6 +33,7 @@ const handleScanType = async (
       name: "",
     },
     product_units: "",
+    product_base_unit: "",
   };
 
   if (mode === "barcode") {
@@ -50,6 +52,7 @@ const handleScanType = async (
         product_base_quantity:
           resultByBarcode.ingredient.base_quantity.toString(),
         quantities: resultByBarcode.ingredient.quantities,
+        product_base_unit: resultByBarcode.ingredient.base_unit ?? "",
       };
       return wantedData;
     }
@@ -77,11 +80,12 @@ const handleScanType = async (
         id: "",
         name: "",
       },
-      product_units: result.search.unit ?? "",
+      product_units: "",
       product_base_quantity,
       product_already_in_database:
         result.search.is_already_in_database ?? false,
       product_internal_id: result.search.ingredient_id ?? undefined,
+      product_base_unit: result.search.unit ?? "",
     };
   } else if (mode === "internalId") {
     const result = await graphqlRequest<GetIngredientQuery>(GetIngredient, {
@@ -101,6 +105,7 @@ const handleScanType = async (
       product_internal_id: result.ingredient.id ?? undefined,
       product_base_quantity: result.ingredient.base_quantity.toString(),
       quantities: result.ingredient.quantities,
+      product_base_unit: result.ingredient.base_unit ?? "",
     };
   } else if (mode === "manual") {
     wantedData = {
@@ -113,6 +118,7 @@ const handleScanType = async (
       product_units: "",
       product_already_in_database: false,
       product_internal_id: undefined,
+      product_base_unit: "",
     };
   }
 

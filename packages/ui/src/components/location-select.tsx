@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select";
 import { cn } from "@workspace/ui/lib/utils";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 export interface LocationItem {
   id: string;
@@ -114,6 +114,15 @@ export function LocationSelect({
 
   // --- Guards --------------------------------------------------------------
   const hasInput = Array.isArray(quantities) && quantities.length > 0;
+
+  useEffect(() => {
+    //Auto seelect first location if no value selected
+    if (!value && list.length === 1 && onValueChange) {
+      if (list[0]) {
+        onValueChange(list[0].location.id);
+      }
+    }
+  }, [value, list, onValueChange]);
 
   if (!hasInput) {
     return (
