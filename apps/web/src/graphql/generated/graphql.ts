@@ -549,6 +549,8 @@ export type Query = {
   /** Liste les pertes pour l'entreprise actuelle. */
   losses: LossPaginator;
   lossesStats: LossesStats;
+  /** The currently authenticated user. */
+  me: User;
   /** Liste les unités de mesure disponibles */
   measurementUnits: Array<MeasurementUnitType>;
   menu?: Maybe<Menu>;
@@ -766,7 +768,7 @@ export type StockMovement = {
   trackable_id: Scalars['ID']['output'];
   /** Type d'entité concernée par ce mouvement (ingredient ou preparation). */
   trackable_type: Scalars['String']['output'];
-  /** Type de mouvement: 'addition' ou 'withdrawal'. */
+  /** Type de mouvement: 'addition', 'withdrawal' ou 'movement'. */
   type: Scalars['String']['output'];
   /** Date et heure de dernière mise à jour du mouvement. */
   updated_at: Scalars['DateTime']['output'];

@@ -760,7 +760,7 @@ export type StockMovement = {
   company: Company;
   /** L'utilisateur qui a effectué l'opération. */
   user?: Maybe<User>;
-  /** Type de mouvement: 'addition' ou 'withdrawal'. */
+  /** Type de mouvement: 'addition', 'withdrawal' ou 'movement'. */
   type: Scalars['String']['output'];
   /** Raison du mouvement. */
   reason?: Maybe<Scalars['String']['output']>;
