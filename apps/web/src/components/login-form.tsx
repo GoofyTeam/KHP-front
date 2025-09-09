@@ -35,15 +35,18 @@ export function LoginForm({
   errors = {},
   isLoading = false,
 }: LoginFormProps) {
-
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: { email: "", password: "" },
   });
 
   useEffect(() => {
-    const email = (document.querySelector('input[name="email"]') as HTMLInputElement)?.value;
-    const password = (document.querySelector('input[name="password"]') as HTMLInputElement)?.value;
+    const email = (
+      document.querySelector('input[name="email"]') as HTMLInputElement
+    )?.value;
+    const password = (
+      document.querySelector('input[name="password"]') as HTMLInputElement
+    )?.value;
     if (email || password) {
       form.reset({ email, password });
     }
@@ -67,7 +70,11 @@ export function LoginForm({
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="Email" {...field} />
+                <Input
+                  placeholder="Email"
+                  {...field}
+                  className="border-khp-primary"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -81,13 +88,18 @@ export function LoginForm({
             <FormItem>
               <FormLabel>Mot de passe</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="Mot de passe" {...field} />
+                <Input
+                  type="password"
+                  placeholder="Mot de passe"
+                  {...field}
+                  className="border-khp-primary"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={isLoading}>
+        <Button type="submit" variant="khp-default" disabled={isLoading}>
           {isLoading ? "Connexion..." : "Se connecter"}
         </Button>
       </form>
