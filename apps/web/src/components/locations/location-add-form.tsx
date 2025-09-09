@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useApolloClient } from "@apollo/client";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
@@ -13,7 +13,7 @@ import { GetLocationsDocument } from "@/graphql/generated/graphql";
 
 type LocationFormValues = {
   name: string;
-  location_type_id?: string;
+  location_type_id: string;
 };
 
 interface LocationAddFormProps {
@@ -25,7 +25,6 @@ export function LocationAddForm({ onLocationAdded }: LocationAddFormProps) {
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const [selectedTypeId, setSelectedTypeId] = useState<string>("");
   const apolloClient = useApolloClient();
 
   const form = useForm<LocationFormValues>({
@@ -42,7 +41,7 @@ export function LocationAddForm({ onLocationAdded }: LocationAddFormProps) {
 
     startTransition(async () => {
       try {
-        if (!selectedTypeId) {
+        if (!values.location_type_id) {
           setSaveError("Please select a location type.");
           setIsLoading(false);
           return;
@@ -50,13 +49,12 @@ export function LocationAddForm({ onLocationAdded }: LocationAddFormProps) {
 
         const payload = {
           name: values.name,
-          location_type_id: parseInt(selectedTypeId),
+          location_type_id: parseInt(values.location_type_id),
         };
         const result = await createLocationAction(payload);
         if (result.success) {
           setSaved(true);
           form.reset();
-          setSelectedTypeId("");
 
           // Refetch la query GraphQL pour mettre à jour le cache Apollo
           await apolloClient.refetchQueries({
@@ -108,11 +106,23 @@ export function LocationAddForm({ onLocationAdded }: LocationAddFormProps) {
           )}
         </div>
 
-        <LocationTypeSelector
-          value={selectedTypeId}
-          onValueChange={setSelectedTypeId}
-          disabled={isLoading || isPending}
+        <Controller
+          name="location_type_id"
+          control={form.control}
+          rules={{ required: "Please select a location type" }}
+          render={({ field }) => (
+            <LocationTypeSelector
+              value={field.value}
+              onValueChange={field.onChange}
+              disabled={isLoading || isPending}
+            />
+          )}
         />
+        {form.formState.errors.location_type_id && (
+          <p className="text-red-500 text-sm mt-1 font-medium">
+            {form.formState.errors.location_type_id.message}
+          </p>
+        )}
 
         <div className="pt-4">
           {saved ? (

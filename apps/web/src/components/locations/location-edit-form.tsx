@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useApolloClient } from "@apollo/client";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
@@ -14,7 +14,7 @@ import { GetLocationsDocument } from "@/graphql/generated/graphql";
 
 type LocationFormValues = {
   name: string;
-  location_type_id?: string;
+  location_type_id: string;
 };
 
 interface LocationEditFormProps {
@@ -23,8 +23,10 @@ interface LocationEditFormProps {
   onCancel?: () => void;
 }
 
-export function LocationEditForm({
-  location,
+export function
+  LocationEditForm({
+    location,
+    
   onLocationUpdated,
   onCancel,
 }: LocationEditFormProps) {
@@ -32,9 +34,6 @@ export function LocationEditForm({
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const [selectedTypeId, setSelectedTypeId] = useState<string>(
-    location.locationType?.id || ""
-  );
   const apolloClient = useApolloClient();
 
   const form = useForm<LocationFormValues>({
@@ -49,7 +48,6 @@ export function LocationEditForm({
       name: location.name,
       location_type_id: location.locationType?.id || "",
     });
-    setSelectedTypeId(location.locationType?.id || "");
   }, [location, form]);
 
   const onSubmit = (values: LocationFormValues) => {
@@ -61,7 +59,9 @@ export function LocationEditForm({
       try {
         const payload = {
           name: values.name,
-          ...(selectedTypeId && { location_type_id: parseInt(selectedTypeId) }),
+          ...(values.location_type_id && {
+            location_type_id: parseInt(values.location_type_id),
+          }),
         };
         const result = await updateLocationAction(location.id, payload);
         if (result?.success) {
@@ -127,11 +127,22 @@ export function LocationEditForm({
           )}
         </div>
 
-        <LocationTypeSelector
-          value={selectedTypeId}
-          onValueChange={setSelectedTypeId}
-          disabled={isLoading || isPending}
+        <Controller
+          name="location_type_id"
+          control={form.control}
+          render={({ field }) => (
+            <LocationTypeSelector
+              value={field.value}
+              onValueChange={field.onChange}
+              disabled={isLoading || isPending}
+            />
+          )}
         />
+        {form.formState.errors.location_type_id && (
+          <p className="text-red-500 text-sm mt-1 font-medium">
+            {form.formState.errors.location_type_id.message}
+          </p>
+        )}
 
         <div className="pt-6">
           {saved ? (

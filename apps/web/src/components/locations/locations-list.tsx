@@ -8,7 +8,7 @@ import {
   useImperativeHandle,
 } from "react";
 import { useQuery } from "@apollo/client";
-import { GetLocationsDocument } from "@/graphql/generated/graphql";
+import { GetLocationsDocument, SortOrder } from "@/graphql/generated/graphql";
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
 import { Trash2, Edit, Loader2, MapPin, Plus } from "lucide-react";
@@ -38,7 +38,7 @@ export const LocationsList = forwardRef<LocationsListRef, LocationsListProps>(
         variables: {
           first: 10,
           page: 1,
-          orderBy: [{ column: "updated_at", order: "DESC" }],
+          orderBy: [{ column: "updated_at", order: SortOrder.Desc }],
         },
         fetchPolicy: "cache-and-network",
         errorPolicy: "all",
@@ -73,7 +73,7 @@ export const LocationsList = forwardRef<LocationsListRef, LocationsListProps>(
           variables: {
             first: 10,
             page: nextPage,
-            orderBy: [{ column: "updated_at", order: "DESC" }],
+            orderBy: [{ column: "updated_at", order: SortOrder.Desc }],
           },
         });
 
@@ -118,7 +118,7 @@ export const LocationsList = forwardRef<LocationsListRef, LocationsListProps>(
       await refetch({
         first: 10,
         page: 1,
-        orderBy: [{ column: "updated_at", order: "DESC" }],
+        orderBy: [{ column: "updated_at", order: SortOrder.Desc }],
       });
     }, [refetch]);
 
