@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreVertical, Package, Trash2 } from "lucide-react";
+import { ArrowUpDown, MoreVertical, Package, Trash2 } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import {
   DropdownMenu,
@@ -22,7 +22,20 @@ export function useIngredientsColumns(
     () => [
       {
         accessorKey: "name",
-        header: "Product Name",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+              className="h-auto p-0 font-medium hover:bg-transparent"
+            >
+              Product Name
+              <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+          );
+        },
         cell: ({ row }) => {
           const ingredient = row.original;
           return (
@@ -51,39 +64,86 @@ export function useIngredientsColumns(
       },
       {
         accessorKey: "quantities",
-        header: "Quantity",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+              className="h-auto p-0 font-medium hover:bg-transparent"
+            >
+              Quantity
+              <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+          );
+        },
         cell: ({ row }) => {
           const ingredient = row.original;
           const total = ingredient.quantities.reduce(
             (sum, q) => sum + q.quantity,
             0
           );
-          return <div className="font-medium">{total.toFixed(1)}</div>;
+          return (
+            <div className="font-medium text-left">{total.toFixed(1)}</div>
+          );
+        },
+        sortingFn: (rowA, rowB) => {
+          const totalA = rowA.original.quantities.reduce(
+            (sum, q) => sum + q.quantity,
+            0
+          );
+          const totalB = rowB.original.quantities.reduce(
+            (sum, q) => sum + q.quantity,
+            0
+          );
+          return totalA - totalB;
         },
       },
       {
         accessorKey: "unit",
         header: "Unit",
-        cell: ({ row }) => <div>{row.getValue("unit")}</div>,
+        cell: ({ row }) => (
+          <div className="text-left">{row.getValue("unit")}</div>
+        ),
       },
       {
         accessorKey: "category",
-        header: "Category",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+              className="h-auto p-0 font-medium hover:bg-transparent"
+            >
+              Category
+              <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+          );
+        },
         cell: ({ row }) => {
           const { category } = row.original;
           return category ? (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 justify-start">
               <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-secondary">
                 {category.name}
               </span>
             </div>
           ) : null;
         },
+        sortingFn: (rowA, rowB) => {
+          const categoryA = rowA.original.category?.name || "";
+          const categoryB = rowB.original.category?.name || "";
+          return categoryA.localeCompare(categoryB);
+        },
       },
       {
         id: "actions",
         header: "Actions",
         enableHiding: false,
+        enableSorting: false,
         cell: ({ row }) => {
           const ingredient = row.original;
 
@@ -91,6 +151,7 @@ export function useIngredientsColumns(
             return (
               <Button variant="destructive" size="icon">
                 <Trash2 className="h-4 w-4" />
+                <span className="sr-only">Delete ingredient</span>
               </Button>
             );
           }

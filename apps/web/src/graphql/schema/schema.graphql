@@ -1,3 +1,20 @@
+enum AllergenEnum {
+  gluten
+  fruits_a_coque
+  crustaces
+  celeri
+  oeufs
+  moutarde
+  poisson
+  soja
+  lait
+  sulfites
+  sesame
+  lupin
+  arachides
+  mollusques
+}
+
 type Category {
   """Unique primary key."""
   id: ID!
@@ -111,6 +128,9 @@ type Ingredient {
 
   """Unit for the base quantity of the ingredient."""
   base_unit: UnitEnum!
+
+  """Allergens contained in the ingredient."""
+  allergens: [AllergenEnum!]!
   quantities: [IngredientQuantity!]!
 
   """The company that owns this ingredient."""
@@ -367,6 +387,7 @@ type Menu {
   image_url: String
   is_a_la_carte: Boolean!
   is_available: Boolean!
+  allergens: [AllergenEnum!]!
   items: [MenuItem!]!
   created_at: DateTime!
   updated_at: DateTime!
@@ -497,6 +518,9 @@ type Preparation {
   """Unit of measurement for the preparation."""
   unit: UnitEnum!
 
+  """Allergens contained in this preparation."""
+  allergens: [AllergenEnum!]!
+
   """The company that produces this preparation."""
   company: Company!
   entities: [PreparationEntity!]!
@@ -571,6 +595,9 @@ type Query {
   """
   search(barcode: String, keyword: String, page: Int = 1, pageSize: Int = 20): OpenFoodFactsProduct
 
+  """Liste les allergènes disponibles"""
+  allergens: [AllergenEnum!]!
+
   """Find a single Category (only if it belongs to the current company)."""
   Category(
     """Search by primary key."""
@@ -627,7 +654,10 @@ type Query {
 
   """Liste les unités de mesure disponibles"""
   measurementUnits: [MeasurementUnitType!]!
-  menus: [Menu!]!
+  menus(
+    """Filtrer par un ou plusieurs allergènes."""
+    allergens: [AllergenEnum!]
+  ): [Menu!]!
   menu(id: ID!): Menu
   menuOrderStats(start: Date, end: Date): MenuOrderStats!
   perishables(filter: PerishableFilter = FRESH): [Perishable!]!
@@ -686,6 +716,9 @@ type Query {
 
     """Filtrer par une ou plusieurs catégories."""
     categoryIds: [ID!]
+
+    """Filtrer par un ou plusieurs allergènes."""
+    allergens: [AllergenEnum!]
 
     """Options de tri des ingrédients"""
     orderBy: [OrderByClause!]
@@ -771,6 +804,9 @@ type Query {
 
     """Filtrer par une ou plusieurs catégories."""
     categoryIds: [ID!]
+
+    """Filtrer par un ou plusieurs allergènes."""
+    allergens: [AllergenEnum!]
 
     """Options de tri des préparations"""
     orderBy: [OrderByClause!]
