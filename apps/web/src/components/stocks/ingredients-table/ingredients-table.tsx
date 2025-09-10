@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useQuery } from "@apollo/client";
 import { useRouter } from "next/navigation";
 import {
@@ -30,9 +30,9 @@ export function IngredientsTable() {
   const router = useRouter();
   const { filters, isRegisterLostMode } = useStocksStore();
   const columns = useIngredientsColumns(isRegisterLostMode);
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const sentinelRef = React.useRef<HTMLDivElement>(null);
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   const { data, loading, error, fetchMore } = useQuery(GetIngredientsDocument, {
     variables: {
@@ -46,7 +46,7 @@ export function IngredientsTable() {
     notifyOnNetworkStatusChange: true,
   });
 
-  const ingredients: GetIngredientsQuery["ingredients"]["data"] = React.useMemo(
+  const ingredients: GetIngredientsQuery["ingredients"]["data"] = useMemo(
     () => data?.ingredients?.data ?? [],
     [data?.ingredients?.data]
   );
@@ -55,12 +55,13 @@ export function IngredientsTable() {
   const hasMorePages = pageInfo?.hasMorePages ?? false;
 
   // Reset page when filters change
-  React.useEffect(() => {
+  useEffect(() => {
     setCurrentPage(1);
   }, [filters.search, filters.categoryIds]);
 
   // Infinite scroll logic
-  React.useEffect(() => {
+  
+  useEffect(() => {
     const el = sentinelRef.current;
     if (!el || !hasMorePages || loading) return;
 

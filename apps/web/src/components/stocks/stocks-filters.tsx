@@ -41,10 +41,6 @@ export default function StocksFilters({
   const debouncedCategories = useDebounce(categoryFilters, 100); // Reduced delay for better reactivity
 
   const categoryOptions = useMemo(() => {
-    console.log(
-      `📊 Categories loaded: ${initialCategories.length}`,
-      initialCategories
-    );
     return initialCategories
       .map((cat) => ({
         label: cat.name,
