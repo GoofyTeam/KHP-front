@@ -14,14 +14,14 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
-    "query GetCategories {\n  categories {\n    data {\n      id\n      name\n    }\n  }\n}": typeof types.GetCategoriesDocument,
+    "query GetCategories {\n  categories(first: 1000) {\n    data {\n      id\n      name\n    }\n  }\n}": typeof types.GetCategoriesDocument,
     "query GetIngredient($id: ID!) {\n  ingredient(id: $id) {\n    id\n    name\n    unit\n    image_url\n    created_at\n    updated_at\n    category {\n      id\n      name\n    }\n    quantities {\n      quantity\n      location {\n        id\n        name\n        locationType {\n          name\n        }\n      }\n    }\n    stockMovements {\n      quantity_before\n      quantity_after\n      type\n      created_at\n      location {\n        id\n      }\n    }\n  }\n}": typeof types.GetIngredientDocument,
     "query GetIngredients($page: Int!, $search: String, $categoryIds: [ID!]) {\n  ingredients(page: $page, search: $search, categoryIds: $categoryIds) {\n    data {\n      id\n      name\n      unit\n      image_url\n      category {\n        id\n        name\n      }\n      quantities {\n        quantity\n        location {\n          id\n          name\n          locationType {\n            name\n          }\n        }\n      }\n    }\n    paginatorInfo {\n      count\n      currentPage\n      hasMorePages\n      lastPage\n      perPage\n      total\n      firstItem\n      lastItem\n    }\n  }\n}": typeof types.GetIngredientsDocument,
     "query GetLocations {\n  locations {\n    data {\n      name\n      id\n    }\n  }\n}": typeof types.GetLocationsDocument,
     "query GetMostUsedIngredients {\n  ingredients(orderBy: {column: \"withdrawals_this_week_count\", order: DESC}) {\n    data {\n      name\n      withdrawals_this_week_count\n    }\n  }\n}": typeof types.GetMostUsedIngredientsDocument,
 };
 const documents: Documents = {
-    "query GetCategories {\n  categories {\n    data {\n      id\n      name\n    }\n  }\n}": types.GetCategoriesDocument,
+    "query GetCategories {\n  categories(first: 1000) {\n    data {\n      id\n      name\n    }\n  }\n}": types.GetCategoriesDocument,
     "query GetIngredient($id: ID!) {\n  ingredient(id: $id) {\n    id\n    name\n    unit\n    image_url\n    created_at\n    updated_at\n    category {\n      id\n      name\n    }\n    quantities {\n      quantity\n      location {\n        id\n        name\n        locationType {\n          name\n        }\n      }\n    }\n    stockMovements {\n      quantity_before\n      quantity_after\n      type\n      created_at\n      location {\n        id\n      }\n    }\n  }\n}": types.GetIngredientDocument,
     "query GetIngredients($page: Int!, $search: String, $categoryIds: [ID!]) {\n  ingredients(page: $page, search: $search, categoryIds: $categoryIds) {\n    data {\n      id\n      name\n      unit\n      image_url\n      category {\n        id\n        name\n      }\n      quantities {\n        quantity\n        location {\n          id\n          name\n          locationType {\n            name\n          }\n        }\n      }\n    }\n    paginatorInfo {\n      count\n      currentPage\n      hasMorePages\n      lastPage\n      perPage\n      total\n      firstItem\n      lastItem\n    }\n  }\n}": types.GetIngredientsDocument,
     "query GetLocations {\n  locations {\n    data {\n      name\n      id\n    }\n  }\n}": types.GetLocationsDocument,
@@ -45,7 +45,7 @@ export function graphql(source: string): unknown;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "query GetCategories {\n  categories {\n    data {\n      id\n      name\n    }\n  }\n}"): (typeof documents)["query GetCategories {\n  categories {\n    data {\n      id\n      name\n    }\n  }\n}"];
+export function graphql(source: "query GetCategories {\n  categories(first: 1000) {\n    data {\n      id\n      name\n    }\n  }\n}"): (typeof documents)["query GetCategories {\n  categories(first: 1000) {\n    data {\n      id\n      name\n    }\n  }\n}"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

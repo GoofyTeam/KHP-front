@@ -12,6 +12,14 @@ import {
 } from "@tanstack/react-table";
 
 import { Skeleton } from "@workspace/ui/components/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@workspace/ui/components/table";
 
 import { GetIngredientsDocument } from "@/graphql/generated/graphql";
 import { useStocksStore } from "@/stores/stocks-store";
@@ -23,8 +31,10 @@ export function IngredientsTable() {
   const { filters, isRegisterLostMode } = useStocksStore();
   const columns = useIngredientsColumns(isRegisterLostMode);
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const sentinelRef = React.useRef<HTMLDivElement>(null);
 
-  const { data, loading, error } = useQuery(GetIngredientsDocument, {
+  const { data, loading, error, fetchMore } = useQuery(GetIngredientsDocument, {
     variables: {
       page: 1,
       search: filters.search || undefined,
@@ -33,12 +43,72 @@ export function IngredientsTable() {
         : undefined,
     },
     fetchPolicy: "cache-and-network",
+    notifyOnNetworkStatusChange: true,
   });
 
   const ingredients: GetIngredientsQuery["ingredients"]["data"] = React.useMemo(
     () => data?.ingredients?.data ?? [],
     [data?.ingredients?.data]
   );
+
+  const pageInfo = data?.ingredients?.paginatorInfo;
+  const hasMorePages = pageInfo?.hasMorePages ?? false;
+
+  // Reset page when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [filters.search, filters.categoryIds]);
+
+  // Infinite scroll logic
+  React.useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasMorePages || loading) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          observer.disconnect();
+          const nextPage = currentPage + 1;
+          setCurrentPage(nextPage);
+
+          fetchMore({
+            variables: {
+              page: nextPage,
+              search: filters.search || undefined,
+              categoryIds: filters.categoryIds?.length
+                ? filters.categoryIds
+                : undefined,
+            },
+            updateQuery: (prev, { fetchMoreResult }) => {
+              if (!fetchMoreResult) return prev;
+
+              return {
+                ...fetchMoreResult,
+                ingredients: {
+                  ...fetchMoreResult.ingredients,
+                  data: [
+                    ...prev.ingredients.data,
+                    ...fetchMoreResult.ingredients.data,
+                  ],
+                },
+              };
+            },
+          });
+        }
+      },
+      { rootMargin: "200px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [
+    hasMorePages,
+    currentPage,
+    filters.search,
+    filters.categoryIds,
+    loading,
+    fetchMore,
+  ]);
 
   const table = useReactTable({
     data: ingredients,
@@ -69,68 +139,82 @@ export function IngredientsTable() {
         </div>
       )}
 
-      <div className="relative overflow-auto rounded-md border border-khp-primary h-[calc(80vh-56px)]">
-        <table className="w-full caption-bottom text-sm table-fixed">
-          <thead className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/95 z-20 border-b border-khp-primary">
+      <div className="relative rounded-lg border-2 border-khp-primary/30 h-[calc(80vh-56px)] overflow-auto">
+        <Table className="w-full caption-bottom text-sm text-khp-text-secondary border-collapse">
+          <TableHeader className="text-khp-text-primary h-16">
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
+              <TableRow
+                key={headerGroup.id}
+                className="border-b border-khp-primary/30 bg-white"
+              >
                 {headerGroup.headers.map((header) => (
-                  <th
+                  <TableHead
                     key={header.id}
-                    className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
+                    className="px-2 text-left bg-white"
                   >
                     {flexRender(
                       header.column.columnDef.header,
                       header.getContext()
                     )}
-                  </th>
+                  </TableHead>
                 ))}
-              </tr>
+              </TableRow>
             ))}
-          </thead>
-          <tbody>
+          </TableHeader>
+          <TableBody>
             {loading && !ingredients.length ? (
               Array.from({ length: 8 }).map((_, i) => (
-                <tr key={i} className="border-b h-[60px]">
+                <TableRow
+                  key={i}
+                  className="border-t border-b border-khp-text-secondary/30 h-16"
+                >
                   {columns.map((_, j) => (
-                    <td key={j} className="p-4 align-middle">
+                    <TableCell key={j} className="px-2 text-left">
                       <Skeleton className="h-8 w-full" />
-                    </td>
+                    </TableCell>
                   ))}
-                </tr>
+                </TableRow>
               ))
             ) : ingredients.length ? (
               table.getRowModel().rows.map((row) => (
-                <tr
+                <TableRow
                   key={row.id}
-                  className="border-b h-[60px] transition-colors hover:bg-muted/50 cursor-pointer"
+                  className="border-b border-khp-text-secondary/30 h-16 cursor-pointer hover:bg-muted/50"
                   onClick={() => handleRowClick(row.original.id)}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <td
-                      key={cell.id}
-                      className="p-4 align-middle whitespace-nowrap"
-                    >
+                    <TableCell key={cell.id} className="px-2 text-left">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
                       )}
-                    </td>
+                    </TableCell>
                   ))}
-                </tr>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td
+              <TableRow className="border-b border-khp-text-secondary/30">
+                <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center text-muted-foreground"
+                  className="h-24 text-center text-muted-foreground px-2"
                 >
-                  No results found
-                </td>
-              </tr>
+                  No ingredient found
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
+        {hasMorePages && (
+          <div
+            ref={sentinelRef}
+            className="h-8 flex items-center justify-center"
+          >
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-khp-primary" />
+          </div>
+        )}
+        {!hasMorePages && ingredients.length > 0 && (
+          <div className="border-b-1 border-khp-text-secondary/30" />
+        )}
       </div>
     </div>
   );

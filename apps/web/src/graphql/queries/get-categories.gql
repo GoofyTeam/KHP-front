@@ -1,5 +1,5 @@
 query GetCategories {
-  categories {
+  categories(first: 1000) {
     data {
       id
       name
