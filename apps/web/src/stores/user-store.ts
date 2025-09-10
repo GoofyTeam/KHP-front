@@ -18,7 +18,7 @@ type State = {
   clearError: () => void;
 };
 
-export const useUserStore = create<State>((set, get) => ({
+export const useUserStore = create<State>((set) => ({
   user: null,
   isLoading: false,
   error: null,
