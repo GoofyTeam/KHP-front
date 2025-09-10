@@ -3,10 +3,10 @@
 import { ProfileSection } from "./profile-section";
 import { PasswordSection } from "./password-section";
 import { LogoutSection } from "./logout-section";
-import type { GetMeQuery } from "@/graphql/generated/graphql";
+import type { User } from "@/lib/httpClient";
 
 interface AccountFormProps {
-  user: GetMeQuery["me"];
+  user: User;
 }
 
 export function AccountForm({ user }: AccountFormProps) {

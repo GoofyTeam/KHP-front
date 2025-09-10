@@ -26,20 +26,12 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL
     ? "https://dash.goofykhp.fr"
     : null;
 
-console.log("[MW] API URL:", API_URL);
-console.log(
-  "[MW] process.env.NEXT_PUBLIC_API_URL:",
-  process.env.NEXT_PUBLIC_API_URL
-);
-
 const serverHttpClient = {
   async fetch(endpoint: string, req: NextRequest): Promise<Response> {
     const cookieHeader = req.headers.get("cookie") || "";
 
     const baseUrl = API_URL || req.nextUrl.origin;
     const url = new URL(endpoint, baseUrl);
-
-    console.log("[MW] API target:", url.toString());
 
     return fetch(url.toString(), {
       method: "GET",

@@ -38,12 +38,17 @@ const passwordFormSchema = z
 type PasswordFormValues = z.infer<typeof passwordFormSchema>;
 
 export function PasswordSection() {
-  const [pwdLoading, setPwdLoading] = useState(false);
-  const [pwdSaved, setPwdSaved] = useState(false);
-  const [pwdError, setPwdError] = useState<string | null>(null);
-  const [showCurrent, setShowCurrent] = useState(false);
-  const [showNew, setShowNew] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [passwordVisibility, setPasswordVisibility] = useState({
+    current: false,
+    new: false,
+    confirm: false,
+  });
+
+  const [formStatus, setFormStatus] = useState<{
+    type: "idle" | "success" | "error";
+    message?: string;
+  }>({ type: "idle" });
+
   const [isPending, startTransition] = useTransition();
 
   const passwordForm = useForm<PasswordFormValues>({
@@ -56,22 +61,20 @@ export function PasswordSection() {
   });
 
   const onPasswordSubmit = (values: PasswordFormValues) => {
-    setPwdLoading(true);
-    setPwdSaved(false);
-    setPwdError(null);
+    setFormStatus({ type: "idle" });
 
     startTransition(async () => {
       const res = await updatePasswordAction(values);
       if (!res.success) {
-        setPwdError(
-          res.error || "Unable to update password. Please try again."
-        );
+        setFormStatus({
+          type: "error",
+          message: res.error || "Unable to update password. Please try again.",
+        });
       } else {
-        setPwdSaved(true);
+        setFormStatus({ type: "success" });
         passwordForm.reset();
-        setTimeout(() => setPwdSaved(false), 3000);
+        setTimeout(() => setFormStatus({ type: "idle" }), 3000);
       }
-      setPwdLoading(false);
     });
   };
 
@@ -106,21 +109,28 @@ export function PasswordSection() {
                   <FormControl>
                     <div className="relative">
                       <Input
-                        type={showCurrent ? "text" : "password"}
+                        type={passwordVisibility.current ? "text" : "password"}
                         placeholder="Enter current password"
-                        disabled={pwdLoading || isPending}
+                        disabled={isPending}
                         className="w-full h-12 text-base border-2 border-khp-primary/20 rounded-md focus:border-khp-primary focus:bg-khp-primary/5 transition-all duration-200 px-4 pr-12 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary shadow-sm"
                         {...field}
                       />
                       <button
                         type="button"
-                        onClick={() => setShowCurrent((s) => !s)}
+                        onClick={() =>
+                          setPasswordVisibility((prev) => ({
+                            ...prev,
+                            current: !prev.current,
+                          }))
+                        }
                         className="absolute inset-y-0 right-3 flex items-center text-khp-text-secondary hover:text-khp-text-primary transition-colors duration-200 p-1 rounded-lg hover:bg-khp-primary/20"
                         aria-label={
-                          showCurrent ? "Hide password" : "Show password"
+                          passwordVisibility.current
+                            ? "Hide password"
+                            : "Show password"
                         }
                       >
-                        {showCurrent ? (
+                        {passwordVisibility.current ? (
                           <EyeOff className="h-5 w-5" />
                         ) : (
                           <Eye className="h-5 w-5" />
@@ -144,19 +154,28 @@ export function PasswordSection() {
                   <FormControl>
                     <div className="relative">
                       <Input
-                        type={showNew ? "text" : "password"}
+                        type={passwordVisibility.new ? "text" : "password"}
                         placeholder="Enter new password"
-                        disabled={pwdLoading || isPending}
+                        disabled={isPending}
                         className="w-full h-12 text-base border-2 border-khp-primary/20 rounded-md focus:border-khp-primary focus:bg-khp-primary/5 transition-all duration-200 px-4 pr-12 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary shadow-sm"
                         {...field}
                       />
                       <button
                         type="button"
-                        onClick={() => setShowNew((s) => !s)}
+                        onClick={() =>
+                          setPasswordVisibility((prev) => ({
+                            ...prev,
+                            new: !prev.new,
+                          }))
+                        }
                         className="absolute inset-y-0 right-3 flex items-center text-khp-text-secondary hover:text-khp-text-primary transition-colors duration-200 p-1 rounded-lg hover:bg-khp-primary/10"
-                        aria-label={showNew ? "Hide password" : "Show password"}
+                        aria-label={
+                          passwordVisibility.new
+                            ? "Hide password"
+                            : "Show password"
+                        }
                       >
-                        {showNew ? (
+                        {passwordVisibility.new ? (
                           <EyeOff className="h-5 w-5" />
                         ) : (
                           <Eye className="h-5 w-5" />
@@ -180,21 +199,28 @@ export function PasswordSection() {
                   <FormControl>
                     <div className="relative">
                       <Input
-                        type={showConfirm ? "text" : "password"}
+                        type={passwordVisibility.confirm ? "text" : "password"}
                         placeholder="Confirm new password"
-                        disabled={pwdLoading || isPending}
+                        disabled={isPending}
                         className="w-full h-12 text-base border-2 border-khp-primary/20 rounded-md focus:border-khp-primary focus:bg-khp-primary/5 transition-all duration-200 px-4 pr-12 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary shadow-sm"
                         {...field}
                       />
                       <button
                         type="button"
-                        onClick={() => setShowConfirm((s) => !s)}
+                        onClick={() =>
+                          setPasswordVisibility((prev) => ({
+                            ...prev,
+                            confirm: !prev.confirm,
+                          }))
+                        }
                         className="absolute inset-y-0 right-3 flex items-center text-khp-text-secondary hover:text-khp-text-primary transition-colors duration-200 p-1 rounded-lg hover:bg-khp-primary/10"
                         aria-label={
-                          showConfirm ? "Hide password" : "Show password"
+                          passwordVisibility.confirm
+                            ? "Hide password"
+                            : "Show password"
                         }
                       >
-                        {showConfirm ? (
+                        {passwordVisibility.confirm ? (
                           <EyeOff className="h-5 w-5" />
                         ) : (
                           <Eye className="h-5 w-5" />
@@ -209,25 +235,25 @@ export function PasswordSection() {
           </div>
 
           <div className="pt-4">
-            {pwdSaved ? (
+            {formStatus.type === "success" ? (
               <div className="flex items-center justify-center gap-3 p-4 bg-green-50 border-2 border-green-200 rounded-xl">
                 <CheckCircleIcon className="h-5 w-5 text-green-600" />
                 <span className="text-green-700 text-sm font-semibold">
                   Password updated successfully
                 </span>
               </div>
-            ) : pwdError ? (
+            ) : formStatus.type === "error" ? (
               <div className="p-4 text-center border-2 border-red-200 bg-red-50 text-red-700 rounded-xl text-sm font-medium">
-                {pwdError}
+                {formStatus.message}
               </div>
             ) : (
               <Button
                 type="submit"
-                disabled={pwdLoading || isPending}
+                disabled={isPending}
                 variant="khp-default"
                 size="xl-full"
               >
-                {pwdLoading || isPending ? (
+                {isPending ? (
                   <div className="flex items-center justify-center gap-2">
                     <Loader2Icon className="animate-spin h-4 w-4" />
                     Updating password...

@@ -3,7 +3,7 @@
 import { User, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
+import { useBreakpoint } from "@workspace/ui/hooks/use-breakpoint";
 import { useState } from "react";
 
 import {
@@ -104,7 +104,7 @@ export function SettingsMenuButton() {
 
 // Composant principal pour la sidebar des paramètres
 export function SettingsSidebar() {
-  const isMobile = useIsMobile();
+  const isMobile = !useBreakpoint("md");
 
   // Sur mobile, on n'affiche rien car le bouton est maintenant dans l'AppSidebarWrapper
   if (isMobile) {
