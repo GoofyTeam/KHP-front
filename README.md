@@ -23,9 +23,9 @@ flowchart LR
   end
 
   subgraph Shared Packages
-    UI[@workspace/ui<br/>React UI Library]
-    ESLint[@workspace/eslint-config]
-    TS[@workspace/typescript-config]
+    UI[&#64;workspace/ui<br/>React UI Library]
+    ESLint[&#64;workspace/eslint-config]
+    TS[&#64;workspace/typescript-config]
     GQL[packages/graphql<br/>Shared artifacts]
   end
 
