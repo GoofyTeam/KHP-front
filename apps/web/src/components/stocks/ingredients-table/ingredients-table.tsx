@@ -176,7 +176,7 @@ export function IngredientsTable() {
                 </TableRow>
               ))
             ) : ingredients.length ? (
-              table.getRowModel().rows.map((row, index) => (
+              table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
                   className="border-b border-khp-text-secondary/30 h-16 cursor-pointer hover:bg-muted/50"
