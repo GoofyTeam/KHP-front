@@ -18,18 +18,18 @@ All projects use TypeScript and common tooling.
 ```mermaid
 flowchart LR
   subgraph Apps
-    Web[Next.js Web App]\napps/web
-    PWA[Vite + React PWA]\napps/pwa
+    Web[Next.js Web App<br/>apps/web]
+    PWA[Vite + React PWA<br/>apps/pwa]
   end
 
   subgraph Shared Packages
-    UI[@workspace/ui\nReact UI Library]
+    UI[@workspace/ui<br/>React UI Library]
     ESLint[@workspace/eslint-config]
     TS[@workspace/typescript-config]
-    GQL[packages/graphql\nShared artifacts]
+    GQL[packages/graphql<br/>Shared artifacts]
   end
 
-  Backend[(GraphQL API\nhttps://back.goofykhp.fr/graphql)]
+  Backend[(GraphQL API<br/>https://back.goofykhp.fr/graphql)]
 
   Web --> UI
   Web --> ESLint
