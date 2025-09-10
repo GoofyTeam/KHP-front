@@ -71,7 +71,7 @@ export function LoginForm({
               <FormLabel>Email</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Email"
+                  placeholder="example@goofykhp.com"
                   {...field}
                   className="border-khp-primary"
                 />
@@ -90,7 +90,6 @@ export function LoginForm({
               <FormControl>
                 <Input
                   type="password"
-                  placeholder="Mot de passe"
                   {...field}
                   className="border-khp-primary"
                 />
