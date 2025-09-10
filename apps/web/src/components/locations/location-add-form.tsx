@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useApolloClient } from "@apollo/client";
 import { Button } from "@workspace/ui/components/button";
@@ -21,10 +21,7 @@ interface LocationAddFormProps {
 }
 
 export function LocationAddForm({ onLocationAdded }: LocationAddFormProps) {
-  const [isLoading, setIsLoading] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
   const apolloClient = useApolloClient();
 
   const form = useForm<LocationFormValues>({
@@ -34,50 +31,52 @@ export function LocationAddForm({ onLocationAdded }: LocationAddFormProps) {
     },
   });
 
-  const onSubmit = (values: LocationFormValues) => {
-    setIsLoading(true);
-    setSaved(false);
-    setSaveError(null);
+  const onSubmit = form.handleSubmit(async (values: LocationFormValues) => {
+    try {
+      setSaved(false);
+      form.clearErrors();
 
-    startTransition(async () => {
-      try {
-        if (!values.location_type_id) {
-          setSaveError("Please select a location type.");
-          setIsLoading(false);
-          return;
-        }
-
-        const payload = {
-          name: values.name,
-          location_type_id: parseInt(values.location_type_id),
-        };
-        const result = await createLocationAction(payload);
-        if (result.success) {
-          setSaved(true);
-          form.reset();
-
-          // Refetch la query GraphQL pour mettre à jour le cache Apollo
-          await apolloClient.refetchQueries({
-            include: [GetLocationsDocument],
-          });
-
-          onLocationAdded?.();
-          setTimeout(() => setSaved(false), 3000);
-        } else {
-          setSaveError(result.error);
-        }
-      } catch (error) {
-        console.error("Error creating location:", error);
-        setSaveError("Unable to create location. Please try again.");
-      } finally {
-        setIsLoading(false);
+      if (!values.location_type_id) {
+        form.setError("location_type_id", {
+          message: "Please select a location type.",
+        });
+        return;
       }
-    });
-  };
+
+      const payload = {
+        name: values.name,
+        location_type_id: parseInt(values.location_type_id),
+      };
+
+      const result = await createLocationAction(payload);
+
+      if (result.success) {
+        setSaved(true);
+        form.reset();
+
+        // Refetch la query GraphQL pour mettre à jour le cache Apollo
+        await apolloClient.refetchQueries({
+          include: [GetLocationsDocument],
+        });
+
+        onLocationAdded?.();
+        setTimeout(() => setSaved(false), 3000);
+      } else {
+        form.setError("root", {
+          message: result.error || "Unable to create location",
+        });
+      }
+    } catch (error) {
+      console.error("Error creating location:", error);
+      form.setError("root", {
+        message: "Unable to create location. Please try again.",
+      });
+    }
+  });
 
   return (
     <div className="space-y-4">
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+      <form onSubmit={onSubmit} className="space-y-5">
         <div className="space-y-2">
           <Label
             htmlFor="name"
@@ -88,7 +87,7 @@ export function LocationAddForm({ onLocationAdded }: LocationAddFormProps) {
           <Input
             id="name"
             type="text"
-            disabled={isLoading || isPending}
+            disabled={form.formState.isSubmitting}
             className="w-full h-12 text-base border-khp-border focus:border-khp-primary focus:ring-2 focus:ring-khp-primary/20 transition-all px-4 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary rounded-lg"
             placeholder="Enter location name"
             {...form.register("name", {
@@ -114,7 +113,7 @@ export function LocationAddForm({ onLocationAdded }: LocationAddFormProps) {
             <LocationTypeSelector
               value={field.value}
               onValueChange={field.onChange}
-              disabled={isLoading || isPending}
+              disabled={form.formState.isSubmitting}
             />
           )}
         />
@@ -132,18 +131,18 @@ export function LocationAddForm({ onLocationAdded }: LocationAddFormProps) {
                 Location created successfully
               </span>
             </div>
-          ) : saveError ? (
+          ) : form.formState.errors.root ? (
             <div className="p-4 text-center border border-red-200 bg-red-50 text-red-700 rounded-lg text-sm font-medium">
-              {saveError}
+              {form.formState.errors.root.message}
             </div>
           ) : (
             <Button
               type="submit"
-              disabled={isLoading || isPending}
+              disabled={form.formState.isSubmitting}
               variant="khp-default"
               className="w-full h-12 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed rounded-lg"
             >
-              {isLoading || isPending ? (
+              {form.formState.isSubmitting ? (
                 <div className="flex items-center justify-center gap-2">
                   <Loader2Icon className="animate-spin h-4 w-4" />
                   Creating location...

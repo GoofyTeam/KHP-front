@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useApolloClient } from "@apollo/client";
 import { Button } from "@workspace/ui/components/button";
@@ -23,17 +23,13 @@ interface LocationEditFormProps {
   onCancel?: () => void;
 }
 
-export function
-  LocationEditForm({
-    location,
-    
+export function LocationEditForm({
+  location,
+
   onLocationUpdated,
   onCancel,
 }: LocationEditFormProps) {
-  const [isLoading, setIsLoading] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
   const apolloClient = useApolloClient();
 
   const form = useForm<LocationFormValues>({
@@ -50,41 +46,42 @@ export function
     });
   }, [location, form]);
 
-  const onSubmit = (values: LocationFormValues) => {
-    setIsLoading(true);
-    setSaved(false);
-    setSaveError(null);
+  const onSubmit = form.handleSubmit(async (values: LocationFormValues) => {
+    try {
+      setSaved(false);
+      form.clearErrors();
 
-    startTransition(async () => {
-      try {
-        const payload = {
-          name: values.name,
-          ...(values.location_type_id && {
-            location_type_id: parseInt(values.location_type_id),
-          }),
-        };
-        const result = await updateLocationAction(location.id, payload);
-        if (result?.success) {
-          setSaved(true);
+      const payload = {
+        name: values.name,
+        ...(values.location_type_id && {
+          location_type_id: parseInt(values.location_type_id),
+        }),
+      };
 
-          // Refetch la query GraphQL pour mettre à jour le cache Apollo
-          await apolloClient.refetchQueries({
-            include: [GetLocationsDocument],
-          });
+      const result = await updateLocationAction(location.id, payload);
 
-          onLocationUpdated?.();
-          setTimeout(() => setSaved(false), 3000);
-        } else {
-          setSaveError(result?.error || "Unknown error occurred");
-        }
-      } catch (error) {
-        console.error("Error updating location:", error);
-        setSaveError("Unable to update location. Please try again.");
-      } finally {
-        setIsLoading(false);
+      if (result?.success) {
+        setSaved(true);
+
+        // Refetch la query GraphQL pour mettre à jour le cache Apollo
+        await apolloClient.refetchQueries({
+          include: [GetLocationsDocument],
+        });
+
+        onLocationUpdated?.();
+        setTimeout(() => setSaved(false), 3000);
+      } else {
+        form.setError("root", {
+          message: result?.error || "Unknown error occurred",
+        });
       }
-    });
-  };
+    } catch (error) {
+      console.error("Error updating location:", error);
+      form.setError("root", {
+        message: "Unable to update location. Please try again.",
+      });
+    }
+  });
 
   return (
     <div className="space-y-4">
@@ -98,7 +95,7 @@ export function
         <p className="text-khp-text-secondary text-xs">ID: {location.id}</p>
       </div>
 
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+      <form onSubmit={onSubmit} className="space-y-5">
         <div className="space-y-2">
           <Label
             htmlFor="name"
@@ -109,7 +106,7 @@ export function
           <Input
             id="name"
             type="text"
-            disabled={isLoading || isPending}
+            disabled={form.formState.isSubmitting}
             className="w-full h-12 text-base border-khp-border focus:border-khp-primary focus:ring-2 focus:ring-khp-primary/20 transition-all px-4 font-medium disabled:bg-khp-background-secondary disabled:text-khp-text-secondary rounded-lg"
             placeholder="Enter location name"
             {...form.register("name", {
@@ -134,7 +131,7 @@ export function
             <LocationTypeSelector
               value={field.value}
               onValueChange={field.onChange}
-              disabled={isLoading || isPending}
+              disabled={form.formState.isSubmitting}
             />
           )}
         />
@@ -152,19 +149,19 @@ export function
                 Location updated successfully
               </span>
             </div>
-          ) : saveError ? (
+          ) : form.formState.errors.root ? (
             <div className="p-4 text-center border border-red-200 bg-red-50 text-red-700 rounded-lg text-sm font-medium">
-              {saveError}
+              {form.formState.errors.root.message}
             </div>
           ) : (
             <div className="space-y-4">
               <Button
                 type="submit"
-                disabled={isLoading || isPending}
+                disabled={form.formState.isSubmitting}
                 variant="khp-default"
                 className="w-full h-12 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed rounded-lg"
               >
-                {isLoading || isPending ? (
+                {form.formState.isSubmitting ? (
                   <div className="flex items-center justify-center gap-2">
                     <Loader2Icon className="animate-spin h-4 w-4" />
                     Updating location...
