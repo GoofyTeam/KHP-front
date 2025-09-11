@@ -42,7 +42,6 @@ export default function LocationPage() {
   );
   const locationsListRef = useRef<LocationsListRef>(null);
 
-  // React Hook Form pour gérer la suppression
   const deleteForm = useForm<DeleteFormData>({
     defaultValues: {
       locationToDelete: null,
