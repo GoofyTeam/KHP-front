@@ -3,7 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@workspace/ui/lib/utils";
 
 const cardVariants = cva(
-  "text-card-foreground flex flex-col gap-6 rounded-xl border py-6",
+  "text-card-foreground flex flex-col gap-4 rounded-xl border py-4",
   {
     variants: {
       variant: {

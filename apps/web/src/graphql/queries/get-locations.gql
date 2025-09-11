@@ -1,8 +1,25 @@
-query GetLocations {
-  locations {
+query GetLocations($first: Int, $page: Int, $orderBy: [OrderByClause!]) {
+  locations(first: $first, page: $page, orderBy: $orderBy) {
     data {
-      name
       id
+      name
+      created_at
+      updated_at
+      locationType {
+        id
+        name
+        is_default
+      }
+    }
+    paginatorInfo {
+      count
+      currentPage
+      hasMorePages
+      lastPage
+      perPage
+      total
+      firstItem
+      lastItem
     }
   }
 }

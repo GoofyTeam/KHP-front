@@ -1,6 +1,6 @@
 "use client";
 
-import { User, Settings } from "lucide-react";
+import { User, Settings, MapPin } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useBreakpoint } from "@workspace/ui/hooks/use-breakpoint";
@@ -30,6 +30,12 @@ const settingsNavItems = [
     href: "/settings/account",
     icon: User,
     value: "account",
+  },
+  {
+    title: "Location",
+    description: "Manage your location settings",
+    href: "/settings/location",
+    icon: MapPin,
   },
 ];
 

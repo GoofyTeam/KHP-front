@@ -1,0 +1,19 @@
+query GetLocationTypes($first: Int, $page: Int) {
+  locationTypes(first: $first, page: $page) {
+    data {
+      id
+      name
+      is_default
+    }
+    paginatorInfo {
+      count
+      currentPage
+      hasMorePages
+      lastPage
+      perPage
+      total
+      firstItem
+      lastItem
+    }
+  }
+}
