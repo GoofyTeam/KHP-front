@@ -387,10 +387,42 @@ type Menu {
   image_url: String
   is_a_la_carte: Boolean!
   is_available: Boolean!
+  type: String!
+  price: Float!
+  categories: [MenuCategory!]!
   allergens: [AllergenEnum!]!
   items: [MenuItem!]!
   created_at: DateTime!
   updated_at: DateTime!
+}
+
+type MenuCategory {
+  """Unique primary key."""
+  id: ID!
+
+  """Category name."""
+  name: String!
+
+  """Menus in this category."""
+  menus: [Menu!]!
+
+  """The company that owns this category."""
+  company: Company!
+
+  """When the category was created."""
+  created_at: DateTime!
+
+  """When the category was last updated."""
+  updated_at: DateTime!
+}
+
+"""A paginated list of MenuCategory items."""
+type MenuCategoryPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of MenuCategory items."""
+  data: [MenuCategory!]!
 }
 
 type MenuItem {
@@ -657,8 +689,28 @@ type Query {
   menus(
     """Filtrer par un ou plusieurs allergènes."""
     allergens: [AllergenEnum!]
+
+    """Filtrer par une ou plusieurs catégories (IDs)."""
+    category_ids: [ID!]
+
+    """Filtrer par un ou plusieurs types."""
+    types: [String!]
+
+    """Filtrer par un range de prix [min, max]."""
+    price_between: [Float!]
   ): [Menu!]!
   menu(id: ID!): Menu
+
+  """
+  Find a single MenuCategory (only if it belongs to the current company).
+  """
+  menuCategory(
+    """Search by primary key."""
+    id: ID
+
+    """Search by category name."""
+    name: String
+  ): MenuCategory
   menuOrderStats(start: Date, end: Date): MenuOrderStats!
   perishables(filter: PerishableFilter = FRESH): [Perishable!]!
   nonPerishableIngredients: [Ingredient!]!
@@ -788,6 +840,18 @@ type Query {
     """The offset from which items are returned."""
     page: Int
   ): LossPaginator!
+
+  """List menu categories for the current company."""
+  menuCategories(
+    """Search by category name. Accepts SQL LIKE wildcards `%` and `_`."""
+    search: String
+
+    """Limits number of fetched items."""
+    first: Int! = 10
+
+    """The offset from which items are returned."""
+    page: Int
+  ): MenuCategoryPaginator!
 
   """Liste les preparations de ma company uniquement"""
   preparations(
