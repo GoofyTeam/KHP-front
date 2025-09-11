@@ -5,7 +5,6 @@ import { LucideIcon, Square } from "lucide-react";
 import * as Icons from "lucide-react";
 import Link from "next/link";
 import { NavUser } from "./nav-user";
-import { httpClient } from "@/lib/httpClient";
 
 import {
   Sidebar,
@@ -73,64 +72,17 @@ const isRouteActive = (currentPath: string, item: NavigationItem): boolean => {
   return currentPath === item.url || currentPath.startsWith(item.url + "/");
 };
 
-interface User {
-  name: string;
-  email: string;
-  avatar: string;
-}
-
-interface ApiUserResponse {
-  user: {
-    id: number;
-    name: string;
-    email: string;
-    company_id: number;
-    created_at: string;
-    updated_at: string;
-    email_verified_at: string;
-  };
-}
-
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   config?: SidebarConfig;
   pathname?: string;
-  user?: User;
 }
 
 export function AppSidebar({
   config = defaultConfig,
   pathname = "/dashboard",
-  user,
   ...props
 }: AppSidebarProps) {
   const { toggleSidebar } = useSidebar();
-  const [userData, setUserData] = React.useState<ApiUserResponse | null>(null);
-
-  // Fetch user data on component mount
-  React.useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await httpClient.get<ApiUserResponse>("/api/user");
-
-        setUserData(response);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-
-    fetchUserData();
-  }, []);
-
-  const fallback = {
-    name: "A",
-    email: "",
-  };
-  const currentUser = userData?.user
-    ? {
-        name: userData.user.name,
-        email: userData.user.email,
-      }
-    : user || fallback;
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -189,7 +141,7 @@ export function AppSidebar({
       </SidebarContent>
 
       <SidebarFooter>
-        <NavUser user={currentUser} />
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   );

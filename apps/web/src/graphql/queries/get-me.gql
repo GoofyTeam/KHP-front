@@ -1,0 +1,11 @@
+query GetMe {
+  me {
+    id
+    name
+    email
+    company {
+      id
+      name
+    }
+  }
+}

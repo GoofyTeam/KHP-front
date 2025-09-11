@@ -131,10 +131,6 @@ export function LossForm({ ingredient }: LossFormProps) {
         reason: reason,
       };
 
-      console.log("Sending loss data:", lossData);
-      console.log("Selected location:", selectedLocation);
-      console.log("Form data:", data);
-
       const result = await createLossAction(lossData);
 
       if (result.success) {
@@ -145,7 +141,6 @@ export function LossForm({ ingredient }: LossFormProps) {
           router.push(`/ingredient/${ingredient.id}`);
         }, 2000);
       } else {
-        console.error("Loss creation failed:", result.error);
         setApiError(result.error || "Erreur lors de l'enregistrement");
       }
     } catch {

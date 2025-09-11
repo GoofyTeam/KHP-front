@@ -47,7 +47,6 @@ function makeClient() {
     // use the `InMemoryCache` from "@apollo/client-integration-nextjs"
     cache: new InMemoryCache(),
     link: httpLink,
-    credentials: "include", // include cookies for CSRF protection
   });
 }
 
