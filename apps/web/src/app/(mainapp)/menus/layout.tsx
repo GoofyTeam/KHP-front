@@ -5,16 +5,13 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
 } from "@workspace/ui/components/breadcrumb";
 export const metadata: Metadata = {
-  title: "KHP | Stocks",
-  description:
-    "Gestion des stocks - Visualisez et gérez l'inventaire de votre entreprise",
+  title: "KHP | Menus",
+  description: "Menus Management - View and manage your menus",
 };
 
-export default function StocksLayout({
+export default function MenusLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -27,18 +24,14 @@ export default function StocksLayout({
             <BreadcrumbList className="text-xl font-semibold">
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link href="/stocks">Stocks</Link>
+                  <Link href="/menus">Menus</Link>
                 </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Ingredient</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </div>
       </header>
-      <div className="flex-1 overflow-auto p-4">{children}</div>
+      <div className="flex-1 overflow-auto px-4">{children}</div>
     </div>
   );
 }
