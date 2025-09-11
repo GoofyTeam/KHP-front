@@ -13,8 +13,8 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { GetProductQuery } from "../graphql/getProduct.gql";
-import { ImagePlaceholder } from "../components/ImagePlaceholder";
 import { LocationSelect } from "@workspace/ui/components/location-select";
+import { ImagePlaceholder } from "@workspace/ui/components/image-placeholder";
 
 // Inférer les types depuis GraphQL
 type ProductData = NonNullable<GetProductQuery["ingredient"]>;

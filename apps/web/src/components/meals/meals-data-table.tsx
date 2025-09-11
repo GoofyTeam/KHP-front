@@ -145,7 +145,7 @@ export function DataTable<TData, TValue>({
         </div>
         <div className="flex items-center justify-end py-4">
           <Button variant="khp-default" asChild>
-            <Link href="/(mainapp)/menus/new">Create new menu</Link>
+            <Link href="/menus/add">Create new menu</Link>
           </Button>
         </div>
       </div>

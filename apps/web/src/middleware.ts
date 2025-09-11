@@ -13,6 +13,7 @@ const protectedRoutes = [
   "/settings",
   "/account",
   "/ingredient",
+  "/menus",
 ];
 const authRoutes = [
   "/login",

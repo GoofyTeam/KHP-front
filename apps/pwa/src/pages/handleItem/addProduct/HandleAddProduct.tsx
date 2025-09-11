@@ -25,6 +25,7 @@ import { getAllMeasurementUnits } from "../../../types/mesurmentsUnitEnum";
 import { addProductSubmit } from "./add-product-submit";
 import { Minus, Plus, Image } from "lucide-react";
 import { handleItemSchema } from "./handleItemSchema";
+import { ImageAdd } from "@workspace/ui/components/image-placeholder";
 
 function HandleAddProduct() {
   const navigate = useNavigate();
@@ -90,13 +91,7 @@ function HandleAddProduct() {
             onClick={() => inputRef.current?.click()}
           />
         ) : (
-          <div
-            className="aspect-square h-34 w-34 border border-khp-primary rounded-lg flex flex-col items-center justify-center my-4 cursor-pointer hover:bg-khp-primary/10"
-            onClick={() => inputRef.current?.click()}
-          >
-            <Image className="text-khp-primary" strokeWidth={1} size={32} />
-            <p className="text-khp-primary font-light">Add a picture</p>
-          </div>
+          <ImageAdd iconSize={32} onClick={() => inputRef.current?.click()} />
         )}
 
         <form
