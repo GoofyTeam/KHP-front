@@ -3,12 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { GalleryVerticalEnd } from "lucide-react";
-import Image from "next/image";
 import { httpClient } from "@/lib/httpClient";
-import {
-  LoginForm,
-  LoginFormValues,
-} from "@/components/login-form";
+import { LoginForm, LoginFormValues } from "@/components/login-form";
 
 const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || "KHP";
 
@@ -55,15 +51,7 @@ export default function Login() {
           </div>
         </div>
       </div>
-      <div className="bg-muted relative hidden lg:block">
-        <Image
-          src="/placeholder.svg"
-          width={800}
-          height={600}
-          alt="Image"
-          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-        />
-      </div>
+      <div className="bg-khp-primary relative hidden lg:block"></div>
     </div>
   );
 }
