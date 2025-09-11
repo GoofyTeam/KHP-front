@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { useDebounce } from "@uidotdev/usehooks";
 import { Search, MoreVertical } from "lucide-react";
+import Link from "next/link";
 
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
@@ -65,10 +66,6 @@ export default function StocksFilters({
     setIsRegisterLostMode(false);
   }, [setIsRegisterLostMode]);
 
-  const handleAddToStock = useCallback(() => {
-    console.log("Adding to stock...");
-  }, []);
-
   useEffect(() => {
     setFilters({
       search: debouncedSearchTerm,
@@ -124,14 +121,12 @@ export default function StocksFilters({
                     </Button>
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem onClick={handleAddToStock}>
-                  <Button
-                    variant="khp-default"
-                    onClick={handleAddToStock}
-                    className="w-full"
-                  >
-                    Add to stock
-                  </Button>
+                <DropdownMenuItem>
+                  <Link href="/stocks/add" className="w-full">
+                    <Button variant="khp-default" className="w-full">
+                      Add to stock
+                    </Button>
+                  </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -164,9 +159,9 @@ export default function StocksFilters({
               <Button variant="khp-destructive" onClick={handleRegisterLost}>
                 Register loss
               </Button>
-              <Button variant="khp-default" onClick={handleAddToStock}>
-                Add to stock
-              </Button>
+              <Link href="/stocks/add">
+                <Button variant="khp-default">Add to stock</Button>
+              </Link>
             </>
           )}
         </div>

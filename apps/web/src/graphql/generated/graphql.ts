@@ -357,6 +357,7 @@ export type MeasurementUnitType = {
 export type Menu = {
   __typename?: 'Menu';
   allergens: Array<AllergenEnum>;
+  categories: Array<MenuCategory>;
   created_at: Scalars['DateTime']['output'];
   description?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
@@ -365,7 +366,34 @@ export type Menu = {
   is_available: Scalars['Boolean']['output'];
   items: Array<MenuItem>;
   name: Scalars['String']['output'];
+  price: Scalars['Float']['output'];
+  type: Scalars['String']['output'];
   updated_at: Scalars['DateTime']['output'];
+};
+
+export type MenuCategory = {
+  __typename?: 'MenuCategory';
+  /** The company that owns this category. */
+  company: Company;
+  /** When the category was created. */
+  created_at: Scalars['DateTime']['output'];
+  /** Unique primary key. */
+  id: Scalars['ID']['output'];
+  /** Menus in this category. */
+  menus: Array<Menu>;
+  /** Category name. */
+  name: Scalars['String']['output'];
+  /** When the category was last updated. */
+  updated_at: Scalars['DateTime']['output'];
+};
+
+/** A paginated list of MenuCategory items. */
+export type MenuCategoryPaginator = {
+  __typename?: 'MenuCategoryPaginator';
+  /** A list of MenuCategory items. */
+  data: Array<MenuCategory>;
+  /** Pagination information about the list of items. */
+  paginatorInfo: PaginatorInfo;
 };
 
 export type MenuItem = {
@@ -578,6 +606,10 @@ export type Query = {
   /** Liste les unités de mesure disponibles */
   measurementUnits: Array<MeasurementUnitType>;
   menu?: Maybe<Menu>;
+  /** List menu categories for the current company. */
+  menuCategories: MenuCategoryPaginator;
+  /** Find a single MenuCategory (only if it belongs to the current company). */
+  menuCategory?: Maybe<MenuCategory>;
   menuOrderStats: MenuOrderStats;
   menus: Array<Menu>;
   nonPerishableIngredients: Array<Ingredient>;
@@ -701,6 +733,19 @@ export type QueryMenuArgs = {
 };
 
 
+export type QueryMenuCategoriesArgs = {
+  first?: Scalars['Int']['input'];
+  page?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryMenuCategoryArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type QueryMenuOrderStatsArgs = {
   end?: InputMaybe<Scalars['Date']['input']>;
   start?: InputMaybe<Scalars['Date']['input']>;
@@ -709,6 +754,9 @@ export type QueryMenuOrderStatsArgs = {
 
 export type QueryMenusArgs = {
   allergens?: InputMaybe<Array<AllergenEnum>>;
+  category_ids?: InputMaybe<Array<Scalars['ID']['input']>>;
+  price_between?: InputMaybe<Array<Scalars['Float']['input']>>;
+  types?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 
