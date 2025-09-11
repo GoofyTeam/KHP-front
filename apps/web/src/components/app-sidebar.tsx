@@ -72,30 +72,17 @@ const isRouteActive = (currentPath: string, item: NavigationItem): boolean => {
   return currentPath === item.url || currentPath.startsWith(item.url + "/");
 };
 
-interface User {
-  name: string;
-  email: string;
-}
-
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   config?: SidebarConfig;
   pathname?: string;
-  user?: User;
 }
 
 export function AppSidebar({
   config = defaultConfig,
   pathname = "/dashboard",
-  user,
   ...props
 }: AppSidebarProps) {
   const { toggleSidebar } = useSidebar();
-
-  const fallback = {
-    name: "",
-    email: "",
-  };
-  const currentUser = user || fallback;
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -154,7 +141,7 @@ export function AppSidebar({
       </SidebarContent>
 
       <SidebarFooter>
-        <NavUser user={currentUser} />
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   );

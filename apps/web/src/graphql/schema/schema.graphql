@@ -718,6 +718,9 @@ type Query {
   """Trouve une preparation (et seulement si elle appartient à ma company)"""
   preparation(id: ID, name: String): Preparation
 
+  """Liste les quick access de l’entreprise courante, triés par index."""
+  quickAccesses: [QuickAccess!]!
+
   """Find a single user by an identifying attribute."""
   user(
     """Search by primary key."""
@@ -923,6 +926,36 @@ type Query {
     """The offset from which items are returned."""
     page: Int
   ): UserPaginator!
+}
+
+"""Bouton d’accès rapide configurable pour une entreprise."""
+type QuickAccess {
+  """Identifiant unique."""
+  id: ID!
+
+  """Position (1..5) au sein de l’entreprise."""
+  index: Int!
+
+  """Libellé du bouton."""
+  name: String!
+
+  """Nom de l’icône (ex: Plus, Notebook, Minus, Calendar, Check)."""
+  icon: String!
+
+  """Couleur de l’icône (ex: primary, warning, error, info)."""
+  icon_color: String!
+
+  """URL cible du bouton."""
+  url: String!
+
+  """Entreprise propriétaire."""
+  company: Company!
+
+  """Date de création."""
+  created_at: DateTime!
+
+  """Date de mise à jour."""
+  updated_at: DateTime!
 }
 
 """Directions for ordering a list of records."""

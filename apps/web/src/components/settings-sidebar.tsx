@@ -38,7 +38,7 @@ const NavigationMenu = ({ onItemClick }: { onItemClick?: () => void }) => {
   const pathname = usePathname();
 
   return (
-    <SidebarGroup className="p-4">
+    <SidebarGroup className="p-0">
       <SidebarGroupContent>
         <SidebarMenu>
           {settingsNavItems.map((item) => {

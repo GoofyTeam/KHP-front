@@ -16,9 +16,8 @@ import {
 } from "@workspace/ui/components/form";
 import { CheckCircleIcon, Loader2Icon, User as UserIcon } from "lucide-react";
 import { updateUserInfoAction } from "@/app/(mainapp)/settings/account/actions";
-import type { User } from "@/lib/httpClient";
+import { useUserStore } from "@/stores/user-store";
 
-// Schéma de validation Zod
 const profileFormSchema = z.object({
   name: z
     .string()
@@ -35,11 +34,8 @@ const profileFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
-interface ProfileSectionProps {
-  user: User;
-}
-
-export function ProfileSection({ user }: ProfileSectionProps) {
+export function ProfileSection() {
+  const { user, fetchUser } = useUserStore();
   const [formStatus, setFormStatus] = useState<{
     type: "idle" | "success" | "error";
     message?: string;
@@ -49,7 +45,7 @@ export function ProfileSection({ user }: ProfileSectionProps) {
 
   const profileForm = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
-    defaultValues: {
+    values: {
       name: user?.name ?? "",
       email: user?.email ?? "",
     },
@@ -84,54 +80,10 @@ export function ProfileSection({ user }: ProfileSectionProps) {
             message: res.error || "Unable to update profile.",
           });
         } else {
-          if (
-            res.data &&
-            typeof res.data === "object" &&
-            "user" in res.data &&
-            res.data.user
-          ) {
-            const updatedUser = res.data.user as User;
-
-            const nameUpdated =
-              !changedFields.name || updatedUser.name === changedFields.name;
-            const emailUpdated =
-              !changedFields.email || updatedUser.email === changedFields.email;
-            const timestampChanged = true;
-
-            if (!nameUpdated || !emailUpdated || !timestampChanged) {
-              const errors = [];
-              if (!nameUpdated)
-                errors.push(
-                  `Name: expected "${changedFields.name}", got "${updatedUser.name}"`
-                );
-              if (!emailUpdated)
-                errors.push(
-                  `Email: expected "${changedFields.email}", got "${updatedUser.email}"`
-                );
-              if (!timestampChanged)
-                errors.push("No timestamp change detected");
-
-              setFormStatus({
-                type: "error",
-                message: `Update failed: ${errors.join(", ")}`,
-              });
-              return;
-            }
-            profileForm.reset({
-              name: updatedUser.name || "",
-              email: updatedUser.email || "",
-            });
-          } else {
-            profileForm.reset({
-              name: user?.name || "",
-              email: user?.email || "",
-            });
-          }
+          await fetchUser();
 
           setFormStatus({ type: "success" });
           setTimeout(() => setFormStatus({ type: "idle" }), 3000);
-
-          // TODO: Optionnel - mettre à jour le store global si nécessaire
         }
       } catch {
         setFormStatus({
