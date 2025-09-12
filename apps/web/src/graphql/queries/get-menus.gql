@@ -5,7 +5,7 @@ query getMenus {
     image_url
     description
     is_a_la_carte
-    is_available
+    available
     created_at
     updated_at
     items {
