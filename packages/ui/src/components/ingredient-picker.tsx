@@ -64,6 +64,7 @@ type Props = {
   onRemove: (id: string) => void;
   onChangeQuantity: (id: string, qty: number) => void;
   onChangeLocation: (id: string, locationId: string) => void;
+  onChangeUnit: (id: string, unit: string) => void;
 
   unitsSelections?: { value: string; label: string }[];
 
@@ -82,6 +83,7 @@ export function IngredientPickerUI({
   onRemove,
   onChangeQuantity,
   onChangeLocation,
+  onChangeUnit,
   className,
   unitsSelections,
 }: Props) {
@@ -127,7 +129,7 @@ export function IngredientPickerUI({
             aria-expanded={open}
             aria-haspopup="listbox"
             onClick={() => openAndFocus(true)}
-            className="w-full justify-start mt-2"
+            className="w-full justify-start mt-2 text-khp-primary bg-white hover:bg-white/70 ring-1 ring-khp-primary hover:ring-khp-primary/50"
           >
             <Search className="h-4 w-4 opacity-60" />
             <span className={`truncate grow ${!query ? "opacity-50" : ""}`}>
@@ -231,9 +233,7 @@ export function IngredientPickerUI({
                       />
                       <Select
                         value={it.unit}
-                        onValueChange={() =>
-                          onChangeQuantity(it.id, it.quantity)
-                        }
+                        onValueChange={(v) => onChangeUnit(it.id, v)}
                       >
                         <SelectTrigger className="w-auto h-9">
                           <SelectValue placeholder="Unit" />

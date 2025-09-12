@@ -34,6 +34,7 @@ export type MenuItemForm = {
   // champs UI optionnels (non envoyés à l’API)
   name?: string;
   imageUrl?: string | null;
+  locations?: PickedItem["locations"];
 };
 
 // Le formulaire parent DOIT avoir items: MenuItemForm[]
@@ -41,7 +42,15 @@ export type HasItemsForm = { items: MenuItemForm[] };
 
 type Props<TForm extends HasItemsForm> = {
   form: UseFormReturn<TForm>;
-  hasErrors?: any;
+  hasErrors?:
+    | {
+        message?: string;
+        root?: { message?: string };
+      }
+    | Array<{
+        quantity?: { message?: string };
+        location_id?: { message?: string };
+      }>;
   label?: string;
 };
 
@@ -66,6 +75,11 @@ export function IngredientPickerField<TForm extends HasItemsForm>({
   // ----- (petit alias typé des fields) -----
   type ItemsField = FieldArrayWithId<{ items: MenuItemForm[] }, "items", "key">;
   const typedFields = fields as unknown as ItemsField[];
+  const appendItem = append as unknown as (value: MenuItemForm) => void;
+  const updateItem = update as unknown as (
+    index: number,
+    value: MenuItemForm
+  ) => void;
 
   // ------- SEARCH contrôlé --------
   const [query, setQuery] = React.useState("");
@@ -79,7 +93,7 @@ export function IngredientPickerField<TForm extends HasItemsForm>({
   React.useEffect(() => {
     if (!debounced.trim()) return;
     // adapte les variables à ta query (ici: { search, limit })
-    runSearch({ variables: { searchTerm: debounced.trim(), limit: 10 } });
+    runSearch({ variables: { searchTerm: debounced.trim() } });
   }, [debounced, runSearch]);
 
   // map API -> résultats UI
@@ -102,25 +116,25 @@ export function IngredientPickerField<TForm extends HasItemsForm>({
   // map RHF -> UI items
   const uiItems: PickedItem[] = typedFields.map((f) => ({
     id: f.entity_id,
-    name: (f as any).name ?? "",
-    imageUrl: (f as any).imageUrl,
+    name: f.name ?? "",
+    imageUrl: f.imageUrl ?? null,
     kind: f.entity_type,
     unit: f.unit,
     quantity: f.quantity,
     locationId: f.location_id,
-    locations: (f as any).locations ?? [],
+    locations: f.locations ?? [],
   }));
 
   // ------- handlers ----------
   const onAdd = (p: PickedItem) => {
     const idx = typedFields.findIndex((x) => x.entity_id === p.id);
     if (idx > -1) {
-      update(idx, {
+      updateItem(idx, {
         ...typedFields[idx],
         quantity: typedFields[idx].quantity + 1,
-      } as any);
+      });
     } else {
-      append({
+      appendItem({
         entity_id: p.id,
         entity_type: p.kind,
         quantity: p.quantity,
@@ -130,7 +144,7 @@ export function IngredientPickerField<TForm extends HasItemsForm>({
         name: p.name,
         imageUrl: p.imageUrl ?? null,
         locations: p.locations || [],
-      } as any);
+      });
     }
     setQuery(""); // reset input
   };
@@ -142,14 +156,25 @@ export function IngredientPickerField<TForm extends HasItemsForm>({
 
   const onChangeQuantity = (id: string, qty: number) => {
     const idx = typedFields.findIndex((x) => x.entity_id === id);
-    if (idx > -1) update(idx, { ...typedFields[idx], quantity: qty } as any);
+    if (idx > -1) updateItem(idx, { ...typedFields[idx], quantity: qty });
   };
 
   const onChangeLocation = (id: string, locationId: string) => {
     const idx = typedFields.findIndex((x) => x.entity_id === id);
     if (idx > -1)
-      update(idx, { ...typedFields[idx], location_id: locationId } as any);
+      updateItem(idx, { ...typedFields[idx], location_id: locationId });
   };
+
+  const onChangeUnit = (id: string, unit: string) => {
+    const idx = typedFields.findIndex((x) => x.entity_id === id);
+    if (idx > -1) updateItem(idx, { ...typedFields[idx], unit });
+  };
+
+  // Memoize static measurement units to avoid recalculation on each render
+  const unitsSelections = React.useMemo(
+    getAllMeasurementUnitsOnlyValues,
+    []
+  );
 
   return (
     <div className="flex flex-col w-full">
@@ -157,10 +182,11 @@ export function IngredientPickerField<TForm extends HasItemsForm>({
         <div className="w-full text-red-500 text-sm mt-1 text-center font-semibold">
           {(() => {
             // Support both array-level and per-item error shapes from RHF/Zod
+            const errObj = Array.isArray(hasErrors) ? undefined : hasErrors;
             const rootMsg =
-              (typeof hasErrors?.message === "string" && hasErrors.message) ||
-              (typeof hasErrors?.root?.message === "string" &&
-                hasErrors.root.message);
+              (typeof errObj?.message === "string" && errObj.message) ||
+              (typeof errObj?.root?.message === "string" &&
+                errObj.root.message);
 
             if (rootMsg) return rootMsg;
 
@@ -191,8 +217,9 @@ export function IngredientPickerField<TForm extends HasItemsForm>({
         onRemove={onRemove}
         onChangeQuantity={onChangeQuantity}
         onChangeLocation={onChangeLocation}
+        onChangeUnit={onChangeUnit}
         className="w-full"
-        unitsSelections={getAllMeasurementUnitsOnlyValues()}
+        unitsSelections={unitsSelections}
       />
     </div>
   );

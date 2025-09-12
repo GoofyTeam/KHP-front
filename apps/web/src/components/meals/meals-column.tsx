@@ -4,7 +4,6 @@ import { GetMenusQuery } from "@/graphql/generated/graphql";
 import { ColumnDef } from "@tanstack/react-table";
 import { StockStatus } from "@workspace/ui/components/stock-status";
 import { Check, X } from "lucide-react";
-import Image from "next/image";
 
 export type Meals = NonNullable<GetMenusQuery["menus"]>[number];
 

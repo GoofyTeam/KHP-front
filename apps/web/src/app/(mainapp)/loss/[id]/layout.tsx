@@ -14,10 +14,7 @@ interface LossLayoutProps {
   }>;
 }
 
-export default async function LossLayout({
-  children,
-  params,
-}: LossLayoutProps) {
+export default async function LossLayout({ children }: LossLayoutProps) {
   return (
     <div className="flex flex-col h-full">
       <header className="border-b border-khp-secondary bg-background sticky top-0 z-10 mb-4">

@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChangeEvent, useRef, useEffect } from "react";
+import { ChangeEvent, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -48,7 +48,15 @@ const menuItemsSchema = z.object({
 const createMenuSchema = z
   .object({
     name: z.string().min(2, "Name must be at least 2 characters long"),
-    image: z.instanceof(File),
+    image: z
+      .instanceof(File)
+      .optional()
+      .refine((file) => {
+        if (!file) return true; // image is optional
+        const validTypes = ["image/jpeg", "image/png", "image/jpg"];
+        const maxSizeInBytes = 1 * 1024 * 1024; // 1MB
+        return validTypes.includes(file.type) && file.size <= maxSizeInBytes;
+      }, "Image must be a JPEG or PNG file and less than 1MB"),
     description: z.string().optional(),
     price: z.number().min(1, "Price must be a positive number"),
     is_a_la_carte: z.boolean(),
@@ -120,12 +128,16 @@ export default function CreateMenusPage() {
       const detailMessage = (() => {
         try {
           if (res && typeof res === "object") {
-            const anyRes = res as unknown as { details?: unknown; error?: string };
+            const anyRes = res as unknown as {
+              details?: unknown;
+              error?: string;
+            };
             if (
               anyRes.details &&
               typeof anyRes.details === "object" &&
               "message" in (anyRes.details as Record<string, unknown>) &&
-              typeof (anyRes.details as { message?: unknown }).message === "string"
+              typeof (anyRes.details as { message?: unknown }).message ===
+                "string"
             ) {
               return (anyRes.details as { message: string }).message;
             }
@@ -148,7 +160,9 @@ export default function CreateMenusPage() {
         tips.push("You must be authenticated. Please sign in again.");
       }
       if (lower.includes("session expired") || lower.includes("419")) {
-        tips.push("Your session has expired. Refresh the page, then try again.");
+        tips.push(
+          "Your session has expired. Refresh the page, then try again."
+        );
       }
       if (lower.includes("validation") || lower.includes("422")) {
         tips.push("Fix the fields with errors, then submit again.");
@@ -182,12 +196,16 @@ export default function CreateMenusPage() {
                 <div className="flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 text-khp-error mt-0.5 flex-shrink-0" />
                   <div className="flex-1">
-                    {/* Split lines to show message + tips neatly */}
-                    {form.formState.errors.root.message.split("\n").map((line, idx) => (
-                      <p key={idx} className={`text-sm ${idx === 0 ? "font-medium" : ""} text-khp-error`}> 
-                        {line}
-                      </p>
-                    ))}
+                    {form.formState.errors.root.message
+                      .split("\n")
+                      .map((line, idx) => (
+                        <p
+                          key={idx}
+                          className={`text-sm ${idx === 0 ? "font-medium" : ""} text-khp-error`}
+                        >
+                          {line}
+                        </p>
+                      ))}
                   </div>
                 </div>
               </div>
@@ -223,7 +241,8 @@ export default function CreateMenusPage() {
                       variant="khp-default"
                       type="file"
                       name={name}
-                      accept="image/*"
+                      accept="image/jpeg, image/png, image/jpg"
+                      max={1048576}
                       capture="environment"
                       ref={(e: HTMLInputElement | null) => {
                         ref(e);
@@ -401,12 +420,21 @@ export default function CreateMenusPage() {
               />
             </div>
 
-            <Button variant="khp-default" type="submit" className="w-full mt-4">
-              Create Menu
-            </Button>
+            <div className="w-full grid grid-cols-1 md:grid-cols-2 mt-4 gap-x-2">
+              <Button variant="khp-default" type="submit" className="w-full">
+                Create
+              </Button>
+              <Button
+                variant="khp-destructive"
+                type="button"
+                className="w-full"
+                onClick={() => router.push("/menus")}
+              >
+                Cancel
+              </Button>
+            </div>
           </div>
 
-          {/* 👉 Le container devient plug&play */}
           <IngredientPickerField
             form={form}
             hasErrors={form.formState.errors.items}
