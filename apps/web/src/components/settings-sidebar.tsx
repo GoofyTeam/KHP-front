@@ -1,6 +1,14 @@
 "use client";
 
-import { User, Settings, MapPin, Tag, Tags, Layers } from "lucide-react";
+import {
+  User,
+  Settings,
+  MapPin,
+  Tag,
+  Tags,
+  Layers,
+  Building,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useBreakpoint } from "@workspace/ui/hooks/use-breakpoint";
@@ -54,6 +62,12 @@ const settingsNavItems = [
     description: "Manage your location types settings",
     href: "/settings/location-types",
     icon: Layers,
+  },
+  {
+    title: "Company",
+    description: "Manage your company settings",
+    href: "/settings/company",
+    icon: Building,
   },
 ];
 
