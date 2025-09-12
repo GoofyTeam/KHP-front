@@ -74,8 +74,6 @@ export async function bulkCreateIngredientsAction(
   input: BulkCreateIngredientsInput
 ): Promise<ActionResult<{ ingredient_ids?: number[] }>> {
   try {
-    console.log("[stocks/actions] payload ->", input);
-
     const data = await httpClient.post<{ ingredient_ids?: number[] }>(
       "/api/ingredients/bulk",
       input
@@ -222,7 +220,10 @@ export async function findIngredientByNameAction(
     }>;
     const target = name.trim().toLowerCase();
     const match = list.find(
-      (it) => String(it?.name ?? "").trim().toLowerCase() === target
+      (it) =>
+        String(it?.name ?? "")
+          .trim()
+          .toLowerCase() === target
     );
     if (!match?.id) return { success: true, data: {} };
     return { success: true, data: { id: Number(match.id) } };

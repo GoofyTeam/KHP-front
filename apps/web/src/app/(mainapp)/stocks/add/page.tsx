@@ -20,7 +20,6 @@ export default function AddStockPage() {
     if (!tableRef.current) return;
 
     const ingredients = tableRef.current.getFormDataPayload();
-    console.log("[stocks/add] ingredients (pre-FormData) ->", ingredients);
 
     if (!ingredients.length) {
       toast.error("Nothing to save.");
@@ -28,7 +27,6 @@ export default function AddStockPage() {
     }
 
     setLoading(true);
-    
 
     try {
       for (let i = 0; i < ingredients.length; i++) {
