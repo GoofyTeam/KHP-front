@@ -1,0 +1,8 @@
+query GetMenuCategories {
+  menuCategories {
+    data {
+      name
+      id
+    }
+  }
+}

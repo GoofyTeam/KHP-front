@@ -214,7 +214,7 @@ class HttpClient {
   /**
    * Generic request method to handle all HTTP methods with intelligent context detection.
    */
-  private async request<T, D extends RequestData = RequestData>(
+  private async request<T, D extends RequestData | FormData = RequestData | FormData>(
     method: "GET" | "POST" | "PUT" | "DELETE",
     endpoint: string,
     data?: D,
@@ -231,6 +231,11 @@ class HttpClient {
         } else {
           body = JSON.stringify(data);
         }
+      }
+
+      // If sending FormData, do not set Content-Type so fetch sets boundary
+      if (body instanceof FormData && "Content-Type" in headers) {
+        delete (headers as Record<string, string>)["Content-Type"];
       }
 
       const requestConfig: RequestInit = {
@@ -310,7 +315,7 @@ class HttpClient {
     return this.request<T>("GET", endpoint, undefined, options);
   }
 
-  async post<T, D extends RequestData = RequestData>(
+  async post<T, D extends RequestData | FormData = RequestData | FormData>(
     endpoint: string,
     data?: D,
     options?: RequestInit
@@ -318,7 +323,7 @@ class HttpClient {
     return this.request<T, D>("POST", endpoint, data, options);
   }
 
-  async put<T, D extends RequestData = RequestData>(
+  async put<T, D extends RequestData | FormData = RequestData | FormData>(
     endpoint: string,
     data?: D,
     options?: RequestInit

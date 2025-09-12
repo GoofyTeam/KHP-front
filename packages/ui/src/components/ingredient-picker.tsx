@@ -72,7 +72,7 @@ type Props = {
 
 export function IngredientPickerUI({
   label = "Ingredients",
-  placeholder = "Rechercher un ingrédient ou une préparation…",
+  placeholder = "Search ingredient or preparation...",
   query,
   onQueryChange,
   results,

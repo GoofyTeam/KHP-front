@@ -23,7 +23,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import z from "zod";
 import { getAllMeasurementUnits } from "../../../types/mesurmentsUnitEnum";
 import { addProductSubmit } from "./add-product-submit";
-import { Minus, Plus, Image } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
 import { handleItemSchema } from "./handleItemSchema";
 import { ImageAdd } from "@workspace/ui/components/image-placeholder";
 

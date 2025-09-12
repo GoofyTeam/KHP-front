@@ -561,6 +561,7 @@ type Preparation {
   """The categories associated with this preparation."""
   categories: [Category!]!
   quantities: [PreparationQuantity!]!
+  image_url: String
 
   """Historique des mouvements de stock pour cette préparation"""
   stockMovements: [StockMovement!]!

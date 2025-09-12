@@ -41,11 +41,13 @@ export type HasItemsForm = { items: MenuItemForm[] };
 
 type Props<TForm extends HasItemsForm> = {
   form: UseFormReturn<TForm>;
+  hasErrors?: any;
   label?: string;
 };
 
 export function IngredientPickerField<TForm extends HasItemsForm>({
   form,
+  hasErrors,
   label = "Ingredients",
 }: Props<TForm>) {
   // IMPORTANT : garder le nom LITTÉRAL "items" et le typer en FieldArrayPath<TForm>
@@ -150,19 +152,48 @@ export function IngredientPickerField<TForm extends HasItemsForm>({
   };
 
   return (
-    <IngredientPickerUI
-      label={label}
-      query={query}
-      onQueryChange={setQuery}
-      results={results}
-      loading={loading}
-      items={uiItems}
-      onAdd={onAdd}
-      onRemove={onRemove}
-      onChangeQuantity={onChangeQuantity}
-      onChangeLocation={onChangeLocation}
-      className="w-full"
-      unitsSelections={getAllMeasurementUnitsOnlyValues()}
-    />
+    <div className="flex flex-col w-full">
+      {hasErrors && (
+        <div className="w-full text-red-500 text-sm mt-1 text-center font-semibold">
+          {(() => {
+            // Support both array-level and per-item error shapes from RHF/Zod
+            const rootMsg =
+              (typeof hasErrors?.message === "string" && hasErrors.message) ||
+              (typeof hasErrors?.root?.message === "string" &&
+                hasErrors.root.message);
+
+            if (rootMsg) return rootMsg;
+
+            // Aggregate a few per-item messages if present
+            if (Array.isArray(hasErrors)) {
+              const msgs: string[] = [];
+              for (const err of hasErrors) {
+                const q = err?.quantity?.message as string | undefined;
+                const l = err?.location_id?.message as string | undefined;
+                if (q) msgs.push(q);
+                if (l) msgs.push(l);
+              }
+              if (msgs.length > 0) return msgs.join(" • ");
+            }
+
+            return "Please check the selected ingredients.";
+          })()}
+        </div>
+      )}
+      <IngredientPickerUI
+        label={label}
+        query={query}
+        onQueryChange={setQuery}
+        results={results}
+        loading={loading}
+        items={uiItems}
+        onAdd={onAdd}
+        onRemove={onRemove}
+        onChangeQuantity={onChangeQuantity}
+        onChangeLocation={onChangeLocation}
+        className="w-full"
+        unitsSelections={getAllMeasurementUnitsOnlyValues()}
+      />
+    </div>
   );
 }

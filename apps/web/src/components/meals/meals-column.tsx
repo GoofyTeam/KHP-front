@@ -8,7 +8,6 @@ import Image from "next/image";
 
 export type Meals = NonNullable<GetMenusQuery["menus"]>[number];
 
-
 export const columns: ColumnDef<Meals>[] = [
   {
     accessorKey: "id",
@@ -19,11 +18,9 @@ export const columns: ColumnDef<Meals>[] = [
     header: "Image",
     cell: ({ row }) =>
       row.original.image_url ? (
-        <Image
+        <img
           src={row.original.image_url}
           alt={row.original.name}
-          height={40}
-          width={40}
           className="w-10 h-10 rounded object-cover"
         />
       ) : (
