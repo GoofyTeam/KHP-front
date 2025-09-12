@@ -191,8 +191,14 @@ function useCamera() {
     canvas.width = squareSize;
     canvas.height = squareSize;
 
-    const blob: Blob = await new Promise((resolve) =>
-      canvas.toBlob((b) => resolve(b as Blob), mime, quality)
+    const blob: Blob = await new Promise((resolve, reject) =>
+      canvas.toBlob((b) => {
+        if (b) {
+          resolve(b);
+        } else {
+          reject(new Error("Failed to create image blob from canvas"));
+        }
+      }, mime, quality)
     );
     return new File([blob], fileName, { type: mime });
   };
