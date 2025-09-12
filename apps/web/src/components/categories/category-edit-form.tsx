@@ -34,13 +34,11 @@ import {
 interface CategoryEditFormProps {
   category: Category;
   onCategoryUpdated?: () => void;
-  onCancel?: () => void;
 }
 
 export function CategoryEditForm({
   category,
   onCategoryUpdated,
-  onCancel,
 }: CategoryEditFormProps) {
   const apolloClient = useApolloClient();
 
@@ -84,7 +82,6 @@ export function CategoryEditForm({
     formState: { isSubmitting, isSubmitSuccessful, errors },
     control,
     clearErrors,
-    reset,
   } = form;
 
   const { fields, append, remove } = useFieldArray({

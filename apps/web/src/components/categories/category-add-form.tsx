@@ -20,10 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
-import {
-  createCategoryAction,
-  type CreateCategoryInput,
-} from "@/app/(mainapp)/settings/categories/actions";
+import { createCategoryAction } from "@/app/(mainapp)/settings/categories/actions";
 import {
   GetCategoriesDocument,
   GetLocationTypesDocument,
@@ -115,7 +112,11 @@ export function CategoryAddForm({ onCategoryAdded }: CategoryAddFormProps) {
     return availableLocationTypes.length > selectedIds.length;
   };
 
-  const handleSuccess = async (result: any) => {
+  const handleSuccess = async (result: {
+    success: boolean;
+    data?: any;
+    error?: string;
+  }) => {
     reset();
     clearErrors();
 
@@ -137,7 +138,7 @@ export function CategoryAddForm({ onCategoryAdded }: CategoryAddFormProps) {
           },
         });
       }
-    } catch (cacheError) {
+    } catch {
       await apolloClient.refetchQueries({
         include: [GetCategoriesDocument],
       });
