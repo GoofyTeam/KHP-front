@@ -1,0 +1,6 @@
+query GetUnit {
+  measurementUnits {
+    label
+    value
+  }
+}

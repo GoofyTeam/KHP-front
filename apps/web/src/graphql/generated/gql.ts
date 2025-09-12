@@ -22,6 +22,7 @@ type Documents = {
     "query GetMe {\n  me {\n    id\n    name\n    email\n    company {\n      id\n      name\n    }\n  }\n}": typeof types.GetMeDocument,
     "query getMenus {\n  menus {\n    id\n    name\n    image_url\n    description\n    is_a_la_carte\n    is_available\n    created_at\n    updated_at\n    items {\n      id\n      quantity\n      unit\n      location {\n        id\n        name\n      }\n    }\n  }\n}": typeof types.GetMenusDocument,
     "query GetMostUsedIngredients {\n  ingredients(orderBy: {column: \"withdrawals_this_week_count\", order: DESC}) {\n    data {\n      name\n      withdrawals_this_week_count\n    }\n  }\n}": typeof types.GetMostUsedIngredientsDocument,
+    "query GetUnit {\n  measurementUnits {\n    label\n    value\n  }\n}": typeof types.GetUnitDocument,
     "query GetUser {\n  user {\n    id\n    name\n    email\n    company {\n      id\n      name\n    }\n  }\n}": typeof types.GetUserDocument,
 };
 const documents: Documents = {
@@ -33,6 +34,7 @@ const documents: Documents = {
     "query GetMe {\n  me {\n    id\n    name\n    email\n    company {\n      id\n      name\n    }\n  }\n}": types.GetMeDocument,
     "query getMenus {\n  menus {\n    id\n    name\n    image_url\n    description\n    is_a_la_carte\n    is_available\n    created_at\n    updated_at\n    items {\n      id\n      quantity\n      unit\n      location {\n        id\n        name\n      }\n    }\n  }\n}": types.GetMenusDocument,
     "query GetMostUsedIngredients {\n  ingredients(orderBy: {column: \"withdrawals_this_week_count\", order: DESC}) {\n    data {\n      name\n      withdrawals_this_week_count\n    }\n  }\n}": types.GetMostUsedIngredientsDocument,
+    "query GetUnit {\n  measurementUnits {\n    label\n    value\n  }\n}": types.GetUnitDocument,
     "query GetUser {\n  user {\n    id\n    name\n    email\n    company {\n      id\n      name\n    }\n  }\n}": types.GetUserDocument,
 };
 
@@ -82,6 +84,10 @@ export function graphql(source: "query getMenus {\n  menus {\n    id\n    name\n
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "query GetMostUsedIngredients {\n  ingredients(orderBy: {column: \"withdrawals_this_week_count\", order: DESC}) {\n    data {\n      name\n      withdrawals_this_week_count\n    }\n  }\n}"): (typeof documents)["query GetMostUsedIngredients {\n  ingredients(orderBy: {column: \"withdrawals_this_week_count\", order: DESC}) {\n    data {\n      name\n      withdrawals_this_week_count\n    }\n  }\n}"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "query GetUnit {\n  measurementUnits {\n    label\n    value\n  }\n}"): (typeof documents)["query GetUnit {\n  measurementUnits {\n    label\n    value\n  }\n}"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
