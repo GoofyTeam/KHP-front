@@ -20,24 +20,22 @@ export default async function IngredientPage({ params }: IngredientPageProps) {
   const ingredient = await fetchIngredient(id);
 
   return (
-    <>
-      <div className="w-full flex flex-col lg:flex-row gap-8">
-        {/* Colonne 1 */}
-        <div className="flex flex-col gap-8 justify-center items-center w-full lg:w-1/2">
-          <IngredientDetails ingredient={ingredient} />
-        </div>
+    <div className="w-full flex flex-col lg:flex-row gap-8">
+      {/* Colonne 1 */}
+      <div className="flex flex-col gap-8 justify-center items-center w-full lg:w-1/2">
+        <IngredientDetails ingredient={ingredient} />
+      </div>
 
-        {/* Colonne 2 */}
-        <div className="w-full lg:w-1/2 flex flex-col justify-center items-center mb-10 lg:mb-0">
-          <div className="w-full lg:w-3/4 max-w-lg">
-            <IngredientStockDisplay ingredient={ingredient} />
-            <MovementHistory
-              movements={ingredient.stockMovements || []}
-              unit={ingredient.unit}
-            />
-          </div>
+      {/* Colonne 2 */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center mb-10 lg:mb-0">
+        <div className="w-full lg:w-3/4 max-w-lg">
+          <IngredientStockDisplay ingredient={ingredient} />
+          <MovementHistory
+            movements={ingredient.stockMovements || []}
+            unit={ingredient.unit}
+          />
         </div>
       </div>
-    </>
+    </div>
   );
 }
