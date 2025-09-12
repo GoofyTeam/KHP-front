@@ -1,0 +1,31 @@
+query searchIngredients($searchTerm: String!) {
+  searchInStock(keyword: $searchTerm) {
+    ... on Ingredient {
+      id
+      name
+      image_url
+      unit
+      allergens
+      quantities {
+        quantity
+        location {
+          id
+          name
+        }
+      }
+    }
+    ... on Preparation {
+      id
+      name
+      unit
+      allergens
+      quantities {
+        quantity
+        location {
+          name
+          id
+        }
+      }
+    }
+  }
+}

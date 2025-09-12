@@ -561,6 +561,7 @@ type Preparation {
   """The categories associated with this preparation."""
   categories: [Category!]!
   quantities: [PreparationQuantity!]!
+  image_url: String
 
   """Historique des mouvements de stock pour cette préparation"""
   stockMovements: [StockMovement!]!
@@ -720,6 +721,7 @@ type Query {
 
   """Liste les quick access de l’entreprise courante, triés par index."""
   quickAccesses: [QuickAccess!]!
+  searchInStock(keyword: String!): [SearchResult!]!
 
   """Find a single user by an identifying attribute."""
   user(
@@ -957,6 +959,8 @@ type QuickAccess {
   """Date de mise à jour."""
   updated_at: DateTime!
 }
+
+union SearchResult = Ingredient | Preparation
 
 """Directions for ordering a list of records."""
 enum SortOrder {

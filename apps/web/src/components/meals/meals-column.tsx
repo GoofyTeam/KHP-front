@@ -4,10 +4,8 @@ import { GetMenusQuery } from "@/graphql/generated/graphql";
 import { ColumnDef } from "@tanstack/react-table";
 import { StockStatus } from "@workspace/ui/components/stock-status";
 import { Check, X } from "lucide-react";
-import Image from "next/image";
 
 export type Meals = NonNullable<GetMenusQuery["menus"]>[number];
-
 
 export const columns: ColumnDef<Meals>[] = [
   {
@@ -19,11 +17,9 @@ export const columns: ColumnDef<Meals>[] = [
     header: "Image",
     cell: ({ row }) =>
       row.original.image_url ? (
-        <Image
+        <img
           src={row.original.image_url}
           alt={row.original.name}
-          height={40}
-          width={40}
           className="w-10 h-10 rounded object-cover"
         />
       ) : (

@@ -13,6 +13,7 @@ const protectedRoutes = [
   "/settings",
   "/account",
   "/ingredient",
+  "/menus",
 ];
 const authRoutes = [
   "/login",
@@ -53,6 +54,12 @@ export default async function middleware(req: NextRequest) {
   if (path === "/") {
     const target = isAuthenticated ? "/dashboard" : "/login";
     const url = new URL(target, req.url);
+    return NextResponse.redirect(url);
+  }
+
+  if (path === "/ingredient" || path === "/ingredients") {
+    //Redirect to /stocks
+    const url = new URL("/stocks", req.url);
     return NextResponse.redirect(url);
   }
 
