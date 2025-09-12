@@ -1121,7 +1121,10 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
                   <TableCell className="text-center">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <div className="flex items-center justify-center">
+                        <div
+                          className="flex items-center justify-center"
+                          aria-label="Open row actions menu"
+                        >
                           <EllipsisVertical />
                         </div>
                       </DropdownMenuTrigger>
