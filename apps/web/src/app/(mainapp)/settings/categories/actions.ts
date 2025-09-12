@@ -77,7 +77,10 @@ export async function updateCategoryAction(
 ): Promise<ActionResult<Category>> {
   try {
     // Build API input according to PUT /categories/{id} structure
-    const apiInput: any = {};
+    const apiInput: {
+      name?: string;
+      shelf_lives?: Record<string, number | null>;
+    } = {};
 
     // Add name if provided
     if (input.name) {

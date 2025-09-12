@@ -24,6 +24,7 @@ import { createCategoryAction } from "@/app/(mainapp)/settings/categories/action
 import {
   GetCategoriesDocument,
   GetLocationTypesDocument,
+  type Category,
 } from "@/graphql/generated/graphql";
 
 interface CategoryAddFormProps {
@@ -114,7 +115,7 @@ export function CategoryAddForm({ onCategoryAdded }: CategoryAddFormProps) {
 
   const handleSuccess = async (result: {
     success: boolean;
-    data?: any;
+    data?: Category;
     error?: string;
   }) => {
     reset();
