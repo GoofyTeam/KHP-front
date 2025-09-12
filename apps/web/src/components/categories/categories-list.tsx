@@ -1,14 +1,9 @@
 "use client";
 
-import {
-  useState,
-  useEffect,
-  useCallback,
-  forwardRef,
-  useImperativeHandle,
-} from "react";
+import { useEffect, useCallback, forwardRef, useImperativeHandle } from "react";
+import { useForm } from "react-hook-form";
 import { useQuery } from "@apollo/client";
-import { GetCategoriesDocument, SortOrder } from "@/graphql/generated/graphql";
+import { GetCategoriesDocument } from "@/graphql/generated/graphql";
 import { Button } from "@workspace/ui/components/button";
 import { Trash2, Edit, Loader2, Tags, Plus } from "lucide-react";
 import type { Category } from "@/graphql/generated/graphql";
@@ -25,13 +20,31 @@ interface CategoriesListProps {
   isDeleting?: boolean;
 }
 
+type ListFormData = {
+  allCategories: Category[];
+  currentPage: number;
+  isLoadingMore: boolean;
+  hasReachedEnd: boolean;
+};
+
 export const CategoriesList = forwardRef<
   CategoriesListRef,
   CategoriesListProps
 >(({ onEdit, onAdd, selectedCategory, onDelete, isDeleting = false }, ref) => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [allCategories, setAllCategories] = useState<Category[]>([]);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const form = useForm<ListFormData>({
+    defaultValues: {
+      allCategories: [],
+      currentPage: 1,
+      isLoadingMore: false,
+      hasReachedEnd: false,
+    },
+  });
+
+  const { watch, setValue } = form;
+  const allCategories = watch("allCategories");
+  const currentPage = watch("currentPage");
+  const isLoadingMore = watch("isLoadingMore");
+  const hasReachedEnd = watch("hasReachedEnd");
 
   const { data, loading, error, refetch, fetchMore } = useQuery(
     GetCategoriesDocument,
@@ -39,7 +52,6 @@ export const CategoriesList = forwardRef<
       variables: {
         first: 10,
         page: 1,
-        orderBy: [{ column: "updated_at", order: SortOrder.Desc }],
       },
       fetchPolicy: "cache-and-network",
       errorPolicy: "all",
@@ -49,81 +61,82 @@ export const CategoriesList = forwardRef<
 
   const paginatorInfo = data?.categories?.paginatorInfo;
 
-  // Update allCategories when data changes (only for initial load)
   useEffect(() => {
-    if (
-      data?.categories?.data &&
-      currentPage === 1 &&
-      allCategories.length === 0
-    ) {
-      setAllCategories(data.categories.data as Category[]);
+    if (data?.categories?.data && currentPage === 1) {
+      setValue("allCategories", data.categories.data as Category[]);
     }
-  }, [data, currentPage, allCategories.length]);
+  }, [data, currentPage, paginatorInfo, setValue]);
 
-  const categories = allCategories;
-
-  // Load more categories
   const loadMore = useCallback(async () => {
-    if (!paginatorInfo?.hasMorePages || isLoadingMore || loading) return;
+    if (!paginatorInfo?.hasMorePages || isLoadingMore || hasReachedEnd) {
+      return;
+    }
 
-    setIsLoadingMore(true);
     const nextPage = currentPage + 1;
+    setValue("isLoadingMore", true);
 
     try {
       const result = await fetchMore({
         variables: {
           first: 10,
           page: nextPage,
-          orderBy: [{ column: "updated_at", order: SortOrder.Desc }],
         },
       });
 
       if (result.data?.categories?.data) {
-        setAllCategories((prev) => [
-          ...prev,
-          ...(result.data.categories.data as Category[]),
-        ]);
-        setCurrentPage(nextPage);
+        const newCategories = result.data.categories.data as Category[];
+        if (newCategories.length === 0) {
+          setValue("hasReachedEnd", true);
+          return;
+        }
+
+        setValue("allCategories", [...allCategories, ...newCategories]);
+        setValue("currentPage", nextPage);
       }
     } catch (error) {
       console.error("Error loading more categories:", error);
     } finally {
-      setIsLoadingMore(false);
+      setValue("isLoadingMore", false);
     }
   }, [
     paginatorInfo?.hasMorePages,
     isLoadingMore,
-    loading,
+    hasReachedEnd,
     currentPage,
+    allCategories,
     fetchMore,
+    setValue,
   ]);
 
   // Scroll handler for infinite scroll
   const handleScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement>) => {
+      if (!paginatorInfo?.hasMorePages || isLoadingMore || hasReachedEnd) {
+        return;
+      }
+
       const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
       const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
-
-      // Load more when 80% scrolled
       if (scrollPercentage > 0.8) {
         loadMore();
       }
     },
-    [loadMore]
+    [loadMore, paginatorInfo?.hasMorePages, isLoadingMore, hasReachedEnd]
   );
 
-  // Reset when refetch is called (for refresh after mutations)
+  // Reset and refetch data (for refresh after mutations)
   const handleRefetch = useCallback(async () => {
-    setCurrentPage(1);
-    setAllCategories([]);
+    setValue("currentPage", 1);
+    setValue("allCategories", []);
+    setValue("isLoadingMore", false);
+    setValue("hasReachedEnd", false);
+
     await refetch({
       first: 10,
       page: 1,
-      orderBy: [{ column: "updated_at", order: SortOrder.Desc }],
     });
-  }, [refetch]);
+  }, [refetch, setValue]);
 
-  // Expose refresh function to parent component
   useImperativeHandle(
     ref,
     () => ({
@@ -156,7 +169,7 @@ export const CategoriesList = forwardRef<
     );
   }
 
-  if (categories.length === 0 && !loading) {
+  if (allCategories.length === 0 && !loading) {
     return (
       <div className="text-center py-12 px-6">
         <div className="max-w-sm mx-auto">
@@ -181,9 +194,9 @@ export const CategoriesList = forwardRef<
   }
 
   return (
-    <div className="h-[28rem] overflow-y-auto" onScroll={handleScroll}>
+    <div className="h-full overflow-y-auto" onScroll={handleScroll}>
       <div className="p-4 pt-0 space-y-2">
-        {categories.map((category) => {
+        {allCategories.map((category) => {
           const isSelected = selectedCategory?.id === category.id;
           return (
             <div
@@ -254,10 +267,10 @@ export const CategoriesList = forwardRef<
         {/* End of list indicator */}
         {paginatorInfo &&
           !paginatorInfo.hasMorePages &&
-          categories.length > 0 && (
+          allCategories.length > 0 && (
             <div className="text-center py-4">
               <span className="text-sm text-khp-text-secondary">
-                All categories loaded
+                All {allCategories.length} categories loaded
               </span>
             </div>
           )}

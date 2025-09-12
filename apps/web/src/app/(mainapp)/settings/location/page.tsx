@@ -86,17 +86,9 @@ export default function LocationPage() {
     }
   });
 
-  const handleCancelDelete = () => {
-    deleteForm.reset();
-  };
-
   const handleLocationAdded = () => {
     locationsListRef.current?.refresh();
     setSelectedLocation(null);
-  };
-
-  const handleLocationUpdated = () => {
-    locationsListRef.current?.refresh();
   };
 
   return (
@@ -176,7 +168,7 @@ export default function LocationPage() {
               {selectedLocation ? (
                 <LocationEditForm
                   location={selectedLocation}
-                  onLocationUpdated={handleLocationUpdated}
+                  onLocationUpdated={() => locationsListRef.current?.refresh()}
                   onCancel={() => setSelectedLocation(null)}
                 />
               ) : (
@@ -190,7 +182,7 @@ export default function LocationPage() {
       {/* Delete Confirmation Dialog */}
       <AlertDialog
         open={!!deleteForm.watch("locationToDelete")}
-        onOpenChange={(open) => !open && handleCancelDelete()}
+        onOpenChange={(open) => !open && deleteForm.reset()}
       >
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
@@ -254,7 +246,7 @@ export default function LocationPage() {
 
           <AlertDialogFooter>
             <AlertDialogCancel
-              onClick={handleCancelDelete}
+              onClick={() => deleteForm.reset()}
               disabled={deleteForm.formState.isSubmitting}
             >
               Cancel

@@ -1,8 +1,25 @@
-query GetCategories {
-  categories(first: 1000) {
+query GetCategories($first: Int! = 10, $page: Int = 1, $search: String) {
+  categories(first: $first, page: $page, search: $search) {
     data {
       id
       name
+      shelfLives {
+        shelf_life_hours
+        locationType {
+          id
+          name
+        }
+      }
+    }
+    paginatorInfo {
+      count
+      currentPage
+      firstItem
+      hasMorePages
+      lastItem
+      lastPage
+      perPage
+      total
     }
   }
 }
