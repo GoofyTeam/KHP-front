@@ -93,7 +93,10 @@ export function CategoryAddForm({ onCategoryAdded }: CategoryAddFormProps) {
       .filter((id): id is string => id !== null && id !== "");
 
     return locationTypes.filter(
-      (locationType) => !selectedIds.includes(locationType.id)
+      (locationType) =>
+        !selectedIds.includes(locationType.id) &&
+        locationType.id !== "1" && // Exclure congélateur
+        locationType.id !== "2" // Exclure réfrigérateur
     );
   };
 
@@ -101,7 +104,15 @@ export function CategoryAddForm({ onCategoryAdded }: CategoryAddFormProps) {
     const selectedIds = fields
       .map((field) => field.location_type_id)
       .filter((id): id is string => id !== null && id !== "");
-    return locationTypes.length > selectedIds.length;
+
+    // Compter les location types disponibles (en excluant fridge et freezer)
+    const availableLocationTypes = locationTypes.filter(
+      (locationType) =>
+        locationType.id !== "1" && // Exclure congélateur
+        locationType.id !== "2" // Exclure réfrigérateur
+    );
+
+    return availableLocationTypes.length > selectedIds.length;
   };
 
   const handleSuccess = async (result: any) => {

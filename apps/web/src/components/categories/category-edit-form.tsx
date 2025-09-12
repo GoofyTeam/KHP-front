@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useApolloClient, useQuery } from "@apollo/client";
 import { Button } from "@workspace/ui/components/button";
@@ -100,7 +100,10 @@ export function CategoryEditForm({
       .filter((id): id is string => id !== null && id !== "");
 
     return locationTypes.filter(
-      (locationType) => !selectedIds.includes(locationType.id)
+      (locationType) =>
+        !selectedIds.includes(locationType.id) &&
+        locationType.id !== "1" && // Exclure congélateur
+        locationType.id !== "2" // Exclure réfrigérateur
     );
   };
 
@@ -108,8 +111,21 @@ export function CategoryEditForm({
     const selectedIds = fields
       .map((field) => field.location_type_id)
       .filter((id): id is string => id !== null && id !== "");
-    return locationTypes.length > selectedIds.length;
+
+    // Compter les location types disponibles (en excluant fridge et freezer)
+    const availableLocationTypes = locationTypes.filter(
+      (locationType) =>
+        locationType.id !== "1" && // Exclure congélateur
+        locationType.id !== "2" // Exclure réfrigérateur
+    );
+
+    return availableLocationTypes.length > selectedIds.length;
   };
+
+  // Garder une trace des location types initiaux pour pouvoir envoyer null lors de la suppression
+  const [initialLocationTypes, setInitialLocationTypes] = useState<string[]>(
+    []
+  );
 
   useEffect(() => {
     const shelfLives = category.shelfLives || [];
@@ -136,6 +152,9 @@ export function CategoryEditForm({
         days: Math.round((sl.shelf_life_hours || 0) / 24),
       }));
 
+    // Sauvegarder les IDs des location types initiaux
+    setInitialLocationTypes(locationTypes.map((lt) => lt.location_type_id));
+
     form.reset({
       name: category.name,
       shelf_lives: {
@@ -156,36 +175,61 @@ export function CategoryEditForm({
 
       const transformedData: UpdateCategoryInput = {
         name: values.name.trim(),
-        shelf_lives: {
-          fridge:
-            typeof values.shelf_lives.fridge === "string"
-              ? values.shelf_lives.fridge === ""
-                ? 0
-                : Number(values.shelf_lives.fridge)
-              : values.shelf_lives.fridge,
-          freezer:
-            typeof values.shelf_lives.freezer === "string"
-              ? values.shelf_lives.freezer === ""
-                ? 0
-                : Number(values.shelf_lives.freezer)
-              : values.shelf_lives.freezer,
-        },
       };
 
+      // Gérer fridge et freezer séparément pour pouvoir envoyer null
+      const fridgeValue =
+        typeof values.shelf_lives.fridge === "string"
+          ? values.shelf_lives.fridge === ""
+            ? null
+            : Number(values.shelf_lives.fridge)
+          : values.shelf_lives.fridge;
+
+      const freezerValue =
+        typeof values.shelf_lives.freezer === "string"
+          ? values.shelf_lives.freezer === ""
+            ? null
+            : Number(values.shelf_lives.freezer)
+          : values.shelf_lives.freezer;
+
+      // Ajouter les valeurs comme des location types individuels
+      if (fridgeValue !== null) {
+        transformedData["2"] = fridgeValue; // ID 2 pour réfrigérateur
+      } else {
+        transformedData["2"] = null; // Supprimer le shelf life du réfrigérateur
+      }
+
+      if (freezerValue !== null) {
+        transformedData["1"] = freezerValue; // ID 1 pour congélateur
+      } else {
+        transformedData["1"] = null; // Supprimer le shelf life du congélateur
+      }
+
+      // Gérer les location types actuels du formulaire
       values.location_types
-        .filter((lt) => lt.location_type_id && lt.days)
+        .filter((lt) => lt.location_type_id)
         .forEach((lt) => {
           const days =
             typeof lt.days === "string"
               ? lt.days === ""
-                ? 0
+                ? null
                 : Number(lt.days)
               : lt.days;
 
-          if (days > 0) {
-            transformedData[lt.location_type_id] = days;
-          }
+          // Envoyer null pour supprimer le shelf life, ou la valeur en jours
+          transformedData[lt.location_type_id] = days;
         });
+
+      // Envoyer null pour les location types qui étaient présents initialement mais qui ont été supprimés
+      const currentLocationTypeIds = values.location_types
+        .filter((lt) => lt.location_type_id)
+        .map((lt) => lt.location_type_id);
+
+      initialLocationTypes.forEach((initialId) => {
+        if (!currentLocationTypeIds.includes(initialId)) {
+          transformedData[initialId] = null; // Supprimer ce location type
+        }
+      });
 
       const result = await updateCategoryAction(category.id, transformedData);
 
@@ -421,7 +465,7 @@ export function CategoryEditForm({
             )}
           </div>
 
-          <div className="flex-shrink-0 pt-6">
+          <div className="flex-shrink-0 pt-4">
             {isSubmitSuccessful ? (
               <div className="flex items-center justify-center gap-2 p-4 bg-green-50 border border-green-200 rounded-lg">
                 <CheckCircleIcon className="h-5 w-5 text-green-600" />
@@ -450,17 +494,6 @@ export function CategoryEditForm({
                     "Update Category"
                   )}
                 </Button>
-
-                {onCancel && (
-                  <Button
-                    type="button"
-                    onClick={onCancel}
-                    variant="outline"
-                    className="w-full h-10 text-sm font-medium rounded-lg border-khp-border hover:bg-khp-background-secondary"
-                  >
-                    Cancel
-                  </Button>
-                )}
               </div>
             )}
           </div>

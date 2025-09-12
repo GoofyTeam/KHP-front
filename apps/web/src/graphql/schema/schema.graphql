@@ -73,6 +73,14 @@ type Company {
   """Types de localisation associés à cette entreprise."""
   locationTypes: [LocationType!]!
 
+  """
+  Option pour activer ou désactiver la complétion automatique des commandes de menu.
+  """
+  auto_complete_menu_orders: Boolean
+
+  """Langue préférée pour les données OpenFoodFacts (fr ou en)."""
+  open_food_facts_language: String
+
   """When the company was created."""
   created_at: DateTime!
 
@@ -386,7 +394,7 @@ type Menu {
   description: String
   image_url: String
   is_a_la_carte: Boolean!
-  is_available: Boolean!
+  available(quantity: Int! = 1): Boolean!
   type: String!
   price: Float!
   categories: [MenuCategory!]!
@@ -699,6 +707,9 @@ type Query {
 
     """Filtrer par un range de prix [min, max]."""
     price_between: [Float!]
+
+    """Filtrer par disponibilité."""
+    available: Boolean
   ): [Menu!]!
   menu(id: ID!): Menu
 
