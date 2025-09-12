@@ -191,6 +191,23 @@ function useCamera() {
     canvas.width = squareSize;
     canvas.height = squareSize;
 
+    // Draw the current video frame onto the canvas, cropping to a square
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Could not get canvas context");
+    // Calculate cropping coordinates to center the square
+    const sx = (videoWidth - squareSize) / 2;
+    const sy = (videoHeight - squareSize) / 2;
+    ctx.drawImage(
+      video,
+      sx,
+      sy,
+      squareSize,
+      squareSize,
+      0,
+      0,
+      squareSize,
+      squareSize
+    );
     const blob: Blob = await new Promise((resolve, reject) =>
       canvas.toBlob((b) => {
         if (b) {
