@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function Dashboard() {
-  const { data, loading, error } = await query({
+  const { loading, error } = await query({
     query: GetLocationsDocument,
   });
 
@@ -24,7 +24,6 @@ export default async function Dashboard() {
     );
   }
 
-  console.log("Dashboard error:", error);
   if (error) {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center">
@@ -36,8 +35,6 @@ export default async function Dashboard() {
       </div>
     );
   }
-
-  console.log("Dashboard data:", data);
 
   return (
     <main className="md:h-dvh h-auto md:overflow-y-clip overflow-auto box-border md:-m-4">
