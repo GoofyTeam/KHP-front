@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function Dashboard() {
-  const { data, loading, error } = await query({
+  const { loading, error } = await query({
     query: GetLocationsDocument,
   });
 
