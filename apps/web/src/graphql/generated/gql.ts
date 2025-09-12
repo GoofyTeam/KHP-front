@@ -20,10 +20,12 @@ type Documents = {
     "query GetLocationTypes($first: Int, $page: Int) {\n  locationTypes(first: $first, page: $page) {\n    data {\n      id\n      name\n      is_default\n    }\n    paginatorInfo {\n      count\n      currentPage\n      hasMorePages\n      lastPage\n      perPage\n      total\n      firstItem\n      lastItem\n    }\n  }\n}": typeof types.GetLocationTypesDocument,
     "query GetLocations($first: Int, $page: Int, $orderBy: [OrderByClause!]) {\n  locations(first: $first, page: $page, orderBy: $orderBy) {\n    data {\n      id\n      name\n      created_at\n      updated_at\n      locationType {\n        id\n        name\n        is_default\n      }\n    }\n    paginatorInfo {\n      count\n      currentPage\n      hasMorePages\n      lastPage\n      perPage\n      total\n      firstItem\n      lastItem\n    }\n  }\n}": typeof types.GetLocationsDocument,
     "query GetMe {\n  me {\n    id\n    name\n    email\n    company {\n      id\n      name\n    }\n  }\n}": typeof types.GetMeDocument,
+    "query GetMenuCategories {\n  menuCategories {\n    data {\n      name\n      id\n    }\n  }\n}": typeof types.GetMenuCategoriesDocument,
     "query getMenus {\n  menus {\n    id\n    name\n    image_url\n    description\n    is_a_la_carte\n    is_available\n    created_at\n    updated_at\n    items {\n      id\n      quantity\n      unit\n      location {\n        id\n        name\n      }\n    }\n  }\n}": typeof types.GetMenusDocument,
     "query GetMostUsedIngredients {\n  ingredients(orderBy: {column: \"withdrawals_this_week_count\", order: DESC}) {\n    data {\n      name\n      withdrawals_this_week_count\n    }\n  }\n}": typeof types.GetMostUsedIngredientsDocument,
     "query GetUnit {\n  measurementUnits {\n    label\n    value\n  }\n}": typeof types.GetUnitDocument,
     "query GetUser {\n  user {\n    id\n    name\n    email\n    company {\n      id\n      name\n    }\n  }\n}": typeof types.GetUserDocument,
+    "query searchIngredients($searchTerm: String!) {\n  searchInStock(keyword: $searchTerm) {\n    ... on Ingredient {\n      id\n      name\n      image_url\n      unit\n      allergens\n      quantities {\n        quantity\n        location {\n          id\n          name\n        }\n      }\n    }\n    ... on Preparation {\n      id\n      name\n      unit\n      allergens\n      quantities {\n        quantity\n        location {\n          name\n          id\n        }\n      }\n    }\n  }\n}": typeof types.SearchIngredientsDocument,
 };
 const documents: Documents = {
     "query GetCategories {\n  categories(first: 1000) {\n    data {\n      id\n      name\n    }\n  }\n}": types.GetCategoriesDocument,
@@ -32,10 +34,12 @@ const documents: Documents = {
     "query GetLocationTypes($first: Int, $page: Int) {\n  locationTypes(first: $first, page: $page) {\n    data {\n      id\n      name\n      is_default\n    }\n    paginatorInfo {\n      count\n      currentPage\n      hasMorePages\n      lastPage\n      perPage\n      total\n      firstItem\n      lastItem\n    }\n  }\n}": types.GetLocationTypesDocument,
     "query GetLocations($first: Int, $page: Int, $orderBy: [OrderByClause!]) {\n  locations(first: $first, page: $page, orderBy: $orderBy) {\n    data {\n      id\n      name\n      created_at\n      updated_at\n      locationType {\n        id\n        name\n        is_default\n      }\n    }\n    paginatorInfo {\n      count\n      currentPage\n      hasMorePages\n      lastPage\n      perPage\n      total\n      firstItem\n      lastItem\n    }\n  }\n}": types.GetLocationsDocument,
     "query GetMe {\n  me {\n    id\n    name\n    email\n    company {\n      id\n      name\n    }\n  }\n}": types.GetMeDocument,
+    "query GetMenuCategories {\n  menuCategories {\n    data {\n      name\n      id\n    }\n  }\n}": types.GetMenuCategoriesDocument,
     "query getMenus {\n  menus {\n    id\n    name\n    image_url\n    description\n    is_a_la_carte\n    is_available\n    created_at\n    updated_at\n    items {\n      id\n      quantity\n      unit\n      location {\n        id\n        name\n      }\n    }\n  }\n}": types.GetMenusDocument,
     "query GetMostUsedIngredients {\n  ingredients(orderBy: {column: \"withdrawals_this_week_count\", order: DESC}) {\n    data {\n      name\n      withdrawals_this_week_count\n    }\n  }\n}": types.GetMostUsedIngredientsDocument,
     "query GetUnit {\n  measurementUnits {\n    label\n    value\n  }\n}": types.GetUnitDocument,
     "query GetUser {\n  user {\n    id\n    name\n    email\n    company {\n      id\n      name\n    }\n  }\n}": types.GetUserDocument,
+    "query searchIngredients($searchTerm: String!) {\n  searchInStock(keyword: $searchTerm) {\n    ... on Ingredient {\n      id\n      name\n      image_url\n      unit\n      allergens\n      quantities {\n        quantity\n        location {\n          id\n          name\n        }\n      }\n    }\n    ... on Preparation {\n      id\n      name\n      unit\n      allergens\n      quantities {\n        quantity\n        location {\n          name\n          id\n        }\n      }\n    }\n  }\n}": types.SearchIngredientsDocument,
 };
 
 /**
@@ -79,6 +83,10 @@ export function graphql(source: "query GetMe {\n  me {\n    id\n    name\n    em
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "query GetMenuCategories {\n  menuCategories {\n    data {\n      name\n      id\n    }\n  }\n}"): (typeof documents)["query GetMenuCategories {\n  menuCategories {\n    data {\n      name\n      id\n    }\n  }\n}"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "query getMenus {\n  menus {\n    id\n    name\n    image_url\n    description\n    is_a_la_carte\n    is_available\n    created_at\n    updated_at\n    items {\n      id\n      quantity\n      unit\n      location {\n        id\n        name\n      }\n    }\n  }\n}"): (typeof documents)["query getMenus {\n  menus {\n    id\n    name\n    image_url\n    description\n    is_a_la_carte\n    is_available\n    created_at\n    updated_at\n    items {\n      id\n      quantity\n      unit\n      location {\n        id\n        name\n      }\n    }\n  }\n}"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -92,6 +100,10 @@ export function graphql(source: "query GetUnit {\n  measurementUnits {\n    labe
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "query GetUser {\n  user {\n    id\n    name\n    email\n    company {\n      id\n      name\n    }\n  }\n}"): (typeof documents)["query GetUser {\n  user {\n    id\n    name\n    email\n    company {\n      id\n      name\n    }\n  }\n}"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "query searchIngredients($searchTerm: String!) {\n  searchInStock(keyword: $searchTerm) {\n    ... on Ingredient {\n      id\n      name\n      image_url\n      unit\n      allergens\n      quantities {\n        quantity\n        location {\n          id\n          name\n        }\n      }\n    }\n    ... on Preparation {\n      id\n      name\n      unit\n      allergens\n      quantities {\n        quantity\n        location {\n          name\n          id\n        }\n      }\n    }\n  }\n}"): (typeof documents)["query searchIngredients($searchTerm: String!) {\n  searchInStock(keyword: $searchTerm) {\n    ... on Ingredient {\n      id\n      name\n      image_url\n      unit\n      allergens\n      quantities {\n        quantity\n        location {\n          id\n          name\n        }\n      }\n    }\n    ... on Preparation {\n      id\n      name\n      unit\n      allergens\n      quantities {\n        quantity\n        location {\n          name\n          id\n        }\n      }\n    }\n  }\n}"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};

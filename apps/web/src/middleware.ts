@@ -57,6 +57,12 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  if (path === "/ingredient" || path === "/ingredients") {
+    //Redirect to /stocks
+    const url = new URL("/stocks", req.url);
+    return NextResponse.redirect(url);
+  }
+
   if (isProtectedRoute(path) && !isAuthenticated) {
     const url = new URL("/login", req.url);
     url.searchParams.set("from", path);

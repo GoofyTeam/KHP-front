@@ -231,7 +231,7 @@ export function IngredientPickerUI({
                       />
                       <Select
                         value={it.unit}
-                        onValueChange={(v) =>
+                        onValueChange={() =>
                           onChangeQuantity(it.id, it.quantity)
                         }
                       >
