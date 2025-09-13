@@ -1,0 +1,9 @@
+fragment MenuItemBasic on MenuItem {
+  id
+  quantity
+  unit
+  location {
+    ...LocationIdName
+  }
+}
+

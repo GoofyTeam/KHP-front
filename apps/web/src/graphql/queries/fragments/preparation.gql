@@ -1,0 +1,16 @@
+fragment PreparationBase on Preparation {
+  id
+  name
+  unit
+  image_url
+}
+
+fragment PreparationQuantitiesBasic on Preparation {
+  quantities {
+    quantity
+    location {
+      ...LocationIdName
+    }
+  }
+}
+

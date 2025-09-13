@@ -1,0 +1,10 @@
+fragment CategoryBasic on Category {
+  id
+  name
+}
+
+# Menu categories are a different type in the schema
+fragment MenuCategoryBasic on MenuCategory {
+  id
+  name
+}

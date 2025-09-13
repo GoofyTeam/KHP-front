@@ -1,25 +1,6 @@
 query GetIngredient($id: ID!) {
   ingredient(id: $id) {
-    id
-    name
-    unit
-    image_url
-    created_at
-    updated_at
-    category {
-      id
-      name
-    }
-    quantities {
-      quantity
-      location {
-        id
-        name
-        locationType {
-          name
-        }
-      }
-    }
+    ...IngredientFull
     stockMovements {
       quantity_before
       quantity_after
