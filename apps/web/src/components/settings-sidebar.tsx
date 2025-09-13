@@ -8,6 +8,7 @@ import {
   Tags,
   Layers,
   Building,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -68,6 +69,12 @@ const settingsNavItems = [
     description: "Manage your menu categories",
     href: "/settings/menu-categories",
     icon: Tags,
+  },
+  {
+    title: "Quick Access",
+    description: "Configure your quick access buttons",
+    href: "/settings/quick-access",
+    icon: Zap,
   },
 ];
 
