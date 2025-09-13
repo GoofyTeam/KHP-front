@@ -5,23 +5,51 @@ query GetMenuById($id: ID!) {
     image_url
     price
     description
+
     type
     allergens
     categories {
-      ...MenuCategoryBasic
+      id
+      name
     }
+
     available
     is_a_la_carte
+
     items {
-      ...MenuItemBasic
+      id
+      quantity
+      unit
+      location {
+        id
+        name
+      }
       entity {
         ... on Preparation {
-          ...PreparationBase
-          ...PreparationQuantitiesBasic
+          id
+          name
+          unit
+          image_url
+          quantities {
+            quantity
+            location {
+              name
+              id
+            }
+          }
         }
         ... on Ingredient {
-          ...IngredientBase
-          ...IngredientQuantitiesBasic
+          id
+          name
+          unit
+          image_url
+          quantities {
+            quantity
+            location {
+              name
+              id
+            }
+          }
         }
       }
     }

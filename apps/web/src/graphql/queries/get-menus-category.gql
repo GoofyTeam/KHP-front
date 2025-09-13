@@ -1,7 +1,8 @@
 query GetMenuCategories {
   menuCategories {
     data {
-      ...MenuCategoryBasic
+      name
+      id
     }
   }
 }

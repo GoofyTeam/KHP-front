@@ -1,11 +1,24 @@
 query GetIngredients($page: Int!, $search: String, $categoryIds: [ID!]) {
   ingredients(page: $page, search: $search, categoryIds: $categoryIds) {
     data {
-      ...IngredientBase
+      id
+      name
+      unit
+      image_url
       category {
-        ...CategoryBasic
+        id
+        name
       }
-      ...IngredientQuantitiesWithType
+      quantities {
+        quantity
+        location {
+          id
+          name
+          locationType {
+            name
+          }
+        }
+      }
     }
     paginatorInfo {
       count
