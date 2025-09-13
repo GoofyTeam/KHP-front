@@ -1,8 +1,5 @@
-query GetMe {
+query GetCompanyOptions {
   me {
-    id
-    name
-    email
     company {
       id
       name
