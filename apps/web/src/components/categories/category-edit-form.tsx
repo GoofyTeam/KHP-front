@@ -119,7 +119,6 @@ export function CategoryEditForm({
     return availableLocationTypes.length > selectedIds.length;
   };
 
-  // Garder une trace des location types initiaux pour pouvoir envoyer null lors de la suppression
   const [initialLocationTypes, setInitialLocationTypes] = useState<string[]>(
     []
   );
@@ -149,7 +148,6 @@ export function CategoryEditForm({
         days: Math.round((sl.shelf_life_hours || 0) / 24),
       }));
 
-    // Sauvegarder les IDs des location types initiaux
     setInitialLocationTypes(locationTypes.map((lt) => lt.location_type_id));
 
     form.reset({
@@ -174,57 +172,32 @@ export function CategoryEditForm({
         name: values.name.trim(),
       };
 
-      // Gérer fridge et freezer séparément pour pouvoir envoyer null
-      const fridgeValue =
-        typeof values.shelf_lives.fridge === "string"
-          ? values.shelf_lives.fridge === ""
-            ? null
-            : Number(values.shelf_lives.fridge)
-          : values.shelf_lives.fridge;
+      const fridgeValue = Number(values.shelf_lives.fridge) || 0;
+      const freezerValue = Number(values.shelf_lives.freezer) || 0;
 
-      const freezerValue =
-        typeof values.shelf_lives.freezer === "string"
-          ? values.shelf_lives.freezer === ""
-            ? null
-            : Number(values.shelf_lives.freezer)
-          : values.shelf_lives.freezer;
+      transformedData.shelf_lives = {
+        fridge: fridgeValue,
+        freezer: freezerValue,
+      };
 
-      // Ajouter les valeurs comme des location types individuels
-      if (fridgeValue !== null) {
-        transformedData["2"] = fridgeValue; // ID 2 pour réfrigérateur
-      } else {
-        transformedData["2"] = null; // Supprimer le shelf life du réfrigérateur
-      }
-
-      if (freezerValue !== null) {
-        transformedData["1"] = freezerValue; // ID 1 pour congélateur
-      } else {
-        transformedData["1"] = null; // Supprimer le shelf life du congélateur
-      }
-
-      // Gérer les location types actuels du formulaire
       values.location_types
         .filter((lt) => lt.location_type_id)
         .forEach((lt) => {
-          const days =
-            typeof lt.days === "string"
-              ? lt.days === ""
-                ? null
-                : Number(lt.days)
-              : lt.days;
+          const days = Number(lt.days) || 0;
 
-          // Envoyer null pour supprimer le shelf life, ou la valeur en jours
-          transformedData[lt.location_type_id] = days;
+          if (days > 0) {
+            transformedData[lt.location_type_id] = days;
+          } else {
+            transformedData[lt.location_type_id] = null;
+          }
         });
-
-      // Envoyer null pour les location types qui étaient présents initialement mais qui ont été supprimés
       const currentLocationTypeIds = values.location_types
         .filter((lt) => lt.location_type_id)
         .map((lt) => lt.location_type_id);
 
       initialLocationTypes.forEach((initialId) => {
         if (!currentLocationTypeIds.includes(initialId)) {
-          transformedData[initialId] = null; // Supprimer ce location type
+          transformedData[initialId] = null;
         }
       });
 

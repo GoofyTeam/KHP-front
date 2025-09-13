@@ -20,10 +20,11 @@ export interface CreateCategoryInput {
     fridge: number;
     freezer: number;
   };
-  location_types?: {
-    location_type_id: string;
-    days: number;
-  }[];
+  [location_type_id: string]:
+    | number
+    | string
+    | { fridge: number; freezer: number }
+    | undefined;
 }
 
 export interface UpdateCategoryInput {
@@ -44,21 +45,27 @@ export async function createCategoryAction(
   input: CreateCategoryInput
 ): Promise<ActionResult<Category>> {
   try {
-    // Convert days to hours for the API
-    const apiInput = {
+    // Build API input according to POST /categories structure
+    const apiInput: {
+      name: string;
+      shelf_lives: Record<string, number>;
+    } = {
       name: input.name,
       shelf_lives: {
-        fridge: input.shelf_lives.fridge * 24, // days to hours
-        freezer: input.shelf_lives.freezer * 24, // days to hours
+        fridge: input.shelf_lives.fridge * 24, // Convert days to hours for creation
+        freezer: input.shelf_lives.freezer * 24, // Convert days to hours for creation
       },
-      ...(input.location_types &&
-        input.location_types.length > 0 && {
-          location_types: input.location_types.map((lt) => ({
-            location_type_id: lt.location_type_id,
-            days: lt.days * 24, // Convert days to hours if needed by API
-          })),
-        }),
     };
+
+    // Handle other location types (convert days to hours)
+    Object.keys(input).forEach((key) => {
+      if (key !== "name" && key !== "shelf_lives") {
+        const value = input[key];
+        if (typeof value === "number" && value > 0) {
+          apiInput.shelf_lives[key] = value * 24; // Convert days to hours
+        }
+      }
+    });
 
     const response = await httpClient.post<
       { message: string; data: Category },
@@ -87,30 +94,35 @@ export async function updateCategoryAction(
       apiInput.name = input.name;
     }
 
-    // Add shelf_lives if provided (convert days to hours)
+    // Initialize shelf_lives object
+    apiInput.shelf_lives = {};
+
+    // Handle fridge and freezer from shelf_lives structure (convert days to hours)
     if (input.shelf_lives) {
-      apiInput.shelf_lives = {
-        fridge: input.shelf_lives.fridge * 24, // days to hours
-        freezer: input.shelf_lives.freezer * 24, // days to hours
-      };
+      if (input.shelf_lives.fridge > 0) {
+        apiInput.shelf_lives.fridge = input.shelf_lives.fridge * 24;
+      }
+      if (input.shelf_lives.freezer > 0) {
+        apiInput.shelf_lives.freezer = input.shelf_lives.freezer * 24;
+      }
     }
 
+    // Handle other location types (convert days to hours or set to null)
     Object.keys(input).forEach((key) => {
       if (key !== "name" && key !== "shelf_lives") {
         const value = input[key];
         if (typeof value === "number" && value > 0) {
-          if (!apiInput.shelf_lives) {
-            apiInput.shelf_lives = {};
-          }
-          apiInput.shelf_lives[key] = value * 24;
+          apiInput.shelf_lives![key] = value * 24; // Convert days to hours
         } else if (value === null || value === 0) {
-          if (!apiInput.shelf_lives) {
-            apiInput.shelf_lives = {};
-          }
-          apiInput.shelf_lives[key] = null;
+          apiInput.shelf_lives![key] = null; // Remove location type
         }
       }
     });
+
+    // Only send shelf_lives if it has properties
+    if (Object.keys(apiInput.shelf_lives).length === 0) {
+      delete apiInput.shelf_lives;
+    }
 
     const response = await httpClient.put<
       { message: string; data: Category },
