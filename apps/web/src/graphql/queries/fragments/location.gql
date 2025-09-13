@@ -1,0 +1,13 @@
+fragment LocationIdName on Location {
+  id
+  name
+}
+
+fragment LocationWithType on Location {
+  id
+  name
+  locationType {
+    name
+  }
+}
+

@@ -1,0 +1,38 @@
+fragment IngredientBase on Ingredient {
+  id
+  name
+  unit
+  image_url
+}
+
+# Quantities with Location id+name (common case)
+fragment IngredientQuantitiesBasic on Ingredient {
+  quantities {
+    quantity
+    location {
+      ...LocationIdName
+    }
+  }
+}
+
+# Quantities with Location and LocationType name (used in ingredients pages)
+fragment IngredientQuantitiesWithType on Ingredient {
+  quantities {
+    quantity
+    location {
+      ...LocationWithType
+    }
+  }
+}
+
+# Full ingredient details used in detail view
+fragment IngredientFull on Ingredient {
+  ...IngredientBase
+  category {
+    ...CategoryBasic
+  }
+  ...IngredientQuantitiesWithType
+  created_at
+  updated_at
+}
+
