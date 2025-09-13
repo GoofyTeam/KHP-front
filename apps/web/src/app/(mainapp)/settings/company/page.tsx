@@ -1,5 +1,3 @@
-"use client";
-
 import { CompanySettingsSection } from "@/components/company/company-settings-section";
 
 export default function Company() {
