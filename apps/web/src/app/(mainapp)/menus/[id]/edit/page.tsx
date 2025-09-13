@@ -45,6 +45,8 @@ const menuItemsSchema = z.object({
   quantity: z.number().min(1, "Quantity must be at least 1"),
   unit: z.string().nonempty("Unit is required"),
   location_id: z.string().nonempty("Location ID is required"),
+  // UI-only: fixed storage unit for display in location select
+  storage_unit: z.string().optional(),
 });
 
 const updateMenuSchema = z
@@ -142,6 +144,7 @@ export default function UpdateMenusPage() {
           quantity: item.quantity,
           unit: item.unit,
           location_id: item.location.id,
+          storage_unit: item.entity.unit,
         })) || [],
     },
   });
@@ -173,6 +176,7 @@ export default function UpdateMenusPage() {
             quantity: item.quantity,
             unit: item.unit,
             location_id: item.location.id,
+            storage_unit: item.entity.unit,
           })) || [],
       });
       setPriceInput(
@@ -506,7 +510,7 @@ export default function UpdateMenusPage() {
                 variant="khp-destructive"
                 type="button"
                 className="w-full"
-                onClick={() => router.push("/menus")}
+                onClick={() => router.push(`/menus/${id}`)}
               >
                 Cancel
               </Button>

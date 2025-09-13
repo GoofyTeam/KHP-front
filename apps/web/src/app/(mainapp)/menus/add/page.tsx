@@ -43,6 +43,8 @@ const menuItemsSchema = z.object({
   quantity: z.number().min(1, "Quantity must be at least 1"),
   unit: z.string().nonempty("Unit is required"),
   location_id: z.string().nonempty("Location ID is required"),
+  // UI-only: fixed storage unit for display in location select
+  storage_unit: z.string().optional(),
 });
 
 const createMenuSchema = z
