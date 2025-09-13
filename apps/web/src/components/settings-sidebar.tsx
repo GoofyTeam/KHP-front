@@ -1,6 +1,6 @@
 "use client";
 
-import { User, Settings, MapPin, Tag, Tags } from "lucide-react";
+import { User, Settings, MapPin, Tag, Tags, Layers } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useBreakpoint } from "@workspace/ui/hooks/use-breakpoint";
@@ -49,9 +49,14 @@ const settingsNavItems = [
     href: "/settings/menu-categories",
     icon: Tags,
   },
+  {
+    title: "Location Types",
+    description: "Manage your location types settings",
+    href: "/settings/location-types",
+    icon: Layers,
+  },
 ];
 
-// Composant de navigation réutilisable
 const NavigationMenu = ({ onItemClick }: { onItemClick?: () => void }) => {
   const pathname = usePathname();
 
