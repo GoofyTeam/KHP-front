@@ -41,13 +41,13 @@ const settingsNavItems = [
     title: "Categories",
     description: "Manage your categories",
     href: "/settings/categories",
-    icon: Tags,
+    icon: Tag,
   },
   {
     title: "Menu Categories",
     description: "Manage your menu categories",
     href: "/settings/menu-categories",
-    icon: Tag,
+    icon: Tags,
   },
 ];
 
