@@ -9,7 +9,13 @@ query getMenus {
     created_at
     updated_at
     items {
-      ...MenuItemBasic
+      id
+      quantity
+      unit
+      location {
+        id
+        name
+      }
     }
   }
 }
