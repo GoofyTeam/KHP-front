@@ -48,7 +48,7 @@ export function DataTable<TData, TValue>({
       value: "all",
     },
     {
-      id: "is_available",
+      id: "available",
       value: "all",
     },
   ]);
@@ -90,18 +90,15 @@ export function DataTable<TData, TValue>({
             />
           </div>
           <div className="flex flex-col gap-1">
-            <Label
-              htmlFor="is_available"
-              className="font-bold whitespace-nowrap"
-            >
+            <Label htmlFor="available" className="font-bold whitespace-nowrap">
               Available ?
             </Label>
             <Select
               onValueChange={(value) =>
-                table.getColumn("is_available")?.setFilterValue(value)
+                table.getColumn("available")?.setFilterValue(value)
               }
               value={
-                (table.getColumn("is_available")?.getFilterValue() as string) ||
+                (table.getColumn("available")?.getFilterValue() as string) ||
                 "all"
               }
             >

@@ -57,10 +57,10 @@ export const columns: ColumnDef<Meals>[] = [
     },
   },
   {
-    accessorKey: "is_available",
+    accessorKey: "available",
     header: "Meal available ?",
     cell: ({ row }) =>
-      row.original.is_available ? (
+      row.original.available ? (
         <StockStatus variant="in-stock" />
       ) : (
         <StockStatus variant="out-of-stock" />

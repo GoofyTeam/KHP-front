@@ -248,7 +248,7 @@ export function IngredientPickerUI({
                       </Select>
                     </div>
                     <Select
-                      value={it.locationId ?? ""}
+                      value={it.locationId || undefined}
                       onValueChange={(v) => onChangeLocation(it.id, v)}
                       disabled={!it.locations || it.locations.length === 0}
                     >
@@ -256,15 +256,12 @@ export function IngredientPickerUI({
                         <SelectValue placeholder="Location" />
                       </SelectTrigger>
                       <SelectContent>
-                        {it.locations && it.locations.length > 0 ? (
-                          it.locations.map((loc) => (
-                            <SelectItem key={loc.id} value={loc.id}>
-                              {loc.name}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <SelectItem value="">No location</SelectItem>
-                        )}
+                        {it.locations?.map((loc) => (
+                          <SelectItem key={loc.id} value={loc.id}>
+                            {loc.name} ({loc.quantityInLocation.toFixed(2)}{" "}
+                            {it.unit})
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <Button
