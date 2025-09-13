@@ -20,11 +20,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
-import { createCategoryAction } from "@/app/(mainapp)/settings/categories/actions";
+import {
+  createCategoryAction,
+  type CreateCategoryInput,
+} from "@/app/(mainapp)/settings/categories/actions";
 import {
   GetCategoriesDocument,
   GetLocationTypesDocument,
-  type Category,
 } from "@/graphql/generated/graphql";
 
 interface CategoryAddFormProps {
@@ -93,8 +95,8 @@ export function CategoryAddForm({ onCategoryAdded }: CategoryAddFormProps) {
     return locationTypes.filter(
       (locationType) =>
         !selectedIds.includes(locationType.id) &&
-        locationType.id !== "1" && // Exclure congélateur
-        locationType.id !== "2" // Exclure réfrigérateur
+        locationType.id !== "1" &&
+        locationType.id !== "2"
     );
   };
 
@@ -103,47 +105,20 @@ export function CategoryAddForm({ onCategoryAdded }: CategoryAddFormProps) {
       .map((field) => field.location_type_id)
       .filter((id): id is string => id !== null && id !== "");
 
-    // Compter les location types disponibles (en excluant fridge et freezer)
     const availableLocationTypes = locationTypes.filter(
-      (locationType) =>
-        locationType.id !== "1" && // Exclure congélateur
-        locationType.id !== "2" // Exclure réfrigérateur
+      (locationType) => locationType.id !== "1" && locationType.id !== "2"
     );
 
     return availableLocationTypes.length > selectedIds.length;
   };
 
-  const handleSuccess = async (result: {
-    success: boolean;
-    data?: Category;
-    error?: string;
-  }) => {
+  const handleSuccess = async () => {
     reset();
     clearErrors();
 
-    try {
-      const existingData = apolloClient.readQuery({
-        query: GetCategoriesDocument,
-        variables: { first: 10, page: 1 },
-      });
-
-      if (existingData?.categories?.data && result.data) {
-        apolloClient.writeQuery({
-          query: GetCategoriesDocument,
-          variables: { first: 10, page: 1 },
-          data: {
-            categories: {
-              ...existingData.categories,
-              data: [result.data, ...existingData.categories.data],
-            },
-          },
-        });
-      }
-    } catch {
-      await apolloClient.refetchQueries({
-        include: [GetCategoriesDocument],
-      });
-    }
+    await apolloClient.refetchQueries({
+      include: [GetCategoriesDocument],
+    });
 
     onCategoryAdded?.();
   };
@@ -152,39 +127,28 @@ export function CategoryAddForm({ onCategoryAdded }: CategoryAddFormProps) {
     try {
       clearErrors("root");
 
-      const transformedData = {
+      const transformedData: CreateCategoryInput = {
         name: values.name.trim(),
         shelf_lives: {
-          fridge:
-            typeof values.shelf_lives.fridge === "string"
-              ? values.shelf_lives.fridge === ""
-                ? 0
-                : Number(values.shelf_lives.fridge)
-              : values.shelf_lives.fridge,
-          freezer:
-            typeof values.shelf_lives.freezer === "string"
-              ? values.shelf_lives.freezer === ""
-                ? 0
-                : Number(values.shelf_lives.freezer)
-              : values.shelf_lives.freezer,
+          fridge: Number(values.shelf_lives.fridge) || 0,
+          freezer: Number(values.shelf_lives.freezer) || 0,
         },
-        location_types: values.location_types
-          .map((lt) => ({
-            location_type_id: lt.location_type_id,
-            days:
-              typeof lt.days === "string"
-                ? lt.days === ""
-                  ? 0
-                  : Number(lt.days)
-                : lt.days,
-          }))
-          .filter((lt) => lt.location_type_id && lt.days > 0),
       };
+
+      values.location_types
+        .filter((lt) => lt.location_type_id)
+        .forEach((lt) => {
+          const days = Number(lt.days) || 0;
+
+          if (days > 0) {
+            transformedData[lt.location_type_id] = days;
+          }
+        });
 
       const result = await createCategoryAction(transformedData);
 
       if (result.success) {
-        await handleSuccess(result);
+        await handleSuccess();
 
         setTimeout(() => {
           clearErrors();

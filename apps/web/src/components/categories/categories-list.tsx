@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, forwardRef, useImperativeHandle } from "react";
+import { useCallback, forwardRef, useImperativeHandle } from "react";
 import { useForm } from "react-hook-form";
 import { useQuery } from "@apollo/client";
 import { GetCategoriesDocument } from "@/graphql/generated/graphql";
@@ -40,7 +40,7 @@ export const CategoriesList = forwardRef<
     },
   });
 
-  const { watch, setValue } = form;
+  const { watch, setValue, reset } = form;
   const allCategories = watch("allCategories");
   const currentPage = watch("currentPage");
   const isLoadingMore = watch("isLoadingMore");
@@ -56,16 +56,20 @@ export const CategoriesList = forwardRef<
       fetchPolicy: "cache-and-network",
       errorPolicy: "all",
       notifyOnNetworkStatusChange: true,
+      onCompleted: (data) => {
+        if (data?.categories?.data && currentPage === 1) {
+          reset({
+            allCategories: data.categories.data as Category[],
+            currentPage: 1,
+            isLoadingMore: false,
+            hasReachedEnd: false,
+          });
+        }
+      },
     }
   );
 
   const paginatorInfo = data?.categories?.paginatorInfo;
-
-  useEffect(() => {
-    if (data?.categories?.data && currentPage === 1) {
-      setValue("allCategories", data.categories.data as Category[]);
-    }
-  }, [data, currentPage, paginatorInfo, setValue]);
 
   const loadMore = useCallback(async () => {
     if (!paginatorInfo?.hasMorePages || isLoadingMore || hasReachedEnd) {
@@ -108,7 +112,6 @@ export const CategoriesList = forwardRef<
     setValue,
   ]);
 
-  // Scroll handler for infinite scroll
   const handleScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement>) => {
       if (!paginatorInfo?.hasMorePages || isLoadingMore || hasReachedEnd) {
@@ -124,18 +127,21 @@ export const CategoriesList = forwardRef<
     [loadMore, paginatorInfo?.hasMorePages, isLoadingMore, hasReachedEnd]
   );
 
-  // Reset and refetch data (for refresh after mutations)
   const handleRefetch = useCallback(async () => {
-    setValue("currentPage", 1);
-    setValue("allCategories", []);
-    setValue("isLoadingMore", false);
-    setValue("hasReachedEnd", false);
-
-    await refetch({
+    const result = await refetch({
       first: 10,
       page: 1,
     });
-  }, [refetch, setValue]);
+
+    if (result.data?.categories?.data) {
+      reset({
+        allCategories: result.data.categories.data as Category[],
+        currentPage: 1,
+        isLoadingMore: false,
+        hasReachedEnd: false,
+      });
+    }
+  }, [refetch, reset]);
 
   useImperativeHandle(
     ref,
