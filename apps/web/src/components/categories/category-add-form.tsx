@@ -27,7 +27,6 @@ import {
 import {
   GetCategoriesDocument,
   GetLocationTypesDocument,
-  type Category,
 } from "@/graphql/generated/graphql";
 
 interface CategoryAddFormProps {
@@ -113,11 +112,7 @@ export function CategoryAddForm({ onCategoryAdded }: CategoryAddFormProps) {
     return availableLocationTypes.length > selectedIds.length;
   };
 
-  const handleSuccess = async (result: {
-    success: boolean;
-    data?: Category;
-    error?: string;
-  }) => {
+  const handleSuccess = async () => {
     reset();
     clearErrors();
 
@@ -153,7 +148,7 @@ export function CategoryAddForm({ onCategoryAdded }: CategoryAddFormProps) {
       const result = await createCategoryAction(transformedData);
 
       if (result.success) {
-        await handleSuccess(result);
+        await handleSuccess();
 
         setTimeout(() => {
           clearErrors();
