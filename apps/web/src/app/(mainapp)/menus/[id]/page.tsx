@@ -12,10 +12,17 @@ import { MealsIngredientDataTable } from "@/components/meals/meals-ingredients-d
 import { MealsIngredientColumns } from "@/components/meals/meals-ingredient-columns";
 import { AvailabilityBadge } from "@workspace/ui/components/availability-badge";
 
-export default async function MenuPage({ params }: { params: { id: string } }) {
+export default async function MenuPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+
   const { data, error } = await query({
     query: GetMenuByIdDocument,
-    variables: { id: params.id },
+    variables: { id },
+    fetchPolicy: "network-only",
   });
 
   if (error) {
@@ -24,7 +31,6 @@ export default async function MenuPage({ params }: { params: { id: string } }) {
   }
 
   const menu = data.menu;
-  console.log("Menu data:", menu);
 
   return (
     <div className="w-full flex flex-col lg:flex-row gap-8 h-full items-center justify-center py-2 ">
@@ -35,7 +41,7 @@ export default async function MenuPage({ params }: { params: { id: string } }) {
               {menu?.name}
             </h1>
             <Button variant="ghost" size="icon" title="Edit menu" asChild>
-              <Link href={`/ingredient/${menu?.id}/edit`}>
+              <Link href={`/menus/${menu?.id}/edit`}>
                 <Edit
                   className="h-6 w-6 text-khp-text-secondary"
                   strokeWidth={1.5}
