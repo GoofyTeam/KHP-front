@@ -11,6 +11,7 @@ import { AllegernsBadgesList } from "@workspace/ui/components/allergens-badge";
 import { MealsIngredientDataTable } from "@/components/meals/meals-ingredients-data-table";
 import { MealsIngredientColumns } from "@/components/meals/meals-ingredient-columns";
 import { AvailabilityBadge } from "@workspace/ui/components/availability-badge";
+import DeleteMenu from "@/components/meals/delete-menus";
 
 export default async function MenuPage({
   params,
@@ -40,15 +41,18 @@ export default async function MenuPage({
             <h1 className="text-3xl lg:text-5xl font-bold text-khp-text-primary leading-tight flex items-center justify-start gap-2 truncate max-w-xs lg:max-w-md">
               {menu?.name}
             </h1>
-            <Button variant="ghost" size="icon" title="Edit menu" asChild>
-              <Link href={`/menus/${menu?.id}/edit`}>
-                <Edit
-                  className="h-6 w-6 text-khp-text-secondary"
-                  strokeWidth={1.5}
-                  size={32}
-                />
-              </Link>
-            </Button>
+            <div className="grid grid-cols-2 gap-1">
+              <Button variant="ghost" size="icon" title="Edit menu" asChild>
+                <Link href={`/menus/${menu?.id}/edit`}>
+                  <Edit
+                    className="h-6 w-6 text-khp-text-secondary"
+                    strokeWidth={1.5}
+                    size={32}
+                  />
+                </Link>
+              </Button>
+              <DeleteMenu id={menu?.id} />
+            </div>
           </div>
           <div className="flex justify-center items-center gap-2 flex-wrap">
             <p className="text-khp-text-secondary font-bold">

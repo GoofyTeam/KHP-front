@@ -251,7 +251,6 @@ export default function UpdateMenusPage() {
         );
       }
 
-      // Combine message and tips for display
       const combinedMessage = [message, ...tips].join("\n");
 
       form.setError("root", {
@@ -260,10 +259,6 @@ export default function UpdateMenusPage() {
       });
     }
   }
-
-  console.log("form errors", form.formState.errors);
-  console.log("menuFetched", menuFetched);
-  console.log("form values", form.getValues());
 
   return (
     <div className="flex flex-col h-full justify-center items-center w-full">
