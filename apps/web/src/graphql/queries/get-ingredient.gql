@@ -4,6 +4,9 @@ query GetIngredient($id: ID!) {
     name
     unit
     image_url
+    base_quantity
+    base_unit
+    allergens
     created_at
     updated_at
     category {

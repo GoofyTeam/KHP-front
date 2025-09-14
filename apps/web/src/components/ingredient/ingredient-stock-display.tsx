@@ -30,8 +30,6 @@ export function IngredientStockDisplay({ ingredient, preparation }: IngredientSt
     return ((stockTarget?.quantities ?? []) as StockQuantity[]).slice();
   }, [stockTarget]);
 
-  // Sync selection when available locations change so the UI always reflects the
-  // current dataset (single location -> auto select, otherwise default to "all").
   useEffect(() => {
     if (quantities.length === 1) {
       const onlyLocationId = quantities[0]?.location.id ?? "all";
@@ -80,8 +78,7 @@ export function IngredientStockDisplay({ ingredient, preparation }: IngredientSt
             label="Locations"
             unit={stockTarget.unit}
             hideEmptyLocations={false}
-            showAllOption={true}
-            allOptionLabel="All locations"
+            showAllOption={false}
             displayAllQuantity={true}
           />
         </div>
