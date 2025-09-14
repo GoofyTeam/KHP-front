@@ -33,7 +33,10 @@ export type IngredientSearchResult = {
   name: string;
   imageUrl?: string | null;
   kind: "ingredient" | "preparation";
+  // unit chosen for the recipe (initially defaults to storageUnit)
   unit: string;
+  // fixed storage unit of the ingredient/preparation
+  storageUnit: string;
   defaultLocationId?: string | null;
   locations?: { id: string; name: string; quantityInLocation: number }[];
 };
@@ -44,6 +47,7 @@ export type PickedItem = {
   imageUrl?: string | null;
   kind: "ingredient" | "preparation";
   unit: string;
+  storageUnit: string;
   quantity: number;
   locationId?: string | null;
   locations?: { id: string; name: string; quantityInLocation: number }[];
@@ -107,6 +111,7 @@ export function IngredientPickerUI({
       imageUrl: r.imageUrl ?? undefined,
       kind: r.kind,
       unit: r.unit,
+      storageUnit: r.storageUnit,
       quantity: 1,
       locationId: r.defaultLocationId ?? undefined,
       locations: r.locations ?? [],
@@ -248,7 +253,7 @@ export function IngredientPickerUI({
                       </Select>
                     </div>
                     <Select
-                      value={it.locationId ?? ""}
+                      value={it.locationId || undefined}
                       onValueChange={(v) => onChangeLocation(it.id, v)}
                       disabled={!it.locations || it.locations.length === 0}
                     >
@@ -256,15 +261,12 @@ export function IngredientPickerUI({
                         <SelectValue placeholder="Location" />
                       </SelectTrigger>
                       <SelectContent>
-                        {it.locations && it.locations.length > 0 ? (
-                          it.locations.map((loc) => (
-                            <SelectItem key={loc.id} value={loc.id}>
-                              {loc.name}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <SelectItem value="">No location</SelectItem>
-                        )}
+                        {it.locations?.map((loc) => (
+                          <SelectItem key={loc.id} value={loc.id}>
+                            {loc.name} ({loc.quantityInLocation.toFixed(2)}{" "}
+                            {it.storageUnit})
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <Button

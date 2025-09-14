@@ -35,6 +35,8 @@ export type MenuItemForm = {
   name?: string;
   imageUrl?: string | null;
   locations?: PickedItem["locations"];
+  // unité de stockage fixe de l’entité (UI uniquement)
+  storage_unit?: string;
 };
 
 // Le formulaire parent DOIT avoir items: MenuItemForm[]
@@ -103,7 +105,8 @@ export function IngredientPickerField<TForm extends HasItemsForm>({
       name: n.name,
       imageUrl: n.__typename === "Ingredient" ? n.image_url : null,
       kind: n.__typename === "Ingredient" ? "ingredient" : "preparation",
-      unit: n.unit, // adapte si nécessaire
+      unit: n.unit, // unité par défaut côté recette
+      storageUnit: n.unit, // unité de stockage de l’ingrédient/préparation
       defaultLocationId: null, // mappe si dispo
       locations: n.quantities.map((q) => ({
         id: q.location.id,
@@ -120,6 +123,7 @@ export function IngredientPickerField<TForm extends HasItemsForm>({
     imageUrl: f.imageUrl ?? null,
     kind: f.entity_type,
     unit: f.unit,
+    storageUnit: f.storage_unit || f.unit,
     quantity: f.quantity,
     locationId: f.location_id,
     locations: f.locations ?? [],
@@ -139,6 +143,7 @@ export function IngredientPickerField<TForm extends HasItemsForm>({
         entity_type: p.kind,
         quantity: p.quantity,
         unit: p.unit,
+        storage_unit: p.storageUnit,
         location_id: p.locationId || "",
         // confort d’affichage
         name: p.name,

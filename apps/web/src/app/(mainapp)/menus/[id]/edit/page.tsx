@@ -3,8 +3,8 @@
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChangeEvent, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { ChangeEvent, useEffect, useRef } from "react";
+import { useParams, useRouter } from "next/navigation";
 
 import {
   Form,
@@ -21,7 +21,7 @@ import { Textarea } from "@workspace/ui/components/textarea";
 import { Switch } from "@workspace/ui/components/switch";
 import { IngredientPickerField } from "@/components/meals/IngredientPickerField";
 import { Button } from "@workspace/ui/components/button";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, LoaderCircle } from "lucide-react";
 import {
   Select,
   SelectTrigger,
@@ -30,15 +30,17 @@ import {
   SelectItem,
 } from "@workspace/ui/components/select";
 
-import { createMenuAction } from "@/app/(mainapp)/menus/add/action";
+import { updateMenuAction } from "@/app/(mainapp)/menus/add/action";
 import { useQuery } from "@apollo/client";
 import {
+  GetMenuByIdDocument,
   GetMenuCategoriesDocument,
   GetMenuCategoriesQuery,
 } from "@/graphql/generated/graphql";
 
 const menuItemsSchema = z.object({
   entity_id: z.string().nonempty("Entity ID is required"),
+  entity_image_url: z.string().optional(),
   entity_type: z.enum(["ingredient", "preparation"]),
   quantity: z.number().min(1, "Quantity must be at least 1"),
   unit: z.string().nonempty("Unit is required"),
@@ -47,7 +49,7 @@ const menuItemsSchema = z.object({
   storage_unit: z.string().optional(),
 });
 
-const createMenuSchema = z
+const updateMenuSchema = z
   .object({
     name: z.string().min(2, "Name must be at least 2 characters long"),
     image: z
@@ -91,9 +93,16 @@ const createMenuSchema = z
     });
   });
 
-export type CreateMenuFormValues = z.infer<typeof createMenuSchema>;
+export type UpdateMenuFormValues = z.infer<typeof updateMenuSchema>;
 
-export default function CreateMenusPage() {
+export default function UpdateMenusPage() {
+  const params = useParams<{ id: string }>();
+  const id = Array.isArray(params.id) ? params.id[0] : params.id;
+  const { data, error, loading } = useQuery(GetMenuByIdDocument, {
+    variables: { id },
+    skip: !id,
+  });
+
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -106,22 +115,100 @@ export default function CreateMenusPage() {
     }
   );
 
-  const form = useForm<CreateMenuFormValues>({
-    resolver: zodResolver(createMenuSchema),
+  const menuFetched = data?.menu;
+
+  const form = useForm<UpdateMenuFormValues>({
+    resolver: zodResolver(updateMenuSchema),
     defaultValues: {
-      name: "",
-      description: "",
-      price: 0,
-      is_a_la_carte: false,
-      items: [],
+      name: menuFetched?.name || "",
+      description: menuFetched?.description || "",
+      price: menuFetched?.price || 0,
+      is_a_la_carte: menuFetched?.is_a_la_carte || false,
+      category_ids: menuFetched?.categories.map((cat) => cat.id) || [],
+      type: menuFetched?.type || "",
+      items:
+        menuFetched?.items.map((item) => ({
+          entity_id: item.entity.id,
+          // champs UI pour l'IngredientPickerField
+          name: item.entity.name,
+          imageUrl: item.entity.image_url || null,
+          locations: item.entity.quantities.map((q) => ({
+            id: q.location.id,
+            name: q.location.name,
+            quantityInLocation: q.quantity,
+          })),
+          entity_type:
+            item.entity.__typename === "Ingredient"
+              ? "ingredient"
+              : "preparation",
+          quantity: item.quantity,
+          unit: item.unit,
+          location_id: item.location.id,
+          storage_unit: item.entity.unit,
+        })) || [],
     },
   });
 
-  async function onMenusCreateSubmit(values: CreateMenuFormValues) {
-    const res = await createMenuAction(values);
+  useEffect(() => {
+    if (menuFetched) {
+      form.reset({
+        name: menuFetched.name || "",
+        description: menuFetched.description || "",
+        price: menuFetched.price || 0,
+        is_a_la_carte: menuFetched.is_a_la_carte || false,
+        category_ids: menuFetched.categories.map((cat) => cat.id) || [],
+        type: menuFetched.type || "",
+        items:
+          menuFetched.items.map((item) => ({
+            entity_id: item.entity.id,
+            // champs UI pour l'IngredientPickerField
+            name: item.entity.name,
+            imageUrl: item.entity.image_url || null,
+            locations: item.entity.quantities.map((q) => ({
+              id: q.location.id,
+              name: q.location.name,
+              quantityInLocation: q.quantity,
+            })),
+            entity_type:
+              item.entity.__typename === "Ingredient"
+                ? "ingredient"
+                : "preparation",
+            quantity: item.quantity,
+            unit: item.unit,
+            location_id: item.location.id,
+            storage_unit: item.entity.unit,
+          })) || [],
+      });
+      setPriceInput(
+        menuFetched.price ? menuFetched.price.toFixed(2).replace(".", ",") : ""
+      );
+    }
+  }, [menuFetched, form]);
+
+  if (error) {
+    return <div>Error loading menu: {error.message}</div>;
+  }
+
+  if (loading) {
+    return (
+      <div>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <LoaderCircle
+              className="animate-spin mx-auto mb-4 text-khp-primary"
+              size={48}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  async function onMenusUpdateSubmit(values: UpdateMenuFormValues) {
+    const res = await updateMenuAction(id, values);
 
     if (res.success) {
-      router.push("/menus");
+      router.push(`/menus/${id}`);
     } else {
       console.error("Failed to create menu:", res.error, res.details);
 
@@ -175,7 +262,6 @@ export default function CreateMenusPage() {
         );
       }
 
-      // Combine message and tips for display
       const combinedMessage = [message, ...tips].join("\n");
 
       form.setError("root", {
@@ -189,7 +275,7 @@ export default function CreateMenusPage() {
     <div className="flex flex-col h-full justify-center items-center w-full">
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(onMenusCreateSubmit)}
+          onSubmit={form.handleSubmit(onMenusUpdateSubmit)}
           className="flex flex-col md:flex-row justify-around gap-8 w-full"
         >
           <div className="flex flex-col justify-center items-center gap-y-4 w-full md:w-5/12">
@@ -212,9 +298,9 @@ export default function CreateMenusPage() {
                 </div>
               </div>
             )}
-            {filePreview ? (
+            {filePreview || menuFetched?.image_url ? (
               <img
-                src={filePreview || ""}
+                src={filePreview || menuFetched?.image_url || undefined}
                 alt={"Menu Image"}
                 className="aspect-square object-cover max-w-1/2 w-full my-6 rounded-md"
                 onClick={() => inputRef.current?.click()}
@@ -313,7 +399,7 @@ export default function CreateMenusPage() {
                     <FormControl>
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        value={field.value || undefined}
                       >
                         <SelectTrigger className="w-full border-khp-primary">
                           <SelectValue placeholder="Select a type" />
@@ -343,7 +429,7 @@ export default function CreateMenusPage() {
                         onValueChange={(value) =>
                           field.onChange(value ? [value] : [])
                         }
-                        defaultValue={field.value?.[0] || ""}
+                        value={field.value?.[0] ?? undefined}
                       >
                         <SelectTrigger className="w-full border-khp-primary">
                           <SelectValue placeholder="Select a category" />
@@ -423,14 +509,19 @@ export default function CreateMenusPage() {
             </div>
 
             <div className="w-full grid grid-cols-1 md:grid-cols-2 mt-4 gap-x-2">
-              <Button variant="khp-default" type="submit" className="w-full">
-                Create
+              <Button
+                variant="khp-default"
+                type="submit"
+                className="w-full"
+                disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting ? "Updating..." : "Update Menu"}
               </Button>
               <Button
                 variant="khp-destructive"
                 type="button"
                 className="w-full"
-                onClick={() => router.push("/menus")}
+                onClick={() => router.push(`/menus/${id}`)}
               >
                 Cancel
               </Button>

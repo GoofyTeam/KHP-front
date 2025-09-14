@@ -1,0 +1,57 @@
+query GetMenuById($id: ID!) {
+  menu(id: $id) {
+    id
+    name
+    image_url
+    price
+    description
+
+    type
+    allergens
+    categories {
+      id
+      name
+    }
+
+    available
+    is_a_la_carte
+
+    items {
+      id
+      quantity
+      unit
+      location {
+        id
+        name
+      }
+      entity {
+        ... on Preparation {
+          id
+          name
+          unit
+          image_url
+          quantities {
+            quantity
+            location {
+              name
+              id
+            }
+          }
+        }
+        ... on Ingredient {
+          id
+          name
+          unit
+          image_url
+          quantities {
+            quantity
+            location {
+              name
+              id
+            }
+          }
+        }
+      }
+    }
+  }
+}
