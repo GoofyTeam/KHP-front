@@ -11,7 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@workspace/ui/components/alert-dialog";
-import { RotateCcw, AlertTriangle, Loader2 } from "lucide-react";
+import { RotateCcw, Loader2 } from "lucide-react";
 import { resetQuickAccessAction } from "@/app/(mainapp)/settings/quick-access/actions";
 
 interface ResetDialogProps {
@@ -40,7 +40,7 @@ export default function ResetDialog({
       } else {
         setResetError(result.error || "Erreur lors de la réinitialisation");
       }
-    } catch (error) {
+    } catch {
       setResetError("Erreur lors de la réinitialisation");
     } finally {
       setIsResetting(false);
@@ -62,7 +62,7 @@ export default function ResetDialog({
             </div>
             <div>
               <AlertDialogTitle className="text-xl text-gray-900">
-                Réinitialiser l'accès rapide
+                Réinitialiser l&apos;accès rapide
               </AlertDialogTitle>
               <AlertDialogDescription className="text-gray-600">
                 Cela restaurera les paramètres par défaut
@@ -73,7 +73,7 @@ export default function ResetDialog({
 
         <div className="space-y-4">
           <p className="text-gray-700 leading-relaxed">
-            Êtes-vous sûr de vouloir réinitialiser tous les boutons d'accès
+            Êtes-vous sûr de vouloir réinitialiser tous les boutons d&apos;accès
             rapide à leurs valeurs par défaut ? Cette action écrasera votre
             configuration actuelle.
           </p>

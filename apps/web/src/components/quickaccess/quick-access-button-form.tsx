@@ -102,7 +102,7 @@ export default function QuickAccessButtonForm({
           message: result.error || "Error updating quick access button",
         });
       }
-    } catch (error) {
+    } catch {
       form.setError("root", {
         message: "Error updating quick access button",
       });
