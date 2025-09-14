@@ -34,11 +34,13 @@ import {
 interface CategoryEditFormProps {
   category: Category;
   onCategoryUpdated?: () => void;
+  onCancel?: () => void;
 }
 
 export function CategoryEditForm({
   category,
   onCategoryUpdated,
+  onCancel,
 }: CategoryEditFormProps) {
   const apolloClient = useApolloClient();
 
@@ -464,6 +466,17 @@ export function CategoryEditForm({
                     "Update Category"
                   )}
                 </Button>
+
+                {onCancel && (
+                  <Button
+                    type="button"
+                    onClick={onCancel}
+                    variant="outline"
+                    className="w-full h-10 text-sm font-medium"
+                  >
+                    Cancel
+                  </Button>
+                )}
               </div>
             )}
           </div>
