@@ -21,7 +21,7 @@ import { Textarea } from "@workspace/ui/components/textarea";
 import { Switch } from "@workspace/ui/components/switch";
 import { IngredientPickerField } from "@/components/meals/IngredientPickerField";
 import { Button } from "@workspace/ui/components/button";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, LoaderCircle } from "lucide-react";
 import {
   Select,
   SelectTrigger,
@@ -190,7 +190,18 @@ export default function UpdateMenusPage() {
   }
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <LoaderCircle
+              className="animate-spin mx-auto mb-4 text-khp-primary"
+              size={48}
+            />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   async function onMenusUpdateSubmit(values: UpdateMenuFormValues) {
@@ -498,8 +509,13 @@ export default function UpdateMenusPage() {
             </div>
 
             <div className="w-full grid grid-cols-1 md:grid-cols-2 mt-4 gap-x-2">
-              <Button variant="khp-default" type="submit" className="w-full">
-                Update
+              <Button
+                variant="khp-default"
+                type="submit"
+                className="w-full"
+                disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting ? "Updating..." : "Update Menu"}
               </Button>
               <Button
                 variant="khp-destructive"

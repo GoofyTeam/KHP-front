@@ -17,15 +17,15 @@ import { Button } from "@workspace/ui/components/button";
 import { Shredder } from "lucide-react";
 
 function DeleteMenu({ id }: { id?: string }) {
-  if (!id) {
-    console.error("No id provided to DeleteMenu");
-    return null;
-  }
-
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  if (!id) {
+    console.error("No id provided to DeleteMenu");
+    return null;
+  }
 
   const handleConfirm = () => {
     setError(null);
@@ -41,7 +41,13 @@ function DeleteMenu({ id }: { id?: string }) {
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setError(null); }}>
+    <AlertDialog
+      open={open}
+      onOpenChange={(v) => {
+        setOpen(v);
+        if (!v) setError(null);
+      }}
+    >
       <AlertDialogTrigger asChild>
         <Button variant="ghost" size="icon" title="Delete menu" asChild>
           <p className="hover:cursor-pointer">
@@ -63,11 +69,11 @@ function DeleteMenu({ id }: { id?: string }) {
             and remove all its data.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        {error && (
-          <p className="text-sm text-red-600">{error}</p>
-        )}
+        {error && <p className="text-sm text-red-600">{error}</p>}
         <AlertDialogFooter>
-          <AlertDialogCancel type="button" disabled={isPending}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel type="button" disabled={isPending}>
+            Cancel
+          </AlertDialogCancel>
           <Button
             type="button"
             onClick={handleConfirm}
