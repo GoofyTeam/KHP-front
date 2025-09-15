@@ -34,7 +34,7 @@ export default function AddStockPage() {
         const fd = new FormData();
         fd.append("name", ing.name);
         fd.append("unit", ing.unit);
-        fd.append("base_unit", ing.unit);
+        fd.append("base_unit", ing.base_unit);
         fd.append("category_id", String(ing.category_id));
         fd.append("base_quantity", String(ing.base_quantity));
         if (ing.image) {

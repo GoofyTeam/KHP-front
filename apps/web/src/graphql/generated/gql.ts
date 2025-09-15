@@ -25,6 +25,7 @@ type Documents = {
     "query GetMenuCategories($first: Int, $page: Int) {\n  menuCategories(first: $first, page: $page) {\n    data {\n      name\n      id\n      created_at\n      updated_at\n    }\n    paginatorInfo {\n      count\n      currentPage\n      firstItem\n      hasMorePages\n      lastItem\n      lastPage\n      perPage\n      total\n    }\n  }\n}": typeof types.GetMenuCategoriesDocument,
     "query getMenus {\n  menus {\n    id\n    name\n    image_url\n    description\n    is_a_la_carte\n    available\n    created_at\n    updated_at\n    items {\n      id\n      quantity\n      unit\n      location {\n        id\n        name\n      }\n    }\n  }\n}": typeof types.GetMenusDocument,
     "query GetMostUsedIngredients {\n  ingredients(orderBy: {column: \"withdrawals_this_week_count\", order: DESC}) {\n    data {\n      name\n      withdrawals_this_week_count\n    }\n  }\n}": typeof types.GetMostUsedIngredientsDocument,
+    "query GetQuickAccessButton {\n  quickAccesses {\n    id\n    name\n    icon\n    icon_color\n    url_key\n  }\n}": typeof types.GetQuickAccessButtonDocument,
     "query GetQuickAccesses {\n  quickAccesses {\n    id\n    index\n    name\n    icon\n    icon_color\n    url_key\n    created_at\n    updated_at\n  }\n}": typeof types.GetQuickAccessesDocument,
     "query GetUnit {\n  measurementUnits {\n    label\n    value\n  }\n}": typeof types.GetUnitDocument,
     "query GetUser {\n  user {\n    id\n    name\n    email\n    company {\n      id\n      name\n    }\n  }\n}": typeof types.GetUserDocument,
@@ -42,6 +43,7 @@ const documents: Documents = {
     "query GetMenuCategories($first: Int, $page: Int) {\n  menuCategories(first: $first, page: $page) {\n    data {\n      name\n      id\n      created_at\n      updated_at\n    }\n    paginatorInfo {\n      count\n      currentPage\n      firstItem\n      hasMorePages\n      lastItem\n      lastPage\n      perPage\n      total\n    }\n  }\n}": types.GetMenuCategoriesDocument,
     "query getMenus {\n  menus {\n    id\n    name\n    image_url\n    description\n    is_a_la_carte\n    available\n    created_at\n    updated_at\n    items {\n      id\n      quantity\n      unit\n      location {\n        id\n        name\n      }\n    }\n  }\n}": types.GetMenusDocument,
     "query GetMostUsedIngredients {\n  ingredients(orderBy: {column: \"withdrawals_this_week_count\", order: DESC}) {\n    data {\n      name\n      withdrawals_this_week_count\n    }\n  }\n}": types.GetMostUsedIngredientsDocument,
+    "query GetQuickAccessButton {\n  quickAccesses {\n    id\n    name\n    icon\n    icon_color\n    url_key\n  }\n}": types.GetQuickAccessButtonDocument,
     "query GetQuickAccesses {\n  quickAccesses {\n    id\n    index\n    name\n    icon\n    icon_color\n    url_key\n    created_at\n    updated_at\n  }\n}": types.GetQuickAccessesDocument,
     "query GetUnit {\n  measurementUnits {\n    label\n    value\n  }\n}": types.GetUnitDocument,
     "query GetUser {\n  user {\n    id\n    name\n    email\n    company {\n      id\n      name\n    }\n  }\n}": types.GetUserDocument,
@@ -106,6 +108,10 @@ export function graphql(source: "query getMenus {\n  menus {\n    id\n    name\n
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "query GetMostUsedIngredients {\n  ingredients(orderBy: {column: \"withdrawals_this_week_count\", order: DESC}) {\n    data {\n      name\n      withdrawals_this_week_count\n    }\n  }\n}"): (typeof documents)["query GetMostUsedIngredients {\n  ingredients(orderBy: {column: \"withdrawals_this_week_count\", order: DESC}) {\n    data {\n      name\n      withdrawals_this_week_count\n    }\n  }\n}"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "query GetQuickAccessButton {\n  quickAccesses {\n    id\n    name\n    icon\n    icon_color\n    url_key\n  }\n}"): (typeof documents)["query GetQuickAccessButton {\n  quickAccesses {\n    id\n    name\n    icon\n    icon_color\n    url_key\n  }\n}"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

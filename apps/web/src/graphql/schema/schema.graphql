@@ -746,7 +746,9 @@ type Query {
 
   """Liste les quick access de l’entreprise courante, triés par index."""
   quickAccesses: [QuickAccess!]!
+  room(id: ID, code: String): Room
   searchInStock(keyword: String!): [SearchResult!]!
+  table(id: ID!): Table
 
   """Find a single user by an identifying attribute."""
   user(
@@ -921,6 +923,17 @@ type Query {
     """The offset from which items are returned."""
     page: Int
   ): PreparationPaginator!
+  rooms(
+    search: String
+    code: String
+    orderBy: [QueryRoomsOrderByOrderByClause!]
+
+    """Limits number of fetched items."""
+    first: Int! = 10
+
+    """The offset from which items are returned."""
+    page: Int
+  ): RoomPaginator!
 
   """Liste les mouvements de stock pour l'entreprise actuelle."""
   stockMovements(
@@ -951,6 +964,17 @@ type Query {
     """The offset from which items are returned."""
     page: Int
   ): StockMovementPaginator!
+  tables(
+    search: String
+    roomId: ID
+    orderBy: [QueryTablesOrderByOrderByClause!]
+
+    """Limits number of fetched items."""
+    first: Int! = 10
+
+    """The offset from which items are returned."""
+    page: Int
+  ): TablePaginator!
 
   """List multiple users."""
   users(
@@ -969,6 +993,24 @@ type Query {
 input QueryMenuOrdersOrderByOrderByClause {
   """The column that is used for ordering."""
   column: MenuOrderOrderByField!
+
+  """The direction that is used for ordering."""
+  order: SortOrder!
+}
+
+"""Order by clause for Query.rooms.orderBy."""
+input QueryRoomsOrderByOrderByClause {
+  """The column that is used for ordering."""
+  column: RoomOrderByField!
+
+  """The direction that is used for ordering."""
+  order: SortOrder!
+}
+
+"""Order by clause for Query.tables.orderBy."""
+input QueryTablesOrderByOrderByClause {
+  """The column that is used for ordering."""
+  column: TableOrderByField!
 
   """The direction that is used for ordering."""
   order: SortOrder!
@@ -1002,6 +1044,34 @@ type QuickAccess {
 
   """Date de mise à jour."""
   updated_at: DateTime!
+}
+
+type Room {
+  """Unique primary key."""
+  id: ID!
+  name: String!
+  code: String!
+  company: Company!
+  tables: [Table!]!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+enum RoomOrderByField {
+  ID
+  NAME
+  CODE
+  CREATED_AT
+  UPDATED_AT
+}
+
+"""A paginated list of Room items."""
+type RoomPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of Room items."""
+  data: [Room!]!
 }
 
 union SearchResult = Ingredient | Preparation
@@ -1084,6 +1154,34 @@ type StockMovementPaginator {
 
   """A list of StockMovement items."""
   data: [StockMovement!]!
+}
+
+type Table {
+  """Unique primary key."""
+  id: ID!
+  label: String!
+  seats: Int!
+  room: Room!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+enum TableOrderByField {
+  ID
+  LABEL
+  SEATS
+  ROOM_ID
+  CREATED_AT
+  UPDATED_AT
+}
+
+"""A paginated list of Table items."""
+type TablePaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of Table items."""
+  data: [Table!]!
 }
 
 """
