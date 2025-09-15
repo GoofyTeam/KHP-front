@@ -9,28 +9,83 @@ export function handleActionError<T = unknown>(
   error: unknown,
   prefix = ""
 ): ActionResult<T> {
-  if (error instanceof Error && error.message.includes("422")) {
-    try {
-      const errorMatch = error.message.match(/422: (.+)/);
-      if (errorMatch) {
-        const errorData = JSON.parse(errorMatch[1]);
-        if (errorData.errors) {
-          const firstError = Object.values(errorData.errors)[0];
-          const errorMessage = Array.isArray(firstError)
-            ? firstError[0]
-            : String(firstError);
+  if (error instanceof Error) {
+    // Parse HTTP status codes from error messages (format: "STATUS: message")
+    const statusMatch = error.message.match(/^(\d{3}):\s*(.*)$/);
+    if (statusMatch) {
+      const status = Number(statusMatch[1]);
+      const detail = statusMatch[2] || "";
+
+      switch (status) {
+        case 401:
           return {
             success: false,
-            error: `${prefix}${errorMessage}`,
+            error: `${prefix}Unauthorized access`,
           };
-        }
+        case 419:
+          return {
+            success: false,
+            error: `${prefix}CSRF token expired. The operation may have been retried automatically.`,
+          };
+        case 422:
+          // Parse validation errors
+          try {
+            const errorData = JSON.parse(detail);
+            if (errorData.errors) {
+              const firstError = Object.values(errorData.errors)[0];
+              const errorMessage = Array.isArray(firstError)
+                ? firstError[0]
+                : String(firstError);
+              return {
+                success: false,
+                error: `${prefix}${errorMessage}`,
+              };
+            }
+          } catch {}
+          return {
+            success: false,
+            error: `${prefix}Validation error: ${detail}`,
+          };
+        case 500:
+          return {
+            success: false,
+            error: `${prefix}Server error occurred`,
+          };
+        default:
+          return {
+            success: false,
+            error: `${prefix}${detail || error.message}`,
+          };
       }
-    } catch {}
+    }
+
+    // Handle legacy 422 format for backward compatibility
+    if (error.message.includes("422")) {
+      try {
+        const errorMatch = error.message.match(/422: (.+)/);
+        if (errorMatch) {
+          const errorData = JSON.parse(errorMatch[1]);
+          if (errorData.errors) {
+            const firstError = Object.values(errorData.errors)[0];
+            const errorMessage = Array.isArray(firstError)
+              ? firstError[0]
+              : String(firstError);
+            return {
+              success: false,
+              error: `${prefix}${errorMessage}`,
+            };
+          }
+        }
+      } catch {}
+    }
   }
 
   return {
     success: false,
-    error: error instanceof Error ? error.message : "Unknown error",
+    error:
+      error instanceof Error
+        ? `${prefix}${error.message}`
+        : `${prefix}Unknown error`,
   };
 }
 
@@ -45,6 +100,10 @@ export async function executeHttpAction<T>(
     const result = await httpCall();
     return { success: true, data: result };
   } catch (error) {
+    // Let Next.js redirect errors pass through
+    if (error instanceof Error && error.message === "NEXT_REDIRECT") {
+      throw error;
+    }
     return handleActionError(error, errorPrefix);
   }
 }

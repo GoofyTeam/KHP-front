@@ -37,35 +37,74 @@ export class ImprovedHttpClient {
    * Initialisation CSRF automatique si nécessaire
    */
   async initCSRF(): Promise<void> {
-    const existing = this.readCookie(this.csrfConfig.cookieName);
-    if (existing) {
-      this.csrfToken = existing;
-      return;
-    }
+    // Always fetch a fresh CSRF token when explicitly called
+    console.log("Initializing CSRF token...");
 
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
-      const res = await fetch(`${this.baseUrl}${this.csrfConfig.endpoint}`, {
+      const csrfUrl = `${this.baseUrl}${this.csrfConfig.endpoint}`;
+      console.log("Fetching CSRF token from:", csrfUrl);
+
+      const res = await fetch(csrfUrl, {
         method: "GET",
         credentials: "include",
         signal: controller.signal,
         headers: {
           ...this.defaultHeaders,
+          Accept: "application/json",
         },
       });
 
       clearTimeout(timeoutId);
 
+      console.log("CSRF endpoint response status:", res.status);
+      console.log(
+        "CSRF endpoint response headers:",
+        Object.fromEntries(res.headers.entries())
+      );
+
       if (!res.ok) {
         throw this.createHttpError(res, "CSRF initialization failed");
       }
 
+      // Wait a bit for the cookie to be set by the browser
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Log all cookies before trying to read the CSRF token
+      console.log("All cookies before reading CSRF:", document.cookie);
+
       this.csrfToken = this.readCookie(this.csrfConfig.cookieName);
+      console.log(
+        "CSRF token after fetch:",
+        this.csrfToken
+          ? `Found: ${this.csrfToken.substring(0, 20)}...`
+          : "Not found"
+      );
+
       if (!this.csrfToken) {
-        throw new Error(`Cookie ${this.csrfConfig.cookieName} not found`);
+        console.error(
+          "CSRF cookie not found. Available cookies:",
+          document.cookie
+        );
+        console.error("Looking for cookie named:", this.csrfConfig.cookieName);
+
+        // Try again after another small delay
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        this.csrfToken = this.readCookie(this.csrfConfig.cookieName);
+
+        if (!this.csrfToken) {
+          console.error(
+            "Still no CSRF cookie after delay. All cookies:",
+            document.cookie
+          );
+          throw new Error(
+            `Cookie ${this.csrfConfig.cookieName} not found after retries`
+          );
+        }
       }
+      console.log("CSRF token successfully refreshed");
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
         throw new Error("CSRF initialization timeout");
@@ -78,10 +117,36 @@ export class ImprovedHttpClient {
    * Lecture d'un cookie par nom
    */
   public readCookie(name: string): string | null {
+    console.log(`Looking for cookie: ${name}`);
+    console.log(`Current cookies: ${document.cookie}`);
+
     const match = document.cookie.match(
       new RegExp("(^|; )" + name + "=([^;]*)")
     );
-    return match ? decodeURIComponent(match[2]) : null;
+
+    if (match) {
+      console.log(`Found cookie match: ${match[0]}`);
+      try {
+        const decoded = decodeURIComponent(match[2]);
+        console.log(`Decoded cookie value: ${decoded.substring(0, 20)}...`);
+        return decoded;
+      } catch (error) {
+        console.warn("Failed to decode cookie, using raw value:", error);
+        return match[2]; // Return raw value if decoding fails
+      }
+    }
+
+    // Try to find any cookie that contains the name (case insensitive)
+    const allCookies = document.cookie.split("; ");
+    const similarCookies = allCookies.filter((cookie) =>
+      cookie.toLowerCase().includes(name.toLowerCase())
+    );
+
+    if (similarCookies.length > 0) {
+      console.log(`Similar cookies found: ${similarCookies.join(", ")}`);
+    }
+
+    return null;
   }
 
   /**
@@ -157,12 +222,12 @@ export class ImprovedHttpClient {
    * Retry logic avec backoff exponentiel
    */
   private async withRetry<T>(
-    fn: () => Promise<T>,
+    fn: (retries: number) => Promise<T>,
     retries: number = this.retries,
     delay = 1000
   ): Promise<T> {
     try {
-      return await fn();
+      return await fn(retries);
     } catch (error) {
       if (retries <= 0) throw error;
 
@@ -171,7 +236,8 @@ export class ImprovedHttpClient {
         if (
           httpError.status >= 400 &&
           httpError.status < 500 &&
-          httpError.status !== 429
+          httpError.status !== 429 &&
+          httpError.status !== 419
         ) {
           throw error;
         }
@@ -278,14 +344,57 @@ export class ImprovedHttpClient {
     );
     if (signal) signal.addEventListener("abort", () => controller.abort());
 
-    const executeRequest = async (): Promise<Res> => {
+    const executeRequest = async (
+      currentRetries = retries ?? this.retries
+    ): Promise<Res> => {
       try {
+        // Recalculate headers on each retry to include fresh CSRF token
+        const freshHeaders: Record<string, string> = {
+          ...this.defaultHeaders,
+          ...headers,
+          ...(this.csrfToken
+            ? { [this.csrfConfig.headerName]: this.csrfToken }
+            : {}),
+        };
+
+        // ⚠️ Cas spécial : init CSRF
+        if (path === this.csrfConfig.endpoint) {
+          freshHeaders["Content-Type"] = "application/json";
+        } else {
+          // Pour FormData/Blob/ArrayBuffer → ne rien fixer
+          if (isFormData || isBlob || isArrayBuffer) {
+            if ("Content-Type" in freshHeaders)
+              delete freshHeaders["Content-Type"];
+          } else if (body !== undefined) {
+            // Sinon JSON
+            freshHeaders["Content-Type"] = "application/json";
+          }
+        }
+
         let response = await fetch(requestConfig.url, {
           ...requestConfig,
+          headers: freshHeaders, // Use fresh headers with current CSRF token
           signal: controller.signal,
         });
 
         clearTimeout(timeoutId);
+
+        // Handle CSRF token expiration (419) with automatic refresh and retry
+        if (response.status === 419) {
+          console.warn("CSRF token expired, refreshing token and retrying...");
+          this.csrfToken = null;
+          await this.initCSRF();
+
+          // Only throw error if we have retries left, otherwise let it fail normally
+          if (currentRetries > 0) {
+            throw await this.createHttpError(
+              response,
+              "CSRF token expired – token refreshed, retrying"
+            );
+          } else {
+            console.error("CSRF token refresh failed - no more retries left");
+          }
+        }
 
         if (response.status === 429) {
           const ra = response.headers.get("Retry-After");

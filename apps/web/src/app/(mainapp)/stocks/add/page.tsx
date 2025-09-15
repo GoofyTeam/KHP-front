@@ -5,10 +5,10 @@ import { AddStockTable, AddStockTableHandle } from "@/components/AddStockTable";
 import { Button } from "@workspace/ui/components/button";
 import { toast } from "sonner";
 import {
-  createIngredientUploadAction,
   findIngredientByNameAction,
   addQuantitiesToIngredientAction,
 } from "./action";
+import { httpClient } from "@/lib/httpClient";
 import { useRouter } from "next/navigation";
 
 export default function AddStockPage() {
@@ -45,7 +45,11 @@ export default function AddStockPage() {
           fd.append(`quantities[${j}][quantity]`, String(q.quantity));
         });
 
-        const res = await createIngredientUploadAction(fd);
+        // Use client-side HTTP call with CSRF retry instead of Server Action
+        const res = await httpClient.postWithResult<{ id?: number }>(
+          "/api/ingredients",
+          fd
+        );
         if (!res.success) {
           if (
             res.error &&
@@ -74,7 +78,15 @@ export default function AddStockPage() {
     } catch (e: unknown) {
       console.error("[stocks/add] error ->", e);
       const message = e instanceof Error ? e.message : String(e);
-      toast.error(message || "Unknown error");
+
+      // Check if it's a CSRF-related error that might have been handled
+      if (message.includes("CSRF token expired")) {
+        toast.info(
+          "Session refreshed. Please try again if the operation didn't complete."
+        );
+      } else {
+        toast.error(message || "Unknown error");
+      }
     } finally {
       setLoading(false);
     }

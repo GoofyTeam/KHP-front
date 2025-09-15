@@ -41,11 +41,12 @@ function HandleAddQuantity() {
   const [serverError, setServerError] = useState<string | null>(null);
 
   async function onSubmit(values: z.infer<typeof handleAddQuantitySchema>) {
-    setServerError(null);
     try {
       await addQuantitySubmit(values);
-    } catch (err) {
-      setServerError(extractApiErrorMessage(err));
+    } catch (error) {
+      console.error("Error adding quantity:", error);
+      // The error will be handled by the HTTP client with automatic retry for CSRF issues
+      throw error;
     }
   }
 

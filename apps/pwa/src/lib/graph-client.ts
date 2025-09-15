@@ -31,10 +31,38 @@ async function csrfFetch(
     };
   }
 
-  return fetch(input, {
+  const response = await fetch(input, {
     ...init,
     credentials: "include",
   });
+
+  // Handle CSRF token expiration with automatic retry
+  if (response.status === 419) {
+    console.warn(
+      "GraphQL CSRF token expired, refreshing token and retrying..."
+    );
+
+    // Refresh CSRF token
+    await api.initCSRF();
+    const newToken = api.readCookie("XSRF-TOKEN");
+
+    if (newToken && init.method === "POST") {
+      // Update headers with new token
+      init.headers = {
+        ...(init.headers || {}),
+        "X-XSRF-TOKEN": newToken,
+        "Content-Type": "application/json",
+      };
+
+      // Retry the request
+      return fetch(input, {
+        ...init,
+        credentials: "include",
+      });
+    }
+  }
+
+  return response;
 }
 
 export const gqlClient = new GraphQLClient(`${API_URL}/graphql`, {

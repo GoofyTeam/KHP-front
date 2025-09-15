@@ -3,9 +3,12 @@
 import { CreateMenuFormValues } from "@/app/(mainapp)/menus/add/page";
 import { httpClient } from "@/lib/httpClient";
 import { UpdateMenuFormValues } from "../[id]/edit/page";
+import { type ActionResult, executeHttpAction } from "@/lib/actionUtils";
 
-export async function createMenuAction(data: CreateMenuFormValues) {
-  try {
+export async function createMenuAction(
+  data: CreateMenuFormValues
+): Promise<ActionResult> {
+  return executeHttpAction(() => {
     const formData = new FormData();
 
     formData.append("name", data.name);
@@ -35,19 +38,15 @@ export async function createMenuAction(data: CreateMenuFormValues) {
       formData.append("image", data.image);
     }
 
-    await httpClient.post("/api/menus", formData);
-
-    return { success: true };
-  } catch (error) {
-    console.error("Error creating menu:", error);
-    console.log(JSON.stringify(error, null, 2));
-
-    return { success: false, error: "Failed to create menu", details: error };
-  }
+    return httpClient.post("/api/menus", formData);
+  }, "Failed to create menu: ");
 }
 
-export async function updateMenuAction(id: string, data: UpdateMenuFormValues) {
-  try {
+export async function updateMenuAction(
+  id: string,
+  data: UpdateMenuFormValues
+): Promise<ActionResult> {
+  return executeHttpAction(() => {
     const formData = new FormData();
     formData.append("_method", "PUT");
 
@@ -57,6 +56,7 @@ export async function updateMenuAction(id: string, data: UpdateMenuFormValues) {
     if (data.is_a_la_carte !== undefined)
       formData.append("is_a_la_carte", data.is_a_la_carte ? "1" : "0");
     if (data.type) formData.append("type", data.type);
+
     // Arrays
     if (Array.isArray(data.category_ids)) {
       for (const id of data.category_ids) {
@@ -78,17 +78,6 @@ export async function updateMenuAction(id: string, data: UpdateMenuFormValues) {
       formData.append("image", data.image);
     }
 
-    for (const pair of formData.entries()) {
-      console.log(`${pair[0]}: ${pair[1]}`);
-    }
-
-    await httpClient.post(`/api/menus/${id}`, formData);
-
-    return { success: true };
-  } catch (error) {
-    console.error("Error updating menu:", error);
-    console.log(JSON.stringify(error, null, 2));
-
-    return { success: false, error: "Failed to update menu", details: error };
-  }
+    return httpClient.post(`/api/menus/${id}`, formData);
+  }, "Failed to update menu: ");
 }

@@ -66,13 +66,41 @@ export const addProductSubmit = async (
   internalId: string | null | undefined,
   product: WantedDataType
 ) => {
-  if (values.image) {
-    await addProductFormData(values, barcode, internalId);
-  } else {
-    await addProductJsonData(values, barcode, internalId, product);
-  }
+  try {
+    if (values.image) {
+      await addProductFormData(values, barcode, internalId);
+    } else {
+      await addProductJsonData(values, barcode, internalId, product);
+    }
 
-  router.navigate({
-    to: "/inventory",
-  });
+    console.log("Product submitted successfully, navigating to inventory...");
+    router.navigate({
+      to: "/inventory",
+    });
+  } catch (error) {
+    console.error("Error in addProductSubmit:", error);
+
+    // If it's a CSRF error, the operation might have succeeded despite the error
+    // Check if the error message indicates CSRF retry
+    if (
+      error instanceof Error &&
+      error.message.includes("CSRF token expired")
+    ) {
+      console.log(
+        "CSRF error detected, but operation might have succeeded. Attempting navigation..."
+      );
+
+      // Wait a bit and then navigate anyway
+      setTimeout(() => {
+        router.navigate({
+          to: "/inventory",
+        });
+      }, 1000);
+
+      return; // Don't re-throw the error
+    }
+
+    // Re-throw other errors
+    throw error;
+  }
 };

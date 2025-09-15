@@ -2,17 +2,7 @@
 
 import { httpClient } from "@/lib/httpClient";
 import type { Category } from "@/graphql/generated/graphql";
-
-export type ActionResult<T = unknown> =
-  | { success: true; data?: T }
-  | { success: false; error: string };
-
-function handleHttpError<T = unknown>(e: unknown): ActionResult<T> {
-  if (e instanceof Error) {
-    return { success: false, error: e.message };
-  }
-  return { success: false, error: "An unexpected error occurred" };
-}
+import { type ActionResult, executeHttpAction } from "@/lib/actionUtils";
 
 export interface CreateCategoryInput {
   name: string;
@@ -44,7 +34,7 @@ export interface UpdateCategoryInput {
 export async function createCategoryAction(
   input: CreateCategoryInput
 ): Promise<ActionResult<Category>> {
-  try {
+  return executeHttpAction(() => {
     // Build API input according to POST /categories structure
     const apiInput: {
       name: string;
@@ -67,22 +57,20 @@ export async function createCategoryAction(
       }
     });
 
-    const response = await httpClient.post<
-      { message: string; data: Category },
-      typeof apiInput
-    >("/api/categories", apiInput);
-    const category = response.data;
-    return { success: true, data: category };
-  } catch (e) {
-    return handleHttpError(e);
-  }
+    return httpClient
+      .post<
+        { message: string; data: Category },
+        typeof apiInput
+      >("/api/categories", apiInput)
+      .then((response) => response.data);
+  }, "Failed to create category: ");
 }
 
 export async function updateCategoryAction(
   id: string,
   input: UpdateCategoryInput
 ): Promise<ActionResult<Category>> {
-  try {
+  return executeHttpAction(() => {
     // Build API input according to PUT /categories/{id} structure
     const apiInput: {
       name?: string;
@@ -124,22 +112,18 @@ export async function updateCategoryAction(
       delete apiInput.shelf_lives;
     }
 
-    const response = await httpClient.put<
-      { message: string; data: Category },
-      typeof apiInput
-    >(`/api/categories/${id}`, apiInput);
-    const category = response.data;
-    return { success: true, data: category };
-  } catch (e) {
-    return handleHttpError(e);
-  }
+    return httpClient
+      .put<
+        { message: string; data: Category },
+        typeof apiInput
+      >(`/api/categories/${id}`, apiInput)
+      .then((response) => response.data);
+  }, "Failed to update category: ");
 }
 
 export async function deleteCategoryAction(id: string): Promise<ActionResult> {
-  try {
-    await httpClient.delete(`/api/categories/${id}`);
-    return { success: true };
-  } catch (e) {
-    return handleHttpError(e);
-  }
+  return executeHttpAction(
+    () => httpClient.delete(`/api/categories/${id}`),
+    "Failed to delete category: "
+  );
 }
