@@ -8,6 +8,7 @@ function isTouchDevice() {
     mq("(hover: none) and (pointer: coarse)") ||
     mq("(any-hover: none) and (any-pointer: coarse)");
   const maxPoints =
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     typeof navigator !== "undefined" && (navigator as any).maxTouchPoints > 0;
   return coarse || maxPoints;
 }

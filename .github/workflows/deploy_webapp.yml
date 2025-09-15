@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'apps/web/**'
+      - 'packages/ui/**'
   workflow_dispatch:
 
 jobs:
