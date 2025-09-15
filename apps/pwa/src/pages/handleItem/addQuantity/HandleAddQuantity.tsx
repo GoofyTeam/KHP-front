@@ -16,8 +16,6 @@ import { Button } from "@workspace/ui/components/button";
 import { router } from "../../../main";
 import { addQuantitySubmit } from "./add-quantity";
 import { cn } from "@workspace/ui/lib/utils";
-import { useState } from "react";
-import { extractApiErrorMessage } from "../../../lib/error-utils";
 
 function HandleAddQuantity() {
   const navigate = useNavigate();
@@ -37,8 +35,6 @@ function HandleAddQuantity() {
       quantity: "",
     },
   });
-
-  const [serverError, setServerError] = useState<string | null>(null);
 
   async function onSubmit(values: z.infer<typeof handleAddQuantitySchema>) {
     try {
@@ -129,15 +125,6 @@ function HandleAddQuantity() {
               )}
             />
           </div>
-
-          {serverError && (
-            <div
-              role="alert"
-              className="w-full max-w-md mx-auto mb-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
-            >
-              {serverError}
-            </div>
-          )}
 
           <div className="flex flex-col w-full gap-x-2 my-4 gap-y-1">
             <Button
