@@ -123,7 +123,7 @@ export default function CreateMenusPage() {
     if (res.success) {
       router.push("/menus");
     } else {
-      console.error("Failed to create menu:", res.error, res.details);
+      console.error("Failed to create menu:", res.error);
 
       // Build a helpful, user-facing error message with potential resolution
       let message = "An error occurred while creating the menu.";

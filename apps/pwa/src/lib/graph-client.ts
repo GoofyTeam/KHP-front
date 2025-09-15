@@ -11,12 +11,10 @@ async function csrfFetch(
   input: string | URL | Request,
   init: RequestInit = {}
 ): Promise<Response> {
-  // Ne traiter que les requêtes POST
   if (init.method === "POST") {
     let token = api.readCookie("XSRF-TOKEN");
 
     if (!token) {
-      //console.info("CSRF token not found in cookies, initializing CSRF...");
       await api.initCSRF();
       token = api.readCookie("XSRF-TOKEN");
       if (!token) {
@@ -31,10 +29,30 @@ async function csrfFetch(
     };
   }
 
-  return fetch(input, {
+  const response = await fetch(input, {
     ...init,
     credentials: "include",
   });
+
+  if (response.status === 419) {
+    await api.initCSRF();
+    const newToken = api.readCookie("XSRF-TOKEN");
+
+    if (newToken && init.method === "POST") {
+      init.headers = {
+        ...(init.headers || {}),
+        "X-XSRF-TOKEN": newToken,
+        "Content-Type": "application/json",
+      };
+
+      return fetch(input, {
+        ...init,
+        credentials: "include",
+      });
+    }
+  }
+
+  return response;
 }
 
 export const gqlClient = new GraphQLClient(`${API_URL}/graphql`, {

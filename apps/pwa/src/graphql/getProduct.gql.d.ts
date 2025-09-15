@@ -61,6 +61,7 @@ import {
   PreparationOrderByClause,
   PreparationOrderByField,
   PreparationPaginator,
+  PreparationPreparableQuantity,
   PreparationQuantity,
   Query,
   QuerySearchArgs,

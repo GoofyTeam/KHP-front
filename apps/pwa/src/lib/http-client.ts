@@ -33,26 +33,20 @@ export class ImprovedHttpClient {
     this.csrfToken = this.readCookie(this.csrfConfig.cookieName);
   }
 
-  /**
-   * Initialisation CSRF automatique si nécessaire
-   */
   async initCSRF(): Promise<void> {
-    const existing = this.readCookie(this.csrfConfig.cookieName);
-    if (existing) {
-      this.csrfToken = existing;
-      return;
-    }
-
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
-      const res = await fetch(`${this.baseUrl}${this.csrfConfig.endpoint}`, {
+      const csrfUrl = `${this.baseUrl}${this.csrfConfig.endpoint}`;
+
+      const res = await fetch(csrfUrl, {
         method: "GET",
         credentials: "include",
         signal: controller.signal,
         headers: {
           ...this.defaultHeaders,
+          Accept: "application/json",
         },
       });
 
@@ -63,8 +57,19 @@ export class ImprovedHttpClient {
       }
 
       this.csrfToken = this.readCookie(this.csrfConfig.cookieName);
+
       if (!this.csrfToken) {
-        throw new Error(`Cookie ${this.csrfConfig.cookieName} not found`);
+        for (let i = 0; i < 3; i++) {
+          await new Promise((resolve) => setTimeout(resolve, 10 * (i + 1)));
+          this.csrfToken = this.readCookie(this.csrfConfig.cookieName);
+          if (this.csrfToken) break;
+        }
+
+        if (!this.csrfToken) {
+          throw new Error(
+            `Cookie ${this.csrfConfig.cookieName} not found after retries`
+          );
+        }
       }
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
@@ -74,19 +79,22 @@ export class ImprovedHttpClient {
     }
   }
 
-  /**
-   * Lecture d'un cookie par nom
-   */
   public readCookie(name: string): string | null {
     const match = document.cookie.match(
       new RegExp("(^|; )" + name + "=([^;]*)")
     );
-    return match ? decodeURIComponent(match[2]) : null;
+
+    if (match) {
+      try {
+        const decoded = decodeURIComponent(match[2]);
+        return decoded;
+      } catch {
+        return match[2];
+      }
+    }
+    return null;
   }
 
-  /**
-   * Création d'une erreur HTTP typée
-   */
   private async createHttpError(
     response: Response,
     message?: string
@@ -113,10 +121,6 @@ export class ImprovedHttpClient {
     return error;
   }
 
-  /**
-   * Gestion du cache
-   * (⚠️ on évite de stringifier les corps binaires/FormData)
-   */
   private getCacheKey(url: string, options: RequestInit): string {
     const method = options.method || "GET";
     let bodySig = "";
@@ -126,7 +130,6 @@ export class ImprovedHttpClient {
     } else if (!options.body) {
       bodySig = "";
     } else {
-      // Pour des Body non string (FormData/Blob/ArrayBuffer…), on ne les met pas dans la clé
       bodySig = "[binary]";
     }
 
@@ -153,16 +156,13 @@ export class ImprovedHttpClient {
     });
   }
 
-  /**
-   * Retry logic avec backoff exponentiel
-   */
   private async withRetry<T>(
-    fn: () => Promise<T>,
+    fn: (retries: number) => Promise<T>,
     retries: number = this.retries,
     delay = 1000
   ): Promise<T> {
     try {
-      return await fn();
+      return await fn(retries);
     } catch (error) {
       if (retries <= 0) throw error;
 
@@ -171,7 +171,8 @@ export class ImprovedHttpClient {
         if (
           httpError.status >= 400 &&
           httpError.status < 500 &&
-          httpError.status !== 429
+          httpError.status !== 429 &&
+          httpError.status !== 419
         ) {
           throw error;
         }
@@ -182,10 +183,6 @@ export class ImprovedHttpClient {
     }
   }
 
-  /**
-   * Méthode générique pour toutes les requêtes
-   * 👉 Fix: détection FormData/Blob/ArrayBuffer, pas de JSON.stringify, pas de Content-Type forcé
-   */
   async request<Req = unknown, Res = unknown>(
     options: RequestOptions<Req>,
     responseType: ResponseType = "json"
@@ -201,7 +198,6 @@ export class ImprovedHttpClient {
       signal,
     } = options;
 
-    // Auto-init CSRF si nécessaire
     if (
       !this.csrfToken &&
       [
@@ -229,15 +225,12 @@ export class ImprovedHttpClient {
         : {}),
     };
 
-    // ⚠️ Cas spécial : init CSRF
     if (path === this.csrfConfig.endpoint) {
       allHeaders["Content-Type"] = "application/json";
     } else {
-      // Pour FormData/Blob/ArrayBuffer → ne rien fixer
       if (isFormData || isBlob || isArrayBuffer) {
         if ("Content-Type" in allHeaders) delete allHeaders["Content-Type"];
       } else if (body !== undefined) {
-        // Sinon JSON
         allHeaders["Content-Type"] = "application/json";
       }
     }
@@ -258,19 +251,16 @@ export class ImprovedHttpClient {
       signal,
     };
 
-    // Interceptor de requête
     if (this.interceptors?.request) {
       requestConfig = this.interceptors.request(requestConfig);
     }
 
-    // Gestion du cache pour GET uniquement
     const cacheKey = this.getCacheKey(requestConfig.url, requestConfig);
     if (method === "GET" && cache !== false) {
       const cached = this.getFromCache<Res>(cacheKey);
       if (cached) return cached;
     }
 
-    // Timeout controller
     const controller = new AbortController();
     const timeoutId = setTimeout(
       () => controller.abort(),
@@ -278,14 +268,48 @@ export class ImprovedHttpClient {
     );
     if (signal) signal.addEventListener("abort", () => controller.abort());
 
-    const executeRequest = async (): Promise<Res> => {
+    const executeRequest = async (
+      currentRetries = retries ?? this.retries
+    ): Promise<Res> => {
       try {
+        const freshHeaders: Record<string, string> = {
+          ...this.defaultHeaders,
+          ...headers,
+          ...(this.csrfToken
+            ? { [this.csrfConfig.headerName]: this.csrfToken }
+            : {}),
+        };
+
+        if (path === this.csrfConfig.endpoint) {
+          freshHeaders["Content-Type"] = "application/json";
+        } else {
+          if (isFormData || isBlob || isArrayBuffer) {
+            if ("Content-Type" in freshHeaders)
+              delete freshHeaders["Content-Type"];
+          } else if (body !== undefined) {
+            freshHeaders["Content-Type"] = "application/json";
+          }
+        }
+
         let response = await fetch(requestConfig.url, {
           ...requestConfig,
+          headers: freshHeaders,
           signal: controller.signal,
         });
 
         clearTimeout(timeoutId);
+
+        if (response.status === 419) {
+          this.csrfToken = null;
+          await this.initCSRF();
+
+          if (currentRetries > 0) {
+            throw await this.createHttpError(
+              response,
+              "CSRF token expired – token refreshed, retrying"
+            );
+          }
+        }
 
         if (response.status === 429) {
           const ra = response.headers.get("Retry-After");
@@ -303,7 +327,6 @@ export class ImprovedHttpClient {
           );
         }
 
-        // Interceptor de réponse
         if (this.interceptors?.response) {
           response = await this.interceptors.response(response);
         }
@@ -354,7 +377,6 @@ export class ImprovedHttpClient {
     return this.withRetry(executeRequest, retries ?? this.retries);
   }
 
-  // Méthodes de convenance
   get<Res = unknown>(
     path: string,
     options?: Partial<RequestOptions<undefined>>,
@@ -413,11 +435,6 @@ export class ImprovedHttpClient {
     );
   }
 
-  /**
-   * Upload de fichiers
-   * - Accepte FormData (recommandé) ou File (auto-emballé)
-   * - Ne force pas Content-Type
-   */
   async upload<Res = unknown>(
     path: string,
     fileOrForm: File | FormData,
@@ -427,12 +444,10 @@ export class ImprovedHttpClient {
       fileOrForm instanceof FormData ? fileOrForm : new FormData();
 
     if (fileOrForm instanceof File) {
-      // nom de champ par défaut "file"
       formData.append("file", fileOrForm);
     }
 
     const { headers = {}, ...rest } = options ?? {};
-    // Par précaution, on retire Content-Type si fourni
     if ("Content-Type" in headers) delete headers["Content-Type"];
 
     return this.request<FormData, Res>(
@@ -447,16 +462,10 @@ export class ImprovedHttpClient {
     );
   }
 
-  /**
-   * Nettoyage du cache
-   */
   clearCache(): void {
     this.cache.clear();
   }
 
-  /**
-   * Mise à jour des headers par défaut
-   */
   setDefaultHeaders(headers: Record<string, string>): void {
     this.defaultHeaders = { ...this.defaultHeaders, ...headers };
   }
