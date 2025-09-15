@@ -63,7 +63,6 @@ const urlKeyOptions = [
   { value: "menu_card", label: "Menu Card" },
   { value: "stock", label: "Stock" },
   { value: "take_order", label: "Take Order" },
-  { value: "move_quantity", label: "Move Quantity" },
 ];
 
 const colorOptions = [
