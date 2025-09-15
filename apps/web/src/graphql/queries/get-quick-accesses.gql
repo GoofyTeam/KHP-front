@@ -1,0 +1,12 @@
+query GetQuickAccesses {
+  quickAccesses {
+    id
+    index
+    name
+    icon
+    icon_color
+    url_key
+    created_at
+    updated_at
+  }
+}
