@@ -426,6 +426,20 @@ export type MenuOrder = {
   updated_at: Scalars['DateTime']['output'];
 };
 
+export enum MenuOrderOrderByField {
+  CreatedAt = 'CREATED_AT',
+  Status = 'STATUS'
+}
+
+/** A paginated list of MenuOrder items. */
+export type MenuOrderPaginator = {
+  __typename?: 'MenuOrderPaginator';
+  /** A list of MenuOrder items. */
+  data: Array<MenuOrder>;
+  /** Pagination information about the list of items. */
+  paginatorInfo: PaginatorInfo;
+};
+
 export type MenuOrderStats = {
   __typename?: 'MenuOrderStats';
   count: Scalars['Int']['output'];
@@ -621,6 +635,7 @@ export type Query = {
   /** Find a single MenuCategory (only if it belongs to the current company). */
   menuCategory?: Maybe<MenuCategory>;
   menuOrderStats: MenuOrderStats;
+  menuOrders: MenuOrderPaginator;
   menus: Array<Menu>;
   nonPerishableIngredients: Array<Ingredient>;
   perishables: Array<Perishable>;
@@ -765,6 +780,14 @@ export type QueryMenuOrderStatsArgs = {
 };
 
 
+export type QueryMenuOrdersArgs = {
+  first?: Scalars['Int']['input'];
+  orderBy?: InputMaybe<Array<QueryMenuOrdersOrderByOrderByClause>>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  status?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type QueryMenusArgs = {
   allergens?: InputMaybe<Array<AllergenEnum>>;
   available?: InputMaybe<Scalars['Boolean']['input']>;
@@ -833,6 +856,14 @@ export type QueryUsersArgs = {
   first?: Scalars['Int']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   page?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** Order by clause for Query.menuOrders.orderBy. */
+export type QueryMenuOrdersOrderByOrderByClause = {
+  /** The column that is used for ordering. */
+  column: MenuOrderOrderByField;
+  /** The direction that is used for ordering. */
+  order: SortOrder;
 };
 
 /** Bouton d’accès rapide configurable pour une entreprise. */

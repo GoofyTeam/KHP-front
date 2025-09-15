@@ -452,6 +452,20 @@ type MenuOrder {
   updated_at: DateTime!
 }
 
+enum MenuOrderOrderByField {
+  STATUS
+  CREATED_AT
+}
+
+"""A paginated list of MenuOrder items."""
+type MenuOrderPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of MenuOrder items."""
+  data: [MenuOrder!]!
+}
+
 type MenuOrderStats {
   count: Int!
 }
@@ -868,6 +882,16 @@ type Query {
     """The offset from which items are returned."""
     page: Int
   ): MenuCategoryPaginator!
+  menuOrders(
+    status: String
+    orderBy: [QueryMenuOrdersOrderByOrderByClause!]
+
+    """Limits number of fetched items."""
+    first: Int! = 10
+
+    """The offset from which items are returned."""
+    page: Int
+  ): MenuOrderPaginator!
 
   """Liste les preparations de ma company uniquement"""
   preparations(
@@ -939,6 +963,15 @@ type Query {
     """The offset from which items are returned."""
     page: Int
   ): UserPaginator!
+}
+
+"""Order by clause for Query.menuOrders.orderBy."""
+input QueryMenuOrdersOrderByOrderByClause {
+  """The column that is used for ordering."""
+  column: MenuOrderOrderByField!
+
+  """The direction that is used for ordering."""
+  order: SortOrder!
 }
 
 """Bouton d’accès rapide configurable pour une entreprise."""
