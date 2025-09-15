@@ -1,6 +1,10 @@
 import { GetQuickAccessButtonDocument } from "@/graphql/generated/graphql";
 import { query } from "@/lib/ApolloClient";
 import { QuickAccessButton } from "@workspace/ui/components/quick-access-button";
+import {
+  getQuickAccessUrl,
+  getQuickAccessBgClass,
+} from "@workspace/ui/lib/quick-access-utils";
 import { ListPanel } from "@/components/ListPanel";
 import OrderLoss from "@/components/OrderLoss";
 import UsedItems from "@/components/UsedItems";
@@ -35,28 +39,12 @@ export default async function Dashboard() {
     );
   }
 
-  // URL key to URL
-  const urlMap: Record<string, string> = {
-    add_to_stock: "/stocks/add",
-    take_order: "/dashboard",
-    menu_card: "/menus",
-    stock: "/stocks",
-    move_quantity: "/dashboard",
-  };
-
   const sortedAccesses = (data?.quickAccesses ?? [])
     .slice()
     .sort((a, b) => Number(a.id) - Number(b.id));
 
   const quickAccesses = sortedAccesses.slice(0, 4);
   const extraAccess = sortedAccesses[4];
-
-  const buttonColors: Record<string, string> = {
-    primary: "bg-khp-primary",
-    error: "bg-khp-error",
-    warning: "bg-khp-warning",
-    info: "bg-khp-info",
-  };
 
   return (
     <main className="md:h-dvh h-auto md:overflow-y-clip overflow-auto box-border md:-m-4">
@@ -104,7 +92,7 @@ export default async function Dashboard() {
                   size="sm"
                   stretch
                 >
-                  <Link href={urlMap[qa.url_key] ?? "/"}>
+                  <Link href={getQuickAccessUrl(qa.url_key)}>
                     <span />
                   </Link>
                 </QuickAccessButton>
@@ -113,11 +101,10 @@ export default async function Dashboard() {
 
             <div className="mt-auto">
               <Link
-                href={urlMap[extraAccess.url_key] ?? "/"}
-                className={`block rounded-md px-4 py-4 text-center font-semibold text-white ${
-                  buttonColors[String(extraAccess.icon_color).toLowerCase()] ||
-                  "bg-khp-primary"
-                }`}
+                href={getQuickAccessUrl(extraAccess.url_key)}
+                className={`block rounded-md px-4 py-4 text-center font-semibold text-white ${getQuickAccessBgClass(
+                  extraAccess.icon_color
+                )}`}
               >
                 {extraAccess.name}
               </Link>

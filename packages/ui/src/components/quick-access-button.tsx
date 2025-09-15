@@ -10,6 +10,20 @@ import {
   type LucideProps,
 } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
+import {
+  normalizeQuickAccessColor,
+  quickAccessBgClassByColor,
+  type QuickAccessNormalizedColor,
+} from "@workspace/ui/lib/quick-access-utils";
+
+export {
+  normalizeQuickAccessColor,
+  quickAccessBgClassByColor,
+  getQuickAccessBgClass,
+  quickAccessUrlMap,
+  getQuickAccessUrl,
+  type QuickAccessNormalizedColor,
+} from "@workspace/ui/lib/quick-access-utils";
 
 type ColorKey = string;
 
@@ -92,26 +106,7 @@ export const QuickAccessButton: FC<QuickAccessButtonProps> = ({
               ? Check
               : Plus;
 
-  const colorKey = String(color).toLowerCase();
-  let normalizedColor: "primary" | "error" | "warning" | "info";
-  switch (colorKey) {
-    case "primary":
-    case "error":
-    case "warning":
-    case "info":
-      normalizedColor = colorKey;
-      break;
-    default:
-      normalizedColor = "primary";
-  }
-
-  const circleColors: Record<"primary" | "error" | "warning" | "info", string> =
-    {
-      primary: "bg-khp-primary",
-      error: "bg-khp-error",
-      warning: "bg-khp-warning",
-      info: "bg-khp-info",
-    };
+  const normalizedColor = normalizeQuickAccessColor(color);
 
   const content = (
     <div
@@ -128,7 +123,7 @@ export const QuickAccessButton: FC<QuickAccessButtonProps> = ({
         <div
           className={cn(
             "rounded-full flex items-center justify-center text-white",
-            circleColors[normalizedColor],
+            quickAccessBgClassByColor[normalizedColor],
             sz.circle
           )}
         >
