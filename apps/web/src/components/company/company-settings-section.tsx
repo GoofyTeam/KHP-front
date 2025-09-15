@@ -37,7 +37,7 @@ type CompanyOptionsFormData = z.infer<typeof companyOptionsSchema>;
 export function CompanySettingsSection() {
   const apolloClient = useApolloClient();
   const { data, loading } = useQuery(GetCompanyOptionsDocument, {
-    fetchPolicy: "network-only", // Force toujours une requête réseau
+    fetchPolicy: "network-only",
     errorPolicy: "all",
     notifyOnNetworkStatusChange: true,
   });
@@ -95,10 +95,10 @@ export function CompanySettingsSection() {
     <div className="bg-khp-surface rounded-2xl shadow-lg border border-khp-primary/20 overflow-hidden w-full">
       <div className="bg-gradient-to-r from-khp-primary/5 to-khp-primary/10 px-6 py-5 border-b border-khp-primary/20">
         <h2 className="text-xl font-semibold text-khp-primary">
-          Options de l&apos;entreprise
+          Company Options
         </h2>
         <p className="text-sm text-khp-text/70 mt-1">
-          Configurez les paramètres généraux de votre entreprise
+          Configure your company's general settings
         </p>
       </div>
 
@@ -111,10 +111,10 @@ export function CompanySettingsSection() {
               <FormItem className="flex flex-row items-center justify-between rounded-lg border border-khp-primary/10 p-4">
                 <div className="space-y-0.5">
                   <FormLabel className="text-base text-khp-text">
-                    Complétion automatique des commandes
+                    Auto-complete menu orders
                   </FormLabel>
                   <FormDescription className="text-khp-text/60">
-                    Active la complétion automatique des commandes de menu
+                    Enable automatic completion of menu orders
                   </FormDescription>
                 </div>
                 <FormControl>
@@ -137,7 +137,7 @@ export function CompanySettingsSection() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-khp-text">
-                  Langue Open Food Facts
+                  Open Food Facts Language
                 </FormLabel>
                 <Select
                   onValueChange={field.onChange}
@@ -146,17 +146,16 @@ export function CompanySettingsSection() {
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner une langue" />
+                      <SelectValue placeholder="Select a language" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="fr">Français</SelectItem>
+                    <SelectItem value="fr">French</SelectItem>
                     <SelectItem value="en">English</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormDescription className="text-khp-text/60">
-                  Langue utilisée pour les données nutritionnelles Open Food
-                  Facts
+                  Language used for Open Food Facts nutritional data
                 </FormDescription>
                 <FormMessage />
               </FormItem>
