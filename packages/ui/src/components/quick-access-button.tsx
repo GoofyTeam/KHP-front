@@ -13,7 +13,6 @@ import { cn } from "@workspace/ui/lib/utils";
 import {
   normalizeQuickAccessColor,
   quickAccessBgClassByColor,
-  type QuickAccessNormalizedColor,
 } from "@workspace/ui/lib/quick-access-utils";
 
 export {
@@ -22,7 +21,6 @@ export {
   getQuickAccessBgClass,
   quickAccessUrlMap,
   getQuickAccessUrl,
-  type QuickAccessNormalizedColor,
 } from "@workspace/ui/lib/quick-access-utils";
 
 type ColorKey = string;
