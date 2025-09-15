@@ -8,6 +8,9 @@ import "@workspace/ui/globals.css";
 import { Guard } from "./components/guard-device";
 import PWABadge from "./PWABadge";
 import MobileInstallBanner from "./components/MobileInstallBanner";
+import OfflineBanner from "./components/OfflineBanner";
+import SyncIndicator from "./components/SyncIndicator";
+import { useOfflineQueue } from "./stores/offline-queue";
 
 export const router = createRouter({ routeTree });
 declare module "@tanstack/react-router" {
@@ -30,8 +33,16 @@ if (!rootElement.innerHTML) {
           <RouterProvider router={router} />
           <PWABadge />
           <MobileInstallBanner />
+          <OfflineBanner />
+          <SyncIndicator />
         </Guard>
       </HelmetProvider>
     </StrictMode>
   );
 }
+
+// Initialize offline queue namespace early
+try {
+  const ns = location.origin; // can be refined when user/tenant is available
+  useOfflineQueue.getState().setNamespace(ns);
+} catch {}

@@ -12,6 +12,7 @@ import {
   PackagePlus,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useOfflineQueue } from "../stores/offline-queue";
 import { GetProductQuery } from "../graphql/getProduct.gql";
 import { LocationSelect } from "@workspace/ui/components/location-select";
 import { ImagePlaceholder } from "@workspace/ui/components/image-placeholder";
@@ -99,6 +100,11 @@ export default function ProductPage() {
     }
   })();
 
+  const { items } = useOfflineQueue();
+  const pendingForThis = items.some(
+    (it) => it.status === "PENDING" && it.productId === product?.id
+  );
+
   useEffect(() => {
     if (locations.length === 1) {
       setSelectedLocation(locations[0].location.id);
@@ -162,6 +168,9 @@ export default function ProductPage() {
               <p className="text-sm text-muted-foreground font-medium">
                 Stock disponible
               </p>
+              {pendingForThis && (
+                <p className="text-xs text-amber-600">En attente de synchro…</p>
+              )}
             </div>
             <StockStatus variant={displayStock.status} showLabel={false} />
           </div>

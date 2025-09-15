@@ -10,6 +10,7 @@ import { Helmet } from "react-helmet-async";
 import api from "../lib/api";
 import { Layout } from "../components/Layout";
 import NotFoundPage from "../pages/NotFound";
+import { useOfflineQueue } from "../stores/offline-queue";
 
 function NotFoundComponent() {
   return (
@@ -25,7 +26,14 @@ function NotFoundComponent() {
 export const Route = createRootRoute({
   beforeLoad: async ({ location }) => {
     try {
-      await api.get("/api/user");
+      const user = await api.get("/api/user");
+      try {
+        const u = user as any;
+        const companyId = u?.company?.id ?? u?.company_id ?? "";
+        const userId = u?.id ?? "";
+        const ns = `${location.origin ?? window.location.origin}:${companyId}:${userId}`;
+        await useOfflineQueue.getState().setNamespace(ns);
+      } catch {}
 
       if (location.pathname === "/login" || location.pathname === "/") {
         throw redirect({
