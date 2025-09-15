@@ -528,6 +528,10 @@ export type Preparation = {
   __typename?: 'Preparation';
   /** Allergens contained in this preparation. */
   allergens: Array<AllergenEnum>;
+  /** Quantity for one unit of the preparation. */
+  base_quantity: Scalars['Float']['output'];
+  /** Unit for the base quantity of the preparation. */
+  base_unit: UnitEnum;
   /** The categories associated with this preparation. */
   categories: Array<Category>;
   /** The company that produces this preparation. */
@@ -541,6 +545,7 @@ export type Preparation = {
   locations: Array<Location>;
   /** Preparation name. */
   name: Scalars['String']['output'];
+  preparable_quantity: PreparationPreparableQuantity;
   quantities: Array<PreparationQuantity>;
   /** Historique des mouvements de stock pour cette préparation */
   stockMovements: Array<StockMovement>;
@@ -559,7 +564,10 @@ export type PreparationEntity = {
   __typename?: 'PreparationEntity';
   entity: PreparationEntityItem;
   id: Scalars['ID']['output'];
+  location: Location;
   preparation: Preparation;
+  quantity: Scalars['Float']['output'];
+  unit: UnitEnum;
 };
 
 export type PreparationEntityItem = Ingredient | Preparation;
@@ -586,6 +594,14 @@ export type PreparationPaginator = {
   data: Array<Preparation>;
   /** Pagination information about the list of items. */
   paginatorInfo: PaginatorInfo;
+};
+
+export type PreparationPreparableQuantity = {
+  __typename?: 'PreparationPreparableQuantity';
+  /** Quantité maximale préparable avec le stock actuel. */
+  quantity: Scalars['Float']['output'];
+  /** Unité associée à la préparation. */
+  unit: UnitEnum;
 };
 
 export type PreparationQuantity = {

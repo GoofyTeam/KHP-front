@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   transpilePackages: ["@workspace/ui"],
   experimental: {
     externalDir: true,
+    serverActions: {
+      bodySizeLimit: "128mb",
+    },
   },
 };
 
