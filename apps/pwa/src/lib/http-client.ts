@@ -33,19 +33,12 @@ export class ImprovedHttpClient {
     this.csrfToken = this.readCookie(this.csrfConfig.cookieName);
   }
 
-  /**
-   * Initialisation CSRF automatique si nécessaire
-   */
   async initCSRF(): Promise<void> {
-    // Always fetch a fresh CSRF token when explicitly called
-    console.log("Initializing CSRF token...");
-
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
       const csrfUrl = `${this.baseUrl}${this.csrfConfig.endpoint}`;
-      console.log("Fetching CSRF token from:", csrfUrl);
 
       const res = await fetch(csrfUrl, {
         method: "GET",
@@ -59,54 +52,25 @@ export class ImprovedHttpClient {
 
       clearTimeout(timeoutId);
 
-      console.log("CSRF endpoint response status:", res.status);
-      console.log(
-        "CSRF endpoint response headers:",
-        res.headers.entries
-          ? Object.fromEntries(res.headers.entries())
-          : "Headers.entries() not available"
-      );
-
       if (!res.ok) {
         throw this.createHttpError(res, "CSRF initialization failed");
       }
 
-      // Wait a bit for the cookie to be set by the browser
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      // Log all cookies before trying to read the CSRF token
-      console.log("All cookies before reading CSRF:", document.cookie);
-
       this.csrfToken = this.readCookie(this.csrfConfig.cookieName);
-      console.log(
-        "CSRF token after fetch:",
-        this.csrfToken
-          ? `Found: ${this.csrfToken.substring(0, 20)}...`
-          : "Not found"
-      );
 
       if (!this.csrfToken) {
-        console.error(
-          "CSRF cookie not found. Available cookies:",
-          document.cookie
-        );
-        console.error("Looking for cookie named:", this.csrfConfig.cookieName);
-
-        // Try again after another small delay
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        this.csrfToken = this.readCookie(this.csrfConfig.cookieName);
+        for (let i = 0; i < 3; i++) {
+          await new Promise((resolve) => setTimeout(resolve, 10 * (i + 1)));
+          this.csrfToken = this.readCookie(this.csrfConfig.cookieName);
+          if (this.csrfToken) break;
+        }
 
         if (!this.csrfToken) {
-          console.error(
-            "Still no CSRF cookie after delay. All cookies:",
-            document.cookie
-          );
           throw new Error(
             `Cookie ${this.csrfConfig.cookieName} not found after retries`
           );
         }
       }
-      console.log("CSRF token successfully refreshed");
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
         throw new Error("CSRF initialization timeout");
@@ -115,45 +79,22 @@ export class ImprovedHttpClient {
     }
   }
 
-  /**
-   * Lecture d'un cookie par nom
-   */
   public readCookie(name: string): string | null {
-    console.log(`Looking for cookie: ${name}`);
-    console.log(`Current cookies: ${document.cookie}`);
-
     const match = document.cookie.match(
       new RegExp("(^|; )" + name + "=([^;]*)")
     );
 
     if (match) {
-      console.log(`Found cookie match: ${match[0]}`);
       try {
         const decoded = decodeURIComponent(match[2]);
-        console.log(`Decoded cookie value: ${decoded.substring(0, 20)}...`);
         return decoded;
-      } catch (error) {
-        console.warn("Failed to decode cookie, using raw value:", error);
-        return match[2]; // Return raw value if decoding fails
+      } catch {
+        return match[2];
       }
     }
-
-    // Try to find any cookie that contains the name (case insensitive)
-    const allCookies = document.cookie.split("; ");
-    const similarCookies = allCookies.filter((cookie) =>
-      cookie.toLowerCase().includes(name.toLowerCase())
-    );
-
-    if (similarCookies.length > 0) {
-      console.log(`Similar cookies found: ${similarCookies.join(", ")}`);
-    }
-
     return null;
   }
 
-  /**
-   * Création d'une erreur HTTP typée
-   */
   private async createHttpError(
     response: Response,
     message?: string
@@ -180,10 +121,6 @@ export class ImprovedHttpClient {
     return error;
   }
 
-  /**
-   * Gestion du cache
-   * (⚠️ on évite de stringifier les corps binaires/FormData)
-   */
   private getCacheKey(url: string, options: RequestInit): string {
     const method = options.method || "GET";
     let bodySig = "";
@@ -193,7 +130,6 @@ export class ImprovedHttpClient {
     } else if (!options.body) {
       bodySig = "";
     } else {
-      // Pour des Body non string (FormData/Blob/ArrayBuffer…), on ne les met pas dans la clé
       bodySig = "[binary]";
     }
 
@@ -220,9 +156,6 @@ export class ImprovedHttpClient {
     });
   }
 
-  /**
-   * Retry logic avec backoff exponentiel
-   */
   private async withRetry<T>(
     fn: (retries: number) => Promise<T>,
     retries: number = this.retries,
@@ -250,10 +183,6 @@ export class ImprovedHttpClient {
     }
   }
 
-  /**
-   * Méthode générique pour toutes les requêtes
-   * 👉 Fix: détection FormData/Blob/ArrayBuffer, pas de JSON.stringify, pas de Content-Type forcé
-   */
   async request<Req = unknown, Res = unknown>(
     options: RequestOptions<Req>,
     responseType: ResponseType = "json"
@@ -269,7 +198,6 @@ export class ImprovedHttpClient {
       signal,
     } = options;
 
-    // Auto-init CSRF si nécessaire
     if (
       !this.csrfToken &&
       [
@@ -297,15 +225,12 @@ export class ImprovedHttpClient {
         : {}),
     };
 
-    // ⚠️ Cas spécial : init CSRF
     if (path === this.csrfConfig.endpoint) {
       allHeaders["Content-Type"] = "application/json";
     } else {
-      // Pour FormData/Blob/ArrayBuffer → ne rien fixer
       if (isFormData || isBlob || isArrayBuffer) {
         if ("Content-Type" in allHeaders) delete allHeaders["Content-Type"];
       } else if (body !== undefined) {
-        // Sinon JSON
         allHeaders["Content-Type"] = "application/json";
       }
     }
@@ -326,19 +251,16 @@ export class ImprovedHttpClient {
       signal,
     };
 
-    // Interceptor de requête
     if (this.interceptors?.request) {
       requestConfig = this.interceptors.request(requestConfig);
     }
 
-    // Gestion du cache pour GET uniquement
     const cacheKey = this.getCacheKey(requestConfig.url, requestConfig);
     if (method === "GET" && cache !== false) {
       const cached = this.getFromCache<Res>(cacheKey);
       if (cached) return cached;
     }
 
-    // Timeout controller
     const controller = new AbortController();
     const timeoutId = setTimeout(
       () => controller.abort(),
@@ -350,7 +272,6 @@ export class ImprovedHttpClient {
       currentRetries = retries ?? this.retries
     ): Promise<Res> => {
       try {
-        // Recalculate headers on each retry to include fresh CSRF token
         const freshHeaders: Record<string, string> = {
           ...this.defaultHeaders,
           ...headers,
@@ -359,42 +280,34 @@ export class ImprovedHttpClient {
             : {}),
         };
 
-        // ⚠️ Cas spécial : init CSRF
         if (path === this.csrfConfig.endpoint) {
           freshHeaders["Content-Type"] = "application/json";
         } else {
-          // Pour FormData/Blob/ArrayBuffer → ne rien fixer
           if (isFormData || isBlob || isArrayBuffer) {
             if ("Content-Type" in freshHeaders)
               delete freshHeaders["Content-Type"];
           } else if (body !== undefined) {
-            // Sinon JSON
             freshHeaders["Content-Type"] = "application/json";
           }
         }
 
         let response = await fetch(requestConfig.url, {
           ...requestConfig,
-          headers: freshHeaders, // Use fresh headers with current CSRF token
+          headers: freshHeaders,
           signal: controller.signal,
         });
 
         clearTimeout(timeoutId);
 
-        // Handle CSRF token expiration (419) with automatic refresh and retry
         if (response.status === 419) {
-          console.warn("CSRF token expired, refreshing token and retrying...");
           this.csrfToken = null;
           await this.initCSRF();
 
-          // Only throw error if we have retries left, otherwise let it fail normally
           if (currentRetries > 0) {
             throw await this.createHttpError(
               response,
               "CSRF token expired – token refreshed, retrying"
             );
-          } else {
-            console.error("CSRF token refresh failed - no more retries left");
           }
         }
 
@@ -414,7 +327,6 @@ export class ImprovedHttpClient {
           );
         }
 
-        // Interceptor de réponse
         if (this.interceptors?.response) {
           response = await this.interceptors.response(response);
         }
@@ -465,7 +377,6 @@ export class ImprovedHttpClient {
     return this.withRetry(executeRequest, retries ?? this.retries);
   }
 
-  // Méthodes de convenance
   get<Res = unknown>(
     path: string,
     options?: Partial<RequestOptions<undefined>>,
@@ -524,11 +435,6 @@ export class ImprovedHttpClient {
     );
   }
 
-  /**
-   * Upload de fichiers
-   * - Accepte FormData (recommandé) ou File (auto-emballé)
-   * - Ne force pas Content-Type
-   */
   async upload<Res = unknown>(
     path: string,
     fileOrForm: File | FormData,
@@ -538,12 +444,10 @@ export class ImprovedHttpClient {
       fileOrForm instanceof FormData ? fileOrForm : new FormData();
 
     if (fileOrForm instanceof File) {
-      // nom de champ par défaut "file"
       formData.append("file", fileOrForm);
     }
 
     const { headers = {}, ...rest } = options ?? {};
-    // Par précaution, on retire Content-Type si fourni
     if ("Content-Type" in headers) delete headers["Content-Type"];
 
     return this.request<FormData, Res>(
@@ -558,16 +462,10 @@ export class ImprovedHttpClient {
     );
   }
 
-  /**
-   * Nettoyage du cache
-   */
   clearCache(): void {
     this.cache.clear();
   }
 
-  /**
-   * Mise à jour des headers par défaut
-   */
   setDefaultHeaders(headers: Record<string, string>): void {
     this.defaultHeaders = { ...this.defaultHeaders, ...headers };
   }

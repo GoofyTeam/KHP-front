@@ -128,4 +128,104 @@ describe("ImprovedHttpClient", () => {
     expect(headers["X-XSRF-TOKEN"]).toBe("form-token");
     expect(config.body).toBe(payload);
   });
+
+  it("handles CSRF token expiration with automatic retry", async () => {
+    const client = new ImprovedHttpClient({ baseUrl: "https://api.test" });
+    let callCount = 0;
+
+    fetchMock.mockImplementation(async (url: string) => {
+      callCount++;
+
+      if (url.includes("/sanctum/csrf-cookie")) {
+        document.cookie = "XSRF-TOKEN=fresh-token-" + callCount + "; path=/";
+        return {
+          ok: true,
+          status: 204,
+          statusText: "No Content",
+          headers: { get: () => null, entries: () => [] },
+        } as unknown as Response;
+      }
+
+      if (callCount === 1) {
+        return {
+          ok: false,
+          status: 419,
+          statusText: "CSRF Token Mismatch",
+          headers: { get: () => null, entries: () => [] },
+        } as unknown as Response;
+      }
+
+      return {
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        headers: {
+          get: (key: string) =>
+            key === "content-type" ? "application/json" : null,
+          entries: () => [["content-type", "application/json"]],
+        },
+        json: () => Promise.resolve({ success: true }),
+      } as unknown as Response;
+    });
+
+    const result = await client.post("/api/test", { data: "test" });
+
+    expect(result).toEqual({ success: true });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(callCount).toBe(2);
+  });
+
+  it("respects retry limits on CSRF failures", async () => {
+    const client = new ImprovedHttpClient({
+      baseUrl: "https://api.test",
+      retries: 2,
+    });
+    let callCount = 0;
+
+    fetchMock.mockImplementation(async (url: string) => {
+      callCount++;
+
+      if (url.includes("/sanctum/csrf-cookie")) {
+        document.cookie = "XSRF-TOKEN=token-" + callCount + "; path=/";
+        return {
+          ok: true,
+          status: 204,
+          statusText: "No Content",
+          headers: { get: () => null, entries: () => [] },
+        } as unknown as Response;
+      }
+
+      return {
+        ok: false,
+        status: 419,
+        statusText: "CSRF Token Mismatch",
+        headers: { get: () => null, entries: () => [] },
+      } as unknown as Response;
+    });
+
+    await expect(client.post("/api/test", { data: "test" })).rejects.toThrow();
+    expect(fetchMock).toHaveBeenCalled();
+    expect(callCount).toBeGreaterThan(2);
+  });
+
+  it("does not request CSRF token for GET requests", async () => {
+    const client = new ImprovedHttpClient({ baseUrl: "https://api.test" });
+
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      statusText: "OK",
+      headers: {
+        get: (key: string) =>
+          key === "content-type" ? "application/json" : null,
+        entries: () => [["content-type", "application/json"]],
+      },
+      json: () => Promise.resolve({ data: "test" }),
+    } as unknown as Response);
+
+    await client.get("/api/data");
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0]?.[0]).toBe("https://api.test/api/data");
+  });
 });
