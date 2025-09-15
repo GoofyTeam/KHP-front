@@ -645,6 +645,8 @@ export type Query = {
   preparations: PreparationPaginator;
   /** Liste les quick access de l’entreprise courante, triés par index. */
   quickAccesses: Array<QuickAccess>;
+  room?: Maybe<Room>;
+  rooms: RoomPaginator;
   /**
    * Recherche un produit par code-barres ou par mots-clés.
    * Si 'barcode' est fourni, la recherche se fait par code-barres.
@@ -654,6 +656,8 @@ export type Query = {
   searchInStock: Array<SearchResult>;
   /** Liste les mouvements de stock pour l'entreprise actuelle. */
   stockMovements: StockMovementPaginator;
+  table?: Maybe<Table>;
+  tables: TablePaginator;
   /** Find a single user by an identifying attribute. */
   user?: Maybe<User>;
   /** List multiple users. */
@@ -820,6 +824,21 @@ export type QueryPreparationsArgs = {
 };
 
 
+export type QueryRoomArgs = {
+  code?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type QueryRoomsArgs = {
+  code?: InputMaybe<Scalars['String']['input']>;
+  first?: Scalars['Int']['input'];
+  orderBy?: InputMaybe<Array<QueryRoomsOrderByOrderByClause>>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type QuerySearchArgs = {
   barcode?: InputMaybe<Scalars['String']['input']>;
   keyword?: InputMaybe<Scalars['String']['input']>;
@@ -846,6 +865,20 @@ export type QueryStockMovementsArgs = {
 };
 
 
+export type QueryTableArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryTablesArgs = {
+  first?: Scalars['Int']['input'];
+  orderBy?: InputMaybe<Array<QueryTablesOrderByOrderByClause>>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  roomId?: InputMaybe<Scalars['ID']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type QueryUserArgs = {
   email?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -862,6 +895,22 @@ export type QueryUsersArgs = {
 export type QueryMenuOrdersOrderByOrderByClause = {
   /** The column that is used for ordering. */
   column: MenuOrderOrderByField;
+  /** The direction that is used for ordering. */
+  order: SortOrder;
+};
+
+/** Order by clause for Query.rooms.orderBy. */
+export type QueryRoomsOrderByOrderByClause = {
+  /** The column that is used for ordering. */
+  column: RoomOrderByField;
+  /** The direction that is used for ordering. */
+  order: SortOrder;
+};
+
+/** Order by clause for Query.tables.orderBy. */
+export type QueryTablesOrderByOrderByClause = {
+  /** The column that is used for ordering. */
+  column: TableOrderByField;
   /** The direction that is used for ordering. */
   order: SortOrder;
 };
@@ -887,6 +936,35 @@ export type QuickAccess = {
   updated_at: Scalars['DateTime']['output'];
   /** Clé d'URL cible du bouton (route logique). */
   url_key: Scalars['String']['output'];
+};
+
+export type Room = {
+  __typename?: 'Room';
+  code: Scalars['String']['output'];
+  company: Company;
+  created_at: Scalars['DateTime']['output'];
+  /** Unique primary key. */
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  tables: Array<Table>;
+  updated_at: Scalars['DateTime']['output'];
+};
+
+export enum RoomOrderByField {
+  Code = 'CODE',
+  CreatedAt = 'CREATED_AT',
+  Id = 'ID',
+  Name = 'NAME',
+  UpdatedAt = 'UPDATED_AT'
+}
+
+/** A paginated list of Room items. */
+export type RoomPaginator = {
+  __typename?: 'RoomPaginator';
+  /** A list of Room items. */
+  data: Array<Room>;
+  /** Pagination information about the list of items. */
+  paginatorInfo: PaginatorInfo;
 };
 
 export type SearchResult = Ingredient | Preparation;
@@ -954,6 +1032,35 @@ export type StockMovementPaginator = {
   __typename?: 'StockMovementPaginator';
   /** A list of StockMovement items. */
   data: Array<StockMovement>;
+  /** Pagination information about the list of items. */
+  paginatorInfo: PaginatorInfo;
+};
+
+export type Table = {
+  __typename?: 'Table';
+  created_at: Scalars['DateTime']['output'];
+  /** Unique primary key. */
+  id: Scalars['ID']['output'];
+  label: Scalars['String']['output'];
+  room: Room;
+  seats: Scalars['Int']['output'];
+  updated_at: Scalars['DateTime']['output'];
+};
+
+export enum TableOrderByField {
+  CreatedAt = 'CREATED_AT',
+  Id = 'ID',
+  Label = 'LABEL',
+  RoomId = 'ROOM_ID',
+  Seats = 'SEATS',
+  UpdatedAt = 'UPDATED_AT'
+}
+
+/** A paginated list of Table items. */
+export type TablePaginator = {
+  __typename?: 'TablePaginator';
+  /** A list of Table items. */
+  data: Array<Table>;
   /** Pagination information about the list of items. */
   paginatorInfo: PaginatorInfo;
 };
@@ -1091,6 +1198,11 @@ export type GetMostUsedIngredientsQueryVariables = Exact<{ [key: string]: never;
 
 export type GetMostUsedIngredientsQuery = { __typename?: 'Query', ingredients: { __typename?: 'IngredientPaginator', data: Array<{ __typename?: 'Ingredient', name: string, withdrawals_this_week_count: number }> } };
 
+export type GetQuickAccessButtonQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetQuickAccessButtonQuery = { __typename?: 'Query', quickAccesses: Array<{ __typename?: 'QuickAccess', id: string, name: string, icon: string, icon_color: string, url_key: string }> };
+
 export type GetQuickAccessesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -1125,6 +1237,7 @@ export const GetMenuByIdDocument = {"kind":"Document","definitions":[{"kind":"Op
 export const GetMenuCategoriesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetMenuCategories"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"first"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"page"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"menuCategories"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"Variable","name":{"kind":"Name","value":"first"}}},{"kind":"Argument","name":{"kind":"Name","value":"page"},"value":{"kind":"Variable","name":{"kind":"Name","value":"page"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"data"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"created_at"}},{"kind":"Field","name":{"kind":"Name","value":"updated_at"}}]}},{"kind":"Field","name":{"kind":"Name","value":"paginatorInfo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"count"}},{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"firstItem"}},{"kind":"Field","name":{"kind":"Name","value":"hasMorePages"}},{"kind":"Field","name":{"kind":"Name","value":"lastItem"}},{"kind":"Field","name":{"kind":"Name","value":"lastPage"}},{"kind":"Field","name":{"kind":"Name","value":"perPage"}},{"kind":"Field","name":{"kind":"Name","value":"total"}}]}}]}}]}}]} as unknown as DocumentNode<GetMenuCategoriesQuery, GetMenuCategoriesQueryVariables>;
 export const GetMenusDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"getMenus"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"menus"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"image_url"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"is_a_la_carte"}},{"kind":"Field","name":{"kind":"Name","value":"available"}},{"kind":"Field","name":{"kind":"Name","value":"created_at"}},{"kind":"Field","name":{"kind":"Name","value":"updated_at"}},{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"quantity"}},{"kind":"Field","name":{"kind":"Name","value":"unit"}},{"kind":"Field","name":{"kind":"Name","value":"location"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetMenusQuery, GetMenusQueryVariables>;
 export const GetMostUsedIngredientsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetMostUsedIngredients"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ingredients"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"orderBy"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"column"},"value":{"kind":"StringValue","value":"withdrawals_this_week_count","block":false}},{"kind":"ObjectField","name":{"kind":"Name","value":"order"},"value":{"kind":"EnumValue","value":"DESC"}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"data"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"withdrawals_this_week_count"}}]}}]}}]}}]} as unknown as DocumentNode<GetMostUsedIngredientsQuery, GetMostUsedIngredientsQueryVariables>;
+export const GetQuickAccessButtonDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetQuickAccessButton"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"quickAccesses"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"icon"}},{"kind":"Field","name":{"kind":"Name","value":"icon_color"}},{"kind":"Field","name":{"kind":"Name","value":"url_key"}}]}}]}}]} as unknown as DocumentNode<GetQuickAccessButtonQuery, GetQuickAccessButtonQueryVariables>;
 export const GetQuickAccessesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetQuickAccesses"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"quickAccesses"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"index"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"icon"}},{"kind":"Field","name":{"kind":"Name","value":"icon_color"}},{"kind":"Field","name":{"kind":"Name","value":"url_key"}},{"kind":"Field","name":{"kind":"Name","value":"created_at"}},{"kind":"Field","name":{"kind":"Name","value":"updated_at"}}]}}]}}]} as unknown as DocumentNode<GetQuickAccessesQuery, GetQuickAccessesQueryVariables>;
 export const GetUnitDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetUnit"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"measurementUnits"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]} as unknown as DocumentNode<GetUnitQuery, GetUnitQueryVariables>;
 export const GetUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetUser"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"company"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]} as unknown as DocumentNode<GetUserQuery, GetUserQueryVariables>;

@@ -14,14 +14,12 @@ export async function createMenuAction(data: CreateMenuFormValues) {
     formData.append("is_a_la_carte", data.is_a_la_carte ? "1" : "0");
     formData.append("type", data.type);
 
-    // Arrays
     if (Array.isArray(data.category_ids)) {
       for (const id of data.category_ids) {
         formData.append("category_ids[]", id);
       }
     }
 
-    // Complex array: send each item using bracket notation so Laravel parses it as an array
     if (Array.isArray(data.items)) {
       data.items.forEach((item, index) => {
         formData.append(`items[${index}][entity_id]`, item.entity_id);
@@ -66,7 +64,6 @@ export async function updateMenuAction(id: string, data: UpdateMenuFormValues) {
       }
     }
 
-    // Complex array: send each item using bracket notation so Laravel parses it as an array
     if (Array.isArray(data.items)) {
       data.items.forEach((item, index) => {
         formData.append(`items[${index}][entity_id]`, item.entity_id);
@@ -77,12 +74,10 @@ export async function updateMenuAction(id: string, data: UpdateMenuFormValues) {
       });
     }
 
-    // File
     if (data.image && data.image instanceof File) {
       formData.append("image", data.image);
     }
 
-    //Consolelog formdata contents to debug & check
     for (const pair of formData.entries()) {
       console.log(`${pair[0]}: ${pair[1]}`);
     }

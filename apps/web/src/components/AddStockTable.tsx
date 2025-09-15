@@ -88,7 +88,12 @@ function useIsMobile() {
 
 // Types
 type Unit = string;
-type FieldKey = "productName" | "qtyunit" | "category" | "location";
+type FieldKey =
+  | "productName"
+  | "qtyunit"
+  | "baseqtyunit"
+  | "category"
+  | "location";
 
 type LocationOpt = { id: number; name: string };
 type UnitOpt = { value: string; label: string };
@@ -98,6 +103,8 @@ export interface RowData {
   productName: string;
   qty: string;
   unit: Unit;
+  base_quantity: number;
+  base_unit: Unit;
   category: number | "";
   location: string;
   image?: File | null;
@@ -109,6 +116,7 @@ export type AddStockTableHandle = {
   getFormDataPayload: () => Array<{
     name: string;
     unit: string;
+    base_unit: string;
     category_id: number;
     quantities: Array<{ location_id: number; quantity: number }>;
     base_quantity: number;
@@ -191,10 +199,8 @@ function useCamera() {
     canvas.width = squareSize;
     canvas.height = squareSize;
 
-    // Draw the current video frame onto the canvas, cropping to a square
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Could not get canvas context");
-    // Calculate cropping coordinates to center the square
     const sx = (videoWidth - squareSize) / 2;
     const sy = (videoHeight - squareSize) / 2;
     ctx.drawImage(
@@ -209,13 +215,17 @@ function useCamera() {
       squareSize
     );
     const blob: Blob = await new Promise((resolve, reject) =>
-      canvas.toBlob((b) => {
-        if (b) {
-          resolve(b);
-        } else {
-          reject(new Error("Failed to create image blob from canvas"));
-        }
-      }, mime, quality)
+      canvas.toBlob(
+        (b) => {
+          if (b) {
+            resolve(b);
+          } else {
+            reject(new Error("Failed to create image blob from canvas"));
+          }
+        },
+        mime,
+        quality
+      )
     );
     return new File([blob], fileName, { type: mime });
   };
@@ -323,6 +333,8 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
     productName: "",
     qty: "",
     unit: "",
+    base_quantity: 0,
+    base_unit: "",
     category: "",
     location: "",
     image: null,
@@ -330,7 +342,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
 
   const [focusedField, setFocusedField] = React.useState<FieldKey | null>(null);
   const [activeSelect, setActiveSelect] = React.useState<{
-    type: "unit" | "category" | "location";
+    type: "unit" | "base_unit" | "category" | "location";
     options: string[];
     value: string;
     onSelect: (value: string) => void;
@@ -467,7 +479,11 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
     setActiveSelect(null);
 
     setTimeout(() => {
-      if (field === "productName" || field === "qtyunit") {
+      if (
+        field === "productName" ||
+        field === "qtyunit" ||
+        field === "baseqtyunit"
+      ) {
         setTimeout(() => {
           if (visibleInputRef.current) {
             visibleInputRef.current.focus({ preventScroll: true });
@@ -520,6 +536,22 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
             (v) => setDraft((d) => ({ ...d, unit: v as Unit }))
           );
         } else {
+          setFocusedField("baseqtyunit");
+          setTimeout(
+            () => visibleInputRef.current?.focus({ preventScroll: true }),
+            50
+          );
+        }
+        break;
+      case "baseqtyunit":
+        if (draft.base_quantity && !activeSelect) {
+          handleSelectClick(
+            "base_unit",
+            units.map((u) => u.value),
+            draft.base_unit,
+            (v) => setDraft((d) => ({ ...d, base_unit: v as Unit }))
+          );
+        } else {
           setFocusedField("category");
           setTimeout(() => {
             handleSelectClick(
@@ -559,6 +591,13 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
           50
         );
         break;
+      case "baseqtyunit":
+        setFocusedField("qtyunit");
+        setTimeout(
+          () => visibleInputRef.current?.focus({ preventScroll: true }),
+          50
+        );
+        break;
       case "productName":
         setFocusedField("location");
         setTimeout(() => {
@@ -571,7 +610,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
         }, 100);
         break;
       case "category":
-        setFocusedField("qtyunit");
+        setFocusedField("baseqtyunit");
         setTimeout(
           () => visibleInputRef.current?.focus({ preventScroll: true }),
           50
@@ -597,6 +636,8 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
       productName: "",
       qty: "",
       unit: units.length > 0 ? (units[0].value as Unit) : "",
+      base_quantity: 0,
+      base_unit: units.length > 0 ? (units[0].value as Unit) : "",
       category: "",
       location: "",
       image: null,
@@ -615,7 +656,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
   };
 
   const handleSelectClick = (
-    type: "unit" | "category" | "location",
+    type: "unit" | "base_unit" | "category" | "location",
     options: string[],
     value: string,
     onSelect: (value: string) => void
@@ -630,6 +671,12 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
     setActiveSelect(null);
     setTimeout(() => {
       if (selectType === "unit") {
+        setFocusedField("baseqtyunit");
+        setTimeout(
+          () => visibleInputRef.current?.focus({ preventScroll: true }),
+          50
+        );
+      } else if (selectType === "base_unit") {
         setFocusedField("category");
         setTimeout(() => {
           handleSelectClick(
@@ -672,6 +719,8 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
       type Acc = {
         name: string;
         unit: string;
+        base_unit: string;
+        base_quantity: number;
         category_id: number | null;
         quantitiesMap: Map<number, number>;
         image?: File;
@@ -682,10 +731,21 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
       for (const r of rows) {
         const name = r.productName?.trim();
         const unit = r.unit?.trim();
+        const base_unit = r.base_unit?.trim();
+        const base_quantity = r.base_quantity;
         const locId = nameToId.get(r.location);
         const qtyNum = Number(r.qty);
 
-        if (!name || !unit || !locId || !Number.isFinite(qtyNum) || qtyNum < 0)
+        if (
+          !name ||
+          !unit ||
+          !base_unit ||
+          !locId ||
+          !Number.isFinite(qtyNum) ||
+          qtyNum < 0 ||
+          !Number.isFinite(base_quantity) ||
+          base_quantity <= 0
+        )
           continue;
 
         const key = name.toLowerCase();
@@ -693,6 +753,8 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
           byName.set(key, {
             name,
             unit,
+            base_unit,
+            base_quantity,
             category_id: typeof r.category === "number" ? r.category : null,
             quantitiesMap: new Map<number, number>(),
             image: r.image ?? undefined,
@@ -722,17 +784,19 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
           return {
             name: acc.name,
             unit: acc.unit,
+            base_unit: acc.base_unit,
             category_id: acc.category_id,
             quantities: Array.from(acc.quantitiesMap.entries()).map(
               ([location_id, quantity]) => ({ location_id, quantity })
             ),
-            base_quantity: 1,
+            base_quantity: acc.base_quantity,
             image: acc.image,
           };
         })
         .filter(Boolean) as Array<{
         name: string;
         unit: string;
+        base_unit: string;
         category_id: number;
         quantities: Array<{ location_id: number; quantity: number }>;
         base_quantity: number;
@@ -788,6 +852,12 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
                 <TableHead className="px-2 text-left md:w-[10%]">Qty</TableHead>
                 <TableHead className="px-2 text-left md:w-[15%]">
                   Unit
+                </TableHead>
+                <TableHead className="px-2 text-left md:w-[10%]">
+                  Base Qty
+                </TableHead>
+                <TableHead className="px-2 text-left md:w-[15%]">
+                  Base Unit
                 </TableHead>
                 <TableHead className="px-2 text-left md:w-[20%]">
                   Category
@@ -898,7 +968,11 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
                         e.stopPropagation();
                       }}
                     >
-                      {draft.qty || "0.0"}
+                      {draft.base_unit ? (
+                        draft.base_unit.toUpperCase()
+                      ) : (
+                        <span className="text-muted-foreground">Quantity</span>
+                      )}
                     </div>
                   )}
                 </TableCell>
@@ -959,6 +1033,106 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
                       ) : (
                         <span className="text-muted-foreground">
                           Select unit
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </TableCell>
+
+                <TableCell className="px-2 cursor-text">
+                  {!isMobile ? (
+                    <Input
+                      variant="khp-product"
+                      className="truncate"
+                      type="number"
+                      value={draft.base_quantity || ""}
+                      onChange={(e) =>
+                        setDraft((d) => ({
+                          ...d,
+                          base_quantity: parseFloat(e.target.value) || 0,
+                        }))
+                      }
+                      placeholder="Base quantity"
+                    />
+                  ) : (
+                    <div
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        startEditing("baseqtyunit");
+                      }}
+                      onFocus={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                    >
+                      {draft.base_quantity > 0 ? (
+                        draft.base_quantity
+                      ) : (
+                        <span className="text-muted-foreground">
+                          Base quantity
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </TableCell>
+
+                <TableCell className="px-2 cursor-pointer">
+                  {!isMobile ? (
+                    <Select
+                      value={draft.base_unit}
+                      onValueChange={(v) =>
+                        setDraft((d) => ({ ...d, base_unit: v as Unit }))
+                      }
+                      disabled={unitsLoading}
+                    >
+                      <SelectTrigger
+                        variant="khp-product"
+                        className="truncate w-full"
+                      >
+                        <SelectValue placeholder="Select base unit">
+                          {draft.base_unit
+                            ? draft.base_unit.toUpperCase()
+                            : "Select base unit"}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {units.map((u) => (
+                          <SelectItem
+                            key={u.value}
+                            value={u.value}
+                            className="truncate"
+                          >
+                            {u.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <div
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const currentScrollTop =
+                          window.pageYOffset ||
+                          document.documentElement.scrollTop;
+                        setTimeout(
+                          () => window.scrollTo(0, currentScrollTop),
+                          0
+                        );
+                        startEditing("baseqtyunit");
+                      }}
+                      onFocus={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      className="cursor-text truncate"
+                    >
+                      {draft.base_unit ? (
+                        draft.base_unit.toUpperCase()
+                      ) : (
+                        <span className="text-muted-foreground">
+                          Select base unit
                         </span>
                       )}
                     </div>
@@ -1113,6 +1287,10 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
                   <TableCell className="px-2">{r.qty}</TableCell>
                   <TableCell className="px-2 truncate">
                     {r.unit.toUpperCase()}
+                  </TableCell>
+                  <TableCell className="px-2">{r.base_quantity}</TableCell>
+                  <TableCell className="px-2 truncate">
+                    {r.base_unit.toUpperCase()}
                   </TableCell>
                   <TableCell className="px-2 truncate">
                     {categories.find((c) => c.id === r.category)?.name ?? ""}
@@ -1290,6 +1468,67 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
                         >
                           <span className="truncate max-w-[5rem]">
                             {draft.unit ? draft.unit.toUpperCase() : "Unit"}
+                          </span>
+                        </button>
+                      </div>
+                    );
+
+                  case "baseqtyunit":
+                    return (
+                      <div className="flex space-x-2">
+                        <Input
+                          {...common}
+                          ref={visibleInputRef}
+                          type="number"
+                          placeholder="Base quantity"
+                          value={draft.base_quantity || ""}
+                          onChange={(e) =>
+                            setDraft((d) => ({
+                              ...d,
+                              base_quantity: parseFloat(e.target.value) || 0,
+                            }))
+                          }
+                          onClick={() => activeSelect && setActiveSelect(null)}
+                          onFocus={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (e.target.scrollIntoView)
+                              e.target.scrollIntoView = () => {};
+                          }}
+                          onBlur={() => {
+                            setTimeout(
+                              () =>
+                                keyboardKeeperRef.current?.focus({
+                                  preventScroll: true,
+                                }),
+                              50
+                            );
+                          }}
+                          style={{
+                            transform: "translateZ(0)",
+                            backfaceVisibility: "hidden",
+                          }}
+                        />
+                        <button
+                          type="button"
+                          className="flex h-9 items-center rounded-md border border-input bg-transparent px-3 text-sm hover:bg-muted"
+                          onClick={() =>
+                            handleSelectClick(
+                              "base_unit",
+                              units.map((u) => u.value),
+                              draft.base_unit,
+                              (v) =>
+                                setDraft((d) => ({
+                                  ...d,
+                                  base_unit: v as Unit,
+                                }))
+                            )
+                          }
+                        >
+                          <span className="truncate max-w-[5rem]">
+                            {draft.base_unit
+                              ? draft.base_unit.toUpperCase()
+                              : "Base Unit"}
                           </span>
                         </button>
                       </div>
