@@ -23,6 +23,7 @@ export interface QuickAccessUpdateInput {
 
 export interface QuickAccessUpdateData {
   quick_accesses: QuickAccessUpdateInput[];
+  [key: string]: unknown;
 }
 
 export interface QuickAccessResponse {
