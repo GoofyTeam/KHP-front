@@ -108,47 +108,12 @@ export async function bulkCreateIngredientsUploadAction(
   formData: FormData
 ): Promise<ActionResult<{ ingredient_ids?: number[] }>> {
   try {
-    const { headers, cookies } = await import("next/headers");
-    const h = await headers();
-    const c = await cookies();
+    const data = await httpClient.post<{ ingredient_ids?: number[] }>(
+      "/api/ingredients/bulk",
+      formData
+    );
 
-    const API_URL =
-      process.env.NEXT_PUBLIC_API_URL ??
-      (process.env.NODE_ENV === "production"
-        ? "https://dash.goofykhp.fr"
-        : "http://localhost:8000");
-
-    const cookieHeader = h.get("cookie") || "";
-    const rawXsrf = c.get("XSRF-TOKEN")?.value;
-    let decodedXsrf = "";
-    try {
-      if (rawXsrf) decodedXsrf = decodeURIComponent(rawXsrf);
-    } catch {
-      decodedXsrf = rawXsrf || "";
-    }
-
-    const upstream = await fetch(`${API_URL}/api/ingredients/bulk`, {
-      method: "POST",
-      body: formData,
-      credentials: "include",
-      headers: {
-        Accept: "application/json",
-        Cookie: cookieHeader,
-        ...(decodedXsrf ? { "X-XSRF-TOKEN": decodedXsrf } : {}),
-        "X-Requested-With": "XMLHttpRequest",
-      },
-      cache: "no-store",
-    });
-
-    if (!upstream.ok) {
-      const errorText = await upstream.text().catch(() => "");
-      return handleHttpError<{
-        ingredient_ids?: number[];
-      }>(new Error(`${upstream.status}: ${errorText || upstream.statusText}`));
-    }
-
-    const result = await upstream.json().catch(() => ({}));
-    return { success: true, data: result };
+    return { success: true, data };
   } catch (e) {
     return handleHttpError(e);
   }
@@ -158,47 +123,12 @@ export async function createIngredientUploadAction(
   formData: FormData
 ): Promise<ActionResult<{ id?: number }>> {
   try {
-    const { headers, cookies } = await import("next/headers");
-    const h = await headers();
-    const c = await cookies();
+    const data = await httpClient.post<{ id?: number }>(
+      "/api/ingredients",
+      formData
+    );
 
-    const API_URL =
-      process.env.NEXT_PUBLIC_API_URL ??
-      (process.env.NODE_ENV === "production"
-        ? "https://dash.goofykhp.fr"
-        : "http://localhost:8000");
-
-    const cookieHeader = h.get("cookie") || "";
-    const rawXsrf = c.get("XSRF-TOKEN")?.value;
-    let decodedXsrf = "";
-    try {
-      if (rawXsrf) decodedXsrf = decodeURIComponent(rawXsrf);
-    } catch {
-      decodedXsrf = rawXsrf || "";
-    }
-
-    const upstream = await fetch(`${API_URL}/api/ingredients`, {
-      method: "POST",
-      body: formData,
-      credentials: "include",
-      headers: {
-        Accept: "application/json",
-        Cookie: cookieHeader,
-        ...(decodedXsrf ? { "X-XSRF-TOKEN": decodedXsrf } : {}),
-        "X-Requested-With": "XMLHttpRequest",
-      },
-      cache: "no-store",
-    });
-
-    if (!upstream.ok) {
-      const errorText = await upstream.text().catch(() => "");
-      return handleHttpError<{
-        id?: number;
-      }>(new Error(`${upstream.status}: ${errorText || upstream.statusText}`));
-    }
-
-    const result = await upstream.json().catch(() => ({}));
-    return { success: true, data: result };
+    return { success: true, data };
   } catch (e) {
     return handleHttpError(e);
   }
