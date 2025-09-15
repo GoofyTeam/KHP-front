@@ -20,3 +20,7 @@ jobs:
         run: npm install
       - name: Run linter
         run: npm run lint
+      - name: Run web tests
+        run: npm run test --workspace web -- --run
+      - name: Run PWA tests
+        run: npm run test --workspace pwa -- --run

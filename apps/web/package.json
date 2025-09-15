@@ -7,6 +7,9 @@
     "build": "npm run codegen && next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "vitest",
+    "test:watch": "vitest -w",
+    "test:run": "vitest run",
     "preview": "next build && next start",
     "introspect": "get-graphql-schema https://back.goofykhp.fr/graphql > src/graphql/schema/schema.graphql",
     "codegen": "npm run introspect && graphql-codegen --config codegen.ts"
@@ -31,13 +34,16 @@
     "@eslint/eslintrc": "^3",
     "@graphql-codegen/cli": "^5.0.7",
     "@tailwindcss/postcss": "^4",
+    "@types/jest": "^30.0.0",
     "@types/js-cookie": "^3.0.6",
+    "@types/mocha": "^10.0.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.3.4",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^2.1.8"
   }
 }
