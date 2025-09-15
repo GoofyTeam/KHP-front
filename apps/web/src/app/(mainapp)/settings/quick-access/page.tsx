@@ -3,12 +3,6 @@
 import { useState } from "react";
 import { useQuery } from "@apollo/client";
 import { Button } from "@workspace/ui/components/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@workspace/ui/components/card";
 import { Settings, RotateCcw, Loader2 } from "lucide-react";
 import { GetQuickAccessesDocument } from "@/graphql/generated/graphql";
 import QuickAccessButtonForm from "@/components/quickaccess/quick-access-button-form";
@@ -76,25 +70,16 @@ export default function QuickAccessPage() {
           </Button>
         </div>
       </div>
-
-      <Card className="bg-khp-surface border-khp-border shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold text-khp-text-primary">
-            Quick Access Buttons Configuration
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {quickAccesses.map((quickAccess, index) => (
-            <QuickAccessButtonForm
-              key={quickAccess.id}
-              index={index}
-              data={quickAccess}
-              onUpdate={handleUpdate}
-            />
-          ))}
-        </CardContent>
-      </Card>
-
+      <div className="space-y-6">
+        {quickAccesses.map((quickAccess, index) => (
+          <QuickAccessButtonForm
+            key={quickAccess.id}
+            index={index}
+            data={quickAccess}
+            onUpdate={handleUpdate}
+          />
+        ))}
+      </div>
       <ResetDialog
         open={showResetDialog}
         onOpenChange={setShowResetDialog}
