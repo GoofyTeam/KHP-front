@@ -41,9 +41,8 @@ export function Guard({
         <h1 className="mb-3 text-2xl font-bold text-gray-900">
           This application is optimized for mobile and tablet devices
         </h1>
-        <p className="mb-6 max-w-md text-gray-700">
-          Please scan the QR code below to open the application on your mobile
-          or tablet device.
+        <p className="mb-2 text-sm text-gray-600">
+          Open it on your mobile/tablet (scan the QR below).
         </p>
         {currentUrl ? (
           <img
@@ -69,6 +68,10 @@ export function Guard({
         <p className="max-w-md text-gray-700">
           This application is best viewed in portrait orientation for an optimal
           experience.
+        </p>
+        <p className="mt-6 text-sm text-gray-500">
+          If you are already in portrait mode and on a mobile or tablet device,
+          please install the app to your home screen for the best experience.
         </p>
       </div>
     );

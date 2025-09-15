@@ -1,29 +1,42 @@
 .PWABadge-container {
-    padding: 0;
-    margin: 0;
-    width: 0;
-    height: 0;
+  padding: 0;
+  margin: 0;
+  width: 0;
+  height: 0;
 }
+
+/* KHP look & feel */
 .PWABadge-toast {
-    position: fixed;
-    right: 0;
-    bottom: 0;
-    margin: 16px;
-    padding: 12px;
-    border: 1px solid #8885;
-    border-radius: 4px;
-    z-index: 1;
-    text-align: left;
-    box-shadow: 3px 4px 5px 0 #8885;
-    background-color: white;
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  margin: 16px;
+  padding: 12px 14px;
+  border: 1px solid rgba(76, 175, 80, 0.25); /* khp primary */
+  border-radius: 10px;
+  z-index: 50;
+  text-align: left;
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+  background-color: #ffffff;
 }
+
 .PWABadge-toast-message {
-    margin-bottom: 8px;
+  margin-bottom: 10px;
+  color: #0f172a; /* slate-900 */
+  font-weight: 500;
 }
+
 .PWABadge-toast-button {
-    border: 1px solid #8885;
-    outline: none;
-    margin-right: 5px;
-    border-radius: 2px;
-    padding: 3px 10px;
+  outline: none;
+  margin-right: 8px;
+  border-radius: 8px;
+  padding: 6px 12px;
+  border: 0;
+  background-color: #4caf50; /* khp primary */
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 150ms ease-in-out, transform 100ms ease-in-out;
 }
+
+.PWABadge-toast-button:hover { opacity: 0.95; }
+.PWABadge-toast-button:active { opacity: 0.9; transform: translateY(1px); }

@@ -82,15 +82,6 @@ function HandleUpdateProduct() {
           </div>
         )}
 
-        {serverError && (
-          <div
-            role="alert"
-            className="w-full max-w-md mx-auto mb-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
-          >
-            {serverError}
-          </div>
-        )}
-
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-4 flex flex-col items-center px-4 w-full max-w-md"
@@ -266,6 +257,15 @@ function HandleUpdateProduct() {
               )}
             />
           </div>
+
+          {serverError && (
+            <div
+              role="alert"
+              className="w-full max-w-md mx-auto mb-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+            >
+              {serverError}
+            </div>
+          )}
 
           <div className="flex flex-col w-full gap-x-2 my-4 gap-y-1">
             <Button

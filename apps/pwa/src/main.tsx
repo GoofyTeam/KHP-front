@@ -6,6 +6,8 @@ import { HelmetProvider } from "react-helmet-async";
 import { routeTree } from "./routeTree.gen";
 import "@workspace/ui/globals.css";
 import { Guard } from "./components/guard-device";
+import PWABadge from "./PWABadge";
+import MobileInstallBanner from "./components/MobileInstallBanner";
 
 export const router = createRouter({ routeTree });
 declare module "@tanstack/react-router" {
@@ -26,6 +28,8 @@ if (!rootElement.innerHTML) {
       <HelmetProvider>
         <Guard isProd={isProd}>
           <RouterProvider router={router} />
+          <PWABadge />
+          <MobileInstallBanner />
         </Guard>
       </HelmetProvider>
     </StrictMode>

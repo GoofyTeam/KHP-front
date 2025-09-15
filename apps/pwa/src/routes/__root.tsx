@@ -5,6 +5,7 @@ import {
   useLocation,
   useMatch,
 } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import api from "../lib/api";
 import { Layout } from "../components/Layout";
@@ -93,6 +94,18 @@ function getDocumentTitle(
 
 function RootComponent() {
   const location = useLocation();
+
+  useEffect(() => {
+    try {
+      window.scrollTo(0, 0);
+    } catch (error) {
+      console.error("Error scrolling to top:", error);
+      if (typeof document !== "undefined") {
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+      }
+    }
+  }, [location.pathname]);
 
   // Accéder directement aux paramètres de route via useMatch
   const productMatch = useMatch({
