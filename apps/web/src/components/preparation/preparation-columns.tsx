@@ -90,7 +90,6 @@ const preparationColumns: ColumnDef<Preparation>[] = [
   },
 ];
 
-export function PreparationsTable({ data }: { data: Preparation[] }) {
-  console.log("Preparation data:", data);
-  return <PreparationDataTable columns={preparationColumns} data={data} />;
+export function PreparationsTable() {
+  return <PreparationDataTable columns={preparationColumns} />;
 }

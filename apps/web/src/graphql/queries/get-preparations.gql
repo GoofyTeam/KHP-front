@@ -1,5 +1,5 @@
-query GetPreparations {
-  preparations {
+query GetPreparations($page: Int!, $search: String) {
+  preparations(page: $page, search: $search) {
     data {
       id
       name
@@ -17,6 +17,10 @@ query GetPreparations {
         id
         name
       }
+    }
+    paginatorInfo {
+      hasMorePages
+      currentPage
     }
   }
 }

@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { gql, useQuery } from "@apollo/client";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -13,13 +16,6 @@ import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@workspace/ui/components/select";
-import {
   Table,
   TableHeader,
   TableRow,
@@ -28,27 +24,92 @@ import {
   TableCell,
 } from "@workspace/ui/components/table";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
+import {
+  GetPreparationsDocument,
+  type GetPreparationsQuery,
+} from "@/graphql/generated/graphql";
+
+type Preparation = NonNullable<
+  GetPreparationsQuery["preparations"]["data"]
+>[number];
+
+interface PreparationDataTableProps<TValue> {
+  columns: ColumnDef<Preparation, TValue>[];
 }
 
-export function PreparationDataTable<TData, TValue>({
+export function PreparationDataTable<TValue>({
   columns,
-  data,
-}: DataTableProps<TData, TValue>) {
+}: PreparationDataTableProps<TValue>) {
   const router = useRouter();
 
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
     id: false,
   });
+  const [search, setSearch] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  const { data, loading, error, fetchMore, refetch } = useQuery(
+    GetPreparationsDocument,
+    {
+      variables: { page: 1, search: search || undefined },
+      fetchPolicy: "cache-and-network",
+      notifyOnNetworkStatusChange: true,
+    }
+  );
+
+  const preparations: Preparation[] = useMemo(
+    () => data?.preparations?.data ?? [],
+    [data?.preparations?.data]
+  );
+
+  const pageInfo = data?.preparations?.paginatorInfo;
+  const hasMorePages = pageInfo?.hasMorePages ?? false;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasMorePages || loading) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          observer.disconnect();
+          const nextPage = currentPage + 1;
+          setCurrentPage(nextPage);
+
+          fetchMore({
+            variables: { page: nextPage, search: search || undefined },
+            updateQuery: (prev, { fetchMoreResult }) => {
+              if (!fetchMoreResult) return prev;
+              return {
+                ...fetchMoreResult,
+                preparations: {
+                  ...fetchMoreResult.preparations,
+                  data: [
+                    ...prev.preparations.data,
+                    ...fetchMoreResult.preparations.data,
+                  ],
+                },
+              };
+            },
+          });
+        }
+      },
+      { rootMargin: "200px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMorePages, currentPage, search, loading, fetchMore]);
 
   const table = useReactTable({
-    data,
+    data: preparations,
     columns,
     getCoreRowModel: getCoreRowModel(),
     onColumnFiltersChange: setColumnFilters,
@@ -59,6 +120,13 @@ export function PreparationDataTable<TData, TValue>({
       columnVisibility,
     },
   });
+
+  const nameFilterValue =
+    (table.getColumn("name")?.getFilterValue() as string) ?? "";
+
+  if (error) {
+    throw error;
+  }
 
   return (
     <>
@@ -71,12 +139,13 @@ export function PreparationDataTable<TData, TValue>({
             <Input
               placeholder="Steak, Salad..."
               variant="khp-default"
-              value={
-                (table.getColumn("name")?.getFilterValue() as string) ?? ""
-              }
-              onChange={(event) =>
-                table.getColumn("name")?.setFilterValue(event.target.value)
-              }
+              value={nameFilterValue}
+              onChange={(event) => {
+                const v = event.target.value;
+                table.getColumn("name")?.setFilterValue(v);
+                setSearch(v);
+                refetch({ page: 1, search: v || undefined });
+              }}
               className="max-w-sm"
             />
           </div>
@@ -114,11 +183,9 @@ export function PreparationDataTable<TData, TValue>({
                   id?: string | number;
                   name?: string;
                 };
-
                 if (!original.id && !original.name) {
                   return null;
                 }
-
                 return (
                   <TableRow
                     key={row.id}
@@ -126,7 +193,7 @@ export function PreparationDataTable<TData, TValue>({
                     onClick={() => router.push(`/preparations/${original.id}`)}
                     tabIndex={0}
                     role="link"
-                    aria-label={`Voir détails du menu ${original.name || original.id}`}
+                    aria-label={`Voir détails de la préparation ${original.name || original.id}`}
                     className="hover:cursor-pointer hover:bg-khp-primary/10 border-b border-khp-secondary focus:outline-2 focus:outline-offset-2 focus:outline-khp-primary"
                   >
                     {row.getVisibleCells().map((cell) => (
@@ -146,12 +213,20 @@ export function PreparationDataTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  {loading ? "Loading..." : "No results."}
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
+        {hasMorePages && (
+          <div
+            ref={sentinelRef}
+            className="h-8 flex items-center justify-center"
+          >
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-khp-primary" />
+          </div>
+        )}
       </div>
     </>
   );
