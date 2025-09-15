@@ -3,12 +3,6 @@
 import { useState } from "react";
 import { useQuery } from "@apollo/client";
 import { Button } from "@workspace/ui/components/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@workspace/ui/components/card";
 import { Settings, RotateCcw, Loader2 } from "lucide-react";
 import { GetQuickAccessesDocument } from "@/graphql/generated/graphql";
 import QuickAccessButtonForm from "@/components/quickaccess/quick-access-button-form";

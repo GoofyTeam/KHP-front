@@ -66,7 +66,7 @@ export function CompanySettingsSection() {
         open_food_facts_language: processedLanguage,
       });
     }
-  }, [data]);
+  }, [data, form]);
 
   const onSubmit = async (values: CompanyOptionsFormData) => {
     startTransition(async () => {
@@ -98,7 +98,7 @@ export function CompanySettingsSection() {
           Company Options
         </h2>
         <p className="text-sm text-khp-text/70 mt-1">
-          Configure your company's general settings
+          Configure your company&apos;s general settings
         </p>
       </div>
 
