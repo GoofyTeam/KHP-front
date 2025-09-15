@@ -1,0 +1,22 @@
+query GetPreparations {
+  preparations {
+    data {
+      id
+      name
+      image_url
+      allergens
+      unit
+      quantities {
+        quantity
+        location {
+          id
+          name
+        }
+      }
+      categories {
+        id
+        name
+      }
+    }
+  }
+}

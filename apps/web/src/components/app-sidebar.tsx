@@ -45,6 +45,12 @@ const defaultConfig: SidebarConfig = {
       activePatterns: ["/stocks", "/ingredient"],
     },
     {
+      title: "Preparations",
+      url: "/preparations",
+      icon: "CookingPot",
+      activePatterns: ["/preparations", "/preparation"],
+    },
+    {
       title: "Menus",
       url: "/menus",
       icon: "Coffee",
