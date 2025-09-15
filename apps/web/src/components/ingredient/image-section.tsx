@@ -23,7 +23,7 @@ type EditIngredientFormData = {
   base_quantity?: number;
   base_unit?: string;
   allergens?: string[];
-  image_file?: any;
+  image_file?: File;
 };
 
 interface ImageSectionProps {

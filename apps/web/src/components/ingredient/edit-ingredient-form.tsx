@@ -36,7 +36,7 @@ interface EditIngredientFormProps {
 const editIngredientSchema = z.object({
   name: z.string().min(1, "Name is required").max(255, "Name is too long"),
   unit: z.string().min(1, "Unit is required").max(50, "Unit is too long"),
-  category: z.string().optional(),
+  category: z.string().optional().or(z.literal("")),
   image_url: z
     .string()
     .optional()
@@ -52,28 +52,22 @@ const editIngredientSchema = z.object({
   base_quantity: z.number().min(0, "Base quantity must be positive").optional(),
   base_unit: z.string().optional(),
   allergens: z.array(z.string()).optional(),
-  image_file: z.any().optional(),
+  image_file: z.instanceof(File).optional(),
 });
 
 type EditIngredientFormData = z.infer<typeof editIngredientSchema>;
 
 export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [apiError, setApiError] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(
-    ingredient.image_url || null
-  );
 
   const form = useForm<EditIngredientFormData>({
     resolver: zodResolver(editIngredientSchema),
     defaultValues: {
       name: ingredient.name,
       unit: ingredient.unit.toString(),
-      category: ingredient.category?.id || "no-category",
+      category: ingredient.category?.id || "",
       image_url: ingredient.image_url || "",
       base_quantity: ingredient.base_quantity || undefined,
       base_unit: ingredient.base_unit?.toString() || "",
@@ -82,29 +76,33 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
     },
   });
 
+  // Valeurs calculées depuis React Hook Form
+  const imageFile = form.watch("image_file");
+  const imageUrl = form.watch("image_url");
+  const imagePreview = imageFile
+    ? URL.createObjectURL(imageFile)
+    : imageUrl || null;
+
+  // États de formulaire depuis React Hook Form
+  const isSubmitting = form.formState.isSubmitting;
+  const apiError = form.formState.errors.root?.message;
+
   const handleImageCapture = (file: File) => {
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
     form.setValue("image_file", file);
     form.setValue("image_url", "");
   };
 
   const handleUrlChange = (url: string) => {
     if (url.trim()) {
-      setImageFile(null);
-      setImagePreview(url);
       form.setValue("image_url", url);
       form.setValue("image_file", undefined);
     } else {
-      setImagePreview(null);
       form.setValue("image_url", "");
       form.setValue("image_file", undefined);
     }
   };
 
   const handleClearImage = () => {
-    setImageFile(null);
-    setImagePreview(null);
     form.setValue("image_url", "");
     form.setValue("image_file", undefined);
   };
@@ -114,7 +112,7 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
     try {
       const result = await deleteIngredientAction(ingredient.id);
       if (result.success) {
-        router.push("/inventory");
+        router.push("/stocks");
       }
     } catch (err) {
       console.error("Delete error:", err);
@@ -124,22 +122,32 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
   };
 
   const onSubmit = async (data: EditIngredientFormData) => {
-    setIsSubmitting(true);
-    setApiError(null);
+    // Nettoyer les erreurs précédentes
+    form.clearErrors("root");
 
     try {
-      const updateData: any = {
+      const updateData: {
+        ingredientId: string;
+        name: string;
+        unit: string;
+        category_id?: number | null;
+        image?: File;
+        image_url?: string;
+        base_quantity?: number;
+        base_unit?: string;
+        allergens?: string[];
+      } = {
         ingredientId: ingredient.id,
         name: data.name,
         unit: data.unit,
         category_id:
-          data.category === "no-category" || !data.category
-            ? null
-            : parseInt(data.category),
+          data.category && data.category.trim() !== ""
+            ? parseInt(data.category)
+            : null,
       };
 
-      if (imageFile) {
-        updateData.image = imageFile;
+      if (data.image_file) {
+        updateData.image = data.image_file;
       } else if (
         data.image_url &&
         data.image_url.trim() !== "" &&
@@ -163,7 +171,9 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
       const result = await updateIngredientAction(updateData);
 
       if (!result.success) {
-        setApiError(result.error || "Failed to update ingredient");
+        form.setError("root", {
+          message: result.error || "Failed to update ingredient",
+        });
         return;
       }
 
@@ -172,9 +182,9 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
         router.push(`/ingredient/${ingredient.id}`);
       }, 2000);
     } catch {
-      setApiError("An unexpected error occurred. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+      form.setError("root", {
+        message: "An unexpected error occurred. Please try again.",
+      });
     }
   };
 

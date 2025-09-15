@@ -33,7 +33,7 @@ type EditIngredientFormData = {
   base_quantity?: number;
   base_unit?: string;
   allergens?: string[];
-  image_file?: any;
+  image_file?: File;
 };
 
 interface IngredientFieldsProps {
@@ -179,13 +179,9 @@ export function IngredientFields({ form }: IngredientFieldsProps) {
               <FormControl>
                 <Select
                   onValueChange={(value) =>
-                    field.onChange(
-                      value === "no-category" ? "no-category" : value
-                    )
+                    field.onChange(value === "__clear__" ? "" : value)
                   }
-                  value={
-                    field.value === "no-category" ? "no-category" : field.value
-                  }
+                  value={field.value || "__clear__"}
                   disabled={categoriesLoading}
                 >
                   <SelectTrigger className="min-h-12 h-12 p-2 rounded-md border text-lg font-medium bg-inherit hover:bg-inherit focus:ring-2 focus:ring-khp-primary/20 touch-manipulation">
@@ -199,10 +195,10 @@ export function IngredientFields({ form }: IngredientFieldsProps) {
                   </SelectTrigger>
                   <SelectContent className="max-h-72">
                     <SelectItem
-                      value="no-category"
+                      value="__clear__"
                       className="!h-12 !min-h-12 !py-3 !px-4 text-base font-medium cursor-pointer hover:bg-khp-primary/10 focus:bg-khp-primary/15 transition-colors touch-manipulation"
                     >
-                      No category
+                      Clear selection
                     </SelectItem>
                     {categoryOptions.map((category) => (
                       <SelectItem

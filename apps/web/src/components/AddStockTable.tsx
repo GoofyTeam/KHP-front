@@ -36,7 +36,7 @@ import {
   ChevronRight,
   EllipsisVertical,
   Camera,
-  X as CloseIcon,
+
 } from "lucide-react";
 
 // hooks mobile
