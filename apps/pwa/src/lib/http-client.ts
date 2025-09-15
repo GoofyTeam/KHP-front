@@ -62,7 +62,9 @@ export class ImprovedHttpClient {
       console.log("CSRF endpoint response status:", res.status);
       console.log(
         "CSRF endpoint response headers:",
-        Object.fromEntries(res.headers.entries())
+        res.headers.entries
+          ? Object.fromEntries(res.headers.entries())
+          : "Headers.entries() not available"
       );
 
       if (!res.ok) {
