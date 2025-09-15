@@ -99,7 +99,6 @@ function RootComponent() {
     from: "/_protected/products/$id",
     shouldThrow: false,
   });
-
   const historyMatch = useMatch({
     from: "/_protected/products/$id_/history",
     shouldThrow: false,

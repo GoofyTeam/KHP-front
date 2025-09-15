@@ -73,6 +73,14 @@ type Company {
   """Types de localisation associés à cette entreprise."""
   locationTypes: [LocationType!]!
 
+  """
+  Option pour activer ou désactiver la complétion automatique des commandes de menu.
+  """
+  auto_complete_menu_orders: Boolean
+
+  """Langue préférée pour les données OpenFoodFacts (fr ou en)."""
+  open_food_facts_language: String
+
   """When the company was created."""
   created_at: DateTime!
 
@@ -386,7 +394,7 @@ type Menu {
   description: String
   image_url: String
   is_a_la_carte: Boolean!
-  is_available: Boolean!
+  available(quantity: Int! = 1): Boolean!
   type: String!
   price: Float!
   categories: [MenuCategory!]!
@@ -442,6 +450,20 @@ type MenuOrder {
   menu: Menu!
   created_at: DateTime!
   updated_at: DateTime!
+}
+
+enum MenuOrderOrderByField {
+  STATUS
+  CREATED_AT
+}
+
+"""A paginated list of MenuOrder items."""
+type MenuOrderPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of MenuOrder items."""
+  data: [MenuOrder!]!
 }
 
 type MenuOrderStats {
@@ -561,6 +583,7 @@ type Preparation {
   """The categories associated with this preparation."""
   categories: [Category!]!
   quantities: [PreparationQuantity!]!
+  image_url: String
 
   """Historique des mouvements de stock pour cette préparation"""
   stockMovements: [StockMovement!]!
@@ -698,6 +721,9 @@ type Query {
 
     """Filtrer par un range de prix [min, max]."""
     price_between: [Float!]
+
+    """Filtrer par disponibilité."""
+    available: Boolean
   ): [Menu!]!
   menu(id: ID!): Menu
 
@@ -720,7 +746,9 @@ type Query {
 
   """Liste les quick access de l’entreprise courante, triés par index."""
   quickAccesses: [QuickAccess!]!
-  searchInStock(keyword: String!): [SearchItem!]!
+  room(id: ID, code: String): Room
+  searchInStock(keyword: String!): [SearchResult!]!
+  table(id: ID!): Table
 
   """Find a single user by an identifying attribute."""
   user(
@@ -856,6 +884,16 @@ type Query {
     """The offset from which items are returned."""
     page: Int
   ): MenuCategoryPaginator!
+  menuOrders(
+    status: String
+    orderBy: [QueryMenuOrdersOrderByOrderByClause!]
+
+    """Limits number of fetched items."""
+    first: Int! = 10
+
+    """The offset from which items are returned."""
+    page: Int
+  ): MenuOrderPaginator!
 
   """Liste les preparations de ma company uniquement"""
   preparations(
@@ -885,6 +923,17 @@ type Query {
     """The offset from which items are returned."""
     page: Int
   ): PreparationPaginator!
+  rooms(
+    search: String
+    code: String
+    orderBy: [QueryRoomsOrderByOrderByClause!]
+
+    """Limits number of fetched items."""
+    first: Int! = 10
+
+    """The offset from which items are returned."""
+    page: Int
+  ): RoomPaginator!
 
   """Liste les mouvements de stock pour l'entreprise actuelle."""
   stockMovements(
@@ -915,6 +964,17 @@ type Query {
     """The offset from which items are returned."""
     page: Int
   ): StockMovementPaginator!
+  tables(
+    search: String
+    roomId: ID
+    orderBy: [QueryTablesOrderByOrderByClause!]
+
+    """Limits number of fetched items."""
+    first: Int! = 10
+
+    """The offset from which items are returned."""
+    page: Int
+  ): TablePaginator!
 
   """List multiple users."""
   users(
@@ -927,6 +987,33 @@ type Query {
     """The offset from which items are returned."""
     page: Int
   ): UserPaginator!
+}
+
+"""Order by clause for Query.menuOrders.orderBy."""
+input QueryMenuOrdersOrderByOrderByClause {
+  """The column that is used for ordering."""
+  column: MenuOrderOrderByField!
+
+  """The direction that is used for ordering."""
+  order: SortOrder!
+}
+
+"""Order by clause for Query.rooms.orderBy."""
+input QueryRoomsOrderByOrderByClause {
+  """The column that is used for ordering."""
+  column: RoomOrderByField!
+
+  """The direction that is used for ordering."""
+  order: SortOrder!
+}
+
+"""Order by clause for Query.tables.orderBy."""
+input QueryTablesOrderByOrderByClause {
+  """The column that is used for ordering."""
+  column: TableOrderByField!
+
+  """The direction that is used for ordering."""
+  order: SortOrder!
 }
 
 """Bouton d’accès rapide configurable pour une entreprise."""
@@ -946,8 +1033,8 @@ type QuickAccess {
   """Couleur de l’icône (ex: primary, warning, error, info)."""
   icon_color: String!
 
-  """URL cible du bouton."""
-  url: String!
+  """Clé d'URL cible du bouton (route logique)."""
+  url_key: String!
 
   """Entreprise propriétaire."""
   company: Company!
@@ -959,11 +1046,35 @@ type QuickAccess {
   updated_at: DateTime!
 }
 
-type SearchItem {
-  type: String!
-  ingredient: Ingredient
-  preparation: Preparation
+type Room {
+  """Unique primary key."""
+  id: ID!
+  name: String!
+  code: String!
+  company: Company!
+  tables: [Table!]!
+  created_at: DateTime!
+  updated_at: DateTime!
 }
+
+enum RoomOrderByField {
+  ID
+  NAME
+  CODE
+  CREATED_AT
+  UPDATED_AT
+}
+
+"""A paginated list of Room items."""
+type RoomPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of Room items."""
+  data: [Room!]!
+}
+
+union SearchResult = Ingredient | Preparation
 
 """Directions for ordering a list of records."""
 enum SortOrder {
@@ -1043,6 +1154,34 @@ type StockMovementPaginator {
 
   """A list of StockMovement items."""
   data: [StockMovement!]!
+}
+
+type Table {
+  """Unique primary key."""
+  id: ID!
+  label: String!
+  seats: Int!
+  room: Room!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+enum TableOrderByField {
+  ID
+  LABEL
+  SEATS
+  ROOM_ID
+  CREATED_AT
+  UPDATED_AT
+}
+
+"""A paginated list of Table items."""
+type TablePaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of Table items."""
+  data: [Table!]!
 }
 
 """
