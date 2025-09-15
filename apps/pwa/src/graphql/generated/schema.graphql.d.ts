@@ -20,6 +20,23 @@ export type Scalars = {
   JSON: { input: unknown; output: unknown; }
 };
 
+export enum AllergenEnum {
+  Gluten = 'gluten',
+  FruitsACoque = 'fruits_a_coque',
+  Crustaces = 'crustaces',
+  Celeri = 'celeri',
+  Oeufs = 'oeufs',
+  Moutarde = 'moutarde',
+  Poisson = 'poisson',
+  Soja = 'soja',
+  Lait = 'lait',
+  Sulfites = 'sulfites',
+  Sesame = 'sesame',
+  Lupin = 'lupin',
+  Arachides = 'arachides',
+  Mollusques = 'mollusques'
+}
+
 export type Category = {
   __typename?: 'Category';
   /** Unique primary key. */
@@ -69,6 +86,10 @@ export type Company = {
   locations: Array<Location>;
   /** Types de localisation associés à cette entreprise. */
   locationTypes: Array<LocationType>;
+  /** Option pour activer ou désactiver la complétion automatique des commandes de menu. */
+  auto_complete_menu_orders?: Maybe<Scalars['Boolean']['output']>;
+  /** Langue préférée pour les données OpenFoodFacts (fr ou en). */
+  open_food_facts_language?: Maybe<Scalars['String']['output']>;
   /** When the company was created. */
   created_at: Scalars['DateTime']['output'];
   /** When the company was last updated. */
@@ -112,6 +133,8 @@ export type Ingredient = {
   base_quantity: Scalars['Float']['output'];
   /** Unit for the base quantity of the ingredient. */
   base_unit: UnitEnum;
+  /** Allergens contained in the ingredient. */
+  allergens: Array<AllergenEnum>;
   quantities: Array<IngredientQuantity>;
   /** The company that owns this ingredient. */
   company: Company;
@@ -342,10 +365,44 @@ export type Menu = {
   description?: Maybe<Scalars['String']['output']>;
   image_url?: Maybe<Scalars['String']['output']>;
   is_a_la_carte: Scalars['Boolean']['output'];
-  is_available: Scalars['Boolean']['output'];
+  available: Scalars['Boolean']['output'];
+  type: Scalars['String']['output'];
+  price: Scalars['Float']['output'];
+  categories: Array<MenuCategory>;
+  allergens: Array<AllergenEnum>;
   items: Array<MenuItem>;
   created_at: Scalars['DateTime']['output'];
   updated_at: Scalars['DateTime']['output'];
+};
+
+
+export type MenuAvailableArgs = {
+  quantity?: Scalars['Int']['input'];
+};
+
+export type MenuCategory = {
+  __typename?: 'MenuCategory';
+  /** Unique primary key. */
+  id: Scalars['ID']['output'];
+  /** Category name. */
+  name: Scalars['String']['output'];
+  /** Menus in this category. */
+  menus: Array<Menu>;
+  /** The company that owns this category. */
+  company: Company;
+  /** When the category was created. */
+  created_at: Scalars['DateTime']['output'];
+  /** When the category was last updated. */
+  updated_at: Scalars['DateTime']['output'];
+};
+
+/** A paginated list of MenuCategory items. */
+export type MenuCategoryPaginator = {
+  __typename?: 'MenuCategoryPaginator';
+  /** Pagination information about the list of items. */
+  paginatorInfo: PaginatorInfo;
+  /** A list of MenuCategory items. */
+  data: Array<MenuCategory>;
 };
 
 export type MenuItem = {
@@ -367,6 +424,20 @@ export type MenuOrder = {
   menu: Menu;
   created_at: Scalars['DateTime']['output'];
   updated_at: Scalars['DateTime']['output'];
+};
+
+export enum MenuOrderOrderByField {
+  Status = 'STATUS',
+  CreatedAt = 'CREATED_AT'
+}
+
+/** A paginated list of MenuOrder items. */
+export type MenuOrderPaginator = {
+  __typename?: 'MenuOrderPaginator';
+  /** Pagination information about the list of items. */
+  paginatorInfo: PaginatorInfo;
+  /** A list of MenuOrder items. */
+  data: Array<MenuOrder>;
 };
 
 export type MenuOrderStats = {
@@ -461,6 +532,8 @@ export type Preparation = {
   name: Scalars['String']['output'];
   /** Unit of measurement for the preparation. */
   unit: UnitEnum;
+  /** Allergens contained in this preparation. */
+  allergens: Array<AllergenEnum>;
   /** The company that produces this preparation. */
   company: Company;
   entities: Array<PreparationEntity>;
@@ -468,6 +541,7 @@ export type Preparation = {
   /** The categories associated with this preparation. */
   categories: Array<Category>;
   quantities: Array<PreparationQuantity>;
+  image_url?: Maybe<Scalars['String']['output']>;
   /** Historique des mouvements de stock pour cette préparation */
   stockMovements: Array<StockMovement>;
   withdrawals_today_count: Scalars['Int']['output'];
@@ -530,6 +604,8 @@ export type Query = {
    * Sinon, la recherche se fait par mots-clés.
    */
   search?: Maybe<OpenFoodFactsProduct>;
+  /** Liste les allergènes disponibles */
+  allergens: Array<AllergenEnum>;
   /** Find a single Category (only if it belongs to the current company). */
   Category?: Maybe<Category>;
   /** Find a single company by an identifying attribute. */
@@ -547,11 +623,18 @@ export type Query = {
   measurementUnits: Array<MeasurementUnitType>;
   menus: Array<Menu>;
   menu?: Maybe<Menu>;
+  /** Find a single MenuCategory (only if it belongs to the current company). */
+  menuCategory?: Maybe<MenuCategory>;
   menuOrderStats: MenuOrderStats;
   perishables: Array<Perishable>;
   nonPerishableIngredients: Array<Ingredient>;
   /** Trouve une preparation (et seulement si elle appartient à ma company) */
   preparation?: Maybe<Preparation>;
+  /** Liste les quick access de l’entreprise courante, triés par index. */
+  quickAccesses: Array<QuickAccess>;
+  room?: Maybe<Room>;
+  searchInStock: Array<SearchResult>;
+  table?: Maybe<Table>;
   /** Find a single user by an identifying attribute. */
   user?: Maybe<User>;
   /** The currently authenticated user. */
@@ -568,10 +651,15 @@ export type Query = {
   locationTypes: LocationTypePaginator;
   /** Liste les pertes pour l'entreprise actuelle. */
   losses: LossPaginator;
+  /** List menu categories for the current company. */
+  menuCategories: MenuCategoryPaginator;
+  menuOrders: MenuOrderPaginator;
   /** Liste les preparations de ma company uniquement */
   preparations: PreparationPaginator;
+  rooms: RoomPaginator;
   /** Liste les mouvements de stock pour l'entreprise actuelle. */
   stockMovements: StockMovementPaginator;
+  tables: TablePaginator;
   /** List multiple users. */
   users: UserPaginator;
 };
@@ -622,8 +710,23 @@ export type QueryLossesStatsArgs = {
 };
 
 
+export type QueryMenusArgs = {
+  allergens?: InputMaybe<Array<AllergenEnum>>;
+  category_ids?: InputMaybe<Array<Scalars['ID']['input']>>;
+  types?: InputMaybe<Array<Scalars['String']['input']>>;
+  price_between?: InputMaybe<Array<Scalars['Float']['input']>>;
+  available?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
 export type QueryMenuArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryMenuCategoryArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -641,6 +744,22 @@ export type QueryPerishablesArgs = {
 export type QueryPreparationArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryRoomArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  code?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QuerySearchInStockArgs = {
+  keyword: Scalars['String']['input'];
+};
+
+
+export type QueryTableArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -670,6 +789,7 @@ export type QueryIngredientsArgs = {
   unit?: InputMaybe<UnitEnum>;
   locationIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   categoryIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+  allergens?: InputMaybe<Array<AllergenEnum>>;
   orderBy?: InputMaybe<Array<OrderByClause>>;
   barcode?: InputMaybe<Scalars['String']['input']>;
   first?: Scalars['Int']['input'];
@@ -707,12 +827,37 @@ export type QueryLossesArgs = {
 };
 
 
+export type QueryMenuCategoriesArgs = {
+  search?: InputMaybe<Scalars['String']['input']>;
+  first?: Scalars['Int']['input'];
+  page?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryMenuOrdersArgs = {
+  status?: InputMaybe<Scalars['String']['input']>;
+  orderBy?: InputMaybe<Array<QueryMenuOrdersOrderByOrderByClause>>;
+  first?: Scalars['Int']['input'];
+  page?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type QueryPreparationsArgs = {
   search?: InputMaybe<Scalars['String']['input']>;
   unit?: InputMaybe<UnitEnum>;
   locationIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   categoryIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+  allergens?: InputMaybe<Array<AllergenEnum>>;
   orderBy?: InputMaybe<Array<OrderByClause>>;
+  first?: Scalars['Int']['input'];
+  page?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryRoomsArgs = {
+  search?: InputMaybe<Scalars['String']['input']>;
+  code?: InputMaybe<Scalars['String']['input']>;
+  orderBy?: InputMaybe<Array<QueryRoomsOrderByOrderByClause>>;
   first?: Scalars['Int']['input'];
   page?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -731,11 +876,98 @@ export type QueryStockMovementsArgs = {
 };
 
 
+export type QueryTablesArgs = {
+  search?: InputMaybe<Scalars['String']['input']>;
+  roomId?: InputMaybe<Scalars['ID']['input']>;
+  orderBy?: InputMaybe<Array<QueryTablesOrderByOrderByClause>>;
+  first?: Scalars['Int']['input'];
+  page?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type QueryUsersArgs = {
   name?: InputMaybe<Scalars['String']['input']>;
   first?: Scalars['Int']['input'];
   page?: InputMaybe<Scalars['Int']['input']>;
 };
+
+/** Order by clause for Query.menuOrders.orderBy. */
+export type QueryMenuOrdersOrderByOrderByClause = {
+  /** The column that is used for ordering. */
+  column: MenuOrderOrderByField;
+  /** The direction that is used for ordering. */
+  order: SortOrder;
+};
+
+/** Order by clause for Query.rooms.orderBy. */
+export type QueryRoomsOrderByOrderByClause = {
+  /** The column that is used for ordering. */
+  column: RoomOrderByField;
+  /** The direction that is used for ordering. */
+  order: SortOrder;
+};
+
+/** Order by clause for Query.tables.orderBy. */
+export type QueryTablesOrderByOrderByClause = {
+  /** The column that is used for ordering. */
+  column: TableOrderByField;
+  /** The direction that is used for ordering. */
+  order: SortOrder;
+};
+
+/** Bouton d’accès rapide configurable pour une entreprise. */
+export type QuickAccess = {
+  __typename?: 'QuickAccess';
+  /** Identifiant unique. */
+  id: Scalars['ID']['output'];
+  /** Position (1..5) au sein de l’entreprise. */
+  index: Scalars['Int']['output'];
+  /** Libellé du bouton. */
+  name: Scalars['String']['output'];
+  /** Nom de l’icône (ex: Plus, Notebook, Minus, Calendar, Check). */
+  icon: Scalars['String']['output'];
+  /** Couleur de l’icône (ex: primary, warning, error, info). */
+  icon_color: Scalars['String']['output'];
+  /** Clé d'URL cible du bouton (route logique). */
+  url_key: Scalars['String']['output'];
+  /** Entreprise propriétaire. */
+  company: Company;
+  /** Date de création. */
+  created_at: Scalars['DateTime']['output'];
+  /** Date de mise à jour. */
+  updated_at: Scalars['DateTime']['output'];
+};
+
+export type Room = {
+  __typename?: 'Room';
+  /** Unique primary key. */
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  code: Scalars['String']['output'];
+  company: Company;
+  tables: Array<Table>;
+  created_at: Scalars['DateTime']['output'];
+  updated_at: Scalars['DateTime']['output'];
+};
+
+export enum RoomOrderByField {
+  Id = 'ID',
+  Name = 'NAME',
+  Code = 'CODE',
+  CreatedAt = 'CREATED_AT',
+  UpdatedAt = 'UPDATED_AT'
+}
+
+/** A paginated list of Room items. */
+export type RoomPaginator = {
+  __typename?: 'RoomPaginator';
+  /** Pagination information about the list of items. */
+  paginatorInfo: PaginatorInfo;
+  /** A list of Room items. */
+  data: Array<Room>;
+};
+
+export type SearchResult = Ingredient | Preparation;
 
 /** Directions for ordering a list of records. */
 export enum SortOrder {
@@ -802,6 +1034,35 @@ export type StockMovementPaginator = {
   paginatorInfo: PaginatorInfo;
   /** A list of StockMovement items. */
   data: Array<StockMovement>;
+};
+
+export type Table = {
+  __typename?: 'Table';
+  /** Unique primary key. */
+  id: Scalars['ID']['output'];
+  label: Scalars['String']['output'];
+  seats: Scalars['Int']['output'];
+  room: Room;
+  created_at: Scalars['DateTime']['output'];
+  updated_at: Scalars['DateTime']['output'];
+};
+
+export enum TableOrderByField {
+  Id = 'ID',
+  Label = 'LABEL',
+  Seats = 'SEATS',
+  RoomId = 'ROOM_ID',
+  CreatedAt = 'CREATED_AT',
+  UpdatedAt = 'UPDATED_AT'
+}
+
+/** A paginated list of Table items. */
+export type TablePaginator = {
+  __typename?: 'TablePaginator';
+  /** Pagination information about the list of items. */
+  paginatorInfo: PaginatorInfo;
+  /** A list of Table items. */
+  data: Array<Table>;
 };
 
 /** Specify if you want to include or exclude trashed results from a query. */
