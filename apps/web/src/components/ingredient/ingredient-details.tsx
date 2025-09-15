@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@workspace/ui/components/button";
 import { ImagePlaceholder } from "@workspace/ui/components/image-placeholder";
@@ -39,13 +38,12 @@ export function IngredientDetails({
       <div className="w-full lg:w-3/4 max-w-lg">
         <div className="aspect-square rounded-xl overflow-hidden bg-khp-background-secondary w-full">
           {ingredient.image_url ? (
-            <Image
+            <img
               src={ingredient.image_url}
               alt={ingredient.name}
               width={200}
               height={200}
               className="w-full h-full object-cover transition-transform duration-300"
-              unoptimized={process.env.NODE_ENV === "development"}
             />
           ) : (
             <ImagePlaceholder className="w-full h-full rounded-lg" />

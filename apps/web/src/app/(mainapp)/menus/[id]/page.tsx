@@ -6,7 +6,6 @@ import { Button } from "@workspace/ui/components/button";
 import { ChevronLeft, Edit } from "lucide-react";
 import { CategoryBadge } from "@/components/category-badge";
 import { ImagePlaceholder } from "@workspace/ui/components/image-placeholder";
-import Image from "next/image";
 import { AllegernsBadgesList } from "@workspace/ui/components/allergens-badge";
 import { MealsIngredientDataTable } from "@/components/meals/meals-ingredients-data-table";
 import { MealsIngredientColumns } from "@/components/meals/meals-ingredient-columns";
@@ -74,13 +73,12 @@ export default async function MenuPage({
         <div className="w-full lg:w-3/4 max-w-lg">
           <div className="aspect-square rounded-xl overflow-hidden bg-khp-background-secondary w-full">
             {menu?.image_url ? (
-              <Image
+              <img
                 src={menu.image_url}
                 alt={menu.name}
                 width={200}
                 height={200}
                 className="w-full h-full object-cover transition-transform duration-300"
-                unoptimized={process.env.NODE_ENV === "development"}
               />
             ) : (
               <ImagePlaceholder className="w-full h-full rounded-lg" />
