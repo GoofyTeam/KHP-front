@@ -26,6 +26,7 @@ type OfflineQueueStore = {
   remove: (id: string) => Promise<void>;
   reload: () => Promise<void>;
   syncNow: () => Promise<void>;
+  retryOne: (id: string) => Promise<void>;
 };
 
 const STORE = "queue";
@@ -109,6 +110,31 @@ export const useOfflineQueue = create<OfflineQueueStore>((set, get) => ({
 
     set({ syncState: "IDLE" });
   },
+
+  async retryOne(id: string) {
+    const { db, items } = get();
+    if (!db) return;
+    const it = items.find((x) => x.id === id);
+    if (!it) return;
+    if (it.status !== "PENDING" && it.status !== "ERROR") return;
+    try {
+      await api.post(it.path, it.body as Record<string, unknown>);
+      await idbDelete(db, STORE, it.id);
+      await get().reload();
+    } catch (e) {
+      const errMsg = (e as Error)?.message || "Unknown error";
+      const anyErr = e as any;
+      const status = anyErr?.status as number | undefined;
+      const updated: OfflineMutation = {
+        ...it,
+        status: status && status >= 400 && status < 500 && status !== 429 ? "ERROR" : "PENDING",
+        attempts: it.attempts + 1,
+        lastError: errMsg,
+      };
+      await idbPut(db, STORE, updated);
+      await get().reload();
+    }
+  },
 }));
 
 // Global online listener to trigger sync when back online
@@ -117,4 +143,3 @@ if (typeof window !== "undefined") {
     useOfflineQueue.getState().syncNow().catch(() => {});
   });
 }
-
