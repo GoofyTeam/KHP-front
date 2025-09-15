@@ -24,6 +24,8 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select";
 import { cn } from "@workspace/ui/lib/utils";
+import { useState } from "react";
+import { extractApiErrorMessage } from "../../../lib/error-utils";
 
 function RegisterLosses() {
   const navigate = useNavigate();
@@ -46,6 +48,8 @@ function RegisterLosses() {
     },
   });
 
+  const [serverError, setServerError] = useState<string | null>(null);
+
   const getTotalQuantity = (product: WantedDataType) => {
     if (!product.quantities) return 0;
     return product.quantities.reduce(
@@ -62,8 +66,24 @@ function RegisterLosses() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[75svh] my-4">
       <Form {...form}>
+        {serverError && (
+          <div
+            role="alert"
+            className="w-full max-w-md mx-auto mb-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          >
+            {serverError}
+          </div>
+        )}
+
         <form
-          onSubmit={form.handleSubmit(registerLossesSubmit)}
+          onSubmit={form.handleSubmit(async (values) => {
+            setServerError(null);
+            try {
+              await registerLossesSubmit(values);
+            } catch (err) {
+              setServerError(extractApiErrorMessage(err));
+            }
+          })}
           className="space-y-4 flex flex-col items-center px-4 w-full max-w-md"
         >
           <img

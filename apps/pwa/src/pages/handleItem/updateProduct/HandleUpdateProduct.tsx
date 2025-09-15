@@ -25,6 +25,7 @@ import { getAllMeasurementUnits } from "../../../types/mesurmentsUnitEnum";
 import { Image } from "lucide-react";
 import { handleUpdateProductSchema } from "./handleUpdateProductSchema";
 import { updateProductSubmit } from "./update-product";
+import { extractApiErrorMessage } from "../../../lib/error-utils";
 
 function HandleUpdateProduct() {
   const navigate = useNavigate();
@@ -37,6 +38,7 @@ function HandleUpdateProduct() {
 
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof handleUpdateProductSchema>>({
     resolver: zodResolver(handleUpdateProductSchema),
@@ -52,7 +54,12 @@ function HandleUpdateProduct() {
   });
 
   async function onSubmit(values: z.infer<typeof handleUpdateProductSchema>) {
-    await updateProductSubmit(values, internalId);
+    setServerError(null);
+    try {
+      await updateProductSubmit(values, internalId);
+    } catch (err) {
+      setServerError(extractApiErrorMessage(err));
+    }
   }
 
   return (
@@ -72,6 +79,15 @@ function HandleUpdateProduct() {
           >
             <Image className="text-khp-primary" strokeWidth={1} size={32} />
             <p className="text-khp-primary font-light">Add a picture</p>
+          </div>
+        )}
+
+        {serverError && (
+          <div
+            role="alert"
+            className="w-full max-w-md mx-auto mb-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          >
+            {serverError}
           </div>
         )}
 

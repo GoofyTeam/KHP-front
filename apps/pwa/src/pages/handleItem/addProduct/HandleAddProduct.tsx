@@ -26,6 +26,7 @@ import { addProductSubmit } from "./add-product-submit";
 import { Minus, Plus } from "lucide-react";
 import { handleItemSchema } from "./handleItemSchema";
 import { ImageAdd } from "@workspace/ui/components/image-placeholder";
+import { extractApiErrorMessage } from "../../../lib/error-utils";
 
 function HandleAddProduct() {
   const navigate = useNavigate();
@@ -38,6 +39,7 @@ function HandleAddProduct() {
 
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const storageUnitDefault = getAllMeasurementUnits().find(
     (unit) => unit.value === "unit"
@@ -77,7 +79,12 @@ function HandleAddProduct() {
   });
 
   async function onSubmit(values: z.infer<typeof handleItemSchema>) {
-    await addProductSubmit(values, barcode, internalId, product!);
+    setServerError(null);
+    try {
+      await addProductSubmit(values, barcode, internalId, product!);
+    } catch (err) {
+      setServerError(extractApiErrorMessage(err));
+    }
   }
 
   return (
@@ -92,6 +99,15 @@ function HandleAddProduct() {
           />
         ) : (
           <ImageAdd iconSize={32} onClick={() => inputRef.current?.click()} />
+        )}
+
+        {serverError && (
+          <div
+            role="alert"
+            className="w-full max-w-md mx-auto mb-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          >
+            {serverError}
+          </div>
         )}
 
         <form
