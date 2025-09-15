@@ -1,17 +1,36 @@
 "use client";
 
 import { FC, ReactElement, cloneElement, isValidElement } from "react";
-import { Plus, Notebook } from "lucide-react";
+import {
+  Plus,
+  Notebook,
+  Minus,
+  Calendar,
+  Check,
+  type LucideProps,
+} from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
+import {
+  normalizeQuickAccessColor,
+  quickAccessBgClassByColor,
+} from "@workspace/ui/lib/quick-access-utils";
 
-type IconType = "plus" | "note";
-type ColorType = "green" | "red";
+export {
+  normalizeQuickAccessColor,
+  quickAccessBgClassByColor,
+  getQuickAccessBgClass,
+  quickAccessUrlMap,
+  getQuickAccessUrl,
+} from "@workspace/ui/lib/quick-access-utils";
+
+type ColorKey = string;
+
 type SizeType = "sm" | "md" | "lg";
 
 type BaseProps = {
   title: string;
-  icon: IconType;
-  color: ColorType;
+  icon: string;
+  color: ColorKey;
   size?: SizeType;
   className?: string;
   subtitle?: string;
@@ -32,30 +51,25 @@ type WithAsChild = BaseProps & {
 
 type QuickAccessButtonProps = WithOnClick | WithAsChild;
 
-const circleColors: Record<ColorType, string> = {
-  green: "bg-khp-primary",
-  red: "bg-khp-error",
-};
-
 const sizeMap: Record<
   SizeType,
   { circle: string; icon: string; title: string; subtitle: string }
 > = {
   sm: {
-    circle: "w-20 h-20 md:w-24 md:h-24",
-    icon: "w-10 h-10 md:w-12 md:h-12",
+    circle: "w-full aspect-square max-w-[7.5rem] md:max-w-[8.5rem]",
+    icon: "w-[60%] h-[60%]",
     title: "text-xs md:text-sm mt-2",
     subtitle: "text-[10px]",
   },
   md: {
-    circle: "w-24 h-24 md:w-28 md:h-28",
-    icon: "w-14 h-14 md:w-16 md:h-16",
+    circle: "w-full aspect-square max-w-[8.5rem] md:max-w-[9.5rem]",
+    icon: "w-[65%] h-[65%]",
     title: "text-sm md:text-base mt-4",
     subtitle: "text-[11px]",
   },
   lg: {
-    circle: "w-28 h-28 md:w-32 md:h-32",
-    icon: "w-16 h-16 md:w-18 md:h-18",
+    circle: "w-full aspect-square max-w-[10rem] md:max-w-[11rem]",
+    icon: "w-[70%] h-[70%]",
     title: "text-base mt-6",
     subtitle: "text-sm",
   },
@@ -75,6 +89,23 @@ export const QuickAccessButton: FC<QuickAccessButtonProps> = ({
 }) => {
   const sz = sizeMap[size];
 
+  const iconKey = String(icon);
+  const normalizedIcon = iconKey.toLowerCase();
+  const IconComponent: FC<LucideProps> =
+    normalizedIcon === "plus"
+      ? Plus
+      : normalizedIcon === "note" || normalizedIcon === "notebook"
+        ? Notebook
+        : normalizedIcon === "minus"
+          ? Minus
+          : normalizedIcon === "calendar"
+            ? Calendar
+            : normalizedIcon === "check"
+              ? Check
+              : Plus;
+
+  const normalizedColor = normalizeQuickAccessColor(color);
+
   const content = (
     <div
       className={cn(
@@ -86,19 +117,15 @@ export const QuickAccessButton: FC<QuickAccessButtonProps> = ({
         {title}
       </span>
 
-      <div className="flex-1 flex items-center justify-center">
+      <div className="flex-1 flex items-center justify-center w-[80%] md:w-[70%] lg:w-[60%] xl:w-[50%]">
         <div
           className={cn(
             "rounded-full flex items-center justify-center text-white",
-            circleColors[color],
+            quickAccessBgClassByColor[normalizedColor],
             sz.circle
           )}
         >
-          {icon === "plus" ? (
-            <Plus className={sz.icon} aria-hidden />
-          ) : (
-            <Notebook className={sz.icon} aria-hidden />
-          )}
+          <IconComponent className={sz.icon} aria-hidden />
         </div>
       </div>
 

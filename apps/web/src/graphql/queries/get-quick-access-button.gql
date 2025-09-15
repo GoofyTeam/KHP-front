@@ -1,0 +1,9 @@
+query GetQuickAccessButton {
+  quickAccesses {
+    id
+    name
+    icon
+    icon_color
+    url_key
+  }
+}

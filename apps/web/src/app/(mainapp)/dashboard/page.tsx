@@ -1,18 +1,21 @@
-import { GetLocationsDocument } from "@/graphql/generated/graphql";
+import { GetQuickAccessButtonDocument } from "@/graphql/generated/graphql";
 import { query } from "@/lib/ApolloClient";
 import { QuickAccessButton } from "@workspace/ui/components/quick-access-button";
+import {
+  getQuickAccessUrl,
+  getQuickAccessBgClass,
+} from "@workspace/ui/lib/quick-access-utils";
 import { ListPanel } from "@/components/ListPanel";
 import OrderLoss from "@/components/OrderLoss";
 import UsedItems from "@/components/UsedItems";
 import Link from "next/link";
 
-// Avoid static generation rendering for this page
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function Dashboard() {
-  const { loading, error } = await query({
-    query: GetLocationsDocument,
+  const { data, loading, error } = await query({
+    query: GetQuickAccessButtonDocument,
   });
 
   if (loading) {
@@ -35,6 +38,13 @@ export default async function Dashboard() {
       </div>
     );
   }
+
+  const sortedAccesses = (data?.quickAccesses ?? [])
+    .slice()
+    .sort((a, b) => Number(a.id) - Number(b.id));
+
+  const quickAccesses = sortedAccesses.slice(0, 4);
+  const extraAccess = sortedAccesses[4];
 
   return (
     <main className="md:h-dvh h-auto md:overflow-y-clip overflow-auto box-border md:-m-4">
@@ -72,62 +82,31 @@ export default async function Dashboard() {
 
           <section className="md:col-span-4 md:row-start-2 md:h-full flex flex-col gap-3 min-h-0">
             <div className="grid grid-cols-2 grid-rows-2 gap-3 flex-1 min-h-0">
-              <QuickAccessButton
-                asChild
-                title="Add to stock"
-                icon="plus"
-                color="green"
-                size="sm"
-                stretch
-              >
-                <Link href="/stock/add">
-                  <span />
-                </Link>
-              </QuickAccessButton>
-              <QuickAccessButton
-                asChild
-                title="Add a loss"
-                icon="plus"
-                color="red"
-                size="sm"
-                stretch
-              >
-                <Link href="/loss/add">
-                  <span />
-                </Link>
-              </QuickAccessButton>
-              <QuickAccessButton
-                asChild
-                title="Another quick action"
-                icon="plus"
-                color="green"
-                size="sm"
-                stretch
-              >
-                <Link href="/actions/other">
-                  <span />
-                </Link>
-              </QuickAccessButton>
-              <QuickAccessButton
-                asChild
-                title="Take Order"
-                icon="note"
-                color="green"
-                size="sm"
-                stretch
-              >
-                <Link href="/orders/new">
-                  <span />
-                </Link>
-              </QuickAccessButton>
+              {quickAccesses.map((qa) => (
+                <QuickAccessButton
+                  key={qa.id}
+                  asChild
+                  title={qa.name}
+                  icon={qa.icon}
+                  color={qa.icon_color}
+                  size="sm"
+                  stretch
+                >
+                  <Link href={getQuickAccessUrl(qa.url_key)}>
+                    <span />
+                  </Link>
+                </QuickAccessButton>
+              ))}
             </div>
 
             <div className="mt-auto">
               <Link
-                href="/actions"
-                className="block rounded-md bg-khp-primary px-4 py-4 text-center font-semibold text-white"
+                href={getQuickAccessUrl(extraAccess.url_key)}
+                className={`block rounded-md px-4 py-4 text-center font-semibold text-white ${getQuickAccessBgClass(
+                  extraAccess.icon_color
+                )}`}
               >
-                Another quick action
+                {extraAccess.name}
               </Link>
             </div>
           </section>
