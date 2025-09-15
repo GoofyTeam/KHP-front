@@ -47,6 +47,9 @@ const preparationItemsSchema = z.object({
   location_id: z.string().nonempty("Location is required"),
 });
 
+const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/jpg"] as const;
+
 const createMenuSchema = z
   .object({
     name: z.string().min(2, "Name must be at least 2 characters long"),
@@ -55,10 +58,11 @@ const createMenuSchema = z
       .optional()
       .refine((file) => {
         if (!file) return true; // image is optional
-        const validTypes = ["image/jpeg", "image/png", "image/jpg"];
-        const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
-        return validTypes.includes(file.type) && file.size <= maxSizeInBytes;
-      }, "Image must be a JPEG or PNG file and less than 1MB"),
+        return (
+          ACCEPTED_IMAGE_TYPES.includes(file.type as (typeof ACCEPTED_IMAGE_TYPES)[number]) &&
+          file.size <= MAX_IMAGE_SIZE_BYTES
+        );
+      }, "Image must be a JPEG or PNG file and less than 10MB"),
     unit: z.string().nonempty("Unit is required"),
     base_quantity: z
       .string()
@@ -90,6 +94,73 @@ const createMenuSchema = z
 
 export type CreateMenuFormValues = z.infer<typeof createMenuSchema>;
 
+type CreatePreparationActionResult = Awaited<
+  ReturnType<typeof createPreparationAction>
+>;
+
+const DEFAULT_FORM_VALUES: Partial<CreateMenuFormValues> = {
+  name: "",
+  image: undefined,
+  unit: undefined,
+  base_quantity: undefined,
+  base_unit: undefined,
+  category_id: "1",
+  entities: [],
+};
+
+function buildSubmissionErrorMessage(result: CreatePreparationActionResult) {
+  const fallbackMessage = "An error occurred while creating the preparation.";
+
+  const detailedMessage = (() => {
+    try {
+      if (!result || typeof result !== "object") {
+        return null;
+      }
+
+      if (
+        "details" in result &&
+        result.details &&
+        typeof result.details === "object" &&
+        "message" in (result.details as Record<string, unknown>)
+      ) {
+        const message = (result.details as { message?: unknown }).message;
+        if (typeof message === "string" && message.trim()) {
+          return message;
+        }
+      }
+
+      if ("error" in result && typeof result.error === "string" && result.error.trim()) {
+        return result.error;
+      }
+    } catch (error) {
+      console.error("Failed to extract submission error message", error);
+    }
+
+    return null;
+  })();
+
+  const message = detailedMessage ?? fallbackMessage;
+  const lowerCaseMessage = message.toLowerCase();
+
+  const tips: string[] = [];
+  if (lowerCaseMessage.includes("authentication") || lowerCaseMessage.includes("unauthorized")) {
+    tips.push("You must be authenticated. Please sign in again.");
+  }
+  if (lowerCaseMessage.includes("session expired") || lowerCaseMessage.includes("419")) {
+    tips.push("Your session has expired. Refresh the page, then try again.");
+  }
+  if (lowerCaseMessage.includes("validation") || lowerCaseMessage.includes("422")) {
+    tips.push("Fix the fields with errors, then submit again.");
+  }
+  if (tips.length === 0) {
+    tips.push(
+      "Check required fields, image format/size, and your network connection."
+    );
+  }
+
+  return [message, ...tips].join("\n");
+}
+
 const CATEGORY_PAGE_SIZE = 20;
 
 export default function CreatePreparationPage() {
@@ -111,19 +182,24 @@ export default function CreatePreparationPage() {
     notifyOnNetworkStatusChange: true,
   });
 
+  const categoriesData = ingredientCategories?.categories?.data;
   const categoriesOptions = useMemo(() => {
-    const nodes = ingredientCategories?.categories?.data ?? [];
-    return nodes.map((category) => ({
+    if (!categoriesData) {
+      return [];
+    }
+
+    return categoriesData.map((category) => ({
       value: category.id,
       label: category.name,
     }));
-  }, [ingredientCategories?.categories?.data]);
+  }, [categoriesData]);
 
   const categoriesPaginator = ingredientCategories?.categories?.paginatorInfo;
   const hasMoreCategories = categoriesPaginator?.hasMorePages ?? false;
   const currentCategoryPage = categoriesPaginator?.currentPage ?? 1;
   const isFetchingMoreCategories =
     categoriesNetworkStatus === NetworkStatus.fetchMore;
+  const isCategoriesLoading = categoriesLoading || isFetchingMoreCategories;
 
   const handleLoadMoreCategories = useCallback(() => {
     if (!hasMoreCategories || isFetchingMoreCategories) {
@@ -169,82 +245,53 @@ export default function CreatePreparationPage() {
 
   const form = useForm<CreateMenuFormValues>({
     resolver: zodResolver(createMenuSchema),
-    defaultValues: {
-      name: "",
-      image: undefined,
-      unit: undefined,
-      base_quantity: undefined,
-      base_unit: undefined,
-      category_id: "1",
-      entities: [],
-    },
+    defaultValues: DEFAULT_FORM_VALUES,
   });
 
   const unitsSelections = useMemo(getAllMeasurementUnitsOnlyValues, []);
 
-  async function onPreparationCreateSubmit(values: CreateMenuFormValues) {
-    const res = await createPreparationAction(values);
+  const handleImageChange = useCallback(
+    (
+      event: ChangeEvent<HTMLInputElement>,
+      onChange: (file?: File) => void
+    ) => {
+      const file = event.target.files?.[0];
 
-    if (res.success) {
+      if (!file) {
+        setFilePreview(null);
+        onChange(undefined);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFilePreview(reader.result as string);
+        onChange(file);
+      };
+      reader.readAsDataURL(file);
+    },
+    [setFilePreview]
+  );
+
+  async function onPreparationCreateSubmit(values: CreateMenuFormValues) {
+    const result = await createPreparationAction(values);
+
+    if (result.success) {
       router.push("/preparations");
       return;
     }
 
-    console.error("Failed to create preparation:", res.error, res.details);
-
-    let message = "An error occurred while creating the preparation.";
-    const detailMessage = (() => {
-      try {
-        if (res && typeof res === "object") {
-          const anyRes = res as unknown as {
-            details?: unknown;
-            error?: string;
-          };
-          if (
-            anyRes.details &&
-            typeof anyRes.details === "object" &&
-            "message" in (anyRes.details as Record<string, unknown>) &&
-            typeof (anyRes.details as { message?: unknown }).message ===
-              "string"
-          ) {
-            return (anyRes.details as { message: string }).message;
-          }
-          if (typeof anyRes.error === "string" && anyRes.error.trim()) {
-            return anyRes.error;
-          }
-        }
-      } catch {}
-      return null;
-    })();
-
-    if (detailMessage) {
-      message = detailMessage;
-    }
-
-    const tips: string[] = [];
-    const lower = message.toLowerCase();
-    if (lower.includes("authentication") || lower.includes("unauthorized")) {
-      tips.push("You must be authenticated. Please sign in again.");
-    }
-    if (lower.includes("session expired") || lower.includes("419")) {
-      tips.push("Your session has expired. Refresh the page, then try again.");
-    }
-    if (lower.includes("validation") || lower.includes("422")) {
-      tips.push("Fix the fields with errors, then submit again.");
-    }
-    if (tips.length === 0) {
-      tips.push(
-        "Check required fields, image format/size, and your network connection."
-      );
-    }
-
-    const combinedMessage = [message, ...tips].join("\n");
+    console.error("Failed to create preparation:", result.error, result.details);
 
     form.setError("root", {
       type: "server",
-      message: combinedMessage,
+      message: buildSubmissionErrorMessage(result),
     });
   }
+
+  const rootErrorLines = form.formState.errors.root?.message
+    ?.split("\n")
+    .filter(Boolean);
 
   return (
     <div className="flex flex-col h-full justify-center items-center w-full">
@@ -259,9 +306,7 @@ export default function CreatePreparationPage() {
                 <div className="flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 text-khp-error mt-0.5 flex-shrink-0" />
                   <div className="flex-1">
-                    {form.formState.errors.root.message
-                      .split("\n")
-                      .map((line, idx) => (
+                    {rootErrorLines?.map((line, idx) => (
                         <p
                           key={idx}
                           className={`text-sm ${idx === 0 ? "font-medium" : ""} text-khp-error`}
@@ -320,26 +365,15 @@ export default function CreatePreparationPage() {
                       type="file"
                       name={name}
                       accept="image/jpeg, image/png, image/jpg"
-                      max={1048576}
+                      max={MAX_IMAGE_SIZE_BYTES}
                       capture="environment"
                       ref={(e: HTMLInputElement | null) => {
                         ref(e);
                         inputRef.current = e;
                       }}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            setFilePreview(reader.result as string);
-                            onChange(file);
-                          };
-                          reader.readAsDataURL(file);
-                        } else {
-                          setFilePreview(null);
-                          onChange(undefined);
-                        }
-                      }}
+                      onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                        handleImageChange(event, onChange)
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -465,9 +499,7 @@ export default function CreatePreparationPage() {
                           options={categoriesOptions}
                           placeholder="Select a category"
                           hasMore={hasMoreCategories}
-                          loading={
-                            categoriesLoading || isFetchingMoreCategories
-                          }
+                          loading={isCategoriesLoading}
                           onLoadMore={handleLoadMoreCategories}
                           emptyMessage="No categories found"
                         />
