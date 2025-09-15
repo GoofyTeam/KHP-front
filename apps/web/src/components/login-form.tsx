@@ -3,6 +3,7 @@
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { useForm } from "react-hook-form";
+import { Loader2 } from "lucide-react";
 
 import {
   Form,
@@ -86,7 +87,14 @@ export function LoginForm({
           )}
         />
         <Button type="submit" variant="khp-default" disabled={isLoading}>
-          {isLoading ? "Connexion..." : "Se connecter"}
+          {isLoading ? (
+            <span className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Connexion...
+            </span>
+          ) : (
+            "Se connecter"
+          )}
         </Button>
       </form>
     </Form>

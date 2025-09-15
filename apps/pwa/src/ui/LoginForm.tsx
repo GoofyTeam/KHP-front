@@ -11,12 +11,15 @@ import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import api from "../lib/api";
 import { useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -25,6 +28,7 @@ export function LoginForm({
     const password = formData.get("password") as string;
 
     try {
+      setIsLoading(true);
       await api.post("/api/login", {
         email,
         password,
@@ -36,6 +40,8 @@ export function LoginForm({
       });
     } catch (error) {
       console.error("Login failed:", error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -75,8 +81,20 @@ export function LoginForm({
                 />
               </div>
               <div className="flex flex-col gap-3">
-                <Button variant="khp-default" type="submit" className="w-full">
-                  Login
+                <Button
+                  variant="khp-default"
+                  type="submit"
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <span className="flex items-center justify-center gap-2 w-full">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Logging in...
+                    </span>
+                  ) : (
+                    "Login"
+                  )}
                 </Button>
               </div>
             </div>
