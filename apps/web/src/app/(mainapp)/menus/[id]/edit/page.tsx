@@ -21,7 +21,7 @@ import { Textarea } from "@workspace/ui/components/textarea";
 import { Switch } from "@workspace/ui/components/switch";
 import { IngredientPickerField } from "@/components/meals/IngredientPickerField";
 import { Button } from "@workspace/ui/components/button";
-import { AlertCircle, LoaderCircle, ChefHat, Package } from "lucide-react";
+import { AlertCircle, ChefHat, Package } from "lucide-react";
 import {
   Select,
   SelectTrigger,
@@ -29,12 +29,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@workspace/ui/components/select";
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "@workspace/ui/components/tabs";
+import { Tabs, TabsContent } from "@workspace/ui/components/tabs";
 
 import { updateMenuAction } from "@/app/(mainapp)/menus/add/action";
 import { useQuery, useApolloClient } from "@apollo/client";
@@ -106,7 +101,7 @@ export default function UpdateMenusPage() {
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const apolloClient = useApolloClient();
 
-  const { data, error, loading, refetch } = useQuery(GetMenuByIdDocument, {
+  const { data, error } = useQuery(GetMenuByIdDocument, {
     variables: { id },
     skip: !id,
     fetchPolicy: "cache-and-network", // Toujours essayer de récupérer les données fraîches
