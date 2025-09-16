@@ -406,14 +406,14 @@ function PreparePreparationForm({
           )}
         />
         <div className="space-y-3">
-          <Label className="text-sm text-muted-foreground">
-            Override component quantities or source locations as needed. Only
-            modified entries will be applied.
-          </Label>
           <IngredientPickerField
             form={form}
             hasErrors={form.formState.errors.items}
+            label="Override preparation base elements"
           />
+          <Label className="text-sm text-muted-foreground">
+            Override component quantities or source locations as needed.
+          </Label>
         </div>
         <div className="flex justify-end">
           <Button
