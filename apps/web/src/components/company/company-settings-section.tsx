@@ -6,7 +6,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@workspace/ui/components/button";
-import { Switch } from "@workspace/ui/components/switch";
 import {
   Select,
   SelectContent,
@@ -28,7 +27,6 @@ import { updateCompanyOptionsAction } from "@/app/(mainapp)/settings/company/act
 import { GetCompanyOptionsDocument } from "@/graphql/generated/graphql";
 
 const companyOptionsSchema = z.object({
-  auto_complete_menu_orders: z.boolean(),
   open_food_facts_language: z.enum(["fr", "en"]),
 });
 
@@ -46,7 +44,6 @@ export function CompanySettingsSection() {
   const form = useForm<CompanyOptionsFormData>({
     resolver: zodResolver(companyOptionsSchema),
     defaultValues: {
-      auto_complete_menu_orders: false,
       open_food_facts_language: "fr",
     },
   });
@@ -62,7 +59,6 @@ export function CompanySettingsSection() {
           : "fr";
 
       form.reset({
-        auto_complete_menu_orders: company.auto_complete_menu_orders ?? false,
         open_food_facts_language: processedLanguage,
       });
     }
@@ -106,33 +102,6 @@ export function CompanySettingsSection() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 space-y-6">
           <FormField
             control={form.control}
-            name="auto_complete_menu_orders"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border border-khp-primary/10 p-4">
-                <div className="space-y-0.5">
-                  <FormLabel className="text-base text-khp-text">
-                    Auto-complete menu orders
-                  </FormLabel>
-                  <FormDescription className="text-khp-text/60">
-                    Enable automatic completion of menu orders
-                  </FormDescription>
-                </div>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    disabled={
-                      isPending || form.formState.isSubmitting || loading
-                    }
-                    aria-readonly
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
             name="open_food_facts_language"
             render={({ field }) => (
               <FormItem>
@@ -154,7 +123,7 @@ export function CompanySettingsSection() {
                     <SelectItem value="en">English</SelectItem>
                   </SelectContent>
                 </Select>
-                <FormDescription className="text-khp-text/60">
+                <FormDescription className="!text-khp-secondary/20">
                   Language used for Open Food Facts nutritional data
                 </FormDescription>
                 <FormMessage />
