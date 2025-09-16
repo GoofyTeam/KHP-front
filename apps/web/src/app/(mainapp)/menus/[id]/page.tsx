@@ -85,31 +85,24 @@ export default async function MenuPage({
             )}
           </div>
         </div>
-
-        <div className="w-full lg:w-3/4 max-w-lg gap-y-4 flex flex-col">
-          <p className="text-khp-text-secondary">{menu?.description}</p>
-          <p className="text-khp-text-secondary">
-            Price:{" "}
-            <span className="text-khp-primary text-xl font-bold">
-              {menu?.price ? `${menu.price.toFixed(2)} EUR` : "N/A"}
-            </span>
-          </p>
-          <div className="flex flex-col">
-            <p className="font-semibold text-khp-text-primary">Allergens:</p>
-            <AllegernsBadgesList allergens={menu?.allergens || []} />
-          </div>
-        </div>
-
-        <div className="hidden lg:block">
-          <Button variant="link" asChild>
-            <Link href="/menus" className="text-khp-primary">
-              <ChevronLeft /> Back to menus
-            </Link>
-          </Button>
-        </div>
       </div>
 
       <div className="flex flex-col w-full lg:w-1/2 gap-y-4">
+        <div className="w-full lg:w-3/4 max-w-lg gap-y-4 flex flex-col">
+          <p className="text-khp-text-secondary text-lg">{menu?.description}</p>
+          <div className="flex gap-x-8">
+            <p className="text-khp-text-secondary">
+              Price:{" "}
+              <span className="text-khp-primary text-xl font-bold">
+                {menu?.price ? `${menu.price.toFixed(2)} EUR` : "N/A"}
+              </span>
+            </p>
+            <div className="flex gap-x-2">
+              <p className="font-semibold text-khp-text-primary">Allergens:</p>
+              <AllegernsBadgesList allergens={menu?.allergens || []} />
+            </div>
+          </div>
+        </div>
         <AvailabilityBadge available={menu?.available || false} />
         <MealsIngredientDataTable
           columns={MealsIngredientColumns}
