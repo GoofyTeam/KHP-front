@@ -1,0 +1,66 @@
+query GetPreparationById($id: ID!) {
+  preparation(id: $id) {
+    id
+    name
+    image_url
+    unit
+    base_quantity
+    base_unit
+    allergens
+    categories {
+      id
+      name
+    }
+
+    preparable_quantity {
+      unit
+      quantity
+    }
+
+    quantities {
+      quantity
+      location {
+        id
+        name
+      }
+    }
+
+    entities {
+      id
+      quantity
+      unit
+      location {
+        id
+        name
+      }
+      entity {
+        ... on Preparation {
+          id
+          name
+          unit
+          image_url
+          quantities {
+            quantity
+            location {
+              name
+              id
+            }
+          }
+        }
+        ... on Ingredient {
+          id
+          name
+          unit
+          image_url
+          quantities {
+            quantity
+            location {
+              name
+              id
+            }
+          }
+        }
+      }
+    }
+  }
+}
