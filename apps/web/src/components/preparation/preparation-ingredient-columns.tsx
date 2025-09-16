@@ -62,7 +62,7 @@ export const PreparationIngredientColumns: ColumnDef<IngredientItem>[] = [
     },
   },
   {
-    header: "Quantity needed ?",
+    header: "Quantity needed?",
     cell: ({ row }) => {
       const quantityForSelectedLocation = row.original.entity.quantities.find(
         (q) => q.location.id === row.original.location.id
