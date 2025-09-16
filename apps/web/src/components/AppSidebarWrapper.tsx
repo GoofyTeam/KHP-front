@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { useEffect, useCallback, useState } from "react";
 import { AppSidebar } from "./app-sidebar";
 import {
   SidebarInset,
@@ -14,7 +15,8 @@ const getSidebarDefaultState = (currentPath: string): boolean => {
     "/stocks",
     "/ingredient",
     "/categories",
-    "settings",
+    "/settings",
+    "/menus",
   ];
 
   if (
@@ -43,9 +45,20 @@ interface AppSidebarWrapperProps {
 export function AppSidebarWrapper({ children }: AppSidebarWrapperProps) {
   const pathname = usePathname();
   const defaultOpen = getSidebarDefaultState(pathname);
+  const [sidebarOpen, setSidebarOpen] = useState(defaultOpen);
+
+  // Force l'état de la sidebar selon la page au chargement
+  useEffect(() => {
+    const pageDefaultState = getSidebarDefaultState(pathname);
+    setSidebarOpen(pageDefaultState);
+  }, [pathname]);
+
+  const handleOpenChange = useCallback((open: boolean) => {
+    setSidebarOpen(open);
+  }, []);
 
   return (
-    <SidebarProvider defaultOpen={defaultOpen}>
+    <SidebarProvider open={sidebarOpen} onOpenChange={handleOpenChange}>
       <AppSidebar pathname={pathname} />
       <SidebarInset>
         <header className="bg-background sticky top-0 flex shrink-0 items-center gap-2 border-b p-4 md:hidden">
