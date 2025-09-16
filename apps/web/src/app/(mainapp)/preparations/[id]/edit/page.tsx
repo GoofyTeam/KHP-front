@@ -356,7 +356,7 @@ export default function UpdatePreparationPage() {
   }
 
   const rootErrorLines = form.formState.errors.root?.message
-    ?.split("")
+    ?.split('\n')
     .filter(Boolean);
 
   return (
