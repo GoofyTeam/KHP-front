@@ -48,8 +48,8 @@ export default async function IngredientPage({ params }: IngredientPageProps) {
       </div>
       <div className="lg:hidden mx-auto">
         <Button variant="link" asChild>
-          <Link href="/menus" className="text-khp-primary">
-            <ChevronLeft /> Back to menus
+          <Link href="/stocks" className="text-khp-primary">
+            <ChevronLeft /> Back to stocks
           </Link>
         </Button>
       </div>
