@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation";
 import { fetchIngredient } from "@/queries/ingredient-query";
 import { fetchLocations } from "@/queries/locations-query";
 import { IngredientDetails } from "../../../../../components/ingredient/ingredient-details";

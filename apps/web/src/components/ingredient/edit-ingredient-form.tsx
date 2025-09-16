@@ -76,12 +76,12 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
     },
   });
 
-  // Valeurs calculées depuis React Hook Form
-  const imageFile = form.watch("image_file");
-  const imageUrl = form.watch("image_url");
-  const imagePreview = imageFile
-    ? URL.createObjectURL(imageFile)
-    : imageUrl || null;
+  // Gérer l'aperçu d'image de façon plus stable
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(
+    ingredient.image_url || null
+  );
+
+  const imagePreview = imagePreviewUrl;
 
   // États de formulaire depuis React Hook Form
   const isSubmitting = form.formState.isSubmitting;
@@ -90,21 +90,23 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
   const handleImageCapture = (file: File) => {
     form.setValue("image_file", file);
     form.setValue("image_url", "");
+    setImagePreviewUrl(URL.createObjectURL(file));
   };
 
   const handleUrlChange = (url: string) => {
+    form.setValue("image_url", url);
     if (url.trim()) {
-      form.setValue("image_url", url);
       form.setValue("image_file", undefined);
+      setImagePreviewUrl(url);
     } else {
-      form.setValue("image_url", "");
-      form.setValue("image_file", undefined);
+      setImagePreviewUrl(null);
     }
   };
 
   const handleClearImage = () => {
     form.setValue("image_url", "");
     form.setValue("image_file", undefined);
+    setImagePreviewUrl(null);
   };
 
   const handleDelete = async () => {
@@ -164,9 +166,8 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
         updateData.base_unit = data.base_unit.trim();
       }
 
-      if (data.allergens && data.allergens.length > 0) {
-        updateData.allergens = data.allergens;
-      }
+      // Toujours envoyer les allergènes, même si tableau vide (pour supprimer tous les allergènes)
+      updateData.allergens = data.allergens || [];
 
       const result = await updateIngredientAction(updateData);
 
@@ -243,7 +244,13 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            console.log("⚠️ Form onSubmit blocked - use button instead");
+          }}
+          className="space-y-6"
+        >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <IngredientFields form={form} />
 
@@ -274,11 +281,15 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
 
           <div className="flex justify-center pt-6">
             <Button
-              type="submit"
+              type="button"
               variant="khp-default"
               size="xl-full"
               className="w-full max-w-md h-14 text-lg font-semibold rounded-xl bg-khp-primary hover:bg-khp-primary/90"
               disabled={isSubmitting}
+              onClick={() => {
+                console.log("🔘 Button clicked - triggering form submission");
+                form.handleSubmit(onSubmit)();
+              }}
             >
               {isSubmitting ? "Updating..." : "Update Ingredient"}
             </Button>

@@ -45,32 +45,33 @@ export async function updateIngredientAction(
 ): Promise<ActionResult> {
   const { ingredientId, image, ...data } = input;
 
-  // If there's an image file, use FormData
-  if (image) {
-    const formData = new FormData();
+  // Always use FormData like in menu actions
+  const formData = new FormData();
 
-    // Add all other fields to FormData
-    Object.entries(data).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        if (Array.isArray(value)) {
-          formData.append(key, JSON.stringify(value));
-        } else {
-          formData.append(key, String(value));
+  // Add _method for PUT request (Laravel convention)
+  formData.append("_method", "PUT");
+
+  // Add all fields to FormData
+  Object.entries(data).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      if (Array.isArray(value)) {
+        // Handle arrays like in menu actions
+        for (const item of value) {
+          formData.append(`${key}[]`, String(item));
         }
+      } else {
+        formData.append(key, String(value));
       }
-    });
+    }
+  });
 
+  // Add image if present
+  if (image) {
     formData.append("image", image);
-
-    return executeHttpAction(
-      () => httpClient.put(`/api/ingredients/${ingredientId}`, formData),
-      "Failed to update ingredient: "
-    );
   }
 
-  // No image file, use regular JSON payload
   return executeHttpAction(
-    () => httpClient.put(`/api/ingredients/${ingredientId}`, data),
+    () => httpClient.post(`/api/ingredients/${ingredientId}`, formData),
     "Failed to update ingredient: "
   );
 }

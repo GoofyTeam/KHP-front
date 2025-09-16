@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { LocationSelect } from "@workspace/ui/components/location-select";
+import { AllegernsBadgesList } from "@workspace/ui/components/allergens-badge";
 import { formatQuantity } from "../../lib/formatQuantity";
 import {
   GetIngredientQuery,
@@ -110,6 +111,14 @@ export function IngredientStockDisplay({ ingredient, preparation }: IngredientSt
             <div className="text-sm text-khp-text-secondary">Total stock</div>
           </div>
         </div>
+
+        {/* Affichage des allergènes */}
+        {ingredient.allergens && ingredient.allergens.length > 0 && (
+          <div className="flex gap-x-2 items-center">
+            <p className="font-semibold text-khp-text-primary">Allergens:</p>
+            <AllegernsBadgesList allergens={ingredient.allergens} />
+          </div>
+        )}
       </div>
     </>
   );

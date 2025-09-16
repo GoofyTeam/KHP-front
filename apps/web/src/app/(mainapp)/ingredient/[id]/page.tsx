@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation";
 import { fetchIngredient } from "@/queries/ingredient-query";
 import { IngredientDetails } from "../../../../components/ingredient/ingredient-details";
 import { IngredientStockDisplay } from "../../../../components/ingredient/ingredient-stock-display";
