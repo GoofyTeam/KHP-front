@@ -3,7 +3,14 @@ import { query } from "@/lib/ApolloClient";
 import { GetPreparationByIdDocument } from "@/graphql/generated/graphql";
 import Link from "next/link";
 import { Button } from "@workspace/ui/components/button";
-import { ChevronLeft, Edit } from "lucide-react";
+import {
+  ArrowLeftRight,
+  ChevronLeft,
+  Edit,
+  Funnel,
+  PackageMinus,
+  PackagePlus,
+} from "lucide-react";
 import { CategoryBadge } from "@/components/category-badge";
 import { ImagePlaceholder } from "@workspace/ui/components/image-placeholder";
 import { MealsIngredientDataTable } from "@/components/meals/meals-ingredients-data-table";
@@ -12,6 +19,7 @@ import { PreparationIngredientColumns } from "@/components/preparation/preparati
 import { IngredientStockDisplay } from "@/components/ingredient/ingredient-stock-display";
 import { formatQuantity } from "@/lib/formatQuantity";
 import DeletePreparation from "@/components/preparation/delete-preparation";
+import { cn } from "@workspace/ui/lib/utils";
 
 export default async function MenuPage({
   params,
@@ -79,6 +87,43 @@ export default async function MenuPage({
               <ImagePlaceholder className="w-full h-full rounded-lg" />
             )}
           </div>
+        </div>
+
+        <div className="w-full grid grid-cols-2 gap-4 lg:gap-8">
+          <Link
+            href={
+              (preparation?.preparable_quantity?.quantity ?? 0) > 0
+                ? `/preparations/${preparation?.id}/prepare`
+                : `#`
+            }
+          >
+            <Button
+              variant="khp-outline"
+              className={cn(
+                "w-full",
+                (preparation?.preparable_quantity?.quantity ?? 0) <= 0 &&
+                  "opacity-50 cursor-not-allowed!"
+              )}
+              disabled={(preparation?.preparable_quantity?.quantity ?? 0) <= 0}
+            >
+              <Funnel size={64} /> Prepare
+            </Button>
+          </Link>
+          <Link href={`/preparations/${preparation?.id}/move-stock`}>
+            <Button variant="khp-outline" className="w-full">
+              <ArrowLeftRight size={64} /> Move Stock
+            </Button>
+          </Link>
+          <Link href={`/preparations/${preparation?.id}/add-stock`}>
+            <Button variant="khp-outline" className="w-full">
+              <PackagePlus size={64} /> Add Stock
+            </Button>
+          </Link>
+          <Link href={`/preparations/${preparation?.id}/remove-stock`}>
+            <Button variant="khp-outline" className="w-full">
+              <PackageMinus size={64} /> Remove Stock
+            </Button>
+          </Link>
         </div>
 
         <div className="hidden lg:block">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { LocationSelect } from "@workspace/ui/components/location-select";
 import { formatQuantity } from "../../lib/formatQuantity";
 import {
@@ -24,14 +24,11 @@ type IngredientStockDisplayProps =
 
 export function IngredientStockDisplay({ ingredient, preparation }: IngredientStockDisplayProps) {
   const stockTarget = ingredient ?? preparation;
-
-  if (!stockTarget) {
-    return null;
-  }
-
   const [selectedLocationId, setSelectedLocationId] = useState<string>("all");
 
-  const quantities = (stockTarget.quantities ?? []) as StockQuantity[];
+  const quantities = useMemo(() => {
+    return ((stockTarget?.quantities ?? []) as StockQuantity[]).slice();
+  }, [stockTarget]);
 
   // Sync selection when available locations change so the UI always reflects the
   // current dataset (single location -> auto select, otherwise default to "all").
@@ -55,6 +52,10 @@ export function IngredientStockDisplay({ ingredient, preparation }: IngredientSt
   const selectedQuantity = isAllSelected
     ? undefined
     : quantities.find((q) => q.location.id === selectedLocationId);
+
+  if (!stockTarget) {
+    return null;
+  }
 
   const totalStock = quantities.reduce((sum: number, q: StockQuantity) => {
     return sum + q.quantity;
