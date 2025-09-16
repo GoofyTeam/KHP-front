@@ -1,8 +1,7 @@
-import { notFound } from "next/navigation";
-import { query } from "@/lib/ApolloClient";
-import { GetIngredientDocument } from "@/graphql/generated/graphql";
+import { fetchIngredient } from "@/queries/ingredient-query";
 import { LossDetails } from "@/components/loss/loss-details";
 import { LossForm } from "./loss-form";
+import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -20,20 +19,7 @@ export default async function LossPage({ params }: LossPageProps) {
     notFound();
   }
 
-  const { data, error } = await query({
-    query: GetIngredientDocument,
-    variables: { id },
-  });
-
-  if (error) {
-    throw new Error(`GraphQL error: ${error.message}`);
-  }
-
-  if (!data?.ingredient) {
-    notFound();
-  }
-
-  const ingredient = data.ingredient;
+  const ingredient = await fetchIngredient(id);
 
   return (
     <div className="w-full flex flex-col lg:flex-row gap-8 p-4 lg:p-8">

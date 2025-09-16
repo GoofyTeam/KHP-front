@@ -26,7 +26,7 @@ type EditIngredientFormData = {
   image_file?: File;
 };
 
-interface ImageSectionProps {
+interface ImageUploaderProps {
   form: UseFormReturn<EditIngredientFormData>;
   imagePreview: string | null;
   onImageCapture: (file: File) => void;
@@ -35,14 +35,14 @@ interface ImageSectionProps {
   ingredientName: string;
 }
 
-export function ImageSection({
+export function ImageUploader({
   form,
   imagePreview,
   onImageCapture,
   onUrlChange,
   onClearImage,
   ingredientName,
-}: ImageSectionProps) {
+}: ImageUploaderProps) {
   const [cameraOpen, setCameraOpen] = useState(false);
   const [showUrlInput, setShowUrlInput] = useState(!!imagePreview);
 

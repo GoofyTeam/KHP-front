@@ -16,10 +16,6 @@ interface IngredientPageProps {
 export default async function IngredientPage({ params }: IngredientPageProps) {
   const { id } = await params;
 
-  if (!id) {
-    notFound();
-  }
-
   const ingredient = await fetchIngredient(id);
 
   return (

@@ -178,9 +178,7 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
       }
 
       setSuccess(true);
-      setTimeout(() => {
-        router.push(`/ingredient/${ingredient.id}`);
-      }, 2000);
+      router.push(`/ingredient/${ingredient.id}`);
     } catch {
       form.setError("root", {
         message: "An unexpected error occurred. Please try again.",
@@ -250,7 +248,7 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
             <IngredientFields form={form} />
 
             <div className="space-y-4">
-              <ImageSection
+              <ImageUploader
                 form={form}
                 imagePreview={imagePreview}
                 onImageCapture={handleImageCapture}

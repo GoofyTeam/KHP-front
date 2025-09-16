@@ -15,18 +15,13 @@ export async function moveIngredientQuantityAction(
 ): Promise<ActionResult> {
   const { ingredientId, from_location_id, to_location_id, quantity } = input;
 
-  const payload = {
-    from_location_id,
-    to_location_id,
-    quantity,
-  };
-
   return executeHttpAction(
     () =>
-      httpClient.post(
-        `/api/ingredients/${ingredientId}/move-quantity`,
-        payload
-      ),
+      httpClient.post(`/api/ingredients/${ingredientId}/move-quantity`, {
+        from_location_id,
+        to_location_id,
+        quantity,
+      }),
     "Failed to move ingredient quantity: "
   );
 }
@@ -50,9 +45,11 @@ export async function updateIngredientAction(
 ): Promise<ActionResult> {
   const { ingredientId, image, ...data } = input;
 
+  // If there's an image file, use FormData
   if (image) {
     const formData = new FormData();
 
+    // Add all other fields to FormData
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         if (Array.isArray(value)) {
@@ -71,6 +68,7 @@ export async function updateIngredientAction(
     );
   }
 
+  // No image file, use regular JSON payload
   return executeHttpAction(
     () => httpClient.put(`/api/ingredients/${ingredientId}`, data),
     "Failed to update ingredient: "

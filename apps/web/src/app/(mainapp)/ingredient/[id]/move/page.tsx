@@ -13,10 +13,6 @@ interface MovePageProps {
 export default async function MoveQuantityPage({ params }: MovePageProps) {
   const { id } = await params;
 
-  if (!id) {
-    notFound();
-  }
-
   const [ingredient, locations] = await Promise.all([
     fetchIngredient(id),
     fetchLocations(),

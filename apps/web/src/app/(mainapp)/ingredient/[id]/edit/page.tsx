@@ -13,10 +13,6 @@ export default async function EditIngredientRoute({
 }: EditIngredientRouteProps) {
   const { id } = await params;
 
-  if (!id) {
-    notFound();
-  }
-
   const ingredient = await fetchIngredient(id);
 
   return (
@@ -36,4 +32,3 @@ export default async function EditIngredientRoute({
     </div>
   );
 }
-
