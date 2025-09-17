@@ -24,6 +24,7 @@ import {
   GetCategoriesDocument,
   GetAllergensDocument,
 } from "@/graphql/generated/graphql";
+import { createAllergenOptions } from "@workspace/ui/lib/allergens";
 
 type EditIngredientFormData = {
   name: string;
@@ -39,23 +40,6 @@ type EditIngredientFormData = {
 interface IngredientFieldsProps {
   form: UseFormReturn<EditIngredientFormData>;
 }
-
-const allergenLabels: Record<string, string> = {
-  gluten: "Gluten",
-  fruits_a_coque: "Tree nuts",
-  crustaces: "Crustaceans",
-  celeri: "Celery",
-  oeufs: "Eggs",
-  moutarde: "Mustard",
-  poisson: "Fish",
-  soja: "Soy",
-  lait: "Milk",
-  sulfites: "Sulfites",
-  sesame: "Sesame",
-  lupin: "Lupin",
-  arachides: "Peanuts",
-  mollusques: "Molluscs",
-};
 
 export function IngredientFields({ form }: IngredientFieldsProps) {
   const { data: unitsData, loading: unitsLoading } = useQuery(
@@ -100,10 +84,7 @@ export function IngredientFields({ form }: IngredientFieldsProps) {
 
   const allergenOptions = useMemo(() => {
     if (!allergensData?.allergens) return [];
-    return allergensData.allergens.map((allergen) => ({
-      value: allergen,
-      label: allergenLabels[allergen] || allergen,
-    }));
+    return createAllergenOptions(allergensData.allergens);
   }, [allergensData]);
 
   return (
@@ -120,7 +101,7 @@ export function IngredientFields({ form }: IngredientFieldsProps) {
               <Input
                 {...field}
                 placeholder="Enter ingredient name"
-                className="h-14 text-lg font-medium border-2 rounded-xl focus:ring-2 focus:ring-khp-primary/20"
+                className="h-14 text-lg font-medium border-2 border-khp-primary/30 rounded-xl focus:ring-2 focus:ring-khp-primary/20 focus:border-khp-primary"
               />
             </FormControl>
             <FormMessage className="text-base" />
@@ -143,7 +124,7 @@ export function IngredientFields({ form }: IngredientFieldsProps) {
                   value={field.value}
                   disabled={unitsLoading}
                 >
-                  <SelectTrigger className="min-h-12 h-12 p-2 rounded-md border text-lg font-medium bg-inherit hover:bg-inherit focus:ring-2 focus:ring-khp-primary/20 touch-manipulation">
+                  <SelectTrigger className="min-h-12 h-12 p-2 rounded-md border-2 border-khp-primary/30 text-lg font-medium bg-inherit hover:bg-inherit focus:ring-2 focus:ring-khp-primary/20 focus:border-khp-primary touch-manipulation">
                     <SelectValue
                       placeholder={
                         unitsLoading ? "Loading units..." : "Select unit"
@@ -184,7 +165,7 @@ export function IngredientFields({ form }: IngredientFieldsProps) {
                   value={field.value || "__clear__"}
                   disabled={categoriesLoading}
                 >
-                  <SelectTrigger className="min-h-12 h-12 p-2 rounded-md border text-lg font-medium bg-inherit hover:bg-inherit focus:ring-2 focus:ring-khp-primary/20 touch-manipulation">
+                  <SelectTrigger className="min-h-12 h-12 p-2 rounded-md border-2 border-khp-primary/30 text-lg font-medium bg-inherit hover:bg-inherit focus:ring-2 focus:ring-khp-primary/20 focus:border-khp-primary touch-manipulation">
                     <SelectValue
                       placeholder={
                         categoriesLoading
@@ -234,7 +215,7 @@ export function IngredientFields({ form }: IngredientFieldsProps) {
                   step="0.01"
                   min="0"
                   placeholder="0.00"
-                  className="h-14 text-lg font-medium border-2 rounded-xl focus:ring-2 focus:ring-khp-primary/20"
+                  className="h-14 text-lg font-medium border-2 border-khp-primary/30 rounded-xl focus:ring-2 focus:ring-khp-primary/20 focus:border-khp-primary"
                   onChange={(e) =>
                     field.onChange(
                       e.target.value ? parseFloat(e.target.value) : undefined
@@ -261,7 +242,7 @@ export function IngredientFields({ form }: IngredientFieldsProps) {
                   value={field.value}
                   disabled={unitsLoading}
                 >
-                  <SelectTrigger className="min-h-12 h-12 p-2 rounded-md border text-lg font-medium bg-inherit hover:bg-inherit focus:ring-2 focus:ring-khp-primary/20 touch-manipulation">
+                  <SelectTrigger className="min-h-12 h-12 p-2 rounded-md border-2 border-khp-primary/30 text-lg font-medium bg-inherit hover:bg-inherit focus:ring-2 focus:ring-khp-primary/20 focus:border-khp-primary touch-manipulation">
                     <SelectValue
                       placeholder={
                         unitsLoading ? "Loading units..." : "Select base unit"
@@ -303,7 +284,7 @@ export function IngredientFields({ form }: IngredientFieldsProps) {
                 placeholder={
                   allergensLoading ? "Loading allergens..." : "Select allergens"
                 }
-                className="min-h-12 h-12 p-2 rounded-md border text-lg font-medium bg-inherit hover:bg-inherit touch-manipulation"
+                className="min-h-12 h-12 p-2 rounded-md border-2 border-khp-primary/30 text-lg font-medium bg-inherit hover:bg-inherit focus:ring-2 focus:ring-khp-primary/20 focus:border-khp-primary touch-manipulation"
                 maxCount={2}
                 compactMode={false}
                 disabled={allergensLoading}

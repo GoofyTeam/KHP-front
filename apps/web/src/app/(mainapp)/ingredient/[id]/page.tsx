@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { fetchIngredient } from "@/queries/ingredient-query";
 import { IngredientDetails } from "../../../../components/ingredient/ingredient-details";
 import { IngredientStockDisplay } from "../../../../components/ingredient/ingredient-stock-display";
@@ -14,6 +15,10 @@ interface IngredientPageProps {
 
 export default async function IngredientPage({ params }: IngredientPageProps) {
   const { id } = await params;
+
+  if (!id) {
+    notFound();
+  }
 
   const ingredient = await fetchIngredient(id);
 

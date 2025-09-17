@@ -37,18 +37,6 @@ const editIngredientSchema = z.object({
   name: z.string().min(1, "Name is required").max(255, "Name is too long"),
   unit: z.string().min(1, "Unit is required").max(50, "Unit is too long"),
   category: z.string().optional().or(z.literal("")),
-  image_url: z
-    .string()
-    .optional()
-    .refine((val) => {
-      if (!val || val.trim() === "") return true;
-      try {
-        new URL(val);
-        return true;
-      } catch {
-        return false;
-      }
-    }, "Please enter a valid URL"),
   base_quantity: z.number().min(0, "Base quantity must be positive").optional(),
   base_unit: z.string().optional(),
   allergens: z.array(z.string()).optional(),
@@ -68,7 +56,6 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
       name: ingredient.name,
       unit: ingredient.unit.toString(),
       category: ingredient.category?.id || "",
-      image_url: ingredient.image_url || "",
       base_quantity: ingredient.base_quantity || undefined,
       base_unit: ingredient.base_unit?.toString() || "",
       allergens: ingredient.allergens || [],
@@ -89,22 +76,10 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
 
   const handleImageCapture = (file: File) => {
     form.setValue("image_file", file);
-    form.setValue("image_url", "");
     setImagePreviewUrl(URL.createObjectURL(file));
   };
 
-  const handleUrlChange = (url: string) => {
-    form.setValue("image_url", url);
-    if (url.trim()) {
-      form.setValue("image_file", undefined);
-      setImagePreviewUrl(url);
-    } else {
-      setImagePreviewUrl(null);
-    }
-  };
-
   const handleClearImage = () => {
-    form.setValue("image_url", "");
     form.setValue("image_file", undefined);
     setImagePreviewUrl(null);
   };
@@ -134,7 +109,6 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
         unit: string;
         category_id?: number | null;
         image?: File;
-        image_url?: string;
         base_quantity?: number;
         base_unit?: string;
         allergens?: string[];
@@ -150,12 +124,6 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
 
       if (data.image_file) {
         updateData.image = data.image_file;
-      } else if (
-        data.image_url &&
-        data.image_url.trim() !== "" &&
-        data.image_url.trim() !== ingredient.image_url
-      ) {
-        updateData.image_url = data.image_url.trim();
       }
 
       if (data.base_quantity !== undefined && data.base_quantity > 0) {
@@ -244,22 +212,12 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
       </div>
 
       <Form {...form}>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            console.log("⚠️ Form onSubmit blocked - use button instead");
-          }}
-          className="space-y-6"
-        >
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <IngredientFields form={form} />
-
             <div className="space-y-4">
               <ImageUploader
-                form={form}
                 imagePreview={imagePreview}
                 onImageCapture={handleImageCapture}
-                onUrlChange={handleUrlChange}
                 onClearImage={handleClearImage}
                 ingredientName={ingredient.name}
               />
@@ -277,19 +235,17 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
                 </div>
               )}
             </div>
+
+            <IngredientFields form={form} />
           </div>
 
           <div className="flex justify-center pt-6">
             <Button
-              type="button"
+              type="submit"
               variant="khp-default"
               size="xl-full"
               className="w-full max-w-md h-14 text-lg font-semibold rounded-xl bg-khp-primary hover:bg-khp-primary/90"
               disabled={isSubmitting}
-              onClick={() => {
-                console.log("🔘 Button clicked - triggering form submission");
-                form.handleSubmit(onSubmit)();
-              }}
             >
               {isSubmitting ? "Updating..." : "Update Ingredient"}
             </Button>

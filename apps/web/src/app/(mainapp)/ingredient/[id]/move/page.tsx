@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { fetchIngredient } from "@/queries/ingredient-query";
 import { fetchLocations } from "@/queries/locations-query";
 import { IngredientDetails } from "../../../../../components/ingredient/ingredient-details";
@@ -11,6 +12,10 @@ interface MovePageProps {
 
 export default async function MoveQuantityPage({ params }: MovePageProps) {
   const { id } = await params;
+
+  if (!id) {
+    notFound();
+  }
 
   const [ingredient, locations] = await Promise.all([
     fetchIngredient(id),
