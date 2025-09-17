@@ -1,6 +1,5 @@
 import { useLoaderData, useNavigate } from "@tanstack/react-router";
 import { useState, useCallback, useEffect, useMemo } from "react";
-import { HistoryTable } from "../components/history-table";
 import { Button } from "@workspace/ui/components/button";
 import {
   Select,
@@ -12,6 +11,8 @@ import {
 import { Filter, X, Loader2 } from "lucide-react";
 import { GetProductQuery } from "../graphql/getProduct.gql";
 import { LocationSelect } from "@workspace/ui/components/location-select";
+import { MovementHistory } from "@workspace/ui/components/movement-history";
+import { movementHistoryFromStockMovements } from "@workspace/ui/lib/movement-history";
 
 interface ProductData {
   id: string;
@@ -287,11 +288,12 @@ export default function ProductHistoryPage() {
       </div>
 
       <div className="m-2">
-        <HistoryTable
-          data={filteredMovements}
-          showHeader={true}
-          limitHeight={false}
-          unit={product.unit}
+        <MovementHistory
+          entries={movementHistoryFromStockMovements(
+            filteredMovements,
+            product.unit
+          )}
+          defaultUnit={product.unit}
         />
       </div>
     </div>

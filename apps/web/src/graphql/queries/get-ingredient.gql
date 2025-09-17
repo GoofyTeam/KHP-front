@@ -20,13 +20,16 @@ query GetIngredient($id: ID!) {
         }
       }
     }
-    stockMovements {
+    stockMovements(orderBy: [{ column: CREATED_AT, order: DESC }]) {
+      id
+      type
+      quantity
       quantity_before
       quantity_after
-      type
       created_at
       location {
         id
+        name
       }
     }
   }
