@@ -85,6 +85,14 @@ export default async function MenuPage({
             )}
           </div>
         </div>
+
+        <div className="hidden lg:block">
+          <Button variant="link" asChild>
+            <Link href="/menus" className="text-khp-primary">
+              <ChevronLeft /> Back to menus
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col w-full lg:w-1/2 gap-y-4">

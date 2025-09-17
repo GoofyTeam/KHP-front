@@ -1,57 +1,84 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { LocationSelect } from "@workspace/ui/components/location-select";
 import { formatQuantity } from "../../lib/formatQuantity";
-import { GetIngredientQuery } from "@/graphql/generated/graphql";
+import {
+  GetIngredientQuery,
+  GetPreparationByIdQuery,
+} from "@/graphql/generated/graphql";
 
 type IngredientData = NonNullable<GetIngredientQuery["ingredient"]>;
-type IngredientQuantity = IngredientData["quantities"][number];
+type PreparationData = NonNullable<GetPreparationByIdQuery["preparation"]>;
+type StockQuantity = {
+  quantity: number;
+  location: {
+    id: string;
+    name: string;
+  };
+};
 
-interface IngredientStockDisplayProps {
-  ingredient: IngredientData;
-}
+type IngredientStockDisplayProps =
+  | { ingredient: IngredientData; preparation?: never }
+  | { ingredient?: never; preparation: PreparationData };
 
-export function IngredientStockDisplay({
-  ingredient,
-}: IngredientStockDisplayProps) {
-  const [selectedLocationIndex, setSelectedLocationIndex] =
-    useState<string>("");
+export function IngredientStockDisplay({ ingredient, preparation }: IngredientStockDisplayProps) {
+  const stockTarget = ingredient ?? preparation;
+  const [selectedLocationId, setSelectedLocationId] = useState<string>("all");
 
-  // Auto-sélectionner la première location s'il n'y en a qu'une
+  const quantities = useMemo(() => {
+    return ((stockTarget?.quantities ?? []) as StockQuantity[]).slice();
+  }, [stockTarget]);
+
+  // Sync selection when available locations change so the UI always reflects the
+  // current dataset (single location -> auto select, otherwise default to "all").
   useEffect(() => {
-    if (ingredient.quantities.length === 1) {
-      setSelectedLocationIndex("0");
+    if (quantities.length === 1) {
+      const onlyLocationId = quantities[0]?.location.id ?? "all";
+      setSelectedLocationId((prev) =>
+        prev === onlyLocationId ? prev : onlyLocationId
+      );
+      return;
     }
-  }, [ingredient.quantities.length]);
 
-  const selectedQuantity = selectedLocationIndex
-    ? ingredient.quantities[parseInt(selectedLocationIndex)]
-    : null;
+    setSelectedLocationId((prev) =>
+      prev === "all" || !quantities.some((q) => q.location.id === prev)
+        ? "all"
+        : prev
+    );
+  }, [quantities]);
 
-  const totalStock = ingredient.quantities.reduce(
-    (sum: number, q: IngredientQuantity) => sum + q.quantity,
-    0
-  );
+  const isAllSelected = selectedLocationId === "all";
+  const selectedQuantity = isAllSelected
+    ? undefined
+    : quantities.find((q) => q.location.id === selectedLocationId);
 
-  const displayStock = selectedQuantity
-    ? selectedQuantity.quantity
-    : totalStock;
-  const stockLabel = selectedQuantity
-    ? `Stock - ${selectedQuantity.location.name}`
-    : "Stock total";
+  if (!stockTarget) {
+    return null;
+  }
+
+  const totalStock = quantities.reduce((sum: number, q: StockQuantity) => {
+    return sum + q.quantity;
+  }, 0);
+
+  const displayStock = isAllSelected
+    ? totalStock
+    : selectedQuantity?.quantity ?? 0;
+  const stockLabel = isAllSelected
+    ? "Stock total"
+    : `Stock - ${selectedQuantity?.location.name ?? ""}`;
 
   return (
     <>
       <div className="space-y-4 w-full">
         <div className="mb-4 ">
           <LocationSelect
-            quantities={ingredient.quantities || []}
-            value={selectedLocationIndex}
-            onValueChange={setSelectedLocationIndex}
+            quantities={quantities}
+            value={selectedLocationId}
+            onValueChange={setSelectedLocationId}
             placeholder="Select location"
             label="Locations"
-            unit={ingredient.unit}
+            unit={stockTarget.unit}
             hideEmptyLocations={false}
             showAllOption={true}
             allOptionLabel="All locations"
@@ -64,7 +91,7 @@ export function IngredientStockDisplay({
               <span className="text-3xl font-bold">
                 {formatQuantity(displayStock)}
               </span>
-              <span className="text-lg ml-2 opacity-90">{ingredient.unit}</span>
+              <span className="text-lg ml-2 opacity-90">{stockTarget.unit}</span>
             </div>
             <span className="text-sm opacity-80">{stockLabel}</span>
           </div>
@@ -73,7 +100,7 @@ export function IngredientStockDisplay({
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-white rounded-lg px-4 py-3 border border-khp-border">
             <div className="text-xl font-semibold text-khp-primary">
-              {ingredient.quantities.length}
+              {quantities.length}
             </div>
             <div className="text-sm text-khp-text-secondary">Locations</div>
           </div>
@@ -81,7 +108,7 @@ export function IngredientStockDisplay({
           <div className="bg-white rounded-lg px-4 py-3 border border-khp-border">
             <div className="text-xl font-semibold text-khp-primary">
               {formatQuantity(totalStock)}
-              <span className="text-sm ml-1">{ingredient.unit}</span>
+              <span className="text-sm ml-1">{stockTarget.unit}</span>
             </div>
             <div className="text-sm text-khp-text-secondary">Total stock</div>
           </div>

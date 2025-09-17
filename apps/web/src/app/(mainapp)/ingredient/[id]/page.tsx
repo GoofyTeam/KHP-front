@@ -3,6 +3,9 @@ import { fetchIngredient } from "@/queries/ingredient-query";
 import { IngredientDetails } from "../../../../components/ingredient/ingredient-details";
 import { IngredientStockDisplay } from "../../../../components/ingredient/ingredient-stock-display";
 import { MovementHistory } from "../../../../components/ingredient/movement-history";
+import { Button } from "@workspace/ui/components/button";
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 
 interface IngredientPageProps {
   params: Promise<{
@@ -24,6 +27,13 @@ export default async function IngredientPage({ params }: IngredientPageProps) {
       {/* Colonne 1 */}
       <div className="flex flex-col gap-8 justify-center items-center w-full lg:w-1/2">
         <IngredientDetails ingredient={ingredient} />
+        <div className="hidden lg:block">
+          <Button variant="link" asChild>
+            <Link href="/stocks" className="text-khp-primary">
+              <ChevronLeft /> Back to stocks
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Colonne 2 */}
@@ -35,6 +45,13 @@ export default async function IngredientPage({ params }: IngredientPageProps) {
             unit={ingredient.unit}
           />
         </div>
+      </div>
+      <div className="lg:hidden mx-auto">
+        <Button variant="link" asChild>
+          <Link href="/stocks" className="text-khp-primary">
+            <ChevronLeft /> Back to stocks
+          </Link>
+        </Button>
       </div>
     </div>
   );

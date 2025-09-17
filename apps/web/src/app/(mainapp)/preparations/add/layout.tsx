@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "KHP | Menus",
-  description: "Menus Management - View and manage your menus",
+  title: "KHP | Create preparation",
+  description: "Menus Management - Create a new preparation",
 };
 
-export default function MenusCreateLayout({
+export default function PreparationCreateLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

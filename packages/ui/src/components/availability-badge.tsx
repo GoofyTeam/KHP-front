@@ -28,3 +28,29 @@ export function AvailabilityBadge({
     </Badge>
   );
 }
+
+export function PreparationAvailabilityBadge({
+  available,
+  quantityPossible,
+}: {
+  available: boolean;
+  quantityPossible?: string;
+}) {
+  if (available) {
+    return (
+      <Badge variant="success" className="text-lg px-2 py-4 gap-x-2 rounded-sm">
+        <ShieldCheck /> Enough stock to make this preparation{" "}
+        {quantityPossible && `(${quantityPossible} possible)`}
+      </Badge>
+    );
+  }
+
+  return (
+    <Badge
+      variant="destructive"
+      className="text-lg px-2 py-4 gap-x-2 rounded-sm"
+    >
+      <TriangleAlert /> Not enough stock to make this preparation
+    </Badge>
+  );
+}
