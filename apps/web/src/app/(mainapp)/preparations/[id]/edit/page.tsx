@@ -1,7 +1,7 @@
 "use client";
 
 import { z } from "zod";
-import { useForm } from "react-hook-form";
+import { SubmitErrorHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ChangeEvent,
@@ -129,6 +129,15 @@ export type UpdatePreparationFormValues = z.infer<
   typeof updatePreparationSchema
 >;
 
+const PREPARATION_DETAILS_FIELDS = [
+  "name",
+  "image",
+  "unit",
+  "base_quantity",
+  "base_unit",
+  "category_id",
+] as const satisfies ReadonlyArray<keyof UpdatePreparationFormValues>;
+
 const CATEGORY_PAGE_SIZE = 20;
 
 const DEFAULT_FORM_VALUES: Omit<UpdatePreparationFormValues, "image"> & {
@@ -239,6 +248,23 @@ export default function UpdatePreparationPage() {
     defaultValues: DEFAULT_FORM_VALUES,
   });
 
+  const handleValidationErrors: SubmitErrorHandler<UpdatePreparationFormValues> = (
+    errors
+  ) => {
+    const hasDetailErrors = PREPARATION_DETAILS_FIELDS.some((field) =>
+      Boolean(errors[field])
+    );
+
+    if (hasDetailErrors) {
+      setActiveTab("details");
+      return;
+    }
+
+    if (errors.entities) {
+      setActiveTab("ingredients");
+    }
+  };
+
   const unitsSelections = useMemo(getAllMeasurementUnitsOnlyValues, []);
 
   const preparation = preparationData?.preparation;
@@ -316,31 +342,34 @@ export default function UpdatePreparationPage() {
     [preparation?.image_url]
   );
 
-  const onSubmit = form.handleSubmit(async (values) => {
-    try {
-      const result = await updatePreparationAction(id, values);
+  const onSubmit = form.handleSubmit(
+    async (values) => {
+      try {
+        const result = await updatePreparationAction(id, values);
 
-      if (result.success) {
-        apolloClient.refetchQueries({
-          include: [GetPreparationByIdDocument],
+        if (result.success) {
+          apolloClient.refetchQueries({
+            include: [GetPreparationByIdDocument],
+          });
+          router.push(`/preparations/${id}`);
+          return;
+        }
+
+        const errorMessage = result.error || "Failed to update preparation.";
+        form.setError("root", {
+          type: "server",
+          message: errorMessage,
         });
-        router.push(`/preparations/${id}`);
-        return;
+      } catch (error) {
+        console.error("Failed to update preparation:", error);
+        form.setError("root", {
+          type: "server",
+          message: "An unexpected error occurred. Please try again.",
+        });
       }
-
-      const errorMessage = result.error || "Failed to update preparation.";
-      form.setError("root", {
-        type: "server",
-        message: errorMessage,
-      });
-    } catch (error) {
-      console.error("Failed to update preparation:", error);
-      form.setError("root", {
-        type: "server",
-        message: "An unexpected error occurred. Please try again.",
-      });
-    }
-  });
+    },
+    handleValidationErrors
+  );
 
   if (preparationError) {
     return (
