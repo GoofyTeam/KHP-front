@@ -4,6 +4,7 @@ import { ImagePlaceholder } from "@workspace/ui/components/image-placeholder";
 import { GetIngredientQuery } from "@/graphql/generated/graphql";
 import { CategoryBadge } from "../category-badge";
 import { Edit } from "lucide-react";
+import DeleteIngredient from "./delete-ingredient";
 
 type IngredientData = NonNullable<GetIngredientQuery["ingredient"]>;
 
@@ -19,20 +20,30 @@ export function IngredientDetails({
   return (
     <>
       <div className="text-center space-y-4 w-full max-w-lg relative">
-        <div className="flex justify-center items-cente gap-2">
-          <h1 className="text-3xl lg:text-5xl font-bold text-khp-text-primary leading-tight">
+        <div className="flex justify-center items-center gap-2">
+          <h1 className="text-3xl lg:text-5xl font-bold text-khp-text-primary leading-tight flex items-center justify-start gap-2 max-w-xs lg:max-w-md text-wrap">
             {ingredient.name}
           </h1>
-          <Link href={`/ingredient/${ingredient.id}/edit`}>
-            <Button variant="ghost" size="icon" title="Edit ingredient">
-              <Edit className="h-4 w-4 text-khp-text-secondary" />
-            </Button>
-          </Link>
         </div>
 
-        <CategoryBadge
-          categories={ingredient.category ? [ingredient.category] : []}
-        />
+        <div className="flex justify-center items-center gap-2 flex-wrap">
+          <CategoryBadge
+            categories={ingredient.category ? [ingredient.category] : []}
+          />
+        </div>
+
+        <div className="flex justify-center items-center gap-2">
+          <Button variant="ghost" size="icon" title="Edit ingredient" asChild>
+            <Link href={`/ingredient/${ingredient.id}/edit`}>
+              <Edit
+                className="h-6 w-6 text-khp-text-secondary"
+                strokeWidth={1.5}
+                size={32}
+              />
+            </Link>
+          </Button>
+          <DeleteIngredient id={ingredient.id} />
+        </div>
       </div>
 
       <div className="w-full lg:w-3/4 max-w-lg">

@@ -196,22 +196,6 @@ export default function UpdateMenusPage() {
     return <div>Error loading menu: {error.message}</div>;
   }
 
-  // Ne pas afficher de loading global, garder le formulaire visible
-  // if (loading) {
-  //   return (
-  //     <div>
-  //       <div className="flex items-center justify-center min-h-screen">
-  //         <div className="text-center">
-  //           <LoaderCircle
-  //             className="animate-spin mx-auto mb-4 text-khp-primary"
-  //             size={48}
-  //           />
-  //         </div>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
   const onMenusUpdateSubmit = form.handleSubmit(
     async (values: UpdateMenuFormValues) => {
       try {
