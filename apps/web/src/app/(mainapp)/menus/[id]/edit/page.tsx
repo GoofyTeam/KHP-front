@@ -64,9 +64,7 @@ const updateMenuSchema = z
     name: z.string().min(2, "Name must be at least 2 characters long"),
     image: z.union([
       imageFileSchema,
-      z
-        .string()
-        .min(1, "Menu image is required"),
+      z.string().min(1, "Menu image is required"),
     ]),
     description: z.string().optional(),
     price: z.number().min(1, "Price must be a positive number"),
@@ -128,7 +126,7 @@ export default function UpdateMenusPage() {
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const [priceInput, setPriceInput] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<string>("menu-info");
+  const [activeTab, setActiveTab] = useState<string>("details");
 
   const { data: menuCategories } = useQuery<GetMenuCategoriesQuery>(
     GetMenuCategoriesDocument,
@@ -218,7 +216,7 @@ export default function UpdateMenusPage() {
     );
 
     if (hasMenuInfoErrors) {
-      setActiveTab("menu-info");
+      setActiveTab("details");
       return;
     }
 
@@ -336,9 +334,9 @@ export default function UpdateMenusPage() {
                 <div className="grid grid-cols-2 gap-2">
                   <Button
                     type="button"
-                    onClick={() => setActiveTab("menu-info")}
+                    onClick={() => setActiveTab("details")}
                     variant={
-                      activeTab === "menu-info" ? "khp-solid" : "khp-outline"
+                      activeTab === "details" ? "khp-solid" : "khp-outline"
                     }
                     className="transition-colors"
                   >
@@ -363,7 +361,7 @@ export default function UpdateMenusPage() {
               </div>
             </div>
 
-            <TabsContent value="menu-info" className="mt-0">
+            <TabsContent value="details" className="mt-0">
               <div className="w-full max-w-4xl mx-auto flex flex-col min-h-[600px]">
                 <div className="flex-1 space-y-6">
                   {filePreview || menuFetched?.image_url ? (
@@ -622,14 +620,6 @@ export default function UpdateMenusPage() {
           <div className="w-full max-w-4xl mx-auto mt-4">
             <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200 bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-sm">
               <Button
-                variant="khp-default"
-                type="submit"
-                className="flex-1"
-                disabled={form.formState.isSubmitting}
-              >
-                {form.formState.isSubmitting ? "Updating..." : "Update Menu"}
-              </Button>
-              <Button
                 variant="khp-destructive"
                 type="button"
                 className="flex-1"
@@ -637,6 +627,15 @@ export default function UpdateMenusPage() {
                 onClick={() => router.push(`/menus/${id}`)}
               >
                 Cancel
+              </Button>
+
+              <Button
+                variant="khp-default"
+                type="submit"
+                className="flex-1"
+                disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting ? "Updating..." : "Update Menu"}
               </Button>
             </div>
           </div>

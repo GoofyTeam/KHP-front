@@ -25,7 +25,7 @@ import { ImageAdd } from "@workspace/ui/components/image-placeholder";
 import { Input } from "@workspace/ui/components/input";
 import { PreparationEntitiesField } from "@/components/preparation/PreparationEntitiesField";
 import { Button } from "@workspace/ui/components/button";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, CookingPot, Loader2, Package } from "lucide-react";
 import { LoadMoreSelect } from "@workspace/ui/components/load-more-select";
 import {
   Select,
@@ -45,6 +45,7 @@ import {
 } from "@/graphql/generated/graphql";
 import { getAllMeasurementUnitsOnlyValues } from "@workspace/ui/lib/measurement-units";
 import { updatePreparationAction } from "./action";
+import { Tabs, TabsContent } from "@workspace/ui/components/tabs";
 
 const preparationItemsSchema = z.object({
   id: z.string().nonempty(),
@@ -77,14 +78,17 @@ const updatePreparationSchema = z
     image: z
       .instanceof(File)
       .optional()
-      .refine((file) => {
-        if (!file) return true;
-        return (
-          ACCEPTED_IMAGE_TYPES.includes(
-            file.type as (typeof ACCEPTED_IMAGE_TYPES)[number]
-          ) && file.size <= MAX_IMAGE_SIZE_BYTES
-        );
-      }, "Image must be a JPEG or PNG file and less than 10MB"),
+      .refine(
+        (file) => {
+          if (!file) return true;
+          return (
+            ACCEPTED_IMAGE_TYPES.includes(
+              file.type as (typeof ACCEPTED_IMAGE_TYPES)[number]
+            ) && file.size <= MAX_IMAGE_SIZE_BYTES
+          );
+        },
+        { message: "L'image doit être un fichier JPEG ou PNG de moins de 10Mo" }
+      ),
     unit: z.string().nonempty("Unit is required"),
     base_quantity: z
       .string()
@@ -127,7 +131,9 @@ export type UpdatePreparationFormValues = z.infer<
 
 const CATEGORY_PAGE_SIZE = 20;
 
-const DEFAULT_FORM_VALUES: UpdatePreparationFormValues = {
+const DEFAULT_FORM_VALUES: Omit<UpdatePreparationFormValues, "image"> & {
+  image?: File;
+} = {
   name: "",
   image: undefined,
   unit: "",
@@ -145,6 +151,7 @@ export default function UpdatePreparationPage() {
 
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [activeTab, setActiveTab] = useState("details");
 
   const {
     data: categoriesData,
@@ -352,22 +359,260 @@ export default function UpdatePreparationPage() {
   }
 
   if (preparationLoading && !preparation) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="animate-spin text-khp-primary" size={64} />
+        </div>
+      </div>
+    );
   }
 
   const rootErrorLines = form.formState.errors.root?.message
-    ?.split('\n')
+    ?.split("\n")
     .filter(Boolean);
 
   return (
-    <div className="flex flex-col h-full justify-center items-center w-full">
+    <div className="w-full p-4 lg:p-6">
       <Form {...form}>
-        <form
-          onSubmit={onSubmit}
-          className="flex flex-col md:flex-row justify-around gap-8 w-full"
-        >
-          <div className="flex flex-col justify-center items-center gap-y-4 w-full md:w-5/12">
-            {form.formState.errors.root?.message && (
+        <form onSubmit={onSubmit} className="w-full max-w-6xl mx-auto">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
+            <div className="w-full max-w-4xl mx-auto mb-10">
+              <div className="relative bg-gray-50 rounded-2xl p-2 shadow-sm border border-gray-200">
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    type="button"
+                    onClick={() => setActiveTab("details")}
+                    variant={
+                      activeTab === "details" ? "khp-solid" : "khp-outline"
+                    }
+                    className="transition-colors"
+                  >
+                    <CookingPot className="w-5 h-5 transition-colors" />
+                    <span className="text-sm font-semibold">
+                      Preparation informations
+                    </span>
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant={
+                      activeTab === "ingredients" ? "khp-solid" : "khp-outline"
+                    }
+                    onClick={() => setActiveTab("ingredients")}
+                    className="transition-colors"
+                  >
+                    <Package className="w-5 h-5 transition-colors" />
+                    <span className="text-sm font-semibold">Ingredients</span>
+                  </Button>
+                </div>
+              </div>
+            </div>
+            <TabsContent value="details" className="mt-0">
+              <div className="w-full max-w-4xl mx-auto flex flex-col min-h-[600px]">
+                <div className="flex-1 space-y-6">
+                  {filePreview ? (
+                    <img
+                      src={filePreview}
+                      alt={form.watch("name") || "Preparation image"}
+                      className="aspect-square object-cover max-w-1/2 w-full my-6 rounded-md mx-auto"
+                      onClick={() => inputRef.current?.click()}
+                    />
+                  ) : (
+                    <ImageAdd
+                      iconSize={32}
+                      onClick={() => inputRef.current?.click()}
+                    />
+                  )}
+
+                  {form.formState.errors.image && (
+                    <div className="w-full text-red-500 text-sm mt-1 text-center">
+                      {form.formState.errors.image.message ||
+                        "Please select an image."}
+                    </div>
+                  )}
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel>
+                          Preparation name{" "}
+                          <span className="text-red-500">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input {...field} variant="khp-default" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="image"
+                    render={({ field: { ref, onChange, name } }) => (
+                      <FormItem className="hidden">
+                        <FormControl>
+                          <Input
+                            variant="khp-default"
+                            type="file"
+                            name={name}
+                            accept={ACCEPTED_IMAGE_TYPES.join(",")}
+                            max={MAX_IMAGE_SIZE_BYTES}
+                            capture="environment"
+                            ref={(element: HTMLInputElement | null) => {
+                              ref(element);
+                              inputRef.current = element;
+                            }}
+                            onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                              handleImageChange(event, onChange)
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex flex-col gap-4 mb-6">
+                    <Label className="text-xl font-semibold">Details</Label>
+                    <div className="grid grid-cols-2 w-full gap-4">
+                      <FormField
+                        control={form.control}
+                        name="base_quantity"
+                        render={({ field }) => (
+                          <FormItem className="w-full">
+                            <FormLabel>
+                              Base quantity (for one unit)
+                              <span className="text-red-500">*</span>
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                className="border-khp-primary"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="base_unit"
+                        render={({ field }) => (
+                          <FormItem className="w-full">
+                            <FormLabel>
+                              Unit <span className="text-red-500">*</span>
+                            </FormLabel>
+                            <FormControl>
+                              <Select
+                                onValueChange={field.onChange}
+                                value={field.value}
+                              >
+                                <SelectTrigger className="w-full border-khp-primary">
+                                  <SelectValue placeholder="Select a unit" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {unitsSelections?.map((u) => (
+                                    <SelectItem key={u.value} value={u.value}>
+                                      {u.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 w-full gap-4">
+                      <FormField
+                        control={form.control}
+                        name="unit"
+                        render={({ field }) => (
+                          <FormItem className="w-full">
+                            <FormLabel>
+                              Storage unit{" "}
+                              <span className="text-red-500">*</span>
+                            </FormLabel>
+                            <FormControl>
+                              <Select
+                                onValueChange={field.onChange}
+                                value={field.value}
+                              >
+                                <SelectTrigger className="w-full border-khp-primary">
+                                  <SelectValue placeholder="Select a unit" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {unitsSelections?.map((u) => (
+                                    <SelectItem key={u.value} value={u.value}>
+                                      {u.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="category_id"
+                        render={({ field }) => (
+                          <FormItem className="w-full">
+                            <FormLabel>
+                              Category <span className="text-red-500">*</span>
+                            </FormLabel>
+                            <FormControl>
+                              <LoadMoreSelect
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                onOpenChange={(open) => {
+                                  if (!open) field.onBlur();
+                                }}
+                                triggerProps={{
+                                  ref: field.ref,
+                                  className: "w-full border-khp-primary",
+                                }}
+                                options={categoriesOptions}
+                                placeholder="Select a category"
+                                hasMore={hasMoreCategories}
+                                loading={isCategoriesLoading}
+                                onLoadMore={handleLoadMoreCategories}
+                                emptyMessage="No categories found"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="ingredients" className="mt-0">
+              <div className="w-full max-w-4xl mx-auto flex flex-col min-h-[600px]">
+                <div className="flex-1">
+                  <PreparationEntitiesField
+                    form={form}
+                    hasErrors={form.formState.errors.entities}
+                  />
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          {form.formState.errors.root?.message && (
+            <div className="w-full max-w-4xl mx-auto flex flex-col min-h-[600px]">
               <div className="w-full p-4 bg-khp-error/10 border border-khp-error/30 rounded-lg">
                 <div className="flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 text-khp-error mt-0.5 flex-shrink-0" />
@@ -383,209 +628,44 @@ export default function UpdatePreparationPage() {
                   </div>
                 </div>
               </div>
-            )}
-            {filePreview ? (
-              <img
-                src={filePreview}
-                alt={form.watch("name") || "Preparation image"}
-                className="aspect-square object-cover max-w-1/2 w-full my-6 rounded-md"
-                onClick={() => inputRef.current?.click()}
-              />
-            ) : (
-              <ImageAdd
-                iconSize={32}
-                onClick={() => inputRef.current?.click()}
-              />
-            )}
+            </div>
+          )}
 
-            {form.formState.errors.image && (
-              <div className="w-full text-red-500 text-sm mt-1 text-center">
-                {form.formState.errors.image.message ||
-                  "Please select an image."}
-              </div>
-            )}
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormLabel>
-                    Preparation name <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} variant="khp-default" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="image"
-              render={({ field: { ref, onChange, name } }) => (
-                <FormItem className="hidden">
-                  <FormControl>
-                    <Input
-                      variant="khp-default"
-                      type="file"
-                      name={name}
-                      accept="image/jpeg, image/png, image/jpg"
-                      max={MAX_IMAGE_SIZE_BYTES}
-                      capture="environment"
-                      ref={(element: HTMLInputElement | null) => {
-                        ref(element);
-                        inputRef.current = element;
-                      }}
-                      onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                        handleImageChange(event, onChange)
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="w-full grid grid-cols-1 md:grid-cols-2 mt-4 gap-x-2">
-              <Button
-                variant="khp-default"
-                type="submit"
-                className="w-full"
-                disabled={form.formState.isSubmitting}
-              >
-                {form.formState.isSubmitting ? "Updating..." : "Update"}
-              </Button>
+          <div className="w-full max-w-4xl mx-auto mt-4">
+            <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200 bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-sm">
               <Button
                 variant="khp-destructive"
                 type="button"
-                className="w-full"
+                className="flex-1"
                 onClick={() => router.push(`/preparations/${id}`)}
-                disabled={form.formState.isSubmitting}
               >
                 Cancel
               </Button>
-            </div>
-          </div>
+              {activeTab === "details" && (
+                <Button
+                  variant="khp-default"
+                  type="button"
+                  onClick={() => setActiveTab("ingredients")}
+                  className="flex-1"
+                  disabled={form.formState.isSubmitting}
+                >
+                  Next: Ingredients
+                </Button>
+              )}
 
-          <div className="w-full">
-            <div className="flex flex-col gap-4 mb-6">
-              <Label className="text-xl font-semibold">Details</Label>
-              <div className="grid grid-cols-2 w-full gap-4">
-                <FormField
-                  control={form.control}
-                  name="base_quantity"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel>
-                        Base quantity (for one unit)
-                        <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input {...field} className="border-khp-primary" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="base_unit"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel>
-                        Unit <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <SelectTrigger className="w-full border-khp-primary">
-                            <SelectValue placeholder="Select a unit" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {unitsSelections?.map((u) => (
-                              <SelectItem key={u.value} value={u.value}>
-                                {u.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 w-full gap-4">
-                <FormField
-                  control={form.control}
-                  name="unit"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel>
-                        Storage unit <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <SelectTrigger className="w-full border-khp-primary">
-                            <SelectValue placeholder="Select a unit" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {unitsSelections?.map((u) => (
-                              <SelectItem key={u.value} value={u.value}>
-                                {u.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="category_id"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel>
-                        Category <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <LoadMoreSelect
-                          value={field.value}
-                          onValueChange={field.onChange}
-                          onOpenChange={(open) => {
-                            if (!open) field.onBlur();
-                          }}
-                          triggerProps={{
-                            ref: field.ref,
-                            className: "w-full border-khp-primary",
-                          }}
-                          options={categoriesOptions}
-                          placeholder="Select a category"
-                          hasMore={hasMoreCategories}
-                          loading={isCategoriesLoading}
-                          onLoadMore={handleLoadMoreCategories}
-                          emptyMessage="No categories found"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              {activeTab === "ingredients" && (
+                <Button
+                  variant="khp-default"
+                  type="submit"
+                  className="flex-1"
+                  disabled={form.formState.isSubmitting}
+                >
+                  {form.formState.isSubmitting
+                    ? "Updating..."
+                    : "Update preparation"}
+                </Button>
+              )}
             </div>
-            <PreparationEntitiesField
-              form={form}
-              hasErrors={form.formState.errors.entities}
-            />
           </div>
         </form>
       </Form>

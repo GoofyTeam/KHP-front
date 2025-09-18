@@ -5,7 +5,7 @@ import { Button } from "@workspace/ui/components/button";
 import { ImagePlaceholder } from "@workspace/ui/components/image-placeholder";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Loader2 } from "lucide-react";
 import PreparePreparationForm from "@/components/preparation/prepare-form";
 
 export default async function PreparePreparationPage({
@@ -30,7 +30,13 @@ export default async function PreparePreparationPage({
   const hasEnoughStock = (preparation?.preparable_quantity?.quantity ?? 0) > 0;
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="animate-spin text-khp-primary" size={64} />
+        </div>
+      </div>
+    );
   }
 
   if (!hasEnoughStock) {

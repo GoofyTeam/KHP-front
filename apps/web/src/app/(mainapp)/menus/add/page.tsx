@@ -524,6 +524,15 @@ export default function CreateMenusPage() {
 
           <div className="w-full max-w-4xl mx-auto mt-4">
             <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200 bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-sm">
+              <Button
+                variant="khp-destructive"
+                type="button"
+                className="flex-1"
+                disabled={form.formState.isSubmitting}
+                onClick={() => router.push(`/menus`)}
+              >
+                Cancel
+              </Button>
               {activeTab === "details" && (
                 <Button
                   variant="khp-default"
@@ -546,16 +555,6 @@ export default function CreateMenusPage() {
                   {form.formState.isSubmitting ? "Updating..." : "Create menu"}
                 </Button>
               )}
-
-              <Button
-                variant="khp-destructive"
-                type="button"
-                className="flex-1"
-                disabled={form.formState.isSubmitting}
-                onClick={() => router.push(`/menus`)}
-              >
-                Cancel
-              </Button>
             </div>
           </div>
         </form>
