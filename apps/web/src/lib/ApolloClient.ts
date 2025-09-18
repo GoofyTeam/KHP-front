@@ -67,6 +67,9 @@ export const { getClient, query, PreloadQuery } = registerApolloClient(
     return new ApolloClient({
       cache: new InMemoryCache(),
       link: xsrfLink.concat(httpLink),
+      devtools: {
+        enabled: process.env.NODE_ENV !== "production",
+      },
     });
   }
 );
