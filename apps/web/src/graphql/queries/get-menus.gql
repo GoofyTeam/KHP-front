@@ -1,5 +1,5 @@
-query getMenus {
-  menus {
+query getMenus($page: Int!, $first: Int! = 10, $available: Boolean) {
+  menus(page: $page, first: $first, available: $available) {
     data {
       id
       name
@@ -18,6 +18,16 @@ query getMenus {
           name
         }
       }
+    }
+    paginatorInfo {
+      count
+      currentPage
+      hasMorePages
+      lastPage
+      perPage
+      total
+      firstItem
+      lastItem
     }
   }
 }

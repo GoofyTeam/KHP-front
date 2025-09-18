@@ -137,6 +137,9 @@ type Ingredient {
   """Unit for the base quantity of the ingredient."""
   base_unit: UnitEnum!
 
+  """Optional minimum stock quantity before alerting."""
+  threshold: Float
+
   """Allergens contained in the ingredient."""
   allergens: [AllergenEnum!]!
   quantities: [IngredientQuantity!]!
@@ -709,6 +712,9 @@ type Query {
     """Search by ingredient barcode."""
     barcode: String
   ): Ingredient
+
+  """List ingredients that dropped below their defined threshold."""
+  ingredientTreshold: [Ingredient!]!
 
   """Find a single location (only if it belongs to the current company)."""
   location(
