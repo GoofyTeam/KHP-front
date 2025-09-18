@@ -25,6 +25,10 @@ const buttonVariants = cva(
           "bg-khp-error text-khp-text-on-primary hover:bg-khp-error/90 rounded-xl",
         "khp-outline":
           "border border-khp-primary bg-transparent text-khp-primary hover:bg-khp-primary/10",
+        "khp-solid":
+          "bg-khp-primary text-khp-text-on-primary hover:bg-khp-primary-hover rounded-xl shadow-md",
+        "khp-solid-destructive":
+          "bg-khp-error text-khp-text-on-primary hover:bg-khp-error/90 rounded-xl shadow-md",
       },
       size: {
         default: "h-12 rounded-md px-4 has-[>svg]:px-3",

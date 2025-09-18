@@ -37,22 +37,11 @@ export default async function MenuPage({
       <div className="flex flex-col gap-8 justify-center items-center w-full lg:w-1/2">
         <div className="text-center space-y-4 w-full max-w-lg relative">
           <div className="flex justify-center items-center gap-2">
-            <h1 className="text-3xl lg:text-5xl font-bold text-khp-text-primary leading-tight flex items-center justify-start gap-2 truncate max-w-xs lg:max-w-md">
+            <h1 className="text-3xl lg:text-5xl font-bold text-khp-text-primary leading-tight flex items-center justify-start gap-2 max-w-xs lg:max-w-md text-wrap">
               {menu?.name}
             </h1>
-            <div className="grid grid-cols-2 gap-1">
-              <Button variant="ghost" size="icon" title="Edit menu" asChild>
-                <Link href={`/menus/${menu?.id}/edit`}>
-                  <Edit
-                    className="h-6 w-6 text-khp-text-secondary"
-                    strokeWidth={1.5}
-                    size={32}
-                  />
-                </Link>
-              </Button>
-              <DeleteMenu id={menu?.id} />
-            </div>
           </div>
+
           <div className="flex justify-center items-center gap-2 flex-wrap">
             <p className="text-khp-text-secondary font-bold">
               {menu?.is_a_la_carte ? "A la carte" : "Set menu"}
@@ -68,6 +57,19 @@ export default async function MenuPage({
                 },
               ]}
             />
+          </div>
+
+          <div className="flex justify-center items-center gap-2">
+            <Button variant="ghost" size="icon" title="Edit menu" asChild>
+              <Link href={`/menus/${menu?.id}/edit`}>
+                <Edit
+                  className="h-6 w-6 text-khp-text-secondary"
+                  strokeWidth={1.5}
+                  size={32}
+                />
+              </Link>
+            </Button>
+            <DeleteMenu id={menu?.id} />
           </div>
         </div>
         <div className="w-full lg:w-3/4 max-w-lg">

@@ -1,9 +1,9 @@
 "use client";
 
 import { z } from "zod";
-import { useForm } from "react-hook-form";
+import { SubmitErrorHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChangeEvent, useEffect, useRef } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 import {
@@ -16,7 +16,6 @@ import {
 } from "@workspace/ui/components/form";
 import { ImageAdd } from "@workspace/ui/components/image-placeholder";
 import { Input } from "@workspace/ui/components/input";
-import { useState } from "react";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { Switch } from "@workspace/ui/components/switch";
 import { IngredientPickerField } from "@/components/meals/IngredientPickerField";
@@ -50,18 +49,23 @@ const menuItemsSchema = z.object({
   storage_unit: z.string().optional(),
 });
 
+const imageFileSchema = z
+  .instanceof(File, {
+    message: "Menu image is required",
+  })
+  .refine((file) => {
+    const validTypes = ["image/jpeg", "image/png", "image/jpg"];
+    const maxSizeInBytes = 1 * 1024 * 1024; // 1MB
+    return validTypes.includes(file.type) && file.size <= maxSizeInBytes;
+  }, "Image must be a JPEG or PNG file and less than 1MB");
+
 const updateMenuSchema = z
   .object({
     name: z.string().min(2, "Name must be at least 2 characters long"),
-    image: z
-      .instanceof(File)
-      .optional()
-      .refine((file) => {
-        if (!file) return true; // image is optional
-        const validTypes = ["image/jpeg", "image/png", "image/jpg"];
-        const maxSizeInBytes = 1 * 1024 * 1024; // 1MB
-        return validTypes.includes(file.type) && file.size <= maxSizeInBytes;
-      }, "Image must be a JPEG or PNG file and less than 1MB"),
+    image: z.union([
+      imageFileSchema,
+      z.string().min(1, "Menu image is required"),
+    ]),
     description: z.string().optional(),
     price: z.number().min(1, "Price must be a positive number"),
     is_a_la_carte: z.boolean(),
@@ -96,6 +100,16 @@ const updateMenuSchema = z
 
 export type UpdateMenuFormValues = z.infer<typeof updateMenuSchema>;
 
+const MENU_INFO_FIELDS = [
+  "name",
+  "image",
+  "description",
+  "price",
+  "is_a_la_carte",
+  "type",
+  "category_ids",
+] as const;
+
 export default function UpdateMenusPage() {
   const params = useParams<{ id: string }>();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
@@ -112,7 +126,7 @@ export default function UpdateMenusPage() {
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const [priceInput, setPriceInput] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<string>("menu-info");
+  const [activeTab, setActiveTab] = useState<string>("details");
 
   const { data: menuCategories } = useQuery<GetMenuCategoriesQuery>(
     GetMenuCategoriesDocument,
@@ -127,6 +141,7 @@ export default function UpdateMenusPage() {
     resolver: zodResolver(updateMenuSchema),
     mode: "onChange", // Validation en temps réel
     defaultValues: {
+      image: menuFetched?.image_url || "",
       name: menuFetched?.name || "",
       description: menuFetched?.description || "",
       price: menuFetched?.price || 0,
@@ -159,6 +174,7 @@ export default function UpdateMenusPage() {
   useEffect(() => {
     if (menuFetched) {
       form.reset({
+        image: menuFetched.image_url || "",
         name: menuFetched.name || "",
         description: menuFetched.description || "",
         price: menuFetched.price || 0,
@@ -192,25 +208,26 @@ export default function UpdateMenusPage() {
     }
   }, [menuFetched, form]);
 
+  const handleValidationErrors: SubmitErrorHandler<UpdateMenuFormValues> = (
+    errors
+  ) => {
+    const hasMenuInfoErrors = MENU_INFO_FIELDS.some((field) =>
+      Boolean(errors[field])
+    );
+
+    if (hasMenuInfoErrors) {
+      setActiveTab("details");
+      return;
+    }
+
+    if (errors.items) {
+      setActiveTab("ingredients");
+    }
+  };
+
   if (error) {
     return <div>Error loading menu: {error.message}</div>;
   }
-
-  // Ne pas afficher de loading global, garder le formulaire visible
-  // if (loading) {
-  //   return (
-  //     <div>
-  //       <div className="flex items-center justify-center min-h-screen">
-  //         <div className="text-center">
-  //           <LoaderCircle
-  //             className="animate-spin mx-auto mb-4 text-khp-primary"
-  //             size={48}
-  //           />
-  //         </div>
-  //       </div>
-  //     </div>
-  //   );
-  // }
 
   const onMenusUpdateSubmit = form.handleSubmit(
     async (values: UpdateMenuFormValues) => {
@@ -296,7 +313,8 @@ export default function UpdateMenusPage() {
         });
         console.error("Submit error:", error);
       }
-    }
+    },
+    handleValidationErrors
   );
 
   return (
@@ -314,75 +332,38 @@ export default function UpdateMenusPage() {
             <div className="w-full max-w-4xl mx-auto mb-10">
               <div className="relative bg-gray-50 rounded-2xl p-2 shadow-sm border border-gray-200">
                 <div className="grid grid-cols-2 gap-2">
-                  <button
+                  <Button
                     type="button"
-                    onClick={() => setActiveTab("menu-info")}
-                    className={`
-                      relative flex items-center justify-center gap-3 px-6 py-4 rounded-xl font-medium transition-all duration-300 ease-out
-                      ${
-                        activeTab === "menu-info"
-                          ? "bg-white text-khp-primary shadow-lg shadow-khp-primary/10 border border-khp-primary/20 transform scale-[1.02]"
-                          : "text-gray-600 hover:text-gray-800 hover:bg-white/50"
-                      }
-                    `}
+                    onClick={() => setActiveTab("details")}
+                    variant={
+                      activeTab === "details" ? "khp-solid" : "khp-outline"
+                    }
+                    className="transition-colors"
                   >
-                    <ChefHat
-                      className={`w-5 h-5 transition-colors ${activeTab === "menu-info" ? "text-khp-primary" : "text-gray-500"}`}
-                    />
+                    <ChefHat className="w-5 h-5 transition-colors" />
                     <span className="text-sm font-semibold">
                       Menu Information
                     </span>
-                    {activeTab === "menu-info" && (
-                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-khp-primary rounded-full"></div>
-                    )}
-                  </button>
+                  </Button>
 
-                  <button
+                  <Button
                     type="button"
+                    variant={
+                      activeTab === "ingredients" ? "khp-solid" : "khp-outline"
+                    }
                     onClick={() => setActiveTab("ingredients")}
-                    className={`
-                      relative flex items-center justify-center gap-3 px-6 py-4 rounded-xl font-medium transition-all duration-300 ease-out
-                      ${
-                        activeTab === "ingredients"
-                          ? "bg-white text-khp-primary shadow-lg shadow-khp-primary/10 border border-khp-primary/20 transform scale-[1.02]"
-                          : "text-gray-600 hover:text-gray-800 hover:bg-white/50"
-                      }
-                    `}
+                    className="transition-colors"
                   >
-                    <Package
-                      className={`w-5 h-5 transition-colors ${activeTab === "ingredients" ? "text-khp-primary" : "text-gray-500"}`}
-                    />
+                    <Package className="w-5 h-5 transition-colors" />
                     <span className="text-sm font-semibold">Ingredients</span>
-                    {activeTab === "ingredients" && (
-                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-khp-primary rounded-full"></div>
-                    )}
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
 
-            <TabsContent value="menu-info" className="mt-0">
+            <TabsContent value="details" className="mt-0">
               <div className="w-full max-w-4xl mx-auto flex flex-col min-h-[600px]">
                 <div className="flex-1 space-y-6">
-                  {form.formState.errors.root?.message && (
-                    <div className="w-full p-4 bg-khp-error/10 border border-khp-error/30 rounded-lg">
-                      <div className="flex items-start gap-3">
-                        <AlertCircle className="w-5 h-5 text-khp-error mt-0.5 flex-shrink-0" />
-                        <div className="flex-1">
-                          {form.formState.errors.root.message
-                            .split("\n")
-                            .map((line, idx) => (
-                              <p
-                                key={idx}
-                                className={`text-sm ${idx === 0 ? "font-medium" : ""} text-khp-error`}
-                              >
-                                {line}
-                              </p>
-                            ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
                   {filePreview || menuFetched?.image_url ? (
                     <img
                       src={filePreview || menuFetched?.image_url || undefined}
@@ -614,17 +595,30 @@ export default function UpdateMenusPage() {
             </TabsContent>
           </Tabs>
 
-          {/* Boutons d'action fixes - en dehors des onglets */}
+          {form.formState.errors.root?.message && (
+            <div className="w-full max-w-4xl mx-auto flex flex-col min-h-[600px]">
+              <div className="w-full p-4 bg-khp-error/10 border border-khp-error/30 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-khp-error mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    {form.formState.errors.root.message
+                      .split("\n")
+                      .map((line, idx) => (
+                        <p
+                          key={idx}
+                          className={`text-sm ${idx === 0 ? "font-medium" : ""} text-khp-error`}
+                        >
+                          {line}
+                        </p>
+                      ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="w-full max-w-4xl mx-auto mt-4">
             <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200 bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-sm">
-              <Button
-                variant="khp-default"
-                type="submit"
-                className="flex-1"
-                disabled={form.formState.isSubmitting}
-              >
-                {form.formState.isSubmitting ? "Updating..." : "Update Menu"}
-              </Button>
               <Button
                 variant="khp-destructive"
                 type="button"
@@ -633,6 +627,15 @@ export default function UpdateMenusPage() {
                 onClick={() => router.push(`/menus/${id}`)}
               >
                 Cancel
+              </Button>
+
+              <Button
+                variant="khp-default"
+                type="submit"
+                className="flex-1"
+                disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting ? "Updating..." : "Update Menu"}
               </Button>
             </div>
           </div>

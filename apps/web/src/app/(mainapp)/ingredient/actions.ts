@@ -10,6 +10,13 @@ export interface MoveIngredientInput {
   quantity: number;
 }
 
+function handleHttpError<T = unknown>(e: unknown): ActionResult<T> {
+  if (e instanceof Error) {
+    return { success: false, error: e.message };
+  }
+  return { success: false, error: "An unexpected error occurred" };
+}
+
 export async function moveIngredientQuantityAction(
   input: MoveIngredientInput
 ): Promise<ActionResult> {
@@ -83,4 +90,14 @@ export async function deleteIngredientAction(
     () => httpClient.delete(`/api/ingredients/${ingredientId}`),
     "Failed to delete ingredient: "
   );
+}
+
+export async function deleteIngredient(id: string): Promise<ActionResult> {
+  try {
+    await httpClient.delete(`/api/ingredients/${id}`);
+    return { success: true };
+  } catch (e) {
+    console.error("Error deleting menu:", e);
+    return handleHttpError(e);
+  }
 }

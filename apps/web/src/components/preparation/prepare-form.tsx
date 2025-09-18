@@ -346,9 +346,7 @@ function PreparePreparationForm({
             </div>
           </div>
         )}
-        <Label className="text-lg font-medium">
-          Make: {preparation_data?.name}
-        </Label>
+
         <FormField
           control={form.control}
           name="quantity"

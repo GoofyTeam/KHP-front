@@ -1,7 +1,7 @@
 "use client";
 
 import { z } from "zod";
-import { useForm } from "react-hook-form";
+import { SubmitErrorHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChangeEvent, useCallback, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -18,7 +18,7 @@ import { ImageAdd } from "@workspace/ui/components/image-placeholder";
 import { Input } from "@workspace/ui/components/input";
 import { PreparationEntitiesField } from "@/components/preparation/PreparationEntitiesField";
 import { Button } from "@workspace/ui/components/button";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, CookingPot, Package } from "lucide-react";
 import {
   Select,
   SelectTrigger,
@@ -36,6 +36,7 @@ import {
 import { getAllMeasurementUnitsOnlyValues } from "@workspace/ui/lib/measurement-units";
 import { Label } from "@workspace/ui/components/label";
 import { createPreparationAction } from "@/app/(mainapp)/preparations/add/action";
+import { Tabs, TabsContent } from "@workspace/ui/components/tabs";
 
 const preparationItemsSchema = z.object({
   id: z.string().nonempty(),
@@ -54,13 +55,14 @@ const createMenuSchema = z
   .object({
     name: z.string().min(2, "Name must be at least 2 characters long"),
     image: z
-      .instanceof(File)
-      .optional()
+      .instanceof(File, {
+        message: "Menu image is required",
+      })
       .refine((file) => {
-        if (!file) return true; // image is optional
         return (
-          ACCEPTED_IMAGE_TYPES.includes(file.type as (typeof ACCEPTED_IMAGE_TYPES)[number]) &&
-          file.size <= MAX_IMAGE_SIZE_BYTES
+          ACCEPTED_IMAGE_TYPES.includes(
+            file.type as (typeof ACCEPTED_IMAGE_TYPES)[number]
+          ) && file.size <= MAX_IMAGE_SIZE_BYTES
         );
       }, "Image must be a JPEG or PNG file and less than 10MB"),
     unit: z.string().nonempty("Unit is required"),
@@ -93,6 +95,15 @@ const createMenuSchema = z
   });
 
 export type CreateMenuFormValues = z.infer<typeof createMenuSchema>;
+
+const PREPARATION_DETAILS_FIELDS = [
+  "name",
+  "image",
+  "unit",
+  "base_quantity",
+  "base_unit",
+  "category_id",
+] as const satisfies ReadonlyArray<keyof CreateMenuFormValues>;
 
 type CreatePreparationActionResult = Awaited<
   ReturnType<typeof createPreparationAction>
@@ -129,7 +140,11 @@ function buildSubmissionErrorMessage(result: CreatePreparationActionResult) {
         }
       }
 
-      if ("error" in result && typeof result.error === "string" && result.error.trim()) {
+      if (
+        "error" in result &&
+        typeof result.error === "string" &&
+        result.error.trim()
+      ) {
         return result.error;
       }
     } catch (error) {
@@ -143,13 +158,22 @@ function buildSubmissionErrorMessage(result: CreatePreparationActionResult) {
   const lowerCaseMessage = message.toLowerCase();
 
   const tips: string[] = [];
-  if (lowerCaseMessage.includes("authentication") || lowerCaseMessage.includes("unauthorized")) {
+  if (
+    lowerCaseMessage.includes("authentication") ||
+    lowerCaseMessage.includes("unauthorized")
+  ) {
     tips.push("You must be authenticated. Please sign in again.");
   }
-  if (lowerCaseMessage.includes("session expired") || lowerCaseMessage.includes("419")) {
+  if (
+    lowerCaseMessage.includes("session expired") ||
+    lowerCaseMessage.includes("419")
+  ) {
     tips.push("Your session has expired. Refresh the page, then try again.");
   }
-  if (lowerCaseMessage.includes("validation") || lowerCaseMessage.includes("422")) {
+  if (
+    lowerCaseMessage.includes("validation") ||
+    lowerCaseMessage.includes("422")
+  ) {
     tips.push("Fix the fields with errors, then submit again.");
   }
   if (tips.length === 0) {
@@ -167,6 +191,7 @@ export default function CreatePreparationPage() {
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState<string>("details");
 
   const {
     data: ingredientCategories,
@@ -248,13 +273,27 @@ export default function CreatePreparationPage() {
     defaultValues: DEFAULT_FORM_VALUES,
   });
 
+  const handleValidationErrors: SubmitErrorHandler<CreateMenuFormValues> = (
+    errors
+  ) => {
+    const hasDetailErrors = PREPARATION_DETAILS_FIELDS.some((field) =>
+      Boolean(errors[field])
+    );
+
+    if (hasDetailErrors) {
+      setActiveTab("details");
+      return;
+    }
+
+    if (errors.entities) {
+      setActiveTab("ingredients");
+    }
+  };
+
   const unitsSelections = useMemo(getAllMeasurementUnitsOnlyValues, []);
 
   const handleImageChange = useCallback(
-    (
-      event: ChangeEvent<HTMLInputElement>,
-      onChange: (file?: File) => void
-    ) => {
+    (event: ChangeEvent<HTMLInputElement>, onChange: (file?: File) => void) => {
       const file = event.target.files?.[0];
 
       if (!file) {
@@ -281,7 +320,11 @@ export default function CreatePreparationPage() {
       return;
     }
 
-    console.error("Failed to create preparation:", result.error, result.details);
+    console.error(
+      "Failed to create preparation:",
+      result.error,
+      result.details
+    );
 
     form.setError("root", {
       type: "server",
@@ -294,226 +337,307 @@ export default function CreatePreparationPage() {
     .filter(Boolean);
 
   return (
-    <div className="flex flex-col h-full justify-center items-center w-full">
+    <div className="w-full p-4 lg:p-6">
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(onPreparationCreateSubmit)}
-          className="flex flex-col md:flex-row justify-around gap-8 w-full"
+          onSubmit={form.handleSubmit(
+            onPreparationCreateSubmit,
+            handleValidationErrors
+          )}
+          className="w-full max-w-6xl mx-auto"
         >
-          <div className="flex flex-col justify-center items-center gap-y-4 w-full md:w-5/12">
-            {form.formState.errors.root?.message && (
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
+            <div className="w-full max-w-4xl mx-auto mb-10">
+              <div className="relative bg-gray-50 rounded-2xl p-2 shadow-sm border border-gray-200">
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    type="button"
+                    onClick={() => setActiveTab("details")}
+                    variant={
+                      activeTab === "details" ? "khp-solid" : "khp-outline"
+                    }
+                    className="transition-colors"
+                  >
+                    <CookingPot className="w-5 h-5 transition-colors" />
+                    <span className="text-sm font-semibold">
+                      Preparation informations
+                    </span>
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant={
+                      activeTab === "ingredients" ? "khp-solid" : "khp-outline"
+                    }
+                    onClick={() => setActiveTab("ingredients")}
+                    className="transition-colors"
+                  >
+                    <Package className="w-5 h-5 transition-colors" />
+                    <span className="text-sm font-semibold">Ingredients</span>
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <TabsContent value="details" className="mt-0">
+              <div className="w-full max-w-4xl mx-auto flex flex-col min-h-[600px]">
+                <div className="flex-1 space-y-6">
+                  {filePreview ? (
+                    <img
+                      src={filePreview || ""}
+                      alt={"Menu Image"}
+                      className="aspect-square object-cover max-w-1/2 w-full my-6 rounded-md mx-auto"
+                      onClick={() => inputRef.current?.click()}
+                    />
+                  ) : (
+                    <ImageAdd
+                      iconSize={32}
+                      onClick={() => inputRef.current?.click()}
+                    />
+                  )}
+
+                  {form.formState.errors.image && (
+                    <div className="w-full text-red-500 text-sm mt-1 text-center">
+                      {form.formState.errors.image.message ||
+                        "Please select an image."}
+                    </div>
+                  )}
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel>
+                          Preparation name{" "}
+                          <span className="text-red-500">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input {...field} variant="khp-default" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="image"
+                    render={({ field: { ref, onChange, name } }) => (
+                      <FormItem className="hidden">
+                        <FormControl>
+                          <Input
+                            variant="khp-default"
+                            type="file"
+                            name={name}
+                            accept={ACCEPTED_IMAGE_TYPES.join(",")}
+                            max={MAX_IMAGE_SIZE_BYTES}
+                            capture="environment"
+                            ref={(e: HTMLInputElement | null) => {
+                              ref(e);
+                              inputRef.current = e;
+                            }}
+                            onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                              handleImageChange(event, onChange)
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex flex-col gap-4 mb-6">
+                    <Label className="text-xl font-semibold">Details</Label>
+                    <div className="grid grid-cols-2 w-full gap-4">
+                      <FormField
+                        control={form.control}
+                        name="base_quantity"
+                        render={({ field }) => (
+                          <FormItem className="w-full">
+                            <FormLabel>
+                              Base quantity (for one unit)
+                              <span className="text-red-500">*</span>
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                className="border-khp-primary"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="base_unit"
+                        render={({ field }) => (
+                          <FormItem className="w-full">
+                            <FormLabel>
+                              Unit <span className="text-red-500">*</span>
+                            </FormLabel>
+                            <FormControl>
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                              >
+                                <SelectTrigger className="w-full border-khp-primary">
+                                  <SelectValue placeholder="Select a unit" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {unitsSelections?.map((u) => (
+                                    <SelectItem key={u.value} value={u.value}>
+                                      {u.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 w-full gap-4">
+                      <FormField
+                        control={form.control}
+                        name="unit"
+                        render={({ field }) => (
+                          <FormItem className="w-full">
+                            <FormLabel>
+                              Storage unit{" "}
+                              <span className="text-red-500">*</span>
+                            </FormLabel>
+                            <FormControl>
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                              >
+                                <SelectTrigger className="w-full border-khp-primary">
+                                  <SelectValue placeholder="Select a unit" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {unitsSelections?.map((u) => (
+                                    <SelectItem key={u.value} value={u.value}>
+                                      {u.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="category_id"
+                        render={({ field }) => (
+                          <FormItem className="w-full">
+                            <FormLabel>
+                              Category <span className="text-red-500">*</span>
+                            </FormLabel>
+                            <FormControl>
+                              <LoadMoreSelect
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                onOpenChange={(open) => {
+                                  if (!open) field.onBlur();
+                                }}
+                                triggerProps={{
+                                  ref: field.ref,
+                                  className: "w-full border-khp-primary",
+                                }}
+                                options={categoriesOptions}
+                                placeholder="Select a category"
+                                hasMore={hasMoreCategories}
+                                loading={isCategoriesLoading}
+                                onLoadMore={handleLoadMoreCategories}
+                                emptyMessage="No categories found"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="ingredients" className="mt-0">
+              <div className="w-full max-w-4xl mx-auto flex flex-col min-h-[600px]">
+                <div className="flex-1">
+                  <PreparationEntitiesField
+                    form={form}
+                    hasErrors={form.formState.errors.entities}
+                  />
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          {form.formState.errors.root?.message && (
+            <div className="w-full max-w-4xl mx-auto flex flex-col min-h-[600px]">
               <div className="w-full p-4 bg-khp-error/10 border border-khp-error/30 rounded-lg">
                 <div className="flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 text-khp-error mt-0.5 flex-shrink-0" />
                   <div className="flex-1">
                     {rootErrorLines?.map((line, idx) => (
-                        <p
-                          key={idx}
-                          className={`text-sm ${idx === 0 ? "font-medium" : ""} text-khp-error`}
-                        >
-                          {line}
-                        </p>
-                      ))}
+                      <p
+                        key={idx}
+                        className={`text-sm ${idx === 0 ? "font-medium" : ""} text-khp-error`}
+                      >
+                        {line}
+                      </p>
+                    ))}
                   </div>
                 </div>
               </div>
-            )}
-            {filePreview ? (
-              <img
-                src={filePreview || ""}
-                alt={"Menu Image"}
-                className="aspect-square object-cover max-w-1/2 w-full my-6 rounded-md"
-                onClick={() => inputRef.current?.click()}
-              />
-            ) : (
-              <ImageAdd
-                iconSize={32}
-                onClick={() => inputRef.current?.click()}
-              />
-            )}
+            </div>
+          )}
 
-            {form.formState.errors.image && (
-              <div className="w-full text-red-500 text-sm mt-1 text-center">
-                {form.formState.errors.image.message ||
-                  "Please select an image."}
-              </div>
-            )}
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormLabel>
-                    Preparation name <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} variant="khp-default" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="image"
-              render={({ field: { ref, onChange, name } }) => (
-                <FormItem className="hidden">
-                  <FormControl>
-                    <Input
-                      variant="khp-default"
-                      type="file"
-                      name={name}
-                      accept="image/jpeg, image/png, image/jpg"
-                      max={MAX_IMAGE_SIZE_BYTES}
-                      capture="environment"
-                      ref={(e: HTMLInputElement | null) => {
-                        ref(e);
-                        inputRef.current = e;
-                      }}
-                      onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                        handleImageChange(event, onChange)
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="w-full grid grid-cols-1 md:grid-cols-2 mt-4 gap-x-2">
-              <Button variant="khp-default" type="submit" className="w-full">
-                Create
-              </Button>
+          <div className="w-full max-w-4xl mx-auto mt-4">
+            <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200 bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-sm">
               <Button
                 variant="khp-destructive"
                 type="button"
-                className="w-full"
+                className="flex-1"
                 onClick={() => router.push("/preparations")}
               >
                 Cancel
               </Button>
-            </div>
-          </div>
 
-          <div className="w-full">
-            <div className="flex flex-col gap-4 mb-6">
-              <Label className="text-xl font-semibold">Details</Label>
-              <div className="grid grid-cols-2 w-full gap-4">
-                <FormField
-                  control={form.control}
-                  name="base_quantity"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel>
-                        Base quantity (for one unit)
-                        <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input {...field} className="border-khp-primary" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="base_unit"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel>
-                        Unit <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <SelectTrigger className="w-full border-khp-primary">
-                            <SelectValue placeholder="Select a unit" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {unitsSelections?.map((u) => (
-                              <SelectItem key={u.value} value={u.value}>
-                                {u.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              {activeTab === "details" && (
+                <Button
+                  variant="khp-default"
+                  type="button"
+                  onClick={() => setActiveTab("ingredients")}
+                  className="flex-1"
+                  disabled={form.formState.isSubmitting}
+                >
+                  Next: Ingredients
+                </Button>
+              )}
 
-              <div className="grid grid-cols-2 w-full gap-4">
-                <FormField
-                  control={form.control}
-                  name="unit"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel>
-                        Storage unit <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <SelectTrigger className="w-full border-khp-primary">
-                            <SelectValue placeholder="Select a unit" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {unitsSelections?.map((u) => (
-                              <SelectItem key={u.value} value={u.value}>
-                                {u.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="category_id"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel>
-                        Category <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <LoadMoreSelect
-                          value={field.value}
-                          onValueChange={field.onChange}
-                          onOpenChange={(open) => {
-                            if (!open) field.onBlur();
-                          }}
-                          triggerProps={{
-                            ref: field.ref,
-                            className: "w-full border-khp-primary",
-                          }}
-                          options={categoriesOptions}
-                          placeholder="Select a category"
-                          hasMore={hasMoreCategories}
-                          loading={isCategoriesLoading}
-                          onLoadMore={handleLoadMoreCategories}
-                          emptyMessage="No categories found"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              {activeTab === "ingredients" && (
+                <Button
+                  variant="khp-default"
+                  type="submit"
+                  className="flex-1"
+                  disabled={form.formState.isSubmitting}
+                >
+                  {form.formState.isSubmitting
+                    ? "Updating..."
+                    : "Create preparation"}
+                </Button>
+              )}
             </div>
-            <PreparationEntitiesField
-              form={form}
-              hasErrors={form.formState.errors.entities}
-            />
           </div>
         </form>
       </Form>
