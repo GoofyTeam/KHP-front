@@ -23,6 +23,7 @@ import {
   TableBody,
   TableCell,
 } from "@workspace/ui/components/table";
+import { Skeleton } from "@workspace/ui/components/skeleton";
 import Link from "next/link";
 
 import {
@@ -156,14 +157,20 @@ export function PreparationDataTable<TValue>({
           </Button>
         </div>
       </div>
-      <div className="overflow-hidden rounded-md border border-khp-secondary">
-        <Table>
-          <TableHeader>
+      <div className="relative rounded-lg border-2 border-khp-primary/30 h-[calc(80vh-56px)] overflow-auto">
+        <Table className="w-full caption-bottom text-sm text-khp-text-secondary border-collapse">
+          <TableHeader className="text-khp-text-primary h-16">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow
+                key={headerGroup.id}
+                className="border-b border-khp-primary/30 bg-white"
+              >
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead
+                      key={header.id}
+                      className="px-2 text-left bg-white"
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -194,10 +201,10 @@ export function PreparationDataTable<TValue>({
                     tabIndex={0}
                     role="link"
                     aria-label={`Voir détails de la préparation ${original.name || original.id}`}
-                    className="hover:cursor-pointer hover:bg-khp-primary/10 border-b border-khp-secondary focus:outline-2 focus:outline-offset-2 focus:outline-khp-primary"
+                    className="hover:cursor-pointer hover:bg-khp-primary/10 border-b border-khp-text-secondary/30 focus:outline-2 focus:outline-offset-2 focus:outline-khp-primary h-16"
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
+                      <TableCell key={cell.id} className="px-2 text-left">
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
@@ -207,13 +214,30 @@ export function PreparationDataTable<TValue>({
                   </TableRow>
                 );
               })
+            ) : loading ? (
+              // Loading skeleton
+              Array.from({ length: 5 }).map((_, index) => (
+                <TableRow
+                  key={`skeleton-${index}`}
+                  className="border-b border-khp-text-secondary/30 h-16"
+                >
+                  {columns.map((_, colIndex) => (
+                    <TableCell
+                      key={`skeleton-cell-${colIndex}`}
+                      className="px-2 text-left"
+                    >
+                      <Skeleton className="h-8 w-full" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
             ) : (
-              <TableRow>
+              <TableRow className="border-b border-khp-text-secondary/30">
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
+                  className="h-24 text-center text-muted-foreground px-2"
                 >
-                  {loading ? "Loading..." : "No results."}
+                  No results.
                 </TableCell>
               </TableRow>
             )}
@@ -226,6 +250,9 @@ export function PreparationDataTable<TValue>({
           >
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-khp-primary" />
           </div>
+        )}
+        {!hasMorePages && preparations.length > 0 && (
+          <div className="border-b-1 border-khp-text-secondary/30" />
         )}
       </div>
     </>
