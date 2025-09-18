@@ -37,6 +37,9 @@ import {
 } from "@/graphql/generated/graphql";
 import { Tabs, TabsContent } from "@workspace/ui/components/tabs";
 
+const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/jpg"] as const;
+
 const menuItemsSchema = z.object({
   entity_id: z.string().nonempty("Entity ID is required"),
   entity_type: z.enum(["ingredient", "preparation"]),
@@ -55,10 +58,12 @@ const createMenuSchema = z
         message: "Menu image is required",
       })
       .refine((file) => {
-        const validTypes = ["image/jpeg", "image/png", "image/jpg"];
-        const maxSizeInBytes = 1 * 1024 * 1024; // 1MB
-        return validTypes.includes(file.type) && file.size <= maxSizeInBytes;
-      }, "Image must be a JPEG or PNG file and less than 1MB"),
+        return (
+          ACCEPTED_IMAGE_TYPES.includes(
+            file.type as (typeof ACCEPTED_IMAGE_TYPES)[number]
+          ) && file.size <= MAX_IMAGE_SIZE_BYTES
+        );
+      }, "Image must be a JPEG or PNG file and less than 10MB"),
     description: z.string().optional(),
     price: z.number().min(1, "Price must be a positive number"),
     is_a_la_carte: z.boolean(),
@@ -108,7 +113,7 @@ export default function CreateMenusPage() {
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const [priceInput, setPriceInput] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<string>("menu-info");
+  const [activeTab, setActiveTab] = useState<string>("details");
 
   const { data: menuCategories } = useQuery<GetMenuCategoriesQuery>(
     GetMenuCategoriesDocument,
@@ -137,7 +142,7 @@ export default function CreateMenusPage() {
     );
 
     if (hasMenuInfoErrors) {
-      setActiveTab("menu-info");
+      setActiveTab("details");
       return;
     }
 
@@ -234,9 +239,9 @@ export default function CreateMenusPage() {
                 <div className="grid grid-cols-2 gap-2">
                   <Button
                     type="button"
-                    onClick={() => setActiveTab("menu-info")}
+                    onClick={() => setActiveTab("details")}
                     variant={
-                      activeTab === "menu-info" ? "khp-solid" : "khp-outline"
+                      activeTab === "details" ? "khp-solid" : "khp-outline"
                     }
                     className="transition-colors"
                   >
@@ -261,7 +266,7 @@ export default function CreateMenusPage() {
               </div>
             </div>
 
-            <TabsContent value="menu-info" className="mt-0">
+            <TabsContent value="details" className="mt-0">
               <div className="w-full max-w-4xl mx-auto flex flex-col min-h-[600px]">
                 <div className="flex-1 space-y-6">
                   {filePreview ? (
@@ -295,8 +300,8 @@ export default function CreateMenusPage() {
                             variant="khp-default"
                             type="file"
                             name={name}
-                            accept="image/jpeg, image/png, image/jpg"
-                            max={1048576}
+                            accept={ACCEPTED_IMAGE_TYPES.join(",")}
+                            max={MAX_IMAGE_SIZE_BYTES}
                             capture="environment"
                             ref={(e: HTMLInputElement | null) => {
                               ref(e);
@@ -519,12 +524,13 @@ export default function CreateMenusPage() {
 
           <div className="w-full max-w-4xl mx-auto mt-4">
             <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200 bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-sm">
-              {activeTab === "menu-info" && (
+              {activeTab === "details" && (
                 <Button
                   variant="khp-default"
                   type="button"
                   className="flex-1"
                   onClick={() => setActiveTab("ingredients")}
+                  disabled={form.formState.isSubmitting}
                 >
                   Next: Ingredients
                 </Button>
@@ -537,7 +543,7 @@ export default function CreateMenusPage() {
                   className="flex-1"
                   disabled={form.formState.isSubmitting}
                 >
-                  {form.formState.isSubmitting ? "Updating..." : "Update Menu"}
+                  {form.formState.isSubmitting ? "Updating..." : "Create menu"}
                 </Button>
               )}
 
