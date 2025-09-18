@@ -16,7 +16,7 @@ import {
 } from "@workspace/ui/components/form";
 import { CheckCircleIcon, Loader2Icon, User as UserIcon } from "lucide-react";
 import { updateUserInfoAction } from "@/app/(mainapp)/settings/account/actions";
-import { useUserStore } from "@/stores/user-store";
+import { useUserWithGraphQL } from "@/stores/user-store";
 
 const profileFormSchema = z.object({
   name: z
@@ -35,7 +35,7 @@ const profileFormSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export function ProfileSection() {
-  const { user, fetchUser } = useUserStore();
+  const { user, fetchUser } = useUserWithGraphQL();
   const [formStatus, setFormStatus] = useState<{
     type: "idle" | "success" | "error";
     message?: string;

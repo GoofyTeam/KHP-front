@@ -60,7 +60,7 @@ export function IngredientsTable() {
   }, [filters.search, filters.categoryIds]);
 
   // Infinite scroll logic
-  
+
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el || !hasMorePages || loading) return;
@@ -167,7 +167,7 @@ export function IngredientsTable() {
               Array.from({ length: 8 }).map((_, i) => (
                 <TableRow
                   key={i}
-                  className="border-t border-b border-khp-text-secondary/30 h-16"
+                  className="border-b border-khp-text-secondary/30 h-16"
                 >
                   {columns.map((_, j) => (
                     <TableCell key={j} className="px-2 text-left">
@@ -180,7 +180,7 @@ export function IngredientsTable() {
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  className="border-b border-khp-text-secondary/30 h-16 cursor-pointer hover:bg-muted/50"
+                  className="border-b border-khp-text-secondary/30 h-16 cursor-pointer hover:bg-khp-primary/10"
                   onClick={() => handleRowClick(row.original.id)}
                 >
                   {row.getVisibleCells().map((cell) => (

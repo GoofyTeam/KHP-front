@@ -1,21 +1,33 @@
-query getMenus {
-  menus {
-    id
-    name
-    image_url
-    description
-    is_a_la_carte
-    available
-    created_at
-    updated_at
-    items {
+query getMenus($page: Int!, $first: Int! = 10, $available: Boolean) {
+  menus(page: $page, first: $first, available: $available) {
+    data {
       id
-      quantity
-      unit
-      location {
+      name
+      image_url
+      description
+      is_a_la_carte
+      available
+      created_at
+      updated_at
+      items {
         id
-        name
+        quantity
+        unit
+        location {
+          id
+          name
+        }
       }
+    }
+    paginatorInfo {
+      count
+      currentPage
+      hasMorePages
+      lastPage
+      perPage
+      total
+      firstItem
+      lastItem
     }
   }
 }

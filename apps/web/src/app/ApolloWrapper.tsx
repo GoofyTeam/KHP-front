@@ -74,7 +74,19 @@ function makeClient() {
             ...options,
             headers: updatedHeaders,
           });
+        } else {
+          // Si on ne peut pas rafraîchir le token, rediriger vers login
+          console.warn("Failed to refresh CSRF token, redirecting to login...");
+          window.location.href = "/login";
         }
+      }
+
+      // Handle authentication errors
+      if (response.status === 401) {
+        console.warn(
+          "Apollo GraphQL authentication failed, redirecting to login..."
+        );
+        window.location.href = "/login";
       }
 
       return response;

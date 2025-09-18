@@ -71,7 +71,7 @@ export function useIngredientsColumns(
               onClick={() =>
                 column.toggleSorting(column.getIsSorted() === "asc")
               }
-              className="h-auto p-0 font-medium hover:bg-transparent"
+              className="h-auto !p-0 font-medium hover:bg-transparent"
             >
               Quantity
               <ArrowUpDown className="ml-2 h-4 w-4" />

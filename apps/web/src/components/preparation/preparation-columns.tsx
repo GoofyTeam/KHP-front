@@ -54,7 +54,7 @@ const preparationColumns: ColumnDef<Preparation>[] = [
       if (quantities && quantities.length > 0) {
         quantity = quantities.reduce((acc, curr) => acc + curr.quantity, 0);
       }
-      return <div className="text-center">{quantity}</div>;
+      return <div className="text-left">{quantity}</div>;
     },
   },
   {

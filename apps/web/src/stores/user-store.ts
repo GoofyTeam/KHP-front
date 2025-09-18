@@ -1,10 +1,24 @@
 "use client";
 
 import { create } from "zustand";
-import { httpClient, type User as HttpUser } from "@/lib/httpClient";
+import { ApolloClient, ApolloError, useApolloClient } from "@apollo/client";
+import {
+  GetMeDocument,
+  type GetMeQuery as GetMeQueryType,
+} from "@/graphql/generated/graphql";
 
-// Utilisation du type httpClient User
-type User = HttpUser;
+// Type basé sur la réponse GraphQL GetMe
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  company?: {
+    id: string;
+    name: string;
+    auto_complete_menu_orders?: boolean | null;
+    open_food_facts_language?: string | null;
+  } | null;
+};
 
 type State = {
   user: User | null;
@@ -13,7 +27,9 @@ type State = {
 
   // Actions
   setUser: (u: User | null) => void;
-  fetchUser: () => Promise<{ success: boolean; data?: User; error?: string }>;
+  fetchUser: (
+    apolloClient: ApolloClient<unknown>
+  ) => Promise<{ success: boolean; data?: User; error?: string }>;
   clearUser: () => void;
   clearError: () => void;
 };
@@ -25,13 +41,17 @@ export const useUserStore = create<State>((set) => ({
 
   setUser: (user) => set({ user, error: null }),
 
-  fetchUser: async () => {
+  fetchUser: async (apolloClient) => {
     set({ isLoading: true, error: null });
 
     try {
-      const response = await httpClient.get<{ user: User }>("/api/user");
+      const { data } = await apolloClient.query<GetMeQueryType>({
+        query: GetMeDocument,
+        fetchPolicy: "network-only",
+        errorPolicy: "all",
+      });
 
-      const userData = response?.user;
+      const userData = data?.me;
 
       if (!userData || !userData.id) {
         const errorMessage = "User not found";
@@ -43,16 +63,53 @@ export const useUserStore = create<State>((set) => ({
         return { success: false, error: errorMessage };
       }
 
+      // Mapper les données GraphQL vers notre type User
+      const user: User = {
+        id: userData.id,
+        name: userData.name,
+        email: userData.email,
+        company: userData.company
+          ? {
+              id: userData.company.id,
+              name: userData.company.name,
+              auto_complete_menu_orders:
+                userData.company.auto_complete_menu_orders,
+              open_food_facts_language:
+                userData.company.open_food_facts_language,
+            }
+          : null,
+      };
+
       set({
-        user: userData,
+        user,
         isLoading: false,
         error: null,
       });
 
-      return { success: true, data: userData };
+      return { success: true, data: user };
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to fetch user data";
+
+      // Gestion spécifique des erreurs d'authentification GraphQL
+      if (error instanceof ApolloError) {
+        const hasAuthError =
+          error.graphQLErrors?.some(
+            (err) => err.extensions?.code === "UNAUTHENTICATED"
+          ) ||
+          (error.networkError &&
+            "statusCode" in error.networkError &&
+            error.networkError.statusCode === 401);
+
+        if (hasAuthError) {
+          // Redirection vers login si pas authentifié
+          if (typeof window !== "undefined") {
+            window.location.href = "/login";
+            return { success: false, error: "Redirecting to login..." };
+          }
+        }
+      }
+
       set({
         isLoading: false,
         error: errorMessage,
@@ -66,3 +123,16 @@ export const useUserStore = create<State>((set) => ({
 
   clearError: () => set({ error: null }),
 }));
+
+// Hook personnalisé pour utiliser le store avec Apollo Client
+export const useUserWithGraphQL = () => {
+  const apolloClient = useApolloClient();
+  const store = useUserStore();
+
+  const fetchUser = () => store.fetchUser(apolloClient);
+
+  return {
+    ...store,
+    fetchUser,
+  };
+};
