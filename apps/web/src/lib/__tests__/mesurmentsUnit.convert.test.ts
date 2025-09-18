@@ -1,4 +1,7 @@
-import { convertMeasurement, MeasurementUnit } from '../mesurmentsUnit'
+import {
+  convertMeasurement,
+  MeasurementUnit,
+} from '@workspace/ui/lib/measurement-units'
 
 describe('convertMeasurement', () => {
   test('converts mass units correctly', () => {
@@ -21,4 +24,3 @@ describe('convertMeasurement', () => {
     expect(convertMeasurement(123.45, MeasurementUnit.GRAM, MeasurementUnit.GRAM)).toBe(123.45)
   })
 })
-

@@ -13,16 +13,16 @@ interface QuantityInputProps {
   placeholder?: string;
 }
 
-// Helpers purs, définis hors composant pour éviter de les recréer
+// Pure helpers defined outside the component to avoid recreating them
 const ONLY_NUMERIC_CHARS = /[^0-9.,]/g;
 const DOT_GLOBAL = /\./g;
 
 function cleanNumericString(raw: string): string {
-  // garder chiffres + , .
+  // keep digits plus comma and dot
   let cleaned = raw.replace(ONLY_NUMERIC_CHARS, "");
-  // normaliser , -> .
+  // normalize comma to dot
   cleaned = cleaned.replace(/,/g, ".");
-  // ne garder qu'un seul point
+  // allow only one dot
   const pointCount = (cleaned.match(DOT_GLOBAL) || []).length;
   if (pointCount > 1) {
     const firstPointIndex = cleaned.indexOf(".");
@@ -37,7 +37,7 @@ function formatDisplayValue(val: string): string {
   if (!val || val === "0") return "";
   const numValue = parseFloat(val) || 0;
   if (numValue === 0) return "";
-  // supprimer les zéros inutiles en fin de décimal
+  // remove trailing zeros in the decimal part
   return val.replace(/\.?0+$/, "");
 }
 
@@ -49,12 +49,12 @@ export function QuantityInput({
   title = "Quantity",
   className = "",
   autoFocus = false,
-  placeholder = "ex: 289.2",
+  placeholder = "e.g. 289.2",
 }: QuantityInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isFocused, setIsFocused] = useState(false);
 
-  // Focus auto identique au comportement d'origine
+  // Preserve original auto-focus behavior
   useEffect(() => {
     if (autoFocus && inputRef.current && !disabled) {
       const id = setTimeout(() => inputRef.current?.focus(), 100);
@@ -62,7 +62,7 @@ export function QuantityInput({
     }
   }, [autoFocus, disabled]);
 
-  // Affichage brut si focus, formaté sinon (mémoïsé pour éviter du travail inutile)
+  // Show raw value while focused, formatted otherwise (memoized to avoid extra work)
   const displayValue = useMemo(
     () => (isFocused ? value : formatDisplayValue(value)),
     [value, isFocused]
@@ -143,7 +143,7 @@ export function QuantityInput({
 
         <div className="mt-2 text-xs text-khp-text-secondary text-center">
           {isFocused
-            ? "Type your quantity directly (ex: 6.5)"
+            ? "Type your quantity directly (e.g. 6.5)"
             : displayValue
               ? `${formatDisplayValue(value)} ${unit?.toLowerCase() || ""}`
               : "Click to enter a quantity"}

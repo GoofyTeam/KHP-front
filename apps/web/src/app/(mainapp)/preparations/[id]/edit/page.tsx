@@ -43,7 +43,7 @@ import {
   GetPreparationByIdDocument,
   type GetPreparationByIdQuery,
 } from "@/graphql/generated/graphql";
-import { getAllMeasurementUnitsOnlyValues } from "@/lib/mesurmentsUnit";
+import { getAllMeasurementUnitsOnlyValues } from "@workspace/ui/lib/measurement-units";
 import { updatePreparationAction } from "./action";
 
 const preparationItemsSchema = z.object({

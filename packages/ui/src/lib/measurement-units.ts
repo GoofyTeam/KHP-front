@@ -18,7 +18,7 @@ export type MeasurementUnitType =
   // Unitary (single unit only)
   | "unit";
 
-export type MeasurementCategory = "masse" | "volume" | "unité";
+export type MeasurementCategory = "mass" | "volume" | "unit";
 
 export const MeasurementUnit = {
   // Mass (gram variants)
@@ -42,55 +42,55 @@ export const MeasurementUnit = {
   // Unitary (single unit only)
   UNIT: "unit" as MeasurementUnitType,
 
-  // Méthodes
-  frenchLabel: (unit: MeasurementUnitType): string => {
+  // Helpers
+  label: (unit: MeasurementUnitType): string => {
     switch (unit) {
       // Mass
       case "kg":
-        return "Kilogramme (kg)";
+        return "Kilogram (kg)";
       case "hg":
-        return "Hectogramme (hg)";
+        return "Hectogram (hg)";
       case "dag":
-        return "Décagramme (dag)";
+        return "Decagram (dag)";
       case "g":
-        return "Gramme (g)";
+        return "Gram (g)";
       case "dg":
-        return "Décigramme (dg)";
+        return "Decigram (dg)";
       case "cg":
-        return "Centigramme (cg)";
+        return "Centigram (cg)";
       case "mg":
-        return "Milligramme (mg)";
+        return "Milligram (mg)";
 
       // Volume
       case "kL":
-        return "Kilolitre (kL)";
+        return "Kiloliter (kL)";
       case "hL":
-        return "Hectolitre (hL)";
+        return "Hectoliter (hL)";
       case "daL":
-        return "Décalitre (daL)";
+        return "Decaliter (daL)";
       case "L":
-        return "Litre (L)";
+        return "Liter (L)";
       case "dL":
-        return "Décilitre (dL)";
+        return "Deciliter (dL)";
       case "cL":
-        return "Centilitre (cL)";
+        return "Centiliter (cL)";
       case "mL":
-        return "Millilitre (mL)";
+        return "Milliliter (mL)";
 
       case "unit":
-        return "Unit (unit)";
+        return "Unit";
       default:
-        return "null";
+        return "Unknown unit";
     }
   },
 
   category: (unit: MeasurementUnitType): MeasurementCategory => {
     if (["kg", "hg", "dag", "g", "dg", "cg", "mg"].includes(unit)) {
-      return "masse";
+      return "mass";
     } else if (["kL", "hL", "daL", "L", "dL", "cL", "mL"].includes(unit)) {
       return "volume";
     } else {
-      return "unité";
+      return "unit";
     }
   },
 
@@ -132,7 +132,7 @@ export type MeasurementUnitInfo = {
 export const getAllMeasurementUnits = (): MeasurementUnitInfo[] => {
   return MeasurementUnit.values().map((value) => ({
     value,
-    label: MeasurementUnit.frenchLabel(value),
+    label: MeasurementUnit.label(value),
     category: MeasurementUnit.category(value),
   }));
 };
@@ -212,11 +212,11 @@ export function convertMeasurement(
   }
 
   // Handle 'unit' category (no scaling across categories)
-  if (fromCategory === "unité") {
+  if (fromCategory === "unit") {
     return null; // only identical units handled earlier
   }
 
-  if (fromCategory === "masse") {
+  if (fromCategory === "mass") {
     const fromFactor = MASS_TO_G[from];
     const toFactor = MASS_TO_G[to];
     if (!isFinite(fromFactor) || !isFinite(toFactor)) return null;
@@ -234,3 +234,4 @@ export function convertMeasurement(
 
   return null;
 }
+

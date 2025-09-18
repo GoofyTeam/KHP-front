@@ -22,7 +22,6 @@ describe('extractApiErrorMessage', () => {
   })
 
   test('generic message for unknown shapes', () => {
-    expect(extractApiErrorMessage(123)).toMatch(/Une erreur est survenue/)
+    expect(extractApiErrorMessage(123)).toMatch(/An error occurred/)
   })
 })
-

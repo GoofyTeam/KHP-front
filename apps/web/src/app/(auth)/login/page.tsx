@@ -23,7 +23,7 @@ export default function Login() {
     } catch (error: unknown) {
       console.error("Login error:", error);
       setErrors({
-        auth: "Identifiants incorrects. Veuillez vérifier votre email et mot de passe.",
+        auth: "Incorrect credentials. Please check your email and password.",
       });
     } finally {
       setIsLoading(false);

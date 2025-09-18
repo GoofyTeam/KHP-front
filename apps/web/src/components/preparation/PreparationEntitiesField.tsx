@@ -21,7 +21,7 @@ import {
   type SearchIngredientsQuery,
 } from "@/graphql/generated/graphql";
 
-import { getAllMeasurementUnitsOnlyValues } from "@/lib/mesurmentsUnit";
+import { getAllMeasurementUnitsOnlyValues } from "@workspace/ui/lib/measurement-units";
 
 export type PreparationEntityForm = {
   id: string;

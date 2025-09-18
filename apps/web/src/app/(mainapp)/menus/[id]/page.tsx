@@ -55,7 +55,7 @@ export default async function MenuPage({
           </div>
           <div className="flex justify-center items-center gap-2 flex-wrap">
             <p className="text-khp-text-secondary font-bold">
-              {menu?.is_a_la_carte ? "À la carte" : "Not à la carte"}
+              {menu?.is_a_la_carte ? "A la carte" : "Set menu"}
             </p>
           </div>
           <div className="flex justify-center items-center gap-2 flex-wrap">

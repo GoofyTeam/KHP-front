@@ -4,7 +4,7 @@ import { GetPreparationByIdQuery } from "@/graphql/generated/graphql";
 import {
   convertMeasurement,
   type MeasurementUnitType,
-} from "@/lib/mesurmentsUnit";
+} from "@workspace/ui/lib/measurement-units";
 import { ColumnDef } from "@tanstack/react-table";
 
 export type IngredientItem = NonNullable<

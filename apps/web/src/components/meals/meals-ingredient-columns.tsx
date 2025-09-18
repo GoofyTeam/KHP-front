@@ -1,7 +1,10 @@
 "use client";
 
 import { GetMenuByIdQuery } from "@/graphql/generated/graphql";
-import { convertMeasurement, type MeasurementUnitType } from "@/lib/mesurmentsUnit";
+import {
+  convertMeasurement,
+  type MeasurementUnitType,
+} from "@workspace/ui/lib/measurement-units";
 import { ColumnDef } from "@tanstack/react-table";
 
 export type IngredientItem = NonNullable<

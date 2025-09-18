@@ -33,7 +33,7 @@ import {
   GetCategoriesDocument,
   GetCategoriesQuery,
 } from "@/graphql/generated/graphql";
-import { getAllMeasurementUnitsOnlyValues } from "@/lib/mesurmentsUnit";
+import { getAllMeasurementUnitsOnlyValues } from "@workspace/ui/lib/measurement-units";
 import { Label } from "@workspace/ui/components/label";
 import { createPreparationAction } from "@/app/(mainapp)/preparations/add/action";
 

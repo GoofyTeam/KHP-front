@@ -21,7 +21,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { useState, useRef, ChangeEvent } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import z from "zod";
-import { getAllMeasurementUnits } from "../../../types/mesurmentsUnitEnum";
+import { getAllMeasurementUnits } from "@workspace/ui/lib/measurement-units";
 import { addProductSubmit } from "./add-product-submit";
 import { Minus, Plus } from "lucide-react";
 import { handleItemSchema } from "./handleItemSchema";

@@ -38,10 +38,12 @@ export default function ResetDialog({
         onReset();
         onOpenChange(false);
       } else {
-        setResetError(result.error || "Erreur lors de la réinitialisation");
+        setResetError(
+          result.error || "Error while resetting quick access"
+        );
       }
     } catch {
-      setResetError("Erreur lors de la réinitialisation");
+      setResetError("Error while resetting quick access");
     } finally {
       setIsResetting(false);
     }
@@ -62,10 +64,10 @@ export default function ResetDialog({
             </div>
             <div>
               <AlertDialogTitle className="text-xl text-gray-900">
-                Réinitialiser l&apos;accès rapide
+                Reset quick access
               </AlertDialogTitle>
               <AlertDialogDescription className="text-gray-600">
-                Cela restaurera les paramètres par défaut
+                This will restore the default settings
               </AlertDialogDescription>
             </div>
           </div>
@@ -73,9 +75,9 @@ export default function ResetDialog({
 
         <div className="space-y-4">
           <p className="text-gray-700 leading-relaxed">
-            Êtes-vous sûr de vouloir réinitialiser tous les boutons d&apos;accès
-            rapide à leurs valeurs par défaut ? Cette action écrasera votre
-            configuration actuelle.
+            Are you sure you want to reset all quick access buttons to their
+            default values? This action will overwrite your current
+            configuration.
           </p>
 
           {resetError && (
@@ -94,7 +96,7 @@ export default function ResetDialog({
 
         <AlertDialogFooter>
           <AlertDialogCancel onClick={handleCancel} disabled={isResetting}>
-            Annuler
+            Cancel
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleReset}
@@ -104,10 +106,10 @@ export default function ResetDialog({
             {isResetting ? (
               <div className="flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Réinitialisation...
+                Resetting...
               </div>
             ) : (
-              "Réinitialiser"
+              "Reset"
             )}
           </AlertDialogAction>
         </AlertDialogFooter>

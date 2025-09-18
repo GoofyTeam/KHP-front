@@ -57,11 +57,11 @@ const PAGES_WITHOUT_LAYOUT = [
 
 const PAGE_DOCUMENT_TITLES: Record<string, string> = {
   "/inventory": "Inventory - KHP",
-  "/login": "Connexion - KHP",
-  "/scan/$scanType": "Scanner - KHP",
-  "/scan/add": "Scanner - KHP",
-  "/scan/remove": "Scanner - KHP",
-  "/handle-item": "Traiter l'article - KHP",
+  "/login": "Login - KHP",
+  "/scan/$scanType": "Scan - KHP",
+  "/scan/add": "Scan - KHP",
+  "/scan/remove": "Scan - KHP",
+  "/handle-item": "Manage Item - KHP",
   "/404": "Page not found - KHP",
 };
 

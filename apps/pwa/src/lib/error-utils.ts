@@ -64,5 +64,5 @@ export function extractApiErrorMessage(error: unknown): string {
     console.error("Error extracting API error message:", error);
   }
 
-  return "Une erreur est survenue. Veuillez réessayer.";
+  return "An error occurred. Please try again.";
 }

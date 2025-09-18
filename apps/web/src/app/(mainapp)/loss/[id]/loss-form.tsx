@@ -107,19 +107,19 @@ export function LossForm({ ingredient }: LossFormProps) {
 
       // Validation des données avant envoi
       if (isNaN(trackableId)) {
-        setApiError("ID d'ingrédient invalide");
+        setApiError("Invalid ingredient ID");
         return;
       }
       if (isNaN(locationId)) {
-        setApiError("ID de localisation invalide");
+        setApiError("Invalid location ID");
         return;
       }
       if (isNaN(quantity) || quantity <= 0) {
-        setApiError("Quantité invalide");
+        setApiError("Invalid quantity");
         return;
       }
       if (!reason) {
-        setApiError("Raison requise");
+        setApiError("Reason is required");
         return;
       }
 
@@ -141,10 +141,10 @@ export function LossForm({ ingredient }: LossFormProps) {
           router.push(`/ingredient/${ingredient.id}`);
         }, 2000);
       } else {
-        setApiError(result.error || "Erreur lors de l'enregistrement");
+        setApiError(result.error || "Error while saving the loss");
       }
     } catch {
-      setApiError("Erreur de connexion");
+      setApiError("Connection error");
     }
   };
 
@@ -153,10 +153,10 @@ export function LossForm({ ingredient }: LossFormProps) {
       <div className="text-center py-8">
         <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
         <h3 className="text-xl font-semibold text-khp-text-primary mb-2">
-          Perte enregistrée avec succès !
+          Loss recorded successfully!
         </h3>
         <p className="text-khp-text-secondary mb-4">
-          La perte a été enregistrée avec succès.
+          The loss was recorded successfully.
         </p>
         <p className="text-sm text-khp-text-secondary">Redirection...</p>
       </div>

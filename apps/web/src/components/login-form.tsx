@@ -18,8 +18,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 export const loginFormSchema = z.object({
-  email: z.string().email("Adresse email invalide"),
-  password: z.string().min(1, "Le mot de passe est requis"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
 });
 
 export type LoginFormValues = z.infer<typeof loginFormSchema>;
@@ -74,7 +74,7 @@ export function LoginForm({
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Mot de passe</FormLabel>
+              <FormLabel>Password</FormLabel>
               <FormControl>
                 <Input
                   type="password"
@@ -90,10 +90,10 @@ export function LoginForm({
           {isLoading ? (
             <span className="flex items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin" />
-              Connexion...
+              Logging in...
             </span>
           ) : (
-            "Se connecter"
+            "Log in"
           )}
         </Button>
       </form>

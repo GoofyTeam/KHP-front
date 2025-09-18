@@ -127,7 +127,7 @@ describe("httpClient (browser environment)", () => {
               ? "1"
               : null,
       },
-      json: () => Promise.resolve({ errors: { email: ["Adresse invalide"] } }),
+      json: () => Promise.resolve({ errors: { email: ["Invalid address"] } }),
       text: () => Promise.resolve(""),
     });
 
@@ -137,7 +137,7 @@ describe("httpClient (browser environment)", () => {
     );
 
     await expect(httpClient.post("/users", { email: "bad" })).rejects.toThrow(
-      "Adresse invalide"
+      "Invalid address"
     );
     expect(getCsrfSpy).toHaveBeenCalled();
 

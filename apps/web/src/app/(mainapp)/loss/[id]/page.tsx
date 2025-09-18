@@ -26,7 +26,7 @@ export default async function LossPage({ params }: LossPageProps) {
   });
 
   if (error) {
-    throw new Error(`Erreur GraphQL: ${error.message}`);
+    throw new Error(`GraphQL error: ${error.message}`);
   }
 
   if (!data?.ingredient) {
