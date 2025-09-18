@@ -19,7 +19,7 @@ query getProduct($id: ID!) {
         }
       }
     }
-    stockMovements {
+    stockMovements(orderBy: [{ column: CREATED_AT, order: DESC }]) {
       id
       type
       quantity
@@ -27,10 +27,6 @@ query getProduct($id: ID!) {
       quantity_after
       created_at
       location {
-        id
-        name
-      }
-      user {
         id
         name
       }

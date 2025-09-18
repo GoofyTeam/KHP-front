@@ -2,7 +2,8 @@ import { Link, useLoaderData, useParams } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 import { useProduct } from "../stores/product-store";
 import { StockStatus } from "@workspace/ui/components/stock-status";
-import { HistoryTable } from "../components/history-table";
+import { MovementHistory } from "@workspace/ui/components/movement-history";
+import { movementHistoryFromStockMovements } from "@workspace/ui/lib/movement-history";
 import { Button } from "@workspace/ui/components/button";
 import {
   ArrowRightLeft,
@@ -22,6 +23,9 @@ type ProductData = NonNullable<GetProductQuery["ingredient"]>;
 const formatQuantity = (quantity: number): string => {
   return parseFloat(quantity.toFixed(3)).toString();
 };
+
+const defaultHistoryScrollClass =
+  "max-h-[40vh] [@media(min-height:600px)]:max-h-[45vh] [@media(min-height:700px)]:max-h-[50vh] [@media(min-height:800px)]:max-h-[55vh] overflow-y-auto";
 
 export default function ProductPage() {
   const { id } = useParams({ from: "/_protected/products/$id" });
@@ -117,6 +121,15 @@ export default function ProductPage() {
       </div>
     );
   }
+
+  const allStockMovements = product.stockMovements ?? [];
+  const recentStockMovements = [...allStockMovements]
+    .sort((a, b) => {
+      const dateA = a?.created_at ? new Date(a.created_at).getTime() : 0;
+      const dateB = b?.created_at ? new Date(b.created_at).getTime() : 0;
+      return dateB - dateA;
+    })
+    .slice(0, 5);
 
   return (
     <>
@@ -251,14 +264,14 @@ export default function ProductPage() {
               View all
             </Link>
           </div>
-          <HistoryTable
-            data={
-              product.stockMovements?.slice(
-                product.stockMovements.length - 5
-              ) || []
-            }
+          <MovementHistory
+            entries={movementHistoryFromStockMovements(
+              recentStockMovements,
+              product.unit
+            )}
             showHeader={false}
-            unit={product.unit}
+            defaultUnit={product.unit}
+            scrollContainerClassName={defaultHistoryScrollClass}
           />
         </div>
         <div className="flex justify-center p-6">
