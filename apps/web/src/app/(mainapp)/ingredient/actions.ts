@@ -13,18 +13,74 @@ export interface MoveIngredientInput {
 export async function moveIngredientQuantityAction(
   input: MoveIngredientInput
 ): Promise<ActionResult> {
-  return executeHttpAction(() => {
-    const { ingredientId, from_location_id, to_location_id, quantity } = input;
+  const { ingredientId, from_location_id, to_location_id, quantity } = input;
 
-    const payload = {
-      from_location_id,
-      to_location_id,
-      quantity,
-    };
+  return executeHttpAction(
+    () =>
+      httpClient.post(`/api/ingredients/${ingredientId}/move-quantity`, {
+        from_location_id,
+        to_location_id,
+        quantity,
+      }),
+    "Failed to move ingredient quantity: "
+  );
+}
 
-    return httpClient.post(
-      `/api/ingredients/${ingredientId}/move-quantity`,
-      payload
-    );
-  }, "Failed to move ingredient quantity: ");
+export interface UpdateIngredientInput {
+  ingredientId: string | number;
+  name?: string;
+  unit?: string;
+  category_id?: number | null;
+  quantities?: { location_id: number; quantity: number }[];
+  barcode?: string;
+  base_quantity?: number;
+  base_unit?: string;
+  allergens?: string[];
+  image_url?: string;
+  image?: File;
+}
+
+export async function updateIngredientAction(
+  input: UpdateIngredientInput
+): Promise<ActionResult> {
+  const { ingredientId, image, ...data } = input;
+
+  // Always use FormData like in menu actions
+  const formData = new FormData();
+
+  // Add _method for PUT request (Laravel convention)
+  formData.append("_method", "PUT");
+
+  // Add all fields to FormData
+  Object.entries(data).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      if (Array.isArray(value)) {
+        // Handle arrays like in menu actions
+        for (const item of value) {
+          formData.append(`${key}[]`, String(item));
+        }
+      } else {
+        formData.append(key, String(value));
+      }
+    }
+  });
+
+  // Add image if present
+  if (image) {
+    formData.append("image", image);
+  }
+
+  return executeHttpAction(
+    () => httpClient.post(`/api/ingredients/${ingredientId}`, formData),
+    "Failed to update ingredient: "
+  );
+}
+
+export async function deleteIngredientAction(
+  ingredientId: string | number
+): Promise<ActionResult> {
+  return executeHttpAction(
+    () => httpClient.delete(`/api/ingredients/${ingredientId}`),
+    "Failed to delete ingredient: "
+  );
 }

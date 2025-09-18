@@ -9,6 +9,7 @@ import {
   TableHead,
   TableCell,
 } from "@workspace/ui/components/table";
+import { CameraModal } from "@workspace/ui/components/camera-modal";
 import { Input } from "@workspace/ui/components/input";
 import {
   Select,
@@ -35,7 +36,7 @@ import {
   ChevronRight,
   EllipsisVertical,
   Camera,
-  X as CloseIcon,
+
 } from "lucide-react";
 
 // hooks mobile
@@ -124,195 +125,6 @@ export type AddStockTableHandle = {
   }>;
   categoryNameById: (id?: number | "") => string;
 };
-
-// Camera capture
-function useCamera() {
-  const videoRef = React.useRef<HTMLVideoElement | null>(null);
-  const streamRef = React.useRef<MediaStream | null>(null);
-
-  const start = async () => {
-    try {
-      const constraints: MediaStreamConstraints = {
-        video: {
-          facingMode: { ideal: "environment" },
-          width: { ideal: 1280 },
-          height: { ideal: 1280 },
-        },
-        audio: false,
-      };
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
-    } catch {
-      try {
-        const fallbackConstraints: MediaStreamConstraints = {
-          video: {
-            facingMode: { ideal: "environment" },
-          },
-          audio: false,
-        };
-        const stream =
-          await navigator.mediaDevices.getUserMedia(fallbackConstraints);
-        streamRef.current = stream;
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play();
-        }
-      } catch {
-        const basicConstraints: MediaStreamConstraints = {
-          video: true,
-          audio: false,
-        };
-        const stream =
-          await navigator.mediaDevices.getUserMedia(basicConstraints);
-        streamRef.current = stream;
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play();
-        }
-      }
-    }
-  };
-
-  const stop = () => {
-    streamRef.current?.getTracks().forEach((t) => t.stop());
-    streamRef.current = null;
-  };
-
-  const takePhoto = async (
-    fileName = `image-${Date.now()}.jpg`,
-    mime = "image/jpeg",
-    quality = 1
-  ): Promise<File> => {
-    const video = videoRef.current;
-    if (!video) throw new Error("Camera not ready");
-
-    const canvas = document.createElement("canvas");
-    const videoWidth = video.videoWidth || 1080;
-    const videoHeight = video.videoHeight || 1080;
-
-    const squareSize = Math.min(videoWidth, videoHeight);
-
-    canvas.width = squareSize;
-    canvas.height = squareSize;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("Could not get canvas context");
-    const sx = (videoWidth - squareSize) / 2;
-    const sy = (videoHeight - squareSize) / 2;
-    ctx.drawImage(
-      video,
-      sx,
-      sy,
-      squareSize,
-      squareSize,
-      0,
-      0,
-      squareSize,
-      squareSize
-    );
-    const blob: Blob = await new Promise((resolve, reject) =>
-      canvas.toBlob(
-        (b) => {
-          if (b) {
-            resolve(b);
-          } else {
-            reject(new Error("Failed to create image blob from canvas"));
-          }
-        },
-        mime,
-        quality
-      )
-    );
-    return new File([blob], fileName, { type: mime });
-  };
-
-  return { videoRef, start, stop, takePhoto };
-}
-
-function CameraModal({
-  open,
-  onClose,
-  onCapture,
-  defaultFilename,
-}: {
-  open: boolean;
-  onClose: () => void;
-  onCapture: (file: File) => void;
-  defaultFilename?: string;
-}) {
-  const { videoRef, start, stop, takePhoto } = useCamera();
-
-  React.useEffect(() => {
-    let mounted = true;
-    if (open) {
-      start().catch((e) => {
-        console.error("Camera start error:", e);
-        onClose();
-      });
-    }
-    return () => {
-      if (mounted) {
-        stop();
-      }
-      mounted = false;
-    };
-  }, [open, onClose, start, stop]);
-
-  if (!open) return null;
-
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-[min(90vw,90vh)] p-3">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="font-semibold">Take a photo</h3>
-          <button
-            onClick={onClose}
-            className="p-2 rounded hover:bg-muted/50"
-            aria-label="Close camera"
-          >
-            <CloseIcon className="h-5 w-5" />
-          </button>
-        </div>
-
-        <div className="relative rounded overflow-hidden bg-transparent">
-          <div className="relative aspect-square w-full max-w-[min(80vw,70vh)] mx-auto">
-            <video
-              ref={videoRef}
-              playsInline
-              muted
-              className="w-full h-full object-cover"
-            />
-          </div>
-        </div>
-
-        <div className="mt-3 flex items-center justify-end gap-2">
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button
-            onClick={async () => {
-              try {
-                const file = await takePhoto(
-                  defaultFilename || `capture-${Date.now()}.jpg`
-                );
-                onCapture(file);
-                onClose();
-              } catch (e) {
-                console.error("Capture error:", e);
-              }
-            }}
-          >
-            Capture
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // composant
 export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {

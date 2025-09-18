@@ -1,4 +1,5 @@
 import { Badge, BadgeProps } from "@workspace/ui/components/badge";
+import { getAllergenLabel } from "@workspace/ui/lib/allergens";
 import {
   Bean,
   Egg,
@@ -193,41 +194,6 @@ function pickLogo(allergenName: Allergen): ReactElement {
   }
 }
 
-function translateAllergen(allergenName: Allergen) {
-  switch (allergenName) {
-    case "gluten":
-      return "Gluten";
-    case "fruits_a_coque":
-      return "Tree nuts";
-    case "crustaces":
-      return "Crustaceans";
-    case "celeri":
-      return "Celery";
-    case "oeufs":
-      return "Eggs";
-    case "moutarde":
-      return "Mustard";
-    case "poisson":
-      return "Fish";
-    case "soja":
-      return "Soy";
-    case "lait":
-      return "Milk";
-    case "sulfites":
-      return "Sulfites";
-    case "sesame":
-      return "Sesame";
-    case "lupin":
-      return "Lupin";
-    case "arachides":
-      return "Peanuts";
-    case "mollusques":
-      return "Molluscs";
-    default:
-      return allergenName;
-  }
-}
-
 export function AllegernsBadge({
   allergens,
   variant,
@@ -237,7 +203,7 @@ export function AllegernsBadge({
 }) {
   return (
     <Badge variant={variant} className="flex items-center gap-1">
-      {pickLogo(allergens)} {translateAllergen(allergens)}
+      {pickLogo(allergens)} {getAllergenLabel(allergens)}
     </Badge>
   );
 }

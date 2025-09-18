@@ -7,14 +7,14 @@ interface ErrorProps {
   reset: () => void;
 }
 
-export default function IngredientError({ error, reset }: ErrorProps) {
+export default function EditPageError({ error, reset }: ErrorProps) {
   return (
     <ErrorPage
       error={error}
       reset={reset}
-      defaultMessage="An error occurred while loading the ingredient page."
-      backHref="/dashboard"
-      backLabel="Go to Dashboard"
+      defaultMessage="An error occurred while loading the edit ingredient page."
+      backHref="/stocks"
+      backLabel="Back to Stocks"
     />
   );
 }
