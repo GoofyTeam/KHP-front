@@ -1,9 +1,9 @@
 "use client";
 
 import { z } from "zod";
-import { useForm } from "react-hook-form";
+import { SubmitErrorHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChangeEvent, useRef } from "react";
+import { ChangeEvent, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -16,12 +16,11 @@ import {
 } from "@workspace/ui/components/form";
 import { ImageAdd } from "@workspace/ui/components/image-placeholder";
 import { Input } from "@workspace/ui/components/input";
-import { useState } from "react";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { Switch } from "@workspace/ui/components/switch";
 import { IngredientPickerField } from "@/components/meals/IngredientPickerField";
 import { Button } from "@workspace/ui/components/button";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, ChefHat, Package } from "lucide-react";
 import {
   Select,
   SelectTrigger,
@@ -36,6 +35,7 @@ import {
   GetMenuCategoriesDocument,
   GetMenuCategoriesQuery,
 } from "@/graphql/generated/graphql";
+import { Tabs, TabsContent } from "@workspace/ui/components/tabs";
 
 const menuItemsSchema = z.object({
   entity_id: z.string().nonempty("Entity ID is required"),
@@ -51,10 +51,10 @@ const createMenuSchema = z
   .object({
     name: z.string().min(2, "Name must be at least 2 characters long"),
     image: z
-      .instanceof(File)
-      .optional()
+      .instanceof(File, {
+        message: "Menu image is required",
+      })
       .refine((file) => {
-        if (!file) return true; // image is optional
         const validTypes = ["image/jpeg", "image/png", "image/jpg"];
         const maxSizeInBytes = 1 * 1024 * 1024; // 1MB
         return validTypes.includes(file.type) && file.size <= maxSizeInBytes;
@@ -93,11 +93,22 @@ const createMenuSchema = z
 
 export type CreateMenuFormValues = z.infer<typeof createMenuSchema>;
 
+const MENU_INFO_FIELDS = [
+  "name",
+  "image",
+  "description",
+  "price",
+  "is_a_la_carte",
+  "type",
+  "category_ids",
+] as const;
+
 export default function CreateMenusPage() {
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const [priceInput, setPriceInput] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<string>("menu-info");
 
   const { data: menuCategories } = useQuery<GetMenuCategoriesQuery>(
     GetMenuCategoriesDocument,
@@ -109,6 +120,7 @@ export default function CreateMenusPage() {
   const form = useForm<CreateMenuFormValues>({
     resolver: zodResolver(createMenuSchema),
     defaultValues: {
+      image: undefined,
       name: "",
       description: "",
       price: 0,
@@ -116,6 +128,23 @@ export default function CreateMenusPage() {
       items: [],
     },
   });
+
+  const handleValidationErrors: SubmitErrorHandler<CreateMenuFormValues> = (
+    errors
+  ) => {
+    const hasMenuInfoErrors = MENU_INFO_FIELDS.some((field) =>
+      Boolean(errors[field])
+    );
+
+    if (hasMenuInfoErrors) {
+      setActiveTab("menu-info");
+      return;
+    }
+
+    if (errors.items) {
+      setActiveTab("ingredients");
+    }
+  };
 
   async function onMenusCreateSubmit(values: CreateMenuFormValues) {
     const res = await createMenuAction(values);
@@ -186,14 +215,288 @@ export default function CreateMenusPage() {
   }
 
   return (
-    <div className="flex flex-col h-full justify-center items-center w-full">
+    <div className="w-full p-4 lg:p-6">
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(onMenusCreateSubmit)}
-          className="flex flex-col md:flex-row justify-around gap-8 w-full"
+          onSubmit={form.handleSubmit(
+            onMenusCreateSubmit,
+            handleValidationErrors
+          )}
+          className="w-full max-w-6xl mx-auto"
         >
-          <div className="flex flex-col justify-center items-center gap-y-4 w-full md:w-5/12">
-            {form.formState.errors.root?.message && (
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
+            <div className="w-full max-w-4xl mx-auto mb-10">
+              <div className="relative bg-gray-50 rounded-2xl p-2 shadow-sm border border-gray-200">
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    type="button"
+                    onClick={() => setActiveTab("menu-info")}
+                    variant={
+                      activeTab === "menu-info" ? "khp-solid" : "khp-outline"
+                    }
+                    className="transition-colors"
+                  >
+                    <ChefHat className="w-5 h-5 transition-colors" />
+                    <span className="text-sm font-semibold">
+                      Menu Information
+                    </span>
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant={
+                      activeTab === "ingredients" ? "khp-solid" : "khp-outline"
+                    }
+                    onClick={() => setActiveTab("ingredients")}
+                    className="transition-colors"
+                  >
+                    <Package className="w-5 h-5 transition-colors" />
+                    <span className="text-sm font-semibold">Ingredients</span>
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <TabsContent value="menu-info" className="mt-0">
+              <div className="w-full max-w-4xl mx-auto flex flex-col min-h-[600px]">
+                <div className="flex-1 space-y-6">
+                  {filePreview ? (
+                    <img
+                      src={filePreview || ""}
+                      alt={"Menu Image"}
+                      className="aspect-square object-cover max-w-1/2 w-full my-6 rounded-md"
+                      onClick={() => inputRef.current?.click()}
+                    />
+                  ) : (
+                    <ImageAdd
+                      iconSize={32}
+                      onClick={() => inputRef.current?.click()}
+                    />
+                  )}
+
+                  {form.formState.errors.image && (
+                    <div className="w-full text-red-500 text-sm mt-1 text-center">
+                      {form.formState.errors.image.message ||
+                        "Please select an image."}
+                    </div>
+                  )}
+
+                  <FormField
+                    control={form.control}
+                    name="image"
+                    render={({ field: { ref, onChange, name } }) => (
+                      <FormItem className="hidden">
+                        <FormControl>
+                          <Input
+                            variant="khp-default"
+                            type="file"
+                            name={name}
+                            accept="image/jpeg, image/png, image/jpg"
+                            max={1048576}
+                            capture="environment"
+                            ref={(e: HTMLInputElement | null) => {
+                              ref(e);
+                              inputRef.current = e;
+                            }}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  setFilePreview(reader.result as string);
+                                  onChange(file);
+                                };
+                                reader.readAsDataURL(file);
+                              } else {
+                                setFilePreview(null);
+                                onChange(undefined);
+                              }
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel>
+                          Menu name <span className="text-red-500">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input {...field} variant="khp-default" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel>Menu description</FormLabel>
+                        <FormControl>
+                          <Textarea {...field} className="border-khp-primary" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-2 w-full gap-4">
+                    <FormField
+                      control={form.control}
+                      name="type"
+                      render={({ field }) => (
+                        <FormItem className="w-full">
+                          <FormLabel>
+                            Type <span className="text-red-500">*</span>
+                          </FormLabel>
+                          <FormControl>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <SelectTrigger className="w-full border-khp-primary">
+                                <SelectValue placeholder="Select a type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="breakfast">
+                                  Breakfast
+                                </SelectItem>
+                                <SelectItem value="lunch">Lunch</SelectItem>
+                                <SelectItem value="dinner">Dinner</SelectItem>
+                                <SelectItem value="snack">Snack</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="category_ids"
+                      render={({ field }) => (
+                        <FormItem className="w-full">
+                          <FormLabel>
+                            Categories <span className="text-red-500">*</span>
+                          </FormLabel>
+                          <FormControl>
+                            <Select
+                              onValueChange={(value) =>
+                                field.onChange(value ? [value] : [])
+                              }
+                              defaultValue={field.value?.[0] || ""}
+                            >
+                              <SelectTrigger className="w-full border-khp-primary">
+                                <SelectValue placeholder="Select a category" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {menuCategories?.menuCategories.data.map(
+                                  (category) => (
+                                    <SelectItem
+                                      key={category.id}
+                                      value={String(category.id)}
+                                    >
+                                      {category.name}
+                                    </SelectItem>
+                                  )
+                                )}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 w-full gap-4">
+                    <FormField
+                      control={form.control}
+                      name="price"
+                      render={({ field }) => (
+                        <FormItem className="w-full">
+                          <FormLabel>
+                            Price <span className="text-red-500">*</span>
+                          </FormLabel>
+                          <FormControl>
+                            {/* Accepte les virgules comme séparateur décimal (ex: 10,90) */}
+                            <Input
+                              variant="khp-default"
+                              type="text"
+                              inputMode="decimal"
+                              name={field.name}
+                              onBlur={field.onBlur}
+                              ref={field.ref}
+                              value={priceInput}
+                              placeholder="Ex: 10,90"
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setPriceInput(val);
+                                const normalized = val
+                                  .replace(/\s+/g, "")
+                                  .replace(",", ".")
+                                  .replace(/[^0-9.]/g, "");
+                                const num = normalized
+                                  ? Number(normalized)
+                                  : NaN;
+                                // Met à jour la valeur du formulaire en nombre, 0 si invalide pour déclencher la validation
+                                field.onChange(Number.isFinite(num) ? num : 0);
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="is_a_la_carte"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col lg:flex-row w-full items-center border rounded-sm border-khp-primary justify-between px-2 py-4">
+                          <FormLabel>
+                            Available &quot;à la carte&quot;
+                          </FormLabel>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="ingredients" className="mt-0">
+              <div className="w-full max-w-4xl mx-auto flex flex-col min-h-[600px]">
+                <div className="flex-1">
+                  <IngredientPickerField
+                    form={form}
+                    hasErrors={form.formState.errors.items}
+                  />
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          {form.formState.errors.root?.message && (
+            <div className="w-full max-w-4xl mx-auto flex flex-col min-h-[600px]">
               <div className="w-full p-4 bg-khp-error/10 border border-khp-error/30 rounded-lg">
                 <div className="flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 text-khp-error mt-0.5 flex-shrink-0" />
@@ -211,236 +514,44 @@ export default function CreateMenusPage() {
                   </div>
                 </div>
               </div>
-            )}
-            {filePreview ? (
-              <img
-                src={filePreview || ""}
-                alt={"Menu Image"}
-                className="aspect-square object-cover max-w-1/2 w-full my-6 rounded-md"
-                onClick={() => inputRef.current?.click()}
-              />
-            ) : (
-              <ImageAdd
-                iconSize={32}
-                onClick={() => inputRef.current?.click()}
-              />
-            )}
-
-            {form.formState.errors.image && (
-              <div className="w-full text-red-500 text-sm mt-1 text-center">
-                {form.formState.errors.image.message ||
-                  "Please select an image."}
-              </div>
-            )}
-
-            <FormField
-              control={form.control}
-              name="image"
-              render={({ field: { ref, onChange, name } }) => (
-                <FormItem className="hidden">
-                  <FormControl>
-                    <Input
-                      variant="khp-default"
-                      type="file"
-                      name={name}
-                      accept="image/jpeg, image/png, image/jpg"
-                      max={1048576}
-                      capture="environment"
-                      ref={(e: HTMLInputElement | null) => {
-                        ref(e);
-                        inputRef.current = e;
-                      }}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            setFilePreview(reader.result as string);
-                            onChange(file);
-                          };
-                          reader.readAsDataURL(file);
-                        } else {
-                          setFilePreview(null);
-                          onChange(undefined);
-                        }
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormLabel>
-                    Menu name <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} variant="khp-default" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormLabel>Menu description</FormLabel>
-                  <FormControl>
-                    <Textarea {...field} className="border-khp-primary" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-2 w-full gap-4">
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <FormLabel>
-                      Type <span className="text-red-500">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <SelectTrigger className="w-full border-khp-primary">
-                          <SelectValue placeholder="Select a type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="breakfast">Breakfast</SelectItem>
-                          <SelectItem value="lunch">Lunch</SelectItem>
-                          <SelectItem value="dinner">Dinner</SelectItem>
-                          <SelectItem value="snack">Snack</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="category_ids"
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <FormLabel>
-                      Categories <span className="text-red-500">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Select
-                        onValueChange={(value) =>
-                          field.onChange(value ? [value] : [])
-                        }
-                        defaultValue={field.value?.[0] || ""}
-                      >
-                        <SelectTrigger className="w-full border-khp-primary">
-                          <SelectValue placeholder="Select a category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {menuCategories?.menuCategories.data.map(
-                            (category) => (
-                              <SelectItem
-                                key={category.id}
-                                value={String(category.id)}
-                              >
-                                {category.name}
-                              </SelectItem>
-                            )
-                          )}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
+          )}
 
-            <div className="grid grid-cols-2 w-full gap-4">
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <FormLabel>
-                      Price <span className="text-red-500">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      {/* Accepte les virgules comme séparateur décimal (ex: 10,90) */}
-                      <Input
-                        variant="khp-default"
-                        type="text"
-                        inputMode="decimal"
-                        name={field.name}
-                        onBlur={field.onBlur}
-                        ref={field.ref}
-                        value={priceInput}
-                        placeholder="Ex: 10,90"
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setPriceInput(val);
-                          const normalized = val
-                            .replace(/\s+/g, "")
-                            .replace(",", ".")
-                            .replace(/[^0-9.]/g, "");
-                          const num = normalized ? Number(normalized) : NaN;
-                          // Met à jour la valeur du formulaire en nombre, 0 si invalide pour déclencher la validation
-                          field.onChange(Number.isFinite(num) ? num : 0);
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="is_a_la_carte"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col lg:flex-row w-full items-center border rounded-sm border-khp-primary justify-between px-2 py-4">
-                    <FormLabel>Available &quot;à la carte&quot;</FormLabel>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </div>
+          <div className="w-full max-w-4xl mx-auto mt-4">
+            <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200 bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-sm">
+              {activeTab === "menu-info" && (
+                <Button
+                  variant="khp-default"
+                  type="button"
+                  className="flex-1"
+                  onClick={() => setActiveTab("ingredients")}
+                >
+                  Next: Ingredients
+                </Button>
+              )}
 
-            <div className="w-full grid grid-cols-1 md:grid-cols-2 mt-4 gap-x-2">
-              <Button variant="khp-default" type="submit" className="w-full">
-                Create
-              </Button>
+              {activeTab === "ingredients" && (
+                <Button
+                  variant="khp-default"
+                  type="submit"
+                  className="flex-1"
+                  disabled={form.formState.isSubmitting}
+                >
+                  {form.formState.isSubmitting ? "Updating..." : "Update Menu"}
+                </Button>
+              )}
+
               <Button
                 variant="khp-destructive"
                 type="button"
-                className="w-full"
-                onClick={() => router.push("/menus")}
+                className="flex-1"
+                disabled={form.formState.isSubmitting}
+                onClick={() => router.push(`/menus`)}
               >
                 Cancel
               </Button>
             </div>
           </div>
-
-          <IngredientPickerField
-            form={form}
-            hasErrors={form.formState.errors.items}
-          />
         </form>
       </Form>
     </div>
