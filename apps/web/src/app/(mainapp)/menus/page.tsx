@@ -15,7 +15,7 @@ export default async function MenusPage() {
 
   return (
     <div>
-      <DataTable columns={columns} data={data.menus || []} />
+      <DataTable columns={columns} data={data.menus?.data || []} />
     </div>
   );
 }

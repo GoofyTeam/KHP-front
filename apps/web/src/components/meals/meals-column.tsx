@@ -5,7 +5,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { StockStatus } from "@workspace/ui/components/stock-status";
 import { Check, X } from "lucide-react";
 
-export type Meals = NonNullable<GetMenusQuery["menus"]>[number];
+export type Meals = NonNullable<GetMenusQuery["menus"]["data"]>[number];
 
 export const columns: ColumnDef<Meals>[] = [
   {

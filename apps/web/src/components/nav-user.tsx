@@ -4,7 +4,7 @@ import { Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { useUserStore } from "@/stores/user-store";
+import { useUserWithGraphQL } from "@/stores/user-store";
 
 import {
   SidebarMenu,
@@ -14,16 +14,23 @@ import {
 
 export function NavUser() {
   const pathname = usePathname();
-  const { user, fetchUser, isLoading } = useUserStore();
+  const { user, fetchUser, isLoading, error } = useUserWithGraphQL();
 
   const isSettingsActive = pathname.startsWith("/settings");
 
   useEffect(() => {
     if (!user) {
-      fetchUser();
+      fetchUser().catch((err) => {
+        console.error("Failed to fetch user:", err);
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Afficher un état de chargement ou d'erreur si nécessaire
+  if (error && !user) {
+    console.warn("Failed to fetch user:", error);
+  }
 
   return (
     <SidebarMenu>

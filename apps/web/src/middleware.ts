@@ -14,6 +14,8 @@ const protectedRoutes = [
   "/account",
   "/ingredient",
   "/menus",
+  "/stocks",
+  "/preparations",
 ];
 const authRoutes = [
   "/login",

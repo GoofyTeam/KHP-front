@@ -1,20 +1,22 @@
 query getMenus {
   menus {
-    id
-    name
-    image_url
-    description
-    is_a_la_carte
-    available
-    created_at
-    updated_at
-    items {
+    data {
       id
-      quantity
-      unit
-      location {
+      name
+      image_url
+      description
+      is_a_la_carte
+      available
+      created_at
+      updated_at
+      items {
         id
-        name
+        quantity
+        unit
+        location {
+          id
+          name
+        }
       }
     }
   }
