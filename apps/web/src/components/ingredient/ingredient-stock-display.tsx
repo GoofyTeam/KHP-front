@@ -23,7 +23,10 @@ type IngredientStockDisplayProps =
   | { ingredient: IngredientData; preparation?: never }
   | { ingredient?: never; preparation: PreparationData };
 
-export function IngredientStockDisplay({ ingredient, preparation }: IngredientStockDisplayProps) {
+export function IngredientStockDisplay({
+  ingredient,
+  preparation,
+}: IngredientStockDisplayProps) {
   const stockTarget = ingredient ?? preparation;
   const [selectedLocationId, setSelectedLocationId] = useState<string>("all");
 
@@ -62,7 +65,7 @@ export function IngredientStockDisplay({ ingredient, preparation }: IngredientSt
 
   const displayStock = isAllSelected
     ? totalStock
-    : selectedQuantity?.quantity ?? 0;
+    : (selectedQuantity?.quantity ?? 0);
   const stockLabel = isAllSelected
     ? "Stock total"
     : `Stock - ${selectedQuantity?.location.name ?? ""}`;
@@ -89,7 +92,9 @@ export function IngredientStockDisplay({ ingredient, preparation }: IngredientSt
               <span className="text-3xl font-bold">
                 {formatQuantity(displayStock)}
               </span>
-              <span className="text-lg ml-2 opacity-90">{stockTarget.unit}</span>
+              <span className="text-lg ml-2 opacity-90">
+                {stockTarget.unit}
+              </span>
             </div>
             <span className="text-sm opacity-80">{stockLabel}</span>
           </div>
@@ -113,7 +118,7 @@ export function IngredientStockDisplay({ ingredient, preparation }: IngredientSt
         </div>
 
         {/* Affichage des allergènes */}
-        {ingredient.allergens && ingredient.allergens.length > 0 && (
+        {ingredient?.allergens && ingredient.allergens.length > 0 && (
           <div className="flex gap-x-2 items-center">
             <p className="font-semibold text-khp-text-primary">Allergens:</p>
             <AllegernsBadgesList allergens={ingredient.allergens} />
