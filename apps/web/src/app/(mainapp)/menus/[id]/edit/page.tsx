@@ -298,49 +298,31 @@ export default function UpdateMenusPage() {
             <div className="w-full max-w-4xl mx-auto mb-10">
               <div className="relative bg-gray-50 rounded-2xl p-2 shadow-sm border border-gray-200">
                 <div className="grid grid-cols-2 gap-2">
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setActiveTab("menu-info")}
-                    className={`
-                      relative flex items-center justify-center gap-3 px-6 py-4 rounded-xl font-medium transition-all duration-300 ease-out
-                      ${
-                        activeTab === "menu-info"
-                          ? "bg-white text-khp-primary shadow-lg shadow-khp-primary/10 border border-khp-primary/20 transform scale-[1.02]"
-                          : "text-gray-600 hover:text-gray-800 hover:bg-white/50"
-                      }
-                    `}
+                    variant={
+                      activeTab === "menu-info" ? "khp-solid" : "khp-outline"
+                    }
+                    className="transition-colors"
                   >
-                    <ChefHat
-                      className={`w-5 h-5 transition-colors ${activeTab === "menu-info" ? "text-khp-primary" : "text-gray-500"}`}
-                    />
+                    <ChefHat className="w-5 h-5 transition-colors" />
                     <span className="text-sm font-semibold">
                       Menu Information
                     </span>
-                    {activeTab === "menu-info" && (
-                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-khp-primary rounded-full"></div>
-                    )}
-                  </button>
+                  </Button>
 
-                  <button
+                  <Button
                     type="button"
+                    variant={
+                      activeTab === "ingredients" ? "khp-solid" : "khp-outline"
+                    }
                     onClick={() => setActiveTab("ingredients")}
-                    className={`
-                      relative flex items-center justify-center gap-3 px-6 py-4 rounded-xl font-medium transition-all duration-300 ease-out
-                      ${
-                        activeTab === "ingredients"
-                          ? "bg-white text-khp-primary shadow-lg shadow-khp-primary/10 border border-khp-primary/20 transform scale-[1.02]"
-                          : "text-gray-600 hover:text-gray-800 hover:bg-white/50"
-                      }
-                    `}
+                    className="transition-colors"
                   >
-                    <Package
-                      className={`w-5 h-5 transition-colors ${activeTab === "ingredients" ? "text-khp-primary" : "text-gray-500"}`}
-                    />
+                    <Package className="w-5 h-5 transition-colors" />
                     <span className="text-sm font-semibold">Ingredients</span>
-                    {activeTab === "ingredients" && (
-                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-khp-primary rounded-full"></div>
-                    )}
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
