@@ -53,7 +53,7 @@ const defaultConfig: SidebarConfig = {
     {
       title: "Menus",
       url: "/menus",
-      icon: "Coffee",
+      icon: "ChefHat",
       activePatterns: ["/menus", "/menu"],
     },
   ],
