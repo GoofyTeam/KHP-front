@@ -10,12 +10,12 @@ type IngredientData = NonNullable<GetIngredientQuery["ingredient"]>;
 
 interface IngredientDetailsProps {
   ingredient: IngredientData;
-  showMoveQuantity?: boolean;
+  showStockActions?: boolean;
 }
 
 export function IngredientDetails({
   ingredient,
-  showMoveQuantity = true,
+  showStockActions = true,
 }: IngredientDetailsProps) {
   return (
     <>
@@ -62,7 +62,7 @@ export function IngredientDetails({
         </div>
       </div>
 
-      {showMoveQuantity && (
+      {showStockActions && (
         <>
           <div className="w-full lg:w-3/4 max-w-lg">
             <div className="w-full grid grid-cols-2 gap-2 mb-2">
