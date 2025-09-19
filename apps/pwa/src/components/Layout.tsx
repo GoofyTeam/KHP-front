@@ -2,7 +2,12 @@ import * as React from "react";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { ArrowLeft } from "lucide-react";
-import { useRouter, useLocation, useMatch } from "@tanstack/react-router";
+import {
+  useRouter,
+  useLocation,
+  useMatch,
+  useNavigate,
+} from "@tanstack/react-router";
 import { useProduct } from "../stores/product-store";
 import { useHandleItemStore } from "../stores/handleitem-store";
 
@@ -23,6 +28,7 @@ const PAGE_TITLES: Record<string, string> = {
 export function Layout({ children, className }: LayoutProps) {
   const router = useRouter();
   const location = useLocation();
+  const navigate = useNavigate();
   const { currentProduct } = useProduct();
   const handleItemTitle = useHandleItemStore((state) => state.pageTitle);
 
@@ -36,6 +42,10 @@ export function Layout({ children, className }: LayoutProps) {
   });
   const handleItemMatch = useMatch({
     from: "/_protected/handle-item",
+    shouldThrow: false,
+  });
+  const moveQuantityMatch = useMatch({
+    from: "/_protected/move-quantity",
     shouldThrow: false,
   });
   const scanMatch = useMatch({
@@ -60,7 +70,59 @@ export function Layout({ children, className }: LayoutProps) {
   }
 
   const handleGoBack = () => {
-    router.history.back();
+    // Logique de navigation basée sur la route actuelle
+    if (
+      location.pathname.includes("/products/") &&
+      location.pathname.includes("/history")
+    ) {
+      // Si on est sur une page d'historique, retourner à la page produit
+      const productId = productMatch?.params?.id || historyMatch?.params?.id;
+      if (productId) {
+        navigate({ to: "/products/$id", params: { id: productId } });
+        return;
+      }
+    }
+
+    if (location.pathname.includes("/products/")) {
+      // Si on est sur une page produit, retourner à l'inventaire
+      navigate({ to: "/inventory" });
+      return;
+    }
+
+    if (location.pathname.includes("/handle-item")) {
+      // Si on est en handle-item, retourner vers la page produit si on a un internalId
+      const internalId =
+        handleItemMatch?.loaderData?.productId ||
+        handleItemMatch?.search?.internalId;
+      if (internalId) {
+        navigate({ to: "/products/$id", params: { id: internalId } });
+        return;
+      }
+      // Sinon retourner à l'inventaire
+      navigate({ to: "/inventory" });
+      return;
+    }
+
+    if (location.pathname.includes("/move-quantity")) {
+      // Si on est en move-quantity, retourner vers la page produit avec l'internalId
+      const internalId = moveQuantityMatch?.search?.internalId;
+      if (internalId) {
+        navigate({ to: "/products/$id", params: { id: internalId } });
+        return;
+      }
+      // Sinon retourner à l'inventaire
+      navigate({ to: "/inventory" });
+      return;
+    }
+
+    if (location.pathname.includes("/scan/")) {
+      // Si on est en scan, retourner à l'inventaire
+      navigate({ to: "/inventory" });
+      return;
+    }
+
+    // Fallback par défaut
+    navigate({ to: "/inventory" });
   };
 
   const shouldShowBackButton = !PAGES_WITHOUT_BACK_BUTTON.includes(
