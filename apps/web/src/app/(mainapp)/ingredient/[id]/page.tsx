@@ -40,6 +40,7 @@ export default async function IngredientPage({ params }: IngredientPageProps) {
       <div className="w-full lg:w-1/2 flex flex-col justify-center items-center mb-10 lg:mb-0">
         <div className="w-full lg:w-3/4 max-w-lg">
           <IngredientStockDisplay ingredient={ingredient} />
+
           <MovementHistory
             movements={ingredient.stockMovements || []}
             unit={ingredient.unit}

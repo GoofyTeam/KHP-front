@@ -1,6 +1,10 @@
 "use server";
 
 import { httpClient } from "@/lib/httpClient";
+import {
+  type ActionResult as LibActionResult,
+  executeHttpAction,
+} from "@/lib/actionUtils";
 
 export type ActionResult<T = unknown> =
   | { success: true; data?: T }
@@ -22,4 +26,65 @@ export async function deletePreparation(id: string): Promise<ActionResult> {
     console.error("Error deleting menu:", e);
     return handleHttpError(e);
   }
+}
+
+export interface AddPreparationQuantityInput {
+  location_id: number;
+  quantity: number;
+  unit?: string;
+  [key: string]: unknown;
+}
+
+export interface RemovePreparationQuantityInput {
+  location_id: number;
+  quantity: number;
+  unit?: string;
+  [key: string]: unknown;
+}
+
+export async function addPreparationQuantityAction(
+  preparationId: string | number,
+  input: AddPreparationQuantityInput
+): Promise<LibActionResult> {
+  return executeHttpAction(
+    () =>
+      httpClient.post(`/api/preparations/${preparationId}/add-quantity`, input),
+    "Failed to add preparation quantity: "
+  );
+}
+
+export async function removePreparationQuantityAction(
+  preparationId: string | number,
+  input: RemovePreparationQuantityInput
+): Promise<LibActionResult> {
+  return executeHttpAction(
+    () =>
+      httpClient.post(
+        `/api/preparations/${preparationId}/remove-quantity`,
+        input
+      ),
+    "Failed to remove preparation quantity: "
+  );
+}
+
+export interface MovePreparationQuantityInput {
+  from_location_id: number;
+  to_location_id: number;
+  quantity: number;
+  unit?: string;
+  [key: string]: unknown;
+}
+
+export async function movePreparationQuantityAction(
+  preparationId: string | number,
+  input: MovePreparationQuantityInput
+): Promise<LibActionResult> {
+  return executeHttpAction(
+    () =>
+      httpClient.post(
+        `/api/preparations/${preparationId}/move-quantity`,
+        input
+      ),
+    "Failed to move preparation quantity: "
+  );
 }

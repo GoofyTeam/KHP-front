@@ -3,19 +3,19 @@ import { Button } from "@workspace/ui/components/button";
 import { ImagePlaceholder } from "@workspace/ui/components/image-placeholder";
 import { GetIngredientQuery } from "@/graphql/generated/graphql";
 import { CategoryBadge } from "../category-badge";
-import { Edit } from "lucide-react";
+import { Edit, PackageMinus, PackagePlus } from "lucide-react";
 import DeleteIngredient from "./delete-ingredient";
 
 type IngredientData = NonNullable<GetIngredientQuery["ingredient"]>;
 
 interface IngredientDetailsProps {
   ingredient: IngredientData;
-  showMoveQuantity?: boolean;
+  showStockActions?: boolean;
 }
 
 export function IngredientDetails({
   ingredient,
-  showMoveQuantity = true,
+  showStockActions = true,
 }: IngredientDetailsProps) {
   return (
     <>
@@ -62,14 +62,28 @@ export function IngredientDetails({
         </div>
       </div>
 
-      {showMoveQuantity && (
-        <div className="w-full lg:w-3/4 max-w-lg">
-          <Link href={`/ingredient/${ingredient.id}/move`}>
-            <Button variant="khp-outline" size="xl-full">
-              Move Quantity
-            </Button>
-          </Link>
-        </div>
+      {showStockActions && (
+        <>
+          <div className="w-full lg:w-3/4 max-w-lg">
+            <div className="w-full grid grid-cols-2 gap-2 mb-2">
+              <Link href={`/ingredient/${ingredient?.id}/add-stock`}>
+                <Button variant="khp-outline" className="w-full">
+                  <PackagePlus size={64} /> Add Stock
+                </Button>
+              </Link>
+              <Link href={`/ingredient/${ingredient?.id}/remove-stock`}>
+                <Button variant="khp-outline" className="w-full">
+                  <PackageMinus size={64} /> Remove Stock
+                </Button>
+              </Link>
+            </div>
+            <Link href={`/ingredient/${ingredient.id}/move`}>
+              <Button variant="khp-outline" size="xl-full">
+                Move Quantity
+              </Button>
+            </Link>
+          </div>
+        </>
       )}
     </>
   );

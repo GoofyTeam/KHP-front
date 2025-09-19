@@ -37,8 +37,13 @@ function formatDisplayValue(val: string): string {
   if (!val || val === "0") return "";
   const numValue = parseFloat(val) || 0;
   if (numValue === 0) return "";
-  // remove trailing zeros in the decimal part
-  return val.replace(/\.?0+$/, "");
+  // remove trailing zeros only in the decimal part (after the dot)
+  // but keep zeros that are part of the integer part
+  if (val.includes(".")) {
+    return val.replace(/\.?0+$/, "");
+  }
+  // if no decimal point, keep the value as is
+  return val;
 }
 
 export function QuantityInput({

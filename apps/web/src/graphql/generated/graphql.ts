@@ -560,6 +560,8 @@ export type Preparation = {
   quantities: Array<PreparationQuantity>;
   /** Historique des mouvements de stock pour cette préparation */
   stockMovements: Array<StockMovement>;
+  /** Threshold below which the preparation is considered understocked. */
+  threshold?: Maybe<Scalars['Float']['output']>;
   /** Unit of measurement for the preparation. */
   unit: UnitEnum;
   /** When the preparation was last updated. */
@@ -627,6 +629,8 @@ export type Query = {
   __typename?: 'Query';
   /** Find a single Category (only if it belongs to the current company). */
   Category?: Maybe<Category>;
+  /** List preparations that dropped below their defined threshold. */
+  PreparationsThreshold: Array<Preparation>;
   /** Liste les allergènes disponibles */
   allergens: Array<AllergenEnum>;
   /** List categories for the current company. */
@@ -700,6 +704,11 @@ export type QueryCategoryArgs = {
 };
 
 
+export type QueryPreparationsThresholdArgs = {
+  locationIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+};
+
+
 export type QueryCategoriesArgs = {
   first?: Scalars['Int']['input'];
   page?: InputMaybe<Scalars['Int']['input']>;
@@ -725,6 +734,11 @@ export type QueryIngredientArgs = {
   barcode?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryIngredientTresholdArgs = {
+  locationIds?: InputMaybe<Array<Scalars['ID']['input']>>;
 };
 
 

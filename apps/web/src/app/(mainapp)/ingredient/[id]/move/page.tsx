@@ -26,7 +26,7 @@ export default async function MoveQuantityPage({ params }: MovePageProps) {
     <>
       <div className="w-full flex flex-col lg:flex-row gap-8">
         <div className="flex flex-col gap-8 justify-center items-center w-full h-fit lg:w-1/2">
-          <IngredientDetails showMoveQuantity={false} ingredient={ingredient} />
+          <IngredientDetails showStockActions={false} ingredient={ingredient} />
         </div>
 
         {/* Colonne 2 */}

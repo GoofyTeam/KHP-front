@@ -101,3 +101,42 @@ export async function deleteIngredient(id: string): Promise<ActionResult> {
     return handleHttpError(e);
   }
 }
+
+export interface AddQuantityInput {
+  location_id: number;
+  quantity: number;
+  unit?: string;
+  [key: string]: unknown;
+}
+
+export interface RemoveQuantityInput {
+  location_id: number;
+  quantity: number;
+  unit?: string;
+  [key: string]: unknown;
+}
+
+export async function addIngredientQuantityAction(
+  ingredientId: string | number,
+  input: AddQuantityInput
+): Promise<ActionResult> {
+  return executeHttpAction(
+    () =>
+      httpClient.post(`/api/ingredients/${ingredientId}/add-quantity`, input),
+    "Failed to add ingredient quantity: "
+  );
+}
+
+export async function removeIngredientQuantityAction(
+  ingredientId: string | number,
+  input: RemoveQuantityInput
+): Promise<ActionResult> {
+  return executeHttpAction(
+    () =>
+      httpClient.post(
+        `/api/ingredients/${ingredientId}/remove-quantity`,
+        input
+      ),
+    "Failed to remove ingredient quantity: "
+  );
+}
