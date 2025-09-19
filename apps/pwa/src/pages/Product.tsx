@@ -151,6 +151,25 @@ export default function ProductPage() {
         <div className="flex flex-col gap-1 ">
           <h2 className="text-2xl font-semibold">{product.name}</h2>
           <p>Category: {product.category?.name || "Uncategorized"}</p>
+
+          {/* Affichage des informations de base pour les ingrédients */}
+          {product && product.base_quantity && product.base_unit && (
+            <div className="flex items-center justify-center gap-4 text-sm mt-2">
+              <div className="flex items-center gap-1">
+                <span className="text-muted-foreground">Base:</span>
+                <span className="font-medium text-foreground">
+                  {formatQuantity(product.base_quantity)}
+                </span>
+              </div>
+              <div className="w-px h-4 bg-border"></div>
+              <div className="flex items-center gap-1">
+                <span className="text-muted-foreground">Unit:</span>
+                <span className="font-medium text-foreground">
+                  {product.base_unit}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-4">
