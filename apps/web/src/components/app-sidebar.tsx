@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { LucideIcon, Square } from "lucide-react";
+import { LucideIcon } from "lucide-react";
 import * as Icons from "lucide-react";
 import Link from "next/link";
 import { NavUser } from "./nav-user";
