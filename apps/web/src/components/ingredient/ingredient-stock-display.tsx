@@ -73,6 +73,24 @@ export function IngredientStockDisplay({
   return (
     <>
       <div className="space-y-4 w-full">
+        {/* Affichage des informations de base pour les ingrédients */}
+        {ingredient && (
+          <div className="flex items-center justify-center gap-4 text-sm">
+            <div className="flex items-center gap-1">
+              <span className="text-khp-text-secondary">Base:</span>
+              <span className="font-medium text-khp-text-primary">
+                {formatQuantity(ingredient.base_quantity)}
+              </span>
+            </div>
+            <div className="w-px h-4 bg-khp-border"></div>
+            <div className="flex items-center gap-1">
+              <span className="text-khp-text-secondary">Unit:</span>
+              <span className="font-medium text-khp-text-primary">
+                {ingredient.base_unit}
+              </span>
+            </div>
+          </div>
+        )}
         <div className="mb-4 ">
           <LocationSelect
             quantities={quantities}

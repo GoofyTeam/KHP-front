@@ -25,7 +25,7 @@ import { ImageAdd } from "@workspace/ui/components/image-placeholder";
 import { Input } from "@workspace/ui/components/input";
 import { PreparationEntitiesField } from "@/components/preparation/PreparationEntitiesField";
 import { Button } from "@workspace/ui/components/button";
-import { AlertCircle, CookingPot, Loader2, Package } from "lucide-react";
+import { AlertCircle, CookingPot, Loader2, Package, X } from "lucide-react";
 import { LoadMoreSelect } from "@workspace/ui/components/load-more-select";
 import {
   Select,
@@ -233,9 +233,7 @@ export default function UpdatePreparationPage() {
           },
         };
       },
-    }).catch((error) => {
-      console.error("Error loading more categories:", error);
-    });
+    }).catch((error) => {});
   }, [
     hasMoreCategories,
     isFetchingMoreCategories,
@@ -342,6 +340,14 @@ export default function UpdatePreparationPage() {
     [preparation?.image_url]
   );
 
+  const handleRemoveImage = useCallback(() => {
+    setFilePreview(null);
+    form.setValue("image", undefined);
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
+  }, [form]);
+
   const onSubmit = form.handleSubmit(async (values) => {
     try {
       const result = await updatePreparationAction(id, values);
@@ -360,7 +366,6 @@ export default function UpdatePreparationPage() {
         message: errorMessage,
       });
     } catch (error) {
-      console.error("Failed to update preparation:", error);
       form.setError("root", {
         type: "server",
         message: "An unexpected error occurred. Please try again.",
@@ -442,17 +447,31 @@ export default function UpdatePreparationPage() {
               <div className="w-full max-w-4xl mx-auto flex flex-col min-h-[600px]">
                 <div className="flex-1 space-y-6">
                   {filePreview ? (
-                    <img
-                      src={filePreview}
-                      alt={form.watch("name") || "Preparation image"}
-                      className="aspect-square object-cover max-w-1/2 w-full my-6 rounded-md mx-auto"
-                      onClick={() => inputRef.current?.click()}
-                    />
+                    <div className="relative max-w-1/2 w-full my-6 mx-auto">
+                      <img
+                        src={filePreview}
+                        alt={form.watch("name") || "Preparation image"}
+                        className="aspect-square object-cover w-full rounded-md cursor-pointer"
+                        onClick={() => inputRef.current?.click()}
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2 h-8 w-8 rounded-full shadow-lg"
+                        onClick={handleRemoveImage}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
                   ) : (
-                    <ImageAdd
-                      iconSize={32}
-                      onClick={() => inputRef.current?.click()}
-                    />
+                    <div className="relative max-w-1/2 w-full my-6 mx-auto">
+                      <ImageAdd
+                        className="w-full aspect-square"
+                        iconSize={64}
+                        onClick={() => inputRef.current?.click()}
+                      />
+                    </div>
                   )}
 
                   {form.formState.errors.image && (

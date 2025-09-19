@@ -39,7 +39,7 @@ export function ImageAdd({
   return (
     <div
       className={cn(
-        "aspect-square h-34 w-34 border border-khp-primary rounded-lg flex flex-col items-center justify-center my-4 cursor-pointer hover:bg-khp-primary/10 mx-auto",
+        "aspect-square w-34 border border-khp-primary rounded-lg flex flex-col items-center justify-center my-4 cursor-pointer hover:bg-khp-primary/10 mx-auto",
         className
       )}
       onClick={onClick}
