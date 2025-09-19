@@ -51,7 +51,13 @@ export default function Login() {
           </div>
         </div>
       </div>
-      <div className="bg-khp-primary relative hidden lg:block"></div>
+      <div className="bg-khp-primary relative hidden lg:block lg:flex lg:items-center lg:justify-center">
+        <img
+          src="/khp-logo-full.png"
+          alt="Logo KHP"
+          className="max-w-full max-h-full object-contain"
+        />
+      </div>
     </div>
   );
 }
