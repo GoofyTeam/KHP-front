@@ -314,7 +314,7 @@ export default function UpdateMenusPage() {
             message: combinedMessage,
           });
         }
-      } catch (error) {
+      } catch {
         // Gestion d'erreur globale
         form.setError("root", {
           type: "server",

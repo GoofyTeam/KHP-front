@@ -1,7 +1,7 @@
 "use client";
 
 import { z } from "zod";
-import { SubmitErrorHandler, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -17,7 +17,7 @@ import {
 import { ImageAdd } from "@workspace/ui/components/image-placeholder";
 import { Input } from "@workspace/ui/components/input";
 import { Button } from "@workspace/ui/components/button";
-import { AlertCircle, CheckCircle, Loader2, X } from "lucide-react";
+import { AlertCircle, CheckCircle, X } from "lucide-react";
 import {
   Select,
   SelectTrigger,
@@ -102,16 +102,13 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { data: categoriesData, loading: categoriesLoading } = useQuery(
-    GetCategoriesDocument,
-    {
-      variables: {
-        first: CATEGORY_PAGE_SIZE,
-        page: 1,
-      },
-      fetchPolicy: "cache-and-network",
-    }
-  );
+  const { data: categoriesData } = useQuery(GetCategoriesDocument, {
+    variables: {
+      first: CATEGORY_PAGE_SIZE,
+      page: 1,
+    },
+    fetchPolicy: "cache-and-network",
+  });
 
   const { data: unitsData } = useQuery(GetMeasurementUnitsDocument, {
     fetchPolicy: "cache-and-network",
@@ -244,7 +241,7 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
         type: "server",
         message: errorMessage,
       });
-    } catch (error) {
+    } catch {
       form.setError("root", {
         type: "server",
         message: "An unexpected error occurred. Please try again.",

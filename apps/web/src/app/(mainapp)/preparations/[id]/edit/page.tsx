@@ -233,7 +233,7 @@ export default function UpdatePreparationPage() {
           },
         };
       },
-    }).catch((error) => {});
+    }).catch(() => {});
   }, [
     hasMoreCategories,
     isFetchingMoreCategories,
@@ -365,7 +365,7 @@ export default function UpdatePreparationPage() {
         type: "server",
         message: errorMessage,
       });
-    } catch (error) {
+    } catch {
       form.setError("root", {
         type: "server",
         message: "An unexpected error occurred. Please try again.",
