@@ -248,9 +248,9 @@ export default function UpdatePreparationPage() {
     defaultValues: DEFAULT_FORM_VALUES,
   });
 
-  const handleValidationErrors: SubmitErrorHandler<UpdatePreparationFormValues> = (
-    errors
-  ) => {
+  const handleValidationErrors: SubmitErrorHandler<
+    UpdatePreparationFormValues
+  > = (errors) => {
     const hasDetailErrors = PREPARATION_DETAILS_FIELDS.some((field) =>
       Boolean(errors[field])
     );
@@ -342,34 +342,31 @@ export default function UpdatePreparationPage() {
     [preparation?.image_url]
   );
 
-  const onSubmit = form.handleSubmit(
-    async (values) => {
-      try {
-        const result = await updatePreparationAction(id, values);
+  const onSubmit = form.handleSubmit(async (values) => {
+    try {
+      const result = await updatePreparationAction(id, values);
 
-        if (result.success) {
-          apolloClient.refetchQueries({
-            include: [GetPreparationByIdDocument],
-          });
-          router.push(`/preparations/${id}`);
-          return;
-        }
-
-        const errorMessage = result.error || "Failed to update preparation.";
-        form.setError("root", {
-          type: "server",
-          message: errorMessage,
+      if (result.success) {
+        apolloClient.refetchQueries({
+          include: [GetPreparationByIdDocument],
         });
-      } catch (error) {
-        console.error("Failed to update preparation:", error);
-        form.setError("root", {
-          type: "server",
-          message: "An unexpected error occurred. Please try again.",
-        });
+        router.push(`/preparations/${id}`);
+        return;
       }
-    },
-    handleValidationErrors
-  );
+
+      const errorMessage = result.error || "Failed to update preparation.";
+      form.setError("root", {
+        type: "server",
+        message: errorMessage,
+      });
+    } catch (error) {
+      console.error("Failed to update preparation:", error);
+      form.setError("root", {
+        type: "server",
+        message: "An unexpected error occurred. Please try again.",
+      });
+    }
+  }, handleValidationErrors);
 
   if (preparationError) {
     return (

@@ -133,6 +133,8 @@ export type Ingredient = {
   base_quantity: Scalars['Float']['output'];
   /** Unit for the base quantity of the ingredient. */
   base_unit: UnitEnum;
+  /** Optional minimum stock quantity before alerting. */
+  threshold?: Maybe<Scalars['Float']['output']>;
   /** Allergens contained in the ingredient. */
   allergens: Array<AllergenEnum>;
   quantities: Array<IngredientQuantity>;
@@ -445,6 +447,15 @@ export type MenuOrderStats = {
   count: Scalars['Int']['output'];
 };
 
+/** A paginated list of Menu items. */
+export type MenuPaginator = {
+  __typename?: 'MenuPaginator';
+  /** Pagination information about the list of items. */
+  paginatorInfo: PaginatorInfo;
+  /** A list of Menu items. */
+  data: Array<Menu>;
+};
+
 /** Représente un produit alimentaire issu d'OpenFoodFacts */
 export type OpenFoodFactsProduct = {
   __typename?: 'OpenFoodFactsProduct';
@@ -540,6 +551,8 @@ export type Preparation = {
   allergens: Array<AllergenEnum>;
   /** The company that produces this preparation. */
   company: Company;
+  /** Threshold below which the preparation is considered understocked. */
+  threshold?: Maybe<Scalars['Float']['output']>;
   entities: Array<PreparationEntity>;
   locations: Array<Location>;
   /** The categories associated with this preparation. */
@@ -628,6 +641,8 @@ export type Query = {
   company?: Maybe<Company>;
   /** Find a single ingredient (only if it belongs to the current company). */
   ingredient?: Maybe<Ingredient>;
+  /** List ingredients that dropped below their defined threshold. */
+  ingredientTreshold: Array<Ingredient>;
   /** Find a single location (only if it belongs to the current company). */
   location?: Maybe<Location>;
   /** Trouve un type de localisation spécifique (seulement s'il appartient à l'entreprise actuelle). */
@@ -637,7 +652,6 @@ export type Query = {
   lossReasons: Array<LossReason>;
   /** Liste les unités de mesure disponibles */
   measurementUnits: Array<MeasurementUnitType>;
-  menus: Array<Menu>;
   menu?: Maybe<Menu>;
   /** Find a single MenuCategory (only if it belongs to the current company). */
   menuCategory?: Maybe<MenuCategory>;
@@ -646,6 +660,8 @@ export type Query = {
   nonPerishableIngredients: Array<Ingredient>;
   /** Trouve une preparation (et seulement si elle appartient à ma company) */
   preparation?: Maybe<Preparation>;
+  /** List preparations that dropped below their defined threshold. */
+  PreparationsThreshold: Array<Preparation>;
   /** Liste les quick access de l’entreprise courante, triés par index. */
   quickAccesses: Array<QuickAccess>;
   room?: Maybe<Room>;
@@ -667,6 +683,7 @@ export type Query = {
   locationTypes: LocationTypePaginator;
   /** Liste les pertes pour l'entreprise actuelle. */
   losses: LossPaginator;
+  menus: MenuPaginator;
   /** List menu categories for the current company. */
   menuCategories: MenuCategoryPaginator;
   menuOrders: MenuOrderPaginator;
@@ -708,6 +725,11 @@ export type QueryIngredientArgs = {
 };
 
 
+export type QueryIngredientTresholdArgs = {
+  locationIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+};
+
+
 export type QueryLocationArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
@@ -723,15 +745,6 @@ export type QueryLocationTypeArgs = {
 export type QueryLossesStatsArgs = {
   start_date?: InputMaybe<Scalars['DateTime']['input']>;
   end_date?: InputMaybe<Scalars['DateTime']['input']>;
-};
-
-
-export type QueryMenusArgs = {
-  allergens?: InputMaybe<Array<AllergenEnum>>;
-  category_ids?: InputMaybe<Array<Scalars['ID']['input']>>;
-  types?: InputMaybe<Array<Scalars['String']['input']>>;
-  price_between?: InputMaybe<Array<Scalars['Float']['input']>>;
-  available?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -760,6 +773,11 @@ export type QueryPerishablesArgs = {
 export type QueryPreparationArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryPreparationsThresholdArgs = {
+  locationIds?: InputMaybe<Array<Scalars['ID']['input']>>;
 };
 
 
@@ -838,6 +856,17 @@ export type QueryLossesArgs = {
   start_date?: InputMaybe<Scalars['DateTime']['input']>;
   end_date?: InputMaybe<Scalars['DateTime']['input']>;
   orderBy?: InputMaybe<Array<OrderByClause>>;
+  first?: Scalars['Int']['input'];
+  page?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryMenusArgs = {
+  allergens?: InputMaybe<Array<AllergenEnum>>;
+  category_ids?: InputMaybe<Array<Scalars['ID']['input']>>;
+  types?: InputMaybe<Array<Scalars['String']['input']>>;
+  price_between?: InputMaybe<Array<Scalars['Float']['input']>>;
+  available?: InputMaybe<Scalars['Boolean']['input']>;
   first?: Scalars['Int']['input'];
   page?: InputMaybe<Scalars['Int']['input']>;
 };
