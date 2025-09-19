@@ -49,23 +49,28 @@ const menuItemsSchema = z.object({
   storage_unit: z.string().optional(),
 });
 
-const imageFileSchema = z
-  .instanceof(File, {
-    message: "Menu image is required",
-  })
-  .refine((file) => {
-    const validTypes = ["image/jpeg", "image/png", "image/jpg"];
-    const maxSizeInBytes = 1 * 1024 * 1024; // 1MB
-    return validTypes.includes(file.type) && file.size <= maxSizeInBytes;
-  }, "Image must be a JPEG or PNG file and less than 1MB");
+const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/jpg"] as const;
 
 const updateMenuSchema = z
   .object({
     name: z.string().min(2, "Name must be at least 2 characters long"),
     image: z
       .union([
-        imageFileSchema,
-        z.string().min(1, "Menu image is required"),
+        z.instanceof(File).refine(
+          (file) => {
+            return (
+              ACCEPTED_IMAGE_TYPES.includes(
+                file.type as (typeof ACCEPTED_IMAGE_TYPES)[number]
+              ) && file.size <= MAX_IMAGE_SIZE_BYTES
+            );
+          },
+          {
+            message:
+              "L'image doit être un fichier JPEG ou PNG de moins de 10Mo",
+          }
+        ),
+        z.string(), // Pour l'URL existante
         z.undefined(),
       ])
       .optional(),
