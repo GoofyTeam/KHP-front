@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { LucideIcon, Square } from "lucide-react";
+import { LucideIcon } from "lucide-react";
 import * as Icons from "lucide-react";
 import Link from "next/link";
 import { NavUser } from "./nav-user";
@@ -98,9 +98,19 @@ export function AppSidebar({
             <SidebarMenuButton
               size="lg"
               onClick={toggleSidebar}
-              className="cursor-pointer hover:bg-khp-primary/10"
+              tooltip="KHP"
+              className="cursor-pointer text-khp-primary hover:bg-khp-primary hover:text-white group/logo"
             >
-              <Square className="size-8 text-gray-400" />
+              <img
+                src="/khp-logo-primary.png"
+                alt="KHP Logo"
+                className="size-8 block group-hover/logo:hidden shrink-0 transition-all duration-200 ease-linear"
+              />
+              <img
+                src="/khp-logo-white.png"
+                alt="KHP Logo"
+                className="size-8 hidden group-hover/logo:block shrink-0 transition-all duration-200 ease-linear"
+              />
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">KHP</span>
                 <span className="truncate text-xs">Platform</span>
