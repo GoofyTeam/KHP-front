@@ -96,7 +96,7 @@ export function AddStockForm({ preparation }: AddStockFormProps) {
       } else {
         setApiError(result.error || "An error occurred while adding stock");
       }
-    } catch (error) {
+    } catch {
       setApiError("An unexpected error occurred");
     } finally {
       setIsSubmitting(false);

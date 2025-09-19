@@ -102,7 +102,7 @@ export function RemoveStockForm({ ingredient }: RemoveStockFormProps) {
       } else {
         setApiError(result.error || "An error occurred while removing stock");
       }
-    } catch (error) {
+    } catch {
       setApiError("An unexpected error occurred");
     } finally {
       setIsSubmitting(false);

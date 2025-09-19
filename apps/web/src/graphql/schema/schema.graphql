@@ -595,6 +595,9 @@ type Preparation {
 
   """The company that produces this preparation."""
   company: Company!
+
+  """Threshold below which the preparation is considered understocked."""
+  threshold: Float
   entities: [PreparationEntity!]!
   locations: [Location!]!
 
@@ -714,7 +717,10 @@ type Query {
   ): Ingredient
 
   """List ingredients that dropped below their defined threshold."""
-  ingredientTreshold: [Ingredient!]!
+  ingredientTreshold(
+    """Filtrer selon un ou plusieurs emplacements."""
+    locationIds: [ID!]
+  ): [Ingredient!]!
 
   """Find a single location (only if it belongs to the current company)."""
   location(
@@ -760,6 +766,12 @@ type Query {
 
   """Trouve une preparation (et seulement si elle appartient à ma company)"""
   preparation(id: ID, name: String): Preparation
+
+  """List preparations that dropped below their defined threshold."""
+  PreparationsThreshold(
+    """Filtrer selon un ou plusieurs emplacements."""
+    locationIds: [ID!]
+  ): [Preparation!]!
 
   """Liste les quick access de l’entreprise courante, triés par index."""
   quickAccesses: [QuickAccess!]!

@@ -32,12 +32,14 @@ export interface AddPreparationQuantityInput {
   location_id: number;
   quantity: number;
   unit?: string;
+  [key: string]: unknown;
 }
 
 export interface RemovePreparationQuantityInput {
   location_id: number;
   quantity: number;
   unit?: string;
+  [key: string]: unknown;
 }
 
 export async function addPreparationQuantityAction(
@@ -70,6 +72,7 @@ export interface MovePreparationQuantityInput {
   to_location_id: number;
   quantity: number;
   unit?: string;
+  [key: string]: unknown;
 }
 
 export async function movePreparationQuantityAction(

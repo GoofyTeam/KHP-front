@@ -106,12 +106,14 @@ export interface AddQuantityInput {
   location_id: number;
   quantity: number;
   unit?: string;
+  [key: string]: unknown;
 }
 
 export interface RemoveQuantityInput {
   location_id: number;
   quantity: number;
   unit?: string;
+  [key: string]: unknown;
 }
 
 export async function addIngredientQuantityAction(

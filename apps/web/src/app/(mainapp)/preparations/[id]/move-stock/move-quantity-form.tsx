@@ -128,7 +128,7 @@ export function MoveQuantityForm({
       } else {
         setApiError(result.error || "Failed to move stock");
       }
-    } catch (error) {
+    } catch {
       setApiError("An unexpected error occurred");
     } finally {
       setIsSubmitting(false);
