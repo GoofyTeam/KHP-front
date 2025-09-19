@@ -25,6 +25,33 @@ function MoveQuantity() {
   const { product, availableLocations } = useLoaderData({
     from: "/_protected/move-quantity",
   });
+
+  const getTotalQuantity = (product: any) => {
+    if (!product.quantities) return 0;
+    return product.quantities.reduce(
+      (total: number, qty: any) => total + (qty.quantity || 0),
+      0
+    );
+  };
+
+  // Rediriger vers la page produit si aucune quantité n'est disponible
+  if (!product.quantities || getTotalQuantity(product) <= 0) {
+    const productId = product.product_internal_id;
+    if (productId) {
+      navigate({
+        to: "/products/$id",
+        params: { id: productId },
+        replace: true,
+      });
+    } else {
+      navigate({
+        to: "/inventory",
+        replace: true,
+      });
+    }
+    return null;
+  }
+
   const form = useForm<z.infer<typeof moveQuantitySchema>>({
     resolver: zodResolver(moveQuantitySchema),
     defaultValues: {
