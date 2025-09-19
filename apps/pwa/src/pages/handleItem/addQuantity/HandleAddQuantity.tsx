@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
@@ -17,52 +16,21 @@ import { Button } from "@workspace/ui/components/button";
 import { router } from "../../../main";
 import { addQuantitySubmit } from "./add-quantity";
 import { cn } from "@workspace/ui/lib/utils";
-import {
-  GetLocations,
-  type GetLocationsQuery,
-} from "../../../graphql/getLocations.gql";
-import { gqlClient } from "../../../lib/graph-client";
 
 function HandleAddQuantity() {
   const navigate = useNavigate();
   const { internalId, barcode, mode, scanMode } = useSearch({
     from: "/_protected/handle-item",
   });
-  const { product, type } = useLoaderData({
+  const { product, type, availableLocations } = useLoaderData({
     from: "/_protected/handle-item",
   });
 
-  // State pour les locations
-  const [locationsData, setLocationsData] = useState<GetLocationsQuery | null>(
-    null
-  );
-  const [locationsLoading, setLocationsLoading] = useState(true);
-
-  // Récupérer toutes les locations de la compagnie
-  useEffect(() => {
-    const fetchLocations = async () => {
-      try {
-        setLocationsLoading(true);
-        const data = await gqlClient.request<GetLocationsQuery>(GetLocations);
-        setLocationsData(data);
-      } catch (error) {
-        console.error("Error fetching locations:", error);
-      } finally {
-        setLocationsLoading(false);
-      }
-    };
-
-    fetchLocations();
-  }, []);
-
   // Combiner toutes les locations avec les quantités actuelles du produit
-  const allLocationsWithQuantities = React.useMemo(() => {
-    if (!locationsData?.locations?.data) return [];
-
-    return locationsData.locations.data.map((location: any) => {
-      // Chercher si le produit a déjà une quantité dans cette location
+  const allLocationsWithQuantities =
+    availableLocations?.map((location) => {
       const existingQuantity = product.quantities?.find(
-        (qty: any) => qty.location.id === location.id
+        (qty) => qty.location.id === location.id
       );
 
       return {
@@ -73,8 +41,7 @@ function HandleAddQuantity() {
           locationType: existingQuantity?.location.locationType || null,
         },
       };
-    });
-  }, [locationsData, product.quantities]);
+    }) || [];
 
   const form = useForm<z.infer<typeof handleAddQuantitySchema>>({
     resolver: zodResolver(handleAddQuantitySchema),
@@ -91,7 +58,6 @@ function HandleAddQuantity() {
       await addQuantitySubmit(values);
     } catch (error) {
       console.error("Error adding quantity:", error);
-      // The error will be handled by the HTTP client with automatic retry for CSRF issues
       throw error;
     }
   }
@@ -142,16 +108,10 @@ function HandleAddQuantity() {
               name="location_id"
               render={({ field }) => (
                 <LocationSelect
-                  quantities={
-                    locationsLoading ? [] : allLocationsWithQuantities
-                  }
+                  quantities={allLocationsWithQuantities}
                   value={field.value}
                   onValueChange={field.onChange}
-                  placeholder={
-                    locationsLoading
-                      ? "Loading locations..."
-                      : "Select location"
-                  }
+                  placeholder="Select location"
                   label="Locations"
                   unit={product.product_units || ""}
                   hideEmptyLocations={false}
