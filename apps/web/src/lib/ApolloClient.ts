@@ -1,4 +1,4 @@
-import { HttpLink } from "@apollo/client";
+import { BatchHttpLink } from "@apollo/client/link/batch-http";
 import { setContext } from "@apollo/client/link/context";
 import {
   registerApolloClient,
@@ -51,9 +51,11 @@ export const { getClient, query, PreloadQuery } = registerApolloClient(
       }
     });
 
-    const httpLink = new HttpLink({
+    const batchHttpLink = new BatchHttpLink({
       uri: `${API_URL}/graphql`,
       credentials: "include",
+      batchMax: 5,
+      batchInterval: 20,
       fetch: (uri, options) =>
         fetch(uri, {
           ...options,
@@ -66,7 +68,7 @@ export const { getClient, query, PreloadQuery } = registerApolloClient(
 
     return new ApolloClient({
       cache: new InMemoryCache(),
-      link: xsrfLink.concat(httpLink),
+      link: xsrfLink.concat(batchHttpLink),
       devtools: {
         enabled: process.env.NODE_ENV !== "production",
       },

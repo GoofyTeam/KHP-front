@@ -52,21 +52,18 @@ function WelcomePanel({ className }: { className?: string }) {
 }
 
 export default async function Dashboard() {
-  const { data, error } = await query({
-    query: GetQuickAccessButtonDocument,
-  });
-
-  const { data: thresholdData, error: thresholdError } = await query({
-    query: GetThresholdDocument,
-  });
-
-  const { data: ordersData, error: ordersError } = await query({
-    query: GetOrdersDocument,
-  });
-
-  const { data: perishableData, error: perishableError } = await query({
-    query: GetPerishableDocument,
-  });
+  // Execute all queries in parallel for better performance
+  const [
+    { data, error },
+    { data: thresholdData, error: thresholdError },
+    { data: ordersData, error: ordersError },
+    { data: perishableData, error: perishableError },
+  ] = await Promise.all([
+    query({ query: GetQuickAccessButtonDocument }),
+    query({ query: GetThresholdDocument }),
+    query({ query: GetOrdersDocument }),
+    query({ query: GetPerishableDocument }),
+  ]);
 
   if (error || thresholdError || ordersError || perishableError) {
     return (
