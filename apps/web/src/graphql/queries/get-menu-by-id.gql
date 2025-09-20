@@ -6,6 +6,14 @@ query GetMenuById($id: ID!) {
     price
     description
 
+    public_priority
+    menu_type_id
+    menu_type {
+      id
+      name
+    }
+    service_type
+    is_returnable
     type
     allergens
     categories {

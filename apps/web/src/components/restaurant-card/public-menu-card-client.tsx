@@ -54,20 +54,26 @@ interface OptionItem {
   label: string;
 }
 
-function getMenuTypeInfo(menu: RestaurantCardMenu): OptionItem {
-  const label = menu.type?.trim();
+interface MenuTypeInfo extends OptionItem {
+  sortIndex: number;
+}
 
-  if (!label) {
-    return { value: "other", label: "Other" };
-  }
+const ORDER_FALLBACK = Number.MAX_SAFE_INTEGER;
 
-  const normalized = normalizeText(label);
+function getMenuTypeInfo(menu: RestaurantCardMenu): MenuTypeInfo {
+  const label = menu.type?.trim() || "Other";
+  const normalized = normalizeText(label) || "other";
+  const value =
+    typeof menu.menu_type_id === "number"
+      ? `type-${menu.menu_type_id}`
+      : normalized;
 
-  if (!normalized) {
-    return { value: "other", label: label || "Other" };
-  }
+  const sortIndex =
+    typeof menu.menu_type_index === "number"
+      ? menu.menu_type_index
+      : ORDER_FALLBACK;
 
-  return { value: normalized, label };
+  return { value, label, sortIndex };
 }
 
 function capitalizeFirstLetter(text: string) {
@@ -92,21 +98,27 @@ export function PublicMenuCardClient({
   const [allergenFilter, setAllergenFilter] = useState("all");
 
   const typeOptions = useMemo<OptionItem[]>(() => {
-    const map = new Map<string, string>();
+    const map = new Map<string, { label: string; sortIndex: number }>();
 
     menus.forEach((menu) => {
-      const { value, label } = getMenuTypeInfo(menu);
+      const { value, label, sortIndex } = getMenuTypeInfo(menu);
+      const existing = map.get(value);
 
-      if (!map.has(value)) {
-        map.set(value, label);
+      if (!existing || sortIndex < existing.sortIndex) {
+        map.set(value, { label, sortIndex });
       }
     });
 
     return Array.from(map.entries())
-      .map(([value, label]) => ({ value, label }))
-      .sort((a, b) =>
-        a.label.localeCompare(b.label, "fr", { sensitivity: "base" })
-      );
+      .map(([value, data]) => ({ value, ...data }))
+      .sort((a, b) => {
+        if (a.sortIndex !== b.sortIndex) {
+          return a.sortIndex - b.sortIndex;
+        }
+
+        return a.label.localeCompare(b.label, "fr", { sensitivity: "base" });
+      })
+      .map(({ value, label }) => ({ value, label }));
   }, [menus]);
 
   const categoryOptions = useMemo<OptionItem[]>(() => {
@@ -194,18 +206,24 @@ export function PublicMenuCardClient({
   const groupedMenus = useMemo(() => {
     const groups = new Map<
       string,
-      { label: string; menus: RestaurantCardMenu[] }
+      { label: string; menus: RestaurantCardMenu[]; sortIndex: number }
     >();
 
     filteredMenus.forEach((menu) => {
-      const { value, label } = getMenuTypeInfo(menu);
+      const { value, label, sortIndex } = getMenuTypeInfo(menu);
       const key = value || "other";
 
       if (!groups.has(key)) {
-        groups.set(key, { label, menus: [] });
+        groups.set(key, { label, menus: [], sortIndex });
       }
 
-      groups.get(key)!.menus.push(menu);
+      const group = groups.get(key)!;
+      group.menus.push(menu);
+
+      if (sortIndex < group.sortIndex) {
+        group.sortIndex = sortIndex;
+        group.label = label;
+      }
     });
 
     return Array.from(groups.entries())
@@ -214,13 +232,26 @@ export function PublicMenuCardClient({
         ...group,
         menus: group.menus
           .slice()
-          .sort((a, b) =>
-            a.name.localeCompare(b.name, "fr", { sensitivity: "base" })
-          ),
+          .sort((a, b) => {
+            const priorityA =
+              typeof a.priority === "number" ? a.priority : ORDER_FALLBACK;
+            const priorityB =
+              typeof b.priority === "number" ? b.priority : ORDER_FALLBACK;
+
+            if (priorityA !== priorityB) {
+              return priorityA - priorityB;
+            }
+
+            return a.name.localeCompare(b.name, "fr", { sensitivity: "base" });
+          }),
       }))
-      .sort((a, b) =>
-        a.label.localeCompare(b.label, "fr", { sensitivity: "base" })
-      );
+      .sort((a, b) => {
+        if (a.sortIndex !== b.sortIndex) {
+          return a.sortIndex - b.sortIndex;
+        }
+
+        return a.label.localeCompare(b.label, "fr", { sensitivity: "base" });
+      });
   }, [filteredMenus]);
 
   //Customize page title and meta description for SEO

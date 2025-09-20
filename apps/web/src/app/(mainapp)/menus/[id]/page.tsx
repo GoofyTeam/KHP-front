@@ -11,6 +11,8 @@ import { MealsIngredientDataTable } from "@/components/meals/meals-ingredients-d
 import { MealsIngredientColumns } from "@/components/meals/meals-ingredient-columns";
 import { AvailabilityBadge } from "@workspace/ui/components/availability-badge";
 import DeleteMenu from "@/components/meals/delete-menus";
+import { getMenuServiceTypeLabel } from "@/constants/menu-service-type-labels";
+import { Separator } from "@workspace/ui/components/separator";
 
 export default async function MenuPage({
   params,
@@ -31,6 +33,15 @@ export default async function MenuPage({
   }
 
   const menu = data.menu;
+  const menuTypeDisplay = menu?.menu_type?.name ?? menu?.menu_type_id ?? null;
+  const menuTypeBadge = menuTypeDisplay
+    ? [
+        {
+          id: menu?.menu_type?.id ?? String(menu?.menu_type_id ?? "unknown"),
+          name: menuTypeDisplay,
+        },
+      ]
+    : undefined;
 
   return (
     <div className="w-full flex flex-col lg:flex-row gap-8 h-full items-center justify-center py-2 ">
@@ -48,15 +59,12 @@ export default async function MenuPage({
             </p>
           </div>
           <div className="flex justify-center items-center gap-2 flex-wrap">
-            <CategoryBadge categories={menu?.categories || []} />
-            <CategoryBadge
-              categories={[
-                {
-                  id: menu?.type || "unknown",
-                  name: menu?.type || "Unknown",
-                },
-              ]}
+            {menuTypeBadge && <CategoryBadge categories={menuTypeBadge} />}
+            <Separator
+              orientation="vertical"
+              className="h-4 w-px bg-khp-border"
             />
+            <CategoryBadge categories={menu?.categories || []} />
           </div>
 
           <div className="flex justify-center items-center gap-2">
@@ -98,10 +106,10 @@ export default async function MenuPage({
       </div>
 
       <div className="flex flex-col w-full lg:w-1/2 gap-y-4">
-        <div className="w-full lg:w-3/4 max-w-lg gap-y-4 flex flex-col">
+        <div className="w-full gap-y-4 flex flex-col">
           <p className="text-khp-text-secondary text-lg">{menu?.description}</p>
-          <div className="flex gap-x-8">
-            <p className="text-khp-text-secondary">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+            <p className="text-khp-text-secondary text-lg">
               Price:{" "}
               <span className="text-khp-primary text-xl font-bold">
                 {menu?.price ? `${menu.price.toFixed(2)} EUR` : "N/A"}
@@ -111,6 +119,28 @@ export default async function MenuPage({
               <p className="font-semibold text-khp-text-primary">Allergens:</p>
               <AllegernsBadgesList allergens={menu?.allergens || []} />
             </div>
+          </div>
+          <div className="flex flex-wrap gap-4 text-sm text-khp-text-secondary">
+            <span>
+              <span className="font-semibold text-khp-text-primary">
+                Service:
+              </span>{" "}
+              {getMenuServiceTypeLabel(menu?.service_type)}
+            </span>
+            <span>
+              <span className="font-semibold text-khp-text-primary">
+                Returnable:
+              </span>{" "}
+              {menu?.is_returnable ? "Yes" : "No"}
+            </span>
+            <span>
+              <span className="font-semibold text-khp-text-primary">
+                Priority:
+              </span>{" "}
+              {typeof menu?.public_priority === "number"
+                ? menu.public_priority
+                : "—"}
+            </span>
           </div>
         </div>
         <AvailabilityBadge available={menu?.available || false} />

@@ -399,6 +399,9 @@ type Menu {
   is_returnable: Boolean!
   available(quantity: Int! = 1): Boolean!
   type: String!
+  menu_type_id: ID!
+  public_priority: Int!
+  menu_type: MenuType
   price: Float!
   categories: [MenuCategory!]!
   allergens: [AllergenEnum!]!
@@ -458,6 +461,12 @@ type MenuPaginator {
 enum MenuServiceTypeEnum {
   PREP
   DIRECT
+}
+
+type MenuType {
+  id: ID!
+  name: String!
+  public_index: Int!
 }
 
 """Représente un produit alimentaire issu d'OpenFoodFacts"""
@@ -904,6 +913,7 @@ type Query {
   """Liste les unités de mesure disponibles"""
   measurementUnits: [MeasurementUnitType!]!
   menu(id: ID!): Menu
+  menuTypes: [MenuType!]!
 
   """
   Find a single MenuCategory (only if it belongs to the current company).

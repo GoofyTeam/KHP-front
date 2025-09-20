@@ -5,6 +5,15 @@ query getMenus($page: Int!, $first: Int! = 10, $available: Boolean) {
       name
       image_url
       description
+      public_priority
+      menu_type_id
+      menu_type {
+        id
+        name
+      }
+      service_type
+      is_returnable
+      price
       is_a_la_carte
       available
       created_at

@@ -36,6 +36,9 @@ import {
   GetMenuByIdDocument,
   GetMenuCategoriesDocument,
   GetMenuCategoriesQuery,
+  GetMenuTypesDocument,
+  GetMenuTypesQuery,
+  MenuServiceTypeEnum,
 } from "@/graphql/generated/graphql";
 
 const menuItemsSchema = z.object({
@@ -51,6 +54,17 @@ const menuItemsSchema = z.object({
 
 const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/jpg"] as const;
+
+const SERVICE_TYPE_OPTIONS = [
+  {
+    value: MenuServiceTypeEnum.Direct,
+    label: "Direct service (no kitchen)",
+  },
+  {
+    value: MenuServiceTypeEnum.Prep,
+    label: "Kitchen preparation",
+  },
+] as const;
 
 const updateMenuSchema = z
   .object({
@@ -77,7 +91,16 @@ const updateMenuSchema = z
     description: z.string().optional(),
     price: z.number().min(1, "Price must be a positive number"),
     is_a_la_carte: z.boolean(),
-    type: z.string().nonempty("Type is required"),
+    is_returnable: z.boolean(),
+    menu_type_id: z.string().nonempty("Menu type is required"),
+    service_type: z.nativeEnum(MenuServiceTypeEnum, {
+      errorMap: () => ({ message: "Service type is required" }),
+    }),
+    priority: z
+      .number({ invalid_type_error: "Priority must be a number" })
+      .int("Priority must be an integer")
+      .min(0, "Priority must be at least 0")
+      .optional(),
     category_ids: z
       .array(z.string())
       .min(1, "At least one category is required"),
@@ -114,8 +137,11 @@ const MENU_INFO_FIELDS = [
   "description",
   "price",
   "is_a_la_carte",
-  "type",
   "category_ids",
+  "menu_type_id",
+  "service_type",
+  "priority",
+  "is_returnable",
 ] as const;
 
 export default function UpdateMenusPage() {
@@ -143,6 +169,13 @@ export default function UpdateMenusPage() {
     }
   );
 
+  const { data: menuTypes } = useQuery<GetMenuTypesQuery>(
+    GetMenuTypesDocument,
+    {
+      fetchPolicy: "network-only",
+    }
+  );
+
   const menuFetched = data?.menu;
 
   const form = useForm<UpdateMenuFormValues>({
@@ -154,8 +187,11 @@ export default function UpdateMenusPage() {
       description: menuFetched?.description || "",
       price: menuFetched?.price || 0,
       is_a_la_carte: menuFetched?.is_a_la_carte || false,
+      is_returnable: menuFetched?.is_returnable || false,
+      menu_type_id: menuFetched?.menu_type_id || "",
+      service_type: menuFetched?.service_type || MenuServiceTypeEnum.Direct,
+      priority: menuFetched?.public_priority ?? undefined,
       category_ids: menuFetched?.categories.map((cat) => cat.id) || [],
-      type: menuFetched?.type || "",
       items:
         menuFetched?.items.map((item) => ({
           entity_id: item.entity.id,
@@ -187,8 +223,11 @@ export default function UpdateMenusPage() {
         description: menuFetched.description || "",
         price: menuFetched.price || 0,
         is_a_la_carte: menuFetched.is_a_la_carte || false,
+        is_returnable: menuFetched.is_returnable || false,
+        menu_type_id: menuFetched.menu_type_id || "",
+        service_type: menuFetched.service_type || MenuServiceTypeEnum.Direct,
+        priority: menuFetched.public_priority ?? undefined,
         category_ids: menuFetched.categories.map((cat) => cat.id) || [],
-        type: menuFetched.type || "",
         items:
           menuFetched.items.map((item) => ({
             entity_id: item.entity.id,
@@ -482,14 +521,14 @@ export default function UpdateMenusPage() {
                     )}
                   />
 
-                  <div className="grid grid-cols-2 w-full gap-4">
+                  <div className="grid w-full gap-4 sm:grid-cols-2">
                     <FormField
                       control={form.control}
-                      name="type"
+                      name="menu_type_id"
                       render={({ field }) => (
                         <FormItem className="w-full">
                           <FormLabel>
-                            Type <span className="text-red-500">*</span>
+                            Menu type <span className="text-red-500">*</span>
                           </FormLabel>
                           <FormControl>
                             <Select
@@ -497,15 +536,17 @@ export default function UpdateMenusPage() {
                               value={field.value || undefined}
                             >
                               <SelectTrigger className="w-full border-khp-primary">
-                                <SelectValue placeholder="Select a type" />
+                                <SelectValue placeholder="Select a menu type" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="breakfast">
-                                  Breakfast
-                                </SelectItem>
-                                <SelectItem value="lunch">Lunch</SelectItem>
-                                <SelectItem value="dinner">Dinner</SelectItem>
-                                <SelectItem value="snack">Snack</SelectItem>
+                                {menuTypes?.menuTypes.map((menuType) => (
+                                  <SelectItem
+                                    key={menuType.id}
+                                    value={String(menuType.id)}
+                                  >
+                                    {menuType.name}
+                                  </SelectItem>
+                                ))}
                               </SelectContent>
                             </Select>
                           </FormControl>
@@ -551,7 +592,7 @@ export default function UpdateMenusPage() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 w-full gap-4">
+                  <div className="grid w-full gap-4 sm:grid-cols-2">
                     <FormField
                       control={form.control}
                       name="price"
@@ -592,12 +633,95 @@ export default function UpdateMenusPage() {
                     />
                     <FormField
                       control={form.control}
+                      name="priority"
+                      render={({ field }) => (
+                        <FormItem className="w-full">
+                          <FormLabel>Priority</FormLabel>
+                          <FormControl>
+                            <Input
+                              variant="khp-default"
+                              type="number"
+                              min={0}
+                              name={field.name}
+                              onBlur={field.onBlur}
+                              ref={field.ref}
+                              value={field.value ?? ""}
+                              placeholder="0 = default order"
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                field.onChange(
+                                  value === "" ? undefined : Number(value)
+                                );
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid w-full gap-4 sm:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="service_type"
+                      render={({ field }) => (
+                        <FormItem className="w-full">
+                          <FormLabel>
+                            Service type <span className="text-red-500">*</span>
+                          </FormLabel>
+                          <FormControl>
+                            <Select
+                              onValueChange={(value) =>
+                                field.onChange(value as MenuServiceTypeEnum)
+                              }
+                              value={field.value || undefined}
+                            >
+                              <SelectTrigger className="w-full border-khp-primary">
+                                <SelectValue placeholder="Select a service type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {SERVICE_TYPE_OPTIONS.map((option) => (
+                                  <SelectItem
+                                    key={option.value}
+                                    value={option.value}
+                                  >
+                                    {option.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
                       name="is_a_la_carte"
                       render={({ field }) => (
                         <FormItem className="flex flex-col lg:flex-row w-full items-center border rounded-sm border-khp-primary justify-between px-2 py-4">
                           <FormLabel>
                             Available &quot;à la carte&quot;
                           </FormLabel>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid w-full gap-4 sm:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="is_returnable"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col lg:flex-row w-full items-center border rounded-sm border-khp-primary justify-between px-2 py-4 sm:col-span-2">
+                          <FormLabel>Returnable container</FormLabel>
                           <FormControl>
                             <Switch
                               checked={field.value}

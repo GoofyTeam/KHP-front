@@ -11,7 +11,7 @@
     "test:watch": "vitest -w",
     "test:run": "vitest run",
     "preview": "next build && next start",
-    "introspect": "get-graphql-schema https://back.goofykhp.fr/graphql > src/graphql/schema/schema.graphql",
+    "introspect": "get-graphql-schema http://localhost:8000/graphql > src/graphql/schema/schema.graphql",
     "codegen": "npm run introspect && graphql-codegen --config codegen.ts"
   },
   "dependencies": {

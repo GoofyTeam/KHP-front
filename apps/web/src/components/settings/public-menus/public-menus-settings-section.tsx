@@ -27,7 +27,7 @@ import {
 import {
   updatePublicMenusSettingsAction,
   type UpdatePublicMenusSettingsInput,
-} from "@/app/(mainapp)/settings/company/actions";
+} from "@/app/(mainapp)/settings/public-menus/actions";
 
 const publicMenusSchema = z.object({
   public_menu_card_url: z
@@ -172,7 +172,7 @@ function PublicMenusSettingsSection({
                 <FormControl>
                   <div className="flex justify-start items-center gap-0.5">
                     <p className="text-khp-text/70 text-md select-none font-medium">
-                      https://dash.goofykhp.fr/cards
+                      https://dash.goofykhp.fr/public-menus/
                     </p>
                     <Input variant="khp-default" {...field} disabled={isBusy} />
                     <Button
@@ -186,7 +186,7 @@ function PublicMenusSettingsSection({
                         if (!field.value) return;
 
                         navigator.clipboard.writeText(
-                          `https://dash.goofykhp.fr/cards/${field.value}`
+                          `https://dash.goofykhp.fr/public-menus/${field.value}`
                         );
                       }}
                     >

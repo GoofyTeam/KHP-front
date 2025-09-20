@@ -1,0 +1,7 @@
+query GetMenuTypes {
+  menuTypes {
+    id
+    name
+    public_index
+  }
+}

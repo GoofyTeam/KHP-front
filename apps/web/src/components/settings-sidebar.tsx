@@ -9,6 +9,8 @@ import {
   Layers,
   Building,
   Zap,
+  SquareMenu,
+  ListOrdered,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -71,10 +73,22 @@ const settingsNavItems = [
     icon: Tags,
   },
   {
+    title: "Menu Types",
+    description: "Manage your menu types",
+    href: "/settings/menu-types",
+    icon: ListOrdered,
+  },
+  {
     title: "Quick Access",
     description: "Configure your quick access buttons",
     href: "/settings/quick-access",
     icon: Zap,
+  },
+  {
+    title: "Public Menus",
+    description: "Manage your public menus settings",
+    href: "/settings/public-menus",
+    icon: SquareMenu,
   },
 ];
 

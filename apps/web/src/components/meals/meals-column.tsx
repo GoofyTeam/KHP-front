@@ -4,6 +4,7 @@ import { GetMenusQuery } from "@/graphql/generated/graphql";
 import { ColumnDef } from "@tanstack/react-table";
 import { StockStatus } from "@workspace/ui/components/stock-status";
 import { Check, X } from "lucide-react";
+import { getMenuServiceTypeLabel } from "@/constants/menu-service-type-labels";
 
 export type Meals = NonNullable<GetMenusQuery["menus"]["data"]>[number];
 
@@ -31,6 +32,66 @@ export const columns: ColumnDef<Meals>[] = [
   {
     accessorKey: "name",
     header: "Name",
+  },
+  {
+    id: "menu_type",
+    header: "Menu Type",
+    cell: ({ row }) => {
+      const menuType = row.original.menu_type;
+      if (menuType?.name) return menuType.name;
+      const id = row.original.menu_type_id;
+      return id ? String(id) : "—";
+    },
+    sortingFn: (a, b) => {
+      const labelA =
+        a.original.menu_type?.name ?? String(a.original.menu_type_id ?? "");
+      const labelB =
+        b.original.menu_type?.name ?? String(b.original.menu_type_id ?? "");
+      return labelA.localeCompare(labelB);
+    },
+  },
+  {
+    accessorKey: "public_priority",
+    header: "Priority",
+    cell: ({ row }) =>
+      typeof row.original.public_priority === "number"
+        ? row.original.public_priority
+        : "—",
+    sortingFn: "basic",
+  },
+  {
+    accessorKey: "service_type",
+    header: "Service",
+    cell: ({ row }) => getMenuServiceTypeLabel(row.original.service_type),
+  },
+  {
+    accessorKey: "is_returnable",
+    header: "Returnable?",
+    cell: ({ row }) =>
+      row.original.is_returnable ? (
+        <p className="text-green-600 flex items-center gap-1">
+          <Check /> Yes
+        </p>
+      ) : (
+        <p className="text-red-600 flex items-center gap-1">
+          <X /> No
+        </p>
+      ),
+    filterFn: (row, id, value) => {
+      if (value === "all") return true;
+      if (value === "true") return row.getValue(id) === true;
+      if (value === "false") return row.getValue(id) === false;
+      return true;
+    },
+  },
+  {
+    accessorKey: "price",
+    header: "Price",
+    cell: ({ row }) =>
+      typeof row.original.price === "number"
+        ? `${row.original.price.toFixed(2)} €`
+        : "—",
+    sortingFn: "basic",
   },
   /*   {
     accessorKey: "category",

@@ -1,16 +1,25 @@
+import { notFound } from "next/navigation";
+
 import { PublicMenuCard } from "@/components/restaurant-card/public-menu-card";
 import { fetchRestaurantCard } from "@/queries/restaurant-card-query";
 
 export const revalidate = 0;
 
-interface PublicMenuCardPageProps {
-  params: Promise<{ publicId: string }>;
-}
-
 export default async function PublicMenuCardPage({
   params,
-}: PublicMenuCardPageProps) {
+}: {
+  params: Promise<{ publicId: string }>;
+}) {
+  if (!params) {
+    notFound();
+  }
+
   const { publicId } = await params;
+
+  if (!publicId) {
+    notFound();
+  }
+
   const decodedPublicId = decodeURIComponent(publicId);
   const result = await fetchRestaurantCard(decodedPublicId);
 
