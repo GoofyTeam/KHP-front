@@ -1,0 +1,11 @@
+query GetPublicMenusSettings {
+  me {
+    company {
+      public_menu_settings {
+        public_menu_card_url
+        show_menu_images
+        show_out_of_stock_menus_on_card
+      }
+    }
+  }
+}

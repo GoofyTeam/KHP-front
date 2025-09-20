@@ -73,13 +73,11 @@ type Company {
   """Types de localisation associés à cette entreprise."""
   locationTypes: [LocationType!]!
 
-  """
-  Option pour activer ou désactiver la complétion automatique des commandes de menu.
-  """
-  auto_complete_menu_orders: Boolean
-
   """Langue préférée pour les données OpenFoodFacts (fr ou en)."""
   open_food_facts_language: String
+
+  """Paramètres visibles publiquement pour la carte des menus."""
+  public_menu_settings: PublicMenuSettings!
 
   """When the company was created."""
   created_at: DateTime!
@@ -397,6 +395,8 @@ type Menu {
   description: String
   image_url: String
   is_a_la_carte: Boolean!
+  service_type: MenuServiceTypeEnum!
+  is_returnable: Boolean!
   available(quantity: Int! = 1): Boolean!
   type: String!
   price: Float!
@@ -446,33 +446,6 @@ type MenuItem {
 
 union MenuItemEntity = Ingredient | Preparation
 
-type MenuOrder {
-  id: ID!
-  status: String!
-  quantity: Int!
-  menu: Menu!
-  created_at: DateTime!
-  updated_at: DateTime!
-}
-
-enum MenuOrderOrderByField {
-  STATUS
-  CREATED_AT
-}
-
-"""A paginated list of MenuOrder items."""
-type MenuOrderPaginator {
-  """Pagination information about the list of items."""
-  paginatorInfo: PaginatorInfo!
-
-  """A list of MenuOrder items."""
-  data: [MenuOrder!]!
-}
-
-type MenuOrderStats {
-  count: Int!
-}
-
 """A paginated list of Menu items."""
 type MenuPaginator {
   """Pagination information about the list of items."""
@@ -480,6 +453,11 @@ type MenuPaginator {
 
   """A list of Menu items."""
   data: [Menu!]!
+}
+
+enum MenuServiceTypeEnum {
+  PREP
+  DIRECT
 }
 
 """Représente un produit alimentaire issu d'OpenFoodFacts"""
@@ -492,6 +470,50 @@ type OpenFoodFactsProduct {
   imageUrl: String
   is_already_in_database: Boolean
   ingredient_id: ID
+}
+
+"""Représente une commande passée dans l'établissement."""
+type Order {
+  """Identifiant unique."""
+  id: ID!
+
+  """Table associée à la commande."""
+  table: Table!
+
+  """Entreprise propriétaire de la commande."""
+  company: Company!
+
+  """Utilisateur qui a créé la commande."""
+  user: User!
+
+  """Statut actuel de la commande."""
+  status: OrderStatusEnum!
+
+  """Horodatage du passage de la commande en statut PENDING."""
+  pending_at: DateTime
+
+  """Horodatage du service de la commande."""
+  served_at: DateTime
+
+  """Horodatage du paiement de la commande."""
+  payed_at: DateTime
+
+  """Horodatage de l'annulation éventuelle."""
+  canceled_at: DateTime
+
+  """
+  Prix total TTC calculé à partir des menus de toutes les étapes (prix × quantité).
+  """
+  price: Float!
+
+  """Étapes associées à la commande."""
+  steps: [OrderStep!]!
+
+  """Date de création de la commande."""
+  created_at: DateTime!
+
+  """Date de dernière mise à jour."""
+  updated_at: DateTime!
 }
 
 """Allows ordering a list of records."""
@@ -529,6 +551,125 @@ enum OrderByRelationWithColumnAggregateFunction {
 
   """Amount of items."""
   COUNT
+}
+
+"""Options de tri disponibles pour les commandes."""
+input OrderOrderByClause {
+  """Colonne utilisée pour le tri."""
+  column: OrderOrderByField!
+
+  """Direction du tri."""
+  order: SortOrder! = ASC
+}
+
+"""Colonnes triables pour les commandes."""
+enum OrderOrderByField {
+  ID
+  STATUS
+  TABLE_ID
+  USER_ID
+  PENDING_AT
+  SERVED_AT
+  PAYED_AT
+  CANCELED_AT
+  CREATED_AT
+  UPDATED_AT
+}
+
+"""A paginated list of Order items."""
+type OrderPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of Order items."""
+  data: [Order!]!
+}
+
+"""Statistiques agrégées sur les commandes."""
+type OrdersStats {
+  pending: Int!
+  served: Int!
+  payed: Int!
+  canceled: Int!
+  total: Int!
+  revenue: Float!
+}
+
+enum OrderStatusEnum {
+  PENDING
+  SERVED
+  PAYED
+  CANCELED
+}
+
+"""Étape individuelle d'une commande."""
+type OrderStep {
+  """Identifiant unique."""
+  id: ID!
+
+  """Commande à laquelle appartient l'étape."""
+  order: Order!
+
+  """Position de l'étape dans le flux de service."""
+  position: Int!
+
+  """Statut actuel de l'étape."""
+  status: OrderStepStatusEnum!
+
+  """Horodatage du service de l'étape."""
+  served_at: DateTime
+
+  """
+  Prix TTC de l'étape calculé en sommant prix × quantité des menus associés.
+  """
+  price: Float!
+
+  """Menus associés à cette étape."""
+  stepMenus: [StepMenu!]!
+
+  """Menus liés via la relation pivot."""
+  menus: [Menu!]!
+
+  """Date de création de l'étape."""
+  created_at: DateTime!
+
+  """Date de dernière mise à jour."""
+  updated_at: DateTime!
+}
+
+"""Options de tri disponibles pour les étapes de commande."""
+input OrderStepOrderByClause {
+  """Colonne utilisée pour le tri."""
+  column: OrderStepOrderByField!
+
+  """Direction du tri."""
+  order: SortOrder! = ASC
+}
+
+"""Colonnes triables pour les étapes de commande."""
+enum OrderStepOrderByField {
+  ID
+  ORDER_ID
+  POSITION
+  STATUS
+  SERVED_AT
+  CREATED_AT
+  UPDATED_AT
+}
+
+"""A paginated list of OrderStep items."""
+type OrderStepPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of OrderStep items."""
+  data: [OrderStep!]!
+}
+
+enum OrderStepStatusEnum {
+  IN_PREP
+  READY
+  SERVED
 }
 
 """Information about pagination using a fully featured paginator."""
@@ -675,6 +816,19 @@ type PreparationQuantity {
   location: Location!
 }
 
+type PublicMenuSettings {
+  """Identifiant public unique pour partager la carte du restaurant."""
+  public_menu_card_url: String!
+
+  """
+  Affiche aussi les menus qui n'ont pas assez de stock sur la carte publique.
+  """
+  show_out_of_stock_menus_on_card: Boolean!
+
+  """Affiche les images des menus sur la carte publique."""
+  show_menu_images: Boolean!
+}
+
 type Query {
   """
   Recherche un produit par code-barres ou par mots-clés.
@@ -760,7 +914,17 @@ type Query {
     """Search by category name."""
     name: String
   ): MenuCategory
-  menuOrderStats(start: Date, end: Date): MenuOrderStats!
+
+  """
+  Récupère une commande précise (si elle appartient à l'entreprise courante).
+  """
+  order(id: ID!): Order
+
+  """Retourne les statistiques des commandes sur une période."""
+  ordersStats(statuses: [OrderStatusEnum!], table_id: ID, user_id: ID, start_date: DateTime, end_date: DateTime): OrdersStats!
+
+  """Récupère une étape précise."""
+  orderStep(id: ID!): OrderStep
   perishables(filter: PerishableFilter = FRESH): [Perishable!]!
   nonPerishableIngredients: [Ingredient!]!
 
@@ -777,6 +941,9 @@ type Query {
   quickAccesses: [QuickAccess!]!
   room(id: ID, code: String): Room
   searchInStock(keyword: String!): [SearchResult!]!
+
+  """Récupère une ligne précise."""
+  stepMenu(id: ID!): StepMenu
   table(id: ID!): Table
 
   """Find a single user by an identifying attribute."""
@@ -911,6 +1078,9 @@ type Query {
     """Filtrer par un ou plusieurs types."""
     types: [String!]
 
+    """Filtrer par type de service (PREP, DIRECT)."""
+    service_types: [MenuServiceTypeEnum!]
+
     """Filtrer par un range de prix [min, max]."""
     price_between: [Float!]
 
@@ -935,16 +1105,51 @@ type Query {
     """The offset from which items are returned."""
     page: Int
   ): MenuCategoryPaginator!
-  menuOrders(
-    status: String
-    orderBy: [QueryMenuOrdersOrderByOrderByClause!]
+
+  """Liste les commandes pour l'entreprise courante."""
+  orders(
+    """Filtre par statut (plusieurs valeurs possibles)."""
+    statuses: [OrderStatusEnum!]
+
+    """Filtre par identifiant de table."""
+    table_id: ID
+
+    """Filtre par identifiant d'utilisateur."""
+    user_id: ID
+
+    """Filtre par date de création minimale."""
+    start_date: DateTime
+
+    """Filtre par date de création maximale."""
+    end_date: DateTime
+
+    """Options de tri des commandes."""
+    orderBy: [QueryOrdersOrderByOrderByClause!]
 
     """Limits number of fetched items."""
     first: Int! = 10
 
     """The offset from which items are returned."""
     page: Int
-  ): MenuOrderPaginator!
+  ): OrderPaginator!
+
+  """Liste les étapes de commandes."""
+  orderSteps(
+    """Filtre par identifiant de commande."""
+    order_id: ID
+
+    """Filtre par statut."""
+    statuses: [OrderStepStatusEnum!]
+
+    """Options de tri des étapes."""
+    orderBy: [QueryOrderStepsOrderByOrderByClause!]
+
+    """Limits number of fetched items."""
+    first: Int! = 10
+
+    """The offset from which items are returned."""
+    page: Int
+  ): OrderStepPaginator!
 
   """Liste les preparations de ma company uniquement"""
   preparations(
@@ -985,6 +1190,27 @@ type Query {
     """The offset from which items are returned."""
     page: Int
   ): RoomPaginator!
+
+  """Liste les menus associés aux étapes de commandes."""
+  stepMenus(
+    """Filtre par identifiant d'étape de commande."""
+    order_step_id: ID
+
+    """Filtre par identifiant de menu."""
+    menu_id: ID
+
+    """Filtre par statut."""
+    statuses: [StepMenuStatusEnum!]
+
+    """Options de tri des lignes."""
+    orderBy: [QueryStepMenusOrderByOrderByClause!]
+
+    """Limits number of fetched items."""
+    first: Int! = 10
+
+    """The offset from which items are returned."""
+    page: Int
+  ): StepMenuPaginator!
 
   """Liste les mouvements de stock pour l'entreprise actuelle."""
   stockMovements(
@@ -1040,10 +1266,19 @@ type Query {
   ): UserPaginator!
 }
 
-"""Order by clause for Query.menuOrders.orderBy."""
-input QueryMenuOrdersOrderByOrderByClause {
+"""Order by clause for Query.orders.orderBy."""
+input QueryOrdersOrderByOrderByClause {
   """The column that is used for ordering."""
-  column: MenuOrderOrderByField!
+  column: OrderOrderByField!
+
+  """The direction that is used for ordering."""
+  order: SortOrder!
+}
+
+"""Order by clause for Query.orderSteps.orderBy."""
+input QueryOrderStepsOrderByOrderByClause {
+  """The column that is used for ordering."""
+  column: OrderStepOrderByField!
 
   """The direction that is used for ordering."""
   order: SortOrder!
@@ -1053,6 +1288,15 @@ input QueryMenuOrdersOrderByOrderByClause {
 input QueryRoomsOrderByOrderByClause {
   """The column that is used for ordering."""
   column: RoomOrderByField!
+
+  """The direction that is used for ordering."""
+  order: SortOrder!
+}
+
+"""Order by clause for Query.stepMenus.orderBy."""
+input QueryStepMenusOrderByOrderByClause {
+  """The column that is used for ordering."""
+  column: StepMenuOrderByField!
 
   """The direction that is used for ordering."""
   order: SortOrder!
@@ -1134,6 +1378,72 @@ enum SortOrder {
 
   """Sort records in descending order."""
   DESC
+}
+
+"""Association entre une étape de commande et un menu."""
+type StepMenu {
+  """Identifiant unique."""
+  id: ID!
+
+  """Étape de commande liée."""
+  step: OrderStep!
+
+  """Menu associé à cette ligne."""
+  menu: Menu!
+
+  """Quantité commandée."""
+  quantity: Int!
+
+  """Statut de la ligne de menu."""
+  status: StepMenuStatusEnum!
+
+  """Note éventuelle ajoutée par l'équipe."""
+  note: String
+
+  """Horodatage du service de ce menu."""
+  served_at: DateTime
+
+  """Date de création de la ligne."""
+  created_at: DateTime!
+
+  """Date de dernière mise à jour."""
+  updated_at: DateTime!
+}
+
+"""Options de tri disponibles pour les menus d'une étape."""
+input StepMenuOrderByClause {
+  """Colonne utilisée pour le tri."""
+  column: StepMenuOrderByField!
+
+  """Direction du tri."""
+  order: SortOrder! = ASC
+}
+
+"""Colonnes triables pour les menus d'une étape."""
+enum StepMenuOrderByField {
+  ID
+  ORDER_STEP_ID
+  MENU_ID
+  QUANTITY
+  STATUS
+  SERVED_AT
+  CREATED_AT
+  UPDATED_AT
+}
+
+"""A paginated list of StepMenu items."""
+type StepMenuPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of StepMenu items."""
+  data: [StepMenu!]!
+}
+
+enum StepMenuStatusEnum {
+  IN_PREP
+  READY
+  SERVED
 }
 
 """Représente un mouvement de stock d'un ingrédient ou d'une préparation."""
