@@ -1,5 +1,5 @@
 query GetThreshold {
-  ingredientTreshold {
+  ingredientThreshold {
     id
     name
     unit
