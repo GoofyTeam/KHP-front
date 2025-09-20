@@ -11,6 +11,7 @@ export type LowStockItem = {
   id: string;
   title: string;
   subtitle: string;
+  threshold: string;
   status: "warning" | "error";
   icon: React.ReactNode;
   onClick?: () => void;
@@ -71,7 +72,8 @@ function transformThresholdDataToLowStockItems(
           items.push({
             id: `ingredient-${ingredient.id}-${quantity.location?.name}`,
             title: `${ingredient.name} - ${quantity.location?.name}`,
-            subtitle: `In stock: ${totalQuantity}${ingredient.unit}  -  Threshold: ${threshold}${ingredient.unit}`,
+            subtitle: `In stock: ${totalQuantity}${ingredient.unit}`,
+            threshold: `Threshold: ${threshold}${ingredient.unit}`,
             status,
             icon,
           });
@@ -93,7 +95,8 @@ function transformThresholdDataToLowStockItems(
           items.push({
             id: `preparation-${preparation.id}-${quantity.location?.name}`,
             title: `${preparation.name} - ${quantity.location?.name}`,
-            subtitle: `In stock: ${totalQuantity}${preparation.unit}ㅤㅤ ㅤ -ㅤㅤ ㅤ Threshold: ${threshold}${preparation.unit}`,
+            subtitle: `In stock: ${totalQuantity}${preparation.unit}`,
+            threshold: `Threshold: ${threshold}${preparation.unit}`,
             status,
             icon,
           });
@@ -173,6 +176,8 @@ export function LowStock({ thresholdData, className }: LowStockProps) {
                     </p>
                     <p className="mt-0.5 text-xs text-khp-text-secondary">
                       {item.subtitle}
+                      <span className="mx-2">-</span>
+                      {item.threshold}
                     </p>
                   </div>
                 </button>
