@@ -401,7 +401,7 @@ type Menu {
   type: String!
   menu_type_id: ID!
   public_priority: Int!
-  menu_type: MenuType!
+  menu_type: MenuType
   price: Float!
   categories: [MenuCategory!]!
   allergens: [AllergenEnum!]!

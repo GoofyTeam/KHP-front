@@ -3,7 +3,6 @@ import { query } from "@/lib/ApolloClient";
 import {
   GetMenuByIdDocument,
   GetMenuTypesDocument,
-  MenuServiceTypeEnum,
 } from "@/graphql/generated/graphql";
 import Link from "next/link";
 import { Button } from "@workspace/ui/components/button";
@@ -15,12 +14,8 @@ import { MealsIngredientDataTable } from "@/components/meals/meals-ingredients-d
 import { MealsIngredientColumns } from "@/components/meals/meals-ingredient-columns";
 import { AvailabilityBadge } from "@workspace/ui/components/availability-badge";
 import DeleteMenu from "@/components/meals/delete-menus";
+import { SERVICE_TYPE_LABELS } from "@/components/meals/meals-column";
 import { Separator } from "@workspace/ui/components/separator";
-
-const SERVICE_TYPE_LABELS: Record<MenuServiceTypeEnum, string> = {
-  [MenuServiceTypeEnum.Direct]: "Direct service",
-  [MenuServiceTypeEnum.Prep]: "Kitchen preparation",
-};
 
 export default async function MenuPage({
   params,
