@@ -2,12 +2,7 @@ import * as React from "react";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { ArrowLeft } from "lucide-react";
-import {
-  useRouter,
-  useLocation,
-  useMatch,
-  useNavigate,
-} from "@tanstack/react-router";
+import { useLocation, useMatch, useNavigate } from "@tanstack/react-router";
 import { useProduct } from "../stores/product-store";
 import { useHandleItemStore } from "../stores/handleitem-store";
 
@@ -26,7 +21,6 @@ const PAGE_TITLES: Record<string, string> = {
 };
 
 export function Layout({ children, className }: LayoutProps) {
-  const router = useRouter();
   const location = useLocation();
   const navigate = useNavigate();
   const { currentProduct } = useProduct();
