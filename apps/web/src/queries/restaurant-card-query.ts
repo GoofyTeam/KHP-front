@@ -10,6 +10,9 @@ export interface RestaurantCardMenu {
   name: string;
   description?: string | null;
   type?: string | null;
+  menu_type_id?: number | null;
+  menu_type_index?: number | null;
+  priority?: number | null;
   price: number | string;
   image_url?: string | null;
   has_sufficient_stock: boolean;
@@ -60,7 +63,10 @@ export async function fetchRestaurantCard(
 
     return {
       status: "success",
-      company: response.company,
+      company: {
+        ...response.company,
+        menus: sortMenusForDisplay(response.company.menus ?? []),
+      },
     };
   } catch (error) {
     const message =
@@ -92,4 +98,34 @@ export async function fetchRestaurantCard(
       message,
     };
   }
+}
+
+const ORDER_FALLBACK = Number.MAX_SAFE_INTEGER;
+
+function getTypeOrder(menu: RestaurantCardMenu): number {
+  return typeof menu.menu_type_index === "number"
+    ? menu.menu_type_index
+    : ORDER_FALLBACK;
+}
+
+function getPriorityOrder(menu: RestaurantCardMenu): number {
+  return typeof menu.priority === "number" ? menu.priority : ORDER_FALLBACK;
+}
+
+function sortMenusForDisplay(menus: RestaurantCardMenu[]): RestaurantCardMenu[] {
+  return menus.slice().sort((a, b) => {
+    const typeComparison = getTypeOrder(a) - getTypeOrder(b);
+
+    if (typeComparison !== 0) {
+      return typeComparison;
+    }
+
+    const priorityComparison = getPriorityOrder(a) - getPriorityOrder(b);
+
+    if (priorityComparison !== 0) {
+      return priorityComparison;
+    }
+
+    return a.name.localeCompare(b.name, "fr", { sensitivity: "base" });
+  });
 }

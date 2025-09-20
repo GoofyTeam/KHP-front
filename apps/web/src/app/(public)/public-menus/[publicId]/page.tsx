@@ -4,14 +4,13 @@ import { fetchRestaurantCard } from "@/queries/restaurant-card-query";
 export const revalidate = 0;
 
 interface PublicMenuCardPageProps {
-  params: Promise<{ publicId: string }>;
+  params: { publicId: string };
 }
 
 export default async function PublicMenuCardPage({
   params,
 }: PublicMenuCardPageProps) {
-  const { publicId } = await params;
-  const decodedPublicId = decodeURIComponent(publicId);
+  const decodedPublicId = decodeURIComponent(params.publicId);
   const result = await fetchRestaurantCard(decodedPublicId);
 
   if (result.status === "success") {
