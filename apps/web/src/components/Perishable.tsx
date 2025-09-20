@@ -89,9 +89,6 @@ function transformPerishableItem(
     locationQuantity: locationQuantityText,
     status: type === "expired" ? "error" : "warning",
     expirationDate: item.expiration_at,
-    onClick: () => {
-      console.log("modify is_read status to true for item id:", item.id);
-    },
   };
 }
 
