@@ -22,9 +22,26 @@ function HandleAddQuantity() {
   const { internalId, barcode, mode, scanMode } = useSearch({
     from: "/_protected/handle-item",
   });
-  const { product, type } = useLoaderData({
+  const { product, type, availableLocations } = useLoaderData({
     from: "/_protected/handle-item",
   });
+
+  // Combiner toutes les locations avec les quantités actuelles du produit
+  const allLocationsWithQuantities =
+    availableLocations?.map((location) => {
+      const existingQuantity = product.quantities?.find(
+        (qty) => qty.location.id === location.id
+      );
+
+      return {
+        quantity: existingQuantity?.quantity || 0,
+        location: {
+          id: location.id,
+          name: location.name,
+          locationType: existingQuantity?.location.locationType || null,
+        },
+      };
+    }) || [];
 
   const form = useForm<z.infer<typeof handleAddQuantitySchema>>({
     resolver: zodResolver(handleAddQuantitySchema),
@@ -41,7 +58,6 @@ function HandleAddQuantity() {
       await addQuantitySubmit(values);
     } catch (error) {
       console.error("Error adding quantity:", error);
-      // The error will be handled by the HTTP client with automatic retry for CSRF issues
       throw error;
     }
   }
@@ -92,7 +108,7 @@ function HandleAddQuantity() {
               name="location_id"
               render={({ field }) => (
                 <LocationSelect
-                  quantities={product.quantities || []}
+                  quantities={allLocationsWithQuantities}
                   value={field.value}
                   onValueChange={field.onChange}
                   placeholder="Select location"

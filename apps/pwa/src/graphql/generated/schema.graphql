@@ -137,6 +137,9 @@ type Ingredient {
   """Unit for the base quantity of the ingredient."""
   base_unit: UnitEnum!
 
+  """Optional minimum stock quantity before alerting."""
+  threshold: Float
+
   """Allergens contained in the ingredient."""
   allergens: [AllergenEnum!]!
   quantities: [IngredientQuantity!]!
@@ -470,6 +473,15 @@ type MenuOrderStats {
   count: Int!
 }
 
+"""A paginated list of Menu items."""
+type MenuPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of Menu items."""
+  data: [Menu!]!
+}
+
 """Représente un produit alimentaire issu d'OpenFoodFacts"""
 type OpenFoodFactsProduct {
   barcode: String
@@ -583,6 +595,9 @@ type Preparation {
 
   """The company that produces this preparation."""
   company: Company!
+
+  """Threshold below which the preparation is considered understocked."""
+  threshold: Float
   entities: [PreparationEntity!]!
   locations: [Location!]!
 
@@ -701,6 +716,12 @@ type Query {
     barcode: String
   ): Ingredient
 
+  """List ingredients that dropped below their defined threshold."""
+  ingredientTreshold(
+    """Filtrer selon un ou plusieurs emplacements."""
+    locationIds: [ID!]
+  ): [Ingredient!]!
+
   """Find a single location (only if it belongs to the current company)."""
   location(
     """Search by primary key."""
@@ -727,22 +748,6 @@ type Query {
 
   """Liste les unités de mesure disponibles"""
   measurementUnits: [MeasurementUnitType!]!
-  menus(
-    """Filtrer par un ou plusieurs allergènes."""
-    allergens: [AllergenEnum!]
-
-    """Filtrer par une ou plusieurs catégories (IDs)."""
-    category_ids: [ID!]
-
-    """Filtrer par un ou plusieurs types."""
-    types: [String!]
-
-    """Filtrer par un range de prix [min, max]."""
-    price_between: [Float!]
-
-    """Filtrer par disponibilité."""
-    available: Boolean
-  ): [Menu!]!
   menu(id: ID!): Menu
 
   """
@@ -761,6 +766,12 @@ type Query {
 
   """Trouve une preparation (et seulement si elle appartient à ma company)"""
   preparation(id: ID, name: String): Preparation
+
+  """List preparations that dropped below their defined threshold."""
+  PreparationsThreshold(
+    """Filtrer selon un ou plusieurs emplacements."""
+    locationIds: [ID!]
+  ): [Preparation!]!
 
   """Liste les quick access de l’entreprise courante, triés par index."""
   quickAccesses: [QuickAccess!]!
@@ -890,6 +901,28 @@ type Query {
     """The offset from which items are returned."""
     page: Int
   ): LossPaginator!
+  menus(
+    """Filtrer par un ou plusieurs allergènes."""
+    allergens: [AllergenEnum!]
+
+    """Filtrer par une ou plusieurs catégories (IDs)."""
+    category_ids: [ID!]
+
+    """Filtrer par un ou plusieurs types."""
+    types: [String!]
+
+    """Filtrer par un range de prix [min, max]."""
+    price_between: [Float!]
+
+    """Filtrer par disponibilité."""
+    available: Boolean
+
+    """Limits number of fetched items."""
+    first: Int! = 10
+
+    """The offset from which items are returned."""
+    page: Int
+  ): MenuPaginator!
 
   """List menu categories for the current company."""
   menuCategories(
