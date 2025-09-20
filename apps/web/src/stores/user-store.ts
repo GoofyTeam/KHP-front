@@ -72,8 +72,6 @@ export const useUserStore = create<State>((set) => ({
           ? {
               id: userData.company.id,
               name: userData.company.name,
-              auto_complete_menu_orders:
-                userData.company.auto_complete_menu_orders,
               open_food_facts_language:
                 userData.company.open_food_facts_language,
             }

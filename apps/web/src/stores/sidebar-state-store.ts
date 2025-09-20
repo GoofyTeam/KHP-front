@@ -54,8 +54,7 @@ const createMinimalLiveStats = () => ({
 
 // Hook simple qui retourne toujours les mêmes valeurs
 const useStaticValue = <T>(factory: () => T): T => {
-  const value = useMemo(factory, []);
-  return value;
+  return useMemo(() => factory(), [factory]);
 };
 
 // Hooks optimisés - retournent des valeurs statiques
