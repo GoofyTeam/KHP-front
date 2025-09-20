@@ -1,6 +1,6 @@
 "use client";
 
-import { HttpLink } from "@apollo/client";
+import { BatchHttpLink } from "@apollo/client/link/batch-http";
 import {
   ApolloNextAppProvider,
   ApolloClient,
@@ -37,9 +37,11 @@ const refreshCSRFToken = async (): Promise<string | null> => {
 };
 
 function makeClient() {
-  const httpLink = new HttpLink({
+  const batchHttpLink = new BatchHttpLink({
     uri: `${API_URL}/graphql`,
     credentials: "include",
+    batchMax: 5,
+    batchInterval: 20,
     fetch: async (uri, options) => {
       const csrfToken = Cookie.get("XSRF-TOKEN") || "";
 
@@ -91,20 +93,13 @@ function makeClient() {
 
       return response;
     },
-    // you can disable result caching here if you want to
-    // (this does not work if you are rendering your page with `export const dynamic = "force-static"`)
-    //fetchOptions: {
-    // you can pass additional options that should be passed to `fetch` here,
-    // e.g. Next.js-related `fetch` options regarding caching and revalidation
-    // see https://nextjs.org/docs/app/api-reference/functions/fetch#fetchurl-options
-    //},
   });
 
   // use the `ApolloClient` from "@apollo/client-integration-nextjs"
   return new ApolloClient({
     // use the `InMemoryCache` from "@apollo/client-integration-nextjs"
     cache: new InMemoryCache(),
-    link: httpLink,
+    link: batchHttpLink,
   });
 }
 
