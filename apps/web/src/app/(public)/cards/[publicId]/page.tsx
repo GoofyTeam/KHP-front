@@ -10,7 +10,7 @@ interface PublicMenuCardPageProps {
 export default async function PublicMenuCardPage({
   params,
 }: PublicMenuCardPageProps) {
-  const { publicId } = await params;
+  const { publicId } = params;
   const decodedPublicId = decodeURIComponent(publicId);
   const result = await fetchRestaurantCard(decodedPublicId);
 

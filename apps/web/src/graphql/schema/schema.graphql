@@ -704,6 +704,7 @@ type Perishable {
   ingredient: Ingredient!
   location: Location!
   quantity: Float!
+  is_read: Boolean!
   expiration_at: DateTime!
   created_at: DateTime!
   updated_at: DateTime!
@@ -925,7 +926,7 @@ type Query {
 
   """Récupère une étape précise."""
   orderStep(id: ID!): OrderStep
-  perishables(filter: PerishableFilter = FRESH): [Perishable!]!
+  perishables(filter: PerishableFilter = FRESH, is_read: Boolean): [Perishable!]!
   nonPerishableIngredients: [Ingredient!]!
 
   """Trouve une preparation (et seulement si elle appartient à ma company)"""

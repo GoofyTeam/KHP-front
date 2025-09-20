@@ -641,6 +641,7 @@ export type Perishable = {
   expiration_at: Scalars['DateTime']['output'];
   id: Scalars['ID']['output'];
   ingredient: Ingredient;
+  is_read: Scalars['Boolean']['output'];
   location: Location;
   quantity: Scalars['Float']['output'];
   updated_at: Scalars['DateTime']['output'];
@@ -1014,6 +1015,7 @@ export type QueryOrdersStatsArgs = {
 
 export type QueryPerishablesArgs = {
   filter?: InputMaybe<PerishableFilter>;
+  is_read?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
