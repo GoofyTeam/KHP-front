@@ -59,7 +59,20 @@ function RegisterLosses() {
   };
 
   if (!product.quantities || getTotalQuantity(product) <= 0) {
-    //TODO: handle when no quantities available
+    // Rediriger vers la page produit si aucune quantité n'est disponible
+    const productId = product.product_internal_id || internalId;
+    if (productId) {
+      navigate({
+        to: "/products/$id",
+        params: { id: productId },
+        replace: true,
+      });
+    } else {
+      navigate({
+        to: "/inventory",
+        replace: true,
+      });
+    }
     return null;
   }
 

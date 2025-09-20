@@ -92,6 +92,8 @@ export type Company = {
   open_food_facts_language?: Maybe<Scalars['String']['output']>;
   /** Preparations associated with this company. */
   preparations: Array<Preparation>;
+  /** Paramètres visibles publiquement pour la carte des menus. */
+  public_menu_settings: PublicMenuSettings;
   /** When the company was last updated. */
   updated_at: Scalars['DateTime']['output'];
 };
@@ -623,6 +625,16 @@ export type PreparationQuantity = {
   location: Location;
   /** Le stock de la préparation. */
   quantity: Scalars['Float']['output'];
+};
+
+export type PublicMenuSettings = {
+  __typename?: 'PublicMenuSettings';
+  /** Identifiant public unique pour partager la carte du restaurant. */
+  public_menu_card_url: Scalars['String']['output'];
+  /** Affiche les images des menus sur la carte publique. */
+  show_menu_images: Scalars['Boolean']['output'];
+  /** Affiche aussi les menus qui n'ont pas assez de stock sur la carte publique. */
+  show_out_of_stock_menus_on_card: Scalars['Boolean']['output'];
 };
 
 export type Query = {
