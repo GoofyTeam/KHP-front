@@ -1,0 +1,26 @@
+query GetThreshold {
+  ingredientTreshold {
+    id
+    name
+    unit
+    threshold
+    quantities {
+      quantity
+      location {
+        name
+      }
+    }
+  }
+  PreparationsThreshold {
+    id
+    name
+    unit
+    threshold
+    quantities {
+      quantity
+      location {
+        name
+      }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+query GetPerishable {
+  soon: perishables(filter: SOON) {
+    id
+    ingredient {
+      name
+    }
+    location {
+      name
+    }
+    quantity
+    is_read
+    expiration_at
+  }
+  expired: perishables(filter: EXPIRED) {
+    id
+    ingredient {
+      name
+    }
+    location {
+      name
+    }
+    quantity
+    is_read
+    expiration_at
+  }
+}
