@@ -27,7 +27,7 @@ import {
 import {
   updatePublicMenusSettingsAction,
   type UpdatePublicMenusSettingsInput,
-} from "@/app/(mainapp)/settings/company/actions";
+} from "@/app/(mainapp)/settings/public-menus/actions";
 
 const publicMenusSchema = z.object({
   public_menu_card_url: z
