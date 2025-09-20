@@ -372,8 +372,11 @@ export type Menu = {
   is_a_la_carte: Scalars['Boolean']['output'];
   is_returnable: Scalars['Boolean']['output'];
   items: Array<MenuItem>;
+  menu_type: MenuType;
+  menu_type_id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
   price: Scalars['Float']['output'];
+  public_priority: Scalars['Int']['output'];
   service_type: MenuServiceTypeEnum;
   type: Scalars['String']['output'];
   updated_at: Scalars['DateTime']['output'];
@@ -433,6 +436,13 @@ export enum MenuServiceTypeEnum {
   Direct = 'DIRECT',
   Prep = 'PREP'
 }
+
+export type MenuType = {
+  __typename?: 'MenuType';
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  public_index: Scalars['Int']['output'];
+};
 
 /** Représente un produit alimentaire issu d'OpenFoodFacts */
 export type OpenFoodFactsProduct = {
@@ -795,6 +805,7 @@ export type Query = {
   menuCategories: MenuCategoryPaginator;
   /** Find a single MenuCategory (only if it belongs to the current company). */
   menuCategory?: Maybe<MenuCategory>;
+  menuTypes: Array<MenuType>;
   menus: MenuPaginator;
   nonPerishableIngredients: Array<Ingredient>;
   /** Récupère une commande précise (si elle appartient à l'entreprise courante). */

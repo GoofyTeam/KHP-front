@@ -5,6 +5,7 @@ import { Clock, CheckCircle, XCircle, Banknote } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@workspace/ui/lib/utils";
 import { GetOrdersQuery } from "@/graphql/generated/graphql";
+import { formatTime } from "@/lib/date-utils";
 
 interface TableData {
   label: string;
@@ -56,14 +57,6 @@ function getStatusIcon(status: string) {
   }
 }
 
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleTimeString("fr-FR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
 function getOrderStatusSummary(order: OrderData): string {
   switch (order.status) {
     case "PAYED":
@@ -88,7 +81,7 @@ function transformData(queryData: GetOrdersQuery): OrderItem[] {
       id: order.id,
       title: `Table ${order.table?.label} - ${order.price}€`,
       subtitle: getOrderStatusSummary(order),
-      time: formatDate(order.created_at),
+      time: formatTime(order.created_at),
       status: order.status as OrderStatus,
     };
   });
