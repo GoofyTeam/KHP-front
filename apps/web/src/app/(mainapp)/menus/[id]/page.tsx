@@ -1,6 +1,10 @@
 import { query } from "@/lib/ApolloClient";
 
-import { GetMenuByIdDocument } from "@/graphql/generated/graphql";
+import {
+  GetMenuByIdDocument,
+  GetMenuTypesDocument,
+  MenuServiceTypeEnum,
+} from "@/graphql/generated/graphql";
 import Link from "next/link";
 import { Button } from "@workspace/ui/components/button";
 import { ChevronLeft, Edit } from "lucide-react";
@@ -11,6 +15,12 @@ import { MealsIngredientDataTable } from "@/components/meals/meals-ingredients-d
 import { MealsIngredientColumns } from "@/components/meals/meals-ingredient-columns";
 import { AvailabilityBadge } from "@workspace/ui/components/availability-badge";
 import DeleteMenu from "@/components/meals/delete-menus";
+import { Separator } from "@workspace/ui/components/separator";
+
+const SERVICE_TYPE_LABELS: Record<MenuServiceTypeEnum, string> = {
+  [MenuServiceTypeEnum.Direct]: "Direct service",
+  [MenuServiceTypeEnum.Prep]: "Kitchen preparation",
+};
 
 export default async function MenuPage({
   params,
@@ -19,11 +29,19 @@ export default async function MenuPage({
 }) {
   const { id } = await params;
 
-  const { data, error } = await query({
-    query: GetMenuByIdDocument,
-    variables: { id },
-    fetchPolicy: "network-only",
-  });
+  const [menuResult, menuTypesResult] = await Promise.all([
+    query({
+      query: GetMenuByIdDocument,
+      variables: { id },
+      fetchPolicy: "network-only",
+    }),
+    query({
+      query: GetMenuTypesDocument,
+      fetchPolicy: "cache-first",
+    }),
+  ]);
+
+  const { data, error } = menuResult;
 
   if (error) {
     console.error("GraphQL error:", error);
@@ -31,6 +49,19 @@ export default async function MenuPage({
   }
 
   const menu = data.menu;
+  const menuTypes = menuTypesResult.data?.menuTypes ?? [];
+  const menuType = menu
+    ? menuTypes.find((type) => String(type.id) === String(menu.menu_type_id))
+    : undefined;
+  const menuTypeDisplay = menuType?.name ?? menu?.menu_type_id ?? null;
+  const menuTypeBadge = menuTypeDisplay
+    ? [
+        {
+          id: menuType?.id ?? String(menu?.menu_type_id ?? "unknown"),
+          name: menuTypeDisplay,
+        },
+      ]
+    : undefined;
 
   return (
     <div className="w-full flex flex-col lg:flex-row gap-8 h-full items-center justify-center py-2 ">
@@ -48,15 +79,12 @@ export default async function MenuPage({
             </p>
           </div>
           <div className="flex justify-center items-center gap-2 flex-wrap">
-            <CategoryBadge categories={menu?.categories || []} />
-            <CategoryBadge
-              categories={[
-                {
-                  id: menu?.type || "unknown",
-                  name: menu?.type || "Unknown",
-                },
-              ]}
+            {menuTypeBadge && <CategoryBadge categories={menuTypeBadge} />}
+            <Separator
+              orientation="vertical"
+              className="h-4 w-px bg-khp-border"
             />
+            <CategoryBadge categories={menu?.categories || []} />
           </div>
 
           <div className="flex justify-center items-center gap-2">
@@ -111,6 +139,30 @@ export default async function MenuPage({
               <p className="font-semibold text-khp-text-primary">Allergens:</p>
               <AllegernsBadgesList allergens={menu?.allergens || []} />
             </div>
+          </div>
+          <div className="flex flex-wrap gap-4 text-sm text-khp-text-secondary">
+            <span>
+              <span className="font-semibold text-khp-text-primary">
+                Service:
+              </span>{" "}
+              {menu?.service_type
+                ? (SERVICE_TYPE_LABELS[menu.service_type] ?? menu.service_type)
+                : "N/A"}
+            </span>
+            <span>
+              <span className="font-semibold text-khp-text-primary">
+                Returnable:
+              </span>{" "}
+              {menu?.is_returnable ? "Yes" : "No"}
+            </span>
+            <span>
+              <span className="font-semibold text-khp-text-primary">
+                Priority:
+              </span>{" "}
+              {typeof menu?.public_priority === "number"
+                ? menu.public_priority
+                : "—"}
+            </span>
           </div>
         </div>
         <AvailabilityBadge available={menu?.available || false} />

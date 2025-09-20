@@ -15,7 +15,12 @@ export async function createMenuAction(
     if (data.description) formData.append("description", data.description);
     formData.append("price", String(data.price));
     formData.append("is_a_la_carte", data.is_a_la_carte ? "1" : "0");
-    formData.append("type", data.type);
+    formData.append("is_returnable", data.is_returnable ? "1" : "0");
+    formData.append("menu_type_id", data.menu_type_id);
+    formData.append("service_type", data.service_type);
+    if (typeof data.priority === "number") {
+      formData.append("priority", String(data.priority));
+    }
 
     if (Array.isArray(data.category_ids)) {
       for (const id of data.category_ids) {
@@ -55,7 +60,18 @@ export async function updateMenuAction(
     if (data.price) formData.append("price", String(data.price));
     if (data.is_a_la_carte !== undefined)
       formData.append("is_a_la_carte", data.is_a_la_carte ? "1" : "0");
-    if (data.type) formData.append("type", data.type);
+    if (data.is_returnable !== undefined) {
+      formData.append("is_returnable", data.is_returnable ? "1" : "0");
+    }
+    if (data.menu_type_id) {
+      formData.append("menu_type_id", data.menu_type_id);
+    }
+    if (data.service_type) {
+      formData.append("service_type", data.service_type);
+    }
+    if (data.priority !== undefined) {
+      formData.append("priority", String(data.priority));
+    }
 
     // Arrays
     if (Array.isArray(data.category_ids)) {
