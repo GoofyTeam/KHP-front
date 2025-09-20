@@ -21,8 +21,15 @@ import z from "zod";
 import { moveQuantitySchema } from "./moveQuantitySchema";
 import moveQuantitySubmit from "./move-quantity";
 
+interface LocationItem {
+  id: string;
+  name: string;
+  locationType?: { is_default?: boolean; name: string } | null;
+}
+
 interface ProductQuantity {
   quantity: number;
+  location: LocationItem;
 }
 
 interface Product {
