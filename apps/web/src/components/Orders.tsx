@@ -90,9 +90,6 @@ function transformData(queryData: GetOrdersQuery): OrderItem[] {
       subtitle: getOrderStatusSummary(order),
       time: formatDate(order.created_at),
       status: order.status as OrderStatus,
-      onClick: () => {
-        console.log(`Navigate to order ${order.id}`);
-      },
     };
   });
 }
