@@ -10,8 +10,9 @@ interface PublicMenuCardPageProps {
 export default async function PublicMenuCardPage({
   params,
 }: PublicMenuCardPageProps) {
-  const publicId = decodeURIComponent(params.publicId);
-  const result = await fetchRestaurantCard(publicId);
+  const { publicId } = await params;
+  const decodedPublicId = decodeURIComponent(publicId);
+  const result = await fetchRestaurantCard(decodedPublicId);
 
   if (result.status === "success") {
     return <PublicMenuCard company={result.company} />;
@@ -22,14 +23,14 @@ export default async function PublicMenuCardPage({
       <div className="max-w-md space-y-4 rounded-3xl border border-slate-200 bg-white px-6 py-12 shadow-sm">
         <h1 className="text-2xl font-semibold text-slate-900">
           {result.status === "not-found"
-            ? "Carte introuvable"
+            ? "Menu card not found"
             : result.status === "invalid-slug"
-              ? "Adresse invalide"
-              : "Une erreur est survenue"}
+              ? "Invalid public address"
+              : "Something went wrong"}
         </h1>
         <p className="text-sm leading-relaxed text-slate-600">
           {result.message ||
-            "Nous n'avons pas pu récupérer cette carte pour le moment. Merci de réessayer plus tard."}
+            "We couldn't load this menu card yet. Please try again in a moment."}
         </p>
       </div>
     </div>

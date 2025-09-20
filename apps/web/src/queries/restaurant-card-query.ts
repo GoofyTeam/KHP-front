@@ -42,7 +42,7 @@ export async function fetchRestaurantCard(
   if (!publicMenuCardUrl) {
     return {
       status: "invalid-slug",
-      message: "Le format de l'URL publique est invalide.",
+      message: "The public URL format is invalid.",
     };
   }
 
@@ -54,7 +54,7 @@ export async function fetchRestaurantCard(
     if (!response?.company) {
       return {
         status: "not-found",
-        message: "Aucun restaurant trouvé pour cette carte.",
+        message: "We couldn't find a restaurant for this menu card.",
       };
     }
 
@@ -64,15 +64,13 @@ export async function fetchRestaurantCard(
     };
   } catch (error) {
     const message =
-      error instanceof Error
-        ? error.message
-        : "Une erreur inattendue est survenue.";
+      error instanceof Error ? error.message : "An unexpected error occurred.";
     const normalized = message.toLowerCase();
 
     if (normalized.includes("404")) {
       return {
         status: "not-found",
-        message: "Aucun restaurant trouvé pour cette carte.",
+        message: "We couldn't find a restaurant for this menu card.",
       };
     }
 
@@ -85,7 +83,7 @@ export async function fetchRestaurantCard(
     ) {
       return {
         status: "invalid-slug",
-        message: message || "Le format de l'URL publique est invalide.",
+        message: message || "The public URL format is invalid.",
       };
     }
 
