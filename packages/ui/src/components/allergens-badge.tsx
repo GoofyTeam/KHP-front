@@ -215,7 +215,6 @@ export function AllegernsBadgesList({
   allergens: Allergen[];
   variant?: BadgeProps["variant"];
 }) {
-  console.log("Allergens list:", allergens);
   if (!allergens || allergens.length === 0) {
     return <span>No allergens</span>;
   }

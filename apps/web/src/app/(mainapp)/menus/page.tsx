@@ -3,11 +3,8 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useQuery } from "@apollo/client";
 import { DataTable } from "@/components/meals/meals-data-table";
-import { getMealsColumns } from "@/components/meals/meals-column";
-import {
-  GetMenuTypesDocument,
-  GetMenusDocument,
-} from "@/graphql/generated/graphql";
+import { columns } from "@/components/meals/meals-column";
+import { GetMenusDocument } from "@/graphql/generated/graphql";
 import type { GetMenusQuery } from "@/graphql/generated/graphql";
 
 export default function MenusPage() {
@@ -27,20 +24,6 @@ export default function MenusPage() {
     () => data?.menus?.data ?? [],
     [data?.menus?.data]
   );
-
-  const { data: menuTypesData } = useQuery(GetMenuTypesDocument, {
-    fetchPolicy: "cache-first",
-  });
-
-  const menuTypeMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    menuTypesData?.menuTypes?.forEach((menuType) => {
-      map[String(menuType.id)] = menuType.name;
-    });
-    return map;
-  }, [menuTypesData?.menuTypes]);
-
-  const tableColumns = useMemo(() => getMealsColumns(menuTypeMap), [menuTypeMap]);
 
   const pageInfo = data?.menus?.paginatorInfo;
   const hasMorePages = pageInfo?.hasMorePages ?? false;
@@ -91,7 +74,7 @@ export default function MenusPage() {
   return (
     <div>
       <DataTable
-        columns={tableColumns}
+        columns={columns}
         data={menus}
         loading={loading}
         hasMorePages={hasMorePages}

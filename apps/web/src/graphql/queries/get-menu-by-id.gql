@@ -8,6 +8,10 @@ query GetMenuById($id: ID!) {
 
     public_priority
     menu_type_id
+    menu_type {
+      id
+      name
+    }
     service_type
     is_returnable
     type

@@ -1,23 +1,14 @@
 "use client";
 
-import {
-  GetMenusQuery,
-  MenuServiceTypeEnum,
-} from "@/graphql/generated/graphql";
+import { GetMenusQuery } from "@/graphql/generated/graphql";
 import { ColumnDef } from "@tanstack/react-table";
 import { StockStatus } from "@workspace/ui/components/stock-status";
 import { Check, X } from "lucide-react";
+import { getMenuServiceTypeLabel } from "@/constants/menu-service-type-labels";
 
 export type Meals = NonNullable<GetMenusQuery["menus"]["data"]>[number];
-const SERVICE_TYPE_LABELS: Record<MenuServiceTypeEnum, string> = {
-  [MenuServiceTypeEnum.Direct]: "Direct service",
-  [MenuServiceTypeEnum.Prep]: "Kitchen preparation",
-};
 
-export function getMealsColumns(
-  menuTypeMap: Record<string, string>
-): ColumnDef<Meals>[] {
-  return [
+export const columns: ColumnDef<Meals>[] = [
   {
     accessorKey: "id",
     header: "ID",
@@ -46,14 +37,16 @@ export function getMealsColumns(
     id: "menu_type",
     header: "Menu Type",
     cell: ({ row }) => {
+      const menuType = row.original.menu_type;
+      if (menuType?.name) return menuType.name;
       const id = row.original.menu_type_id;
-      if (!id) return "—";
-      return menuTypeMap[String(id)] ?? String(id);
+      return id ? String(id) : "—";
     },
     sortingFn: (a, b) => {
-      const map = menuTypeMap;
-      const labelA = map[String(a.original.menu_type_id)] ?? String(a.original.menu_type_id ?? "");
-      const labelB = map[String(b.original.menu_type_id)] ?? String(b.original.menu_type_id ?? "");
+      const labelA =
+        a.original.menu_type?.name ?? String(a.original.menu_type_id ?? "");
+      const labelB =
+        b.original.menu_type?.name ?? String(b.original.menu_type_id ?? "");
       return labelA.localeCompare(labelB);
     },
   },
@@ -69,10 +62,7 @@ export function getMealsColumns(
   {
     accessorKey: "service_type",
     header: "Service",
-    cell: ({ row }) =>
-      row.original.service_type
-        ? SERVICE_TYPE_LABELS[row.original.service_type] ?? row.original.service_type
-        : "—",
+    cell: ({ row }) => getMenuServiceTypeLabel(row.original.service_type),
   },
   {
     accessorKey: "is_returnable",
@@ -143,7 +133,4 @@ export function getMealsColumns(
       return true;
     },
   },
-  ];
-}
-
-export { SERVICE_TYPE_LABELS };
+];

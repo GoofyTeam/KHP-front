@@ -1,9 +1,6 @@
 import { query } from "@/lib/ApolloClient";
 
-import {
-  GetMenuByIdDocument,
-  GetMenuTypesDocument,
-} from "@/graphql/generated/graphql";
+import { GetMenuByIdDocument } from "@/graphql/generated/graphql";
 import Link from "next/link";
 import { Button } from "@workspace/ui/components/button";
 import { ChevronLeft, Edit } from "lucide-react";
@@ -14,7 +11,7 @@ import { MealsIngredientDataTable } from "@/components/meals/meals-ingredients-d
 import { MealsIngredientColumns } from "@/components/meals/meals-ingredient-columns";
 import { AvailabilityBadge } from "@workspace/ui/components/availability-badge";
 import DeleteMenu from "@/components/meals/delete-menus";
-import { SERVICE_TYPE_LABELS } from "@/components/meals/meals-column";
+import { getMenuServiceTypeLabel } from "@/constants/menu-service-type-labels";
 import { Separator } from "@workspace/ui/components/separator";
 
 export default async function MenuPage({
@@ -24,19 +21,11 @@ export default async function MenuPage({
 }) {
   const { id } = await params;
 
-  const [menuResult, menuTypesResult] = await Promise.all([
-    query({
-      query: GetMenuByIdDocument,
-      variables: { id },
-      fetchPolicy: "network-only",
-    }),
-    query({
-      query: GetMenuTypesDocument,
-      fetchPolicy: "cache-first",
-    }),
-  ]);
-
-  const { data, error } = menuResult;
+  const { data, error } = await query({
+    query: GetMenuByIdDocument,
+    variables: { id },
+    fetchPolicy: "network-only",
+  });
 
   if (error) {
     console.error("GraphQL error:", error);
@@ -44,15 +33,11 @@ export default async function MenuPage({
   }
 
   const menu = data.menu;
-  const menuTypes = menuTypesResult.data?.menuTypes ?? [];
-  const menuType = menu
-    ? menuTypes.find((type) => String(type.id) === String(menu.menu_type_id))
-    : undefined;
-  const menuTypeDisplay = menuType?.name ?? menu?.menu_type_id ?? null;
+  const menuTypeDisplay = menu?.menu_type?.name ?? menu?.menu_type_id ?? null;
   const menuTypeBadge = menuTypeDisplay
     ? [
         {
-          id: menuType?.id ?? String(menu?.menu_type_id ?? "unknown"),
+          id: menu?.menu_type?.id ?? String(menu?.menu_type_id ?? "unknown"),
           name: menuTypeDisplay,
         },
       ]
@@ -121,10 +106,10 @@ export default async function MenuPage({
       </div>
 
       <div className="flex flex-col w-full lg:w-1/2 gap-y-4">
-        <div className="w-full lg:w-3/4 max-w-lg gap-y-4 flex flex-col">
+        <div className="w-full gap-y-4 flex flex-col">
           <p className="text-khp-text-secondary text-lg">{menu?.description}</p>
-          <div className="flex gap-x-8">
-            <p className="text-khp-text-secondary">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+            <p className="text-khp-text-secondary text-lg">
               Price:{" "}
               <span className="text-khp-primary text-xl font-bold">
                 {menu?.price ? `${menu.price.toFixed(2)} EUR` : "N/A"}
@@ -140,9 +125,7 @@ export default async function MenuPage({
               <span className="font-semibold text-khp-text-primary">
                 Service:
               </span>{" "}
-              {menu?.service_type
-                ? (SERVICE_TYPE_LABELS[menu.service_type] ?? menu.service_type)
-                : "N/A"}
+              {getMenuServiceTypeLabel(menu?.service_type)}
             </span>
             <span>
               <span className="font-semibold text-khp-text-primary">
