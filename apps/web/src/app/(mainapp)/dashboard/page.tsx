@@ -52,7 +52,6 @@ function WelcomePanel({ className }: { className?: string }) {
 }
 
 export default async function Dashboard() {
-  // Execute all queries in parallel for better performance
   const [
     { data, error },
     { data: thresholdData, error: thresholdError },
@@ -65,15 +64,20 @@ export default async function Dashboard() {
     query({ query: GetPerishableDocument }),
   ]);
 
-  if (error || thresholdError || ordersError || perishableError) {
-    return (
-      <div className="flex h-full w-full flex-col items-center justify-center">
-        <h1 className="text-2xl font-bold text-red-500">Error</h1>
-        <p className="text-red-500">
-          An error occurred while fetching the dashboard data. Please try again
-          later.
-        </p>
-      </div>
+  if (error) {
+    throw new Error(`Failed to fetch quick access data: ${error.message}`);
+  }
+  if (thresholdError) {
+    throw new Error(
+      `Failed to fetch threshold data: ${thresholdError.message}`
+    );
+  }
+  if (ordersError) {
+    throw new Error(`Failed to fetch orders data: ${ordersError.message}`);
+  }
+  if (perishableError) {
+    throw new Error(
+      `Failed to fetch perishable data: ${perishableError.message}`
     );
   }
 
