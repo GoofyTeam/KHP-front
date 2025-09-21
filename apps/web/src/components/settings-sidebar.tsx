@@ -90,6 +90,12 @@ const settingsNavItems = [
     href: "/settings/public-menus",
     icon: SquareMenu,
   },
+  {
+    title: "Tables",
+    description: "Manage your table settings",
+    href: "/settings/tables",
+    icon: Building,
+  },
 ];
 
 const NavigationMenu = ({ onItemClick }: { onItemClick?: () => void }) => {
