@@ -35,6 +35,31 @@ export const Route = createFileRoute("/_protected/move-quantity")({
 
     const productData = await handleScanType("internalId", internalId);
 
+    // Vérifier si le produit a des quantités disponibles pour le déplacement
+    const getTotalQuantity = (product: any) => {
+      if (!product.quantities) return 0;
+      return product.quantities.reduce(
+        (total: number, qty: any) => total + (qty.quantity || 0),
+        0
+      );
+    };
+
+    if (!productData.quantities || getTotalQuantity(productData) <= 0) {
+      const productId = productData.product_internal_id;
+      if (productId) {
+        throw redirect({
+          to: "/products/$id",
+          params: { id: productId },
+          replace: true,
+        });
+      } else {
+        throw redirect({
+          to: "/inventory",
+          replace: true,
+        });
+      }
+    }
+
     useHandleItemStore
       .getState()
       .setPageTitle(`Move quantity for ${productData.product_name}`);

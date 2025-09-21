@@ -11,93 +11,33 @@ import {
 import {
   LocationSelect,
   locationSelectMapper,
-  LocationsFromCompany,
 } from "@workspace/ui/components/location-select";
 import { QuantityInput } from "@workspace/ui/components/quantity-input";
 import { cn } from "@workspace/ui/lib/utils";
 import { useForm } from "react-hook-form";
-import { useEffect } from "react";
 import z from "zod";
 import { moveQuantitySchema } from "./moveQuantitySchema";
 import moveQuantitySubmit from "./move-quantity";
-
-interface LocationItem {
-  id: string;
-  name: string;
-  locationType?: { is_default?: boolean; name: string } | null;
-}
-
-interface ProductQuantity {
-  quantity: number;
-  location: LocationItem;
-}
-
-interface Product {
-  product_internal_id: string;
-  product_name: string;
-  product_category: { name: string };
-  product_image?: string;
-  product_units: string;
-  quantities?: ProductQuantity[];
-}
 
 function MoveQuantity() {
   const navigate = useNavigate();
   const { product, availableLocations } = useLoaderData({
     from: "/_protected/move-quantity",
-  }) as { product: Product; availableLocations: LocationsFromCompany[] };
+  });
 
   const form = useForm<z.infer<typeof moveQuantitySchema>>({
     resolver: zodResolver(moveQuantitySchema),
     defaultValues: {
-      product_id: product.product_internal_id,
+      product_id: product.product_internal_id || "",
       quantity: "",
       source_id: "",
       destination_id: "",
     },
   });
 
-  const getTotalQuantity = (product: Product) => {
-    if (!product.quantities) return 0;
-    return product.quantities.reduce(
-      (total: number, qty: ProductQuantity) => total + (qty.quantity || 0),
-      0
-    );
-  };
-
-  // Utiliser useEffect pour la redirection afin d'éviter les hooks conditionnels
-  useEffect(() => {
-    if (!product.quantities || getTotalQuantity(product) <= 0) {
-      const productId = product.product_internal_id;
-      if (productId) {
-        navigate({
-          to: "/products/$id",
-          params: { id: productId },
-          replace: true,
-        });
-      } else {
-        navigate({
-          to: "/inventory",
-          replace: true,
-        });
-      }
-    }
-  }, [product, navigate]);
-
   const onSubmit = async (data: z.infer<typeof moveQuantitySchema>) => {
     await moveQuantitySubmit(data);
   };
-
-  // Afficher un loading state pendant la redirection
-  if (!product.quantities || getTotalQuantity(product) <= 0) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p className="text-lg">Redirecting...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[75svh] my-4">
@@ -167,11 +107,7 @@ function MoveQuantity() {
               name="destination_id"
               render={({ field }) => (
                 <LocationSelect
-                  quantities={
-                    locationSelectMapper(
-                      availableLocations as unknown as LocationsFromCompany[]
-                    ) || []
-                  }
+                  quantities={locationSelectMapper(availableLocations) || []}
                   value={field.value}
                   onValueChange={field.onChange}
                   placeholder="Select destination location"

@@ -64,58 +64,43 @@ export function Layout({ children, className }: LayoutProps) {
   }
 
   const handleGoBack = () => {
-    // Logique de navigation basée sur la route actuelle
-    if (
-      location.pathname.includes("/products/") &&
-      location.pathname.includes("/history")
-    ) {
-      // Si on est sur une page d'historique, retourner à la page produit
-      const productId = productMatch?.params?.id || historyMatch?.params?.id;
-      if (productId) {
-        navigate({ to: "/products/$id", params: { id: productId } });
-        return;
-      }
+    if (historyMatch) {
+      const productId = historyMatch.params.id;
+      navigate({ to: "/products/$id", params: { id: productId } });
+      return;
     }
 
-    if (location.pathname.includes("/products/")) {
-      // Si on est sur une page produit, retourner à l'inventaire
+    if (productMatch) {
       navigate({ to: "/inventory" });
       return;
     }
 
-    if (location.pathname.includes("/handle-item")) {
-      // Si on est en handle-item, retourner vers la page produit si on a un internalId
+    if (handleItemMatch) {
       const internalId =
-        handleItemMatch?.loaderData?.productId ||
-        handleItemMatch?.search?.internalId;
+        handleItemMatch.loaderData?.productId ||
+        handleItemMatch.search?.internalId;
       if (internalId) {
         navigate({ to: "/products/$id", params: { id: internalId } });
         return;
       }
-      // Sinon retourner à l'inventaire
       navigate({ to: "/inventory" });
       return;
     }
 
-    if (location.pathname.includes("/move-quantity")) {
-      // Si on est en move-quantity, retourner vers la page produit avec l'internalId
-      const internalId = moveQuantityMatch?.search?.internalId;
+    if (moveQuantityMatch) {
+      const internalId = moveQuantityMatch.search?.internalId;
       if (internalId) {
         navigate({ to: "/products/$id", params: { id: internalId } });
         return;
       }
-      // Sinon retourner à l'inventaire
       navigate({ to: "/inventory" });
       return;
     }
 
-    if (location.pathname.includes("/scan/")) {
-      // Si on est en scan, retourner à l'inventaire
+    if (scanMatch) {
       navigate({ to: "/inventory" });
       return;
     }
-
-    // Fallback par défaut
     navigate({ to: "/inventory" });
   };
 
