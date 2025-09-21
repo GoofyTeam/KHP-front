@@ -36,10 +36,13 @@ export const Route = createFileRoute("/_protected/move-quantity")({
     const productData = await handleScanType("internalId", internalId);
 
     // Vérifier si le produit a des quantités disponibles pour le déplacement
-    const getTotalQuantity = (product: any) => {
+    const getTotalQuantity = (product: {
+      quantities?: Array<{ quantity?: number }>;
+    }) => {
       if (!product.quantities) return 0;
       return product.quantities.reduce(
-        (total: number, qty: any) => total + (qty.quantity || 0),
+        (total: number, qty: { quantity?: number }) =>
+          total + (qty.quantity || 0),
         0
       );
     };
