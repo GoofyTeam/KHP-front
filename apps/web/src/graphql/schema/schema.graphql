@@ -1534,6 +1534,7 @@ type Table {
   label: String!
   seats: Int!
   room: Room!
+  orders: [Order!]
   created_at: DateTime!
   updated_at: DateTime!
 }

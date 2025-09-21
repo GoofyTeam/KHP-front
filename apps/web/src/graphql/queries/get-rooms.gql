@@ -8,6 +8,13 @@ query GetRooms($first: Int! = 10, $page: Int = 1, $search: String) {
         id
         label
         seats
+        orders {
+          id
+          price
+          status
+          created_at
+          pending_at
+        }
       }
     }
     paginatorInfo {
