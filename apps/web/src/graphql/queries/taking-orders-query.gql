@@ -1,0 +1,52 @@
+query TakinOrdersQuery($id: ID!) {
+  order(id: $id) {
+    id
+    price
+    served_at
+    pending_at
+    payed_at
+    canceled_at
+    status
+    created_at
+    steps {
+      id
+      created_at
+      position
+      served_at
+      status
+      stepMenus {
+        id
+        created_at
+        quantity
+        status
+        note
+        served_at
+        menu {
+          name
+          price
+          allergens
+          image_url
+        }
+      }
+    }
+    table {
+      id
+      label
+    }
+  }
+  menus(available: true, first: 200) {
+    data {
+      id
+      name
+      image_url
+      price
+      public_priority
+      service_type
+      allergens
+      menu_type {
+        id
+        name
+      }
+    }
+  }
+}
