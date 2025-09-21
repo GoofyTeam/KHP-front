@@ -208,7 +208,12 @@ export function Perishable({ data, className }: PerishableProps) {
               <li key={item.id}>
                 <button
                   type="button"
-                  className="w-full text-left flex items-start gap-3 py-2.5 px-3 md:px-4 lg:px-5 bg-red-50"
+                  className={cn(
+                    "w-full text-left flex items-start gap-3 py-2.5 px-3 md:px-4 lg:px-5",
+                    item.status === "error"
+                      ? "bg-khp-error/10"
+                      : "bg-transparent"
+                  )}
                   onClick={item.onClick}
                 >
                   <StatusIcon status={item.status} />
