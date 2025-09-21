@@ -1,0 +1,47 @@
+query ChefsOrderSteps {
+  orderSteps(
+    statuses: [IN_PREP, READY]
+    orderBy: [{ column: CREATED_AT, order: ASC }]
+    first: 50
+  ) {
+    data {
+      id
+      position
+      status
+      created_at
+      stepMenus {
+        id
+        note
+        status
+        quantity
+        created_at
+        menu {
+          id
+          name
+          description
+          image_url
+          service_type
+          price
+        }
+      }
+      order {
+        id
+        status
+        created_at
+        table {
+          id
+          label
+          room {
+            name
+          }
+        }
+      }
+    }
+    paginatorInfo {
+      total
+      count
+      currentPage
+      hasMorePages
+    }
+  }
+}

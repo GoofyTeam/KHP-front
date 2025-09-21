@@ -13,6 +13,7 @@ import { Switch } from "@workspace/ui/components/switch";
 import { Label } from "@workspace/ui/components/label";
 import type { CancelOrderAction, PayOrderAction } from "./actions";
 import { OrderStatusEnum } from "@/graphql/generated/graphql";
+import { cn } from "@workspace/ui/lib/utils";
 
 interface OrderManagementActionsProps {
   status: OrderStatusEnum;
@@ -37,18 +38,28 @@ function OrderManagementActions({
 
   const isOrderCanceled = status === OrderStatusEnum.Canceled;
   const isOrderPayed = status === OrderStatusEnum.Payed;
+  const isOrderServed = status === OrderStatusEnum.Served;
 
   const canCancel = useMemo(() => !isOrderCanceled, [isOrderCanceled]);
   const canPay = useMemo(
     () => !isOrderCanceled && !isOrderPayed,
     [isOrderCanceled, isOrderPayed]
   );
+  const allowForcePayment = canPay && !isOrderServed;
+  const canSubmitPayment = canPay && (isOrderServed || forcePayment);
+  const payButtonDisabled = !canSubmitPayment || isPending;
 
   useEffect(() => {
     if (!hasRemainingMenus) {
       setForcePayment(false);
     }
   }, [hasRemainingMenus]);
+
+  useEffect(() => {
+    if (isOrderServed) {
+      setForcePayment(false);
+    }
+  }, [isOrderServed]);
 
   const handleCancel = () => {
     if (!canCancel) return;
@@ -70,7 +81,7 @@ function OrderManagementActions({
   };
 
   const handlePay = () => {
-    if (!canPay) return;
+    if (!canSubmitPayment) return;
 
     setError(null);
     setPendingAction("pay");
@@ -89,40 +100,42 @@ function OrderManagementActions({
 
   return (
     <Card className="khp-card">
-      <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <CardTitle className="text-base">Manage order</CardTitle>
-        <div className="text-sm text-gray-500">
-          Current status:{" "}
-          <span className="font-medium text-gray-700">{status}</span>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {!isOrderPayed && hasRemainingMenus && (
-          <p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 px-3 py-2 rounded-md">
-            Some menus are not served yet. Enable force payment to bypass this
-            check.
-          </p>
-        )}
-
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-3">
+      <CardContent className="space-y-3 px-4 pb-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div
+            className={cn(
+              "flex items-center gap-3",
+              !allowForcePayment && "opacity-50"
+            )}
+          >
             <Switch
               id="force-payment"
-              disabled={!canPay || (!hasRemainingMenus && !forcePayment)}
+              disabled={!allowForcePayment || isPending}
               checked={forcePayment}
               onCheckedChange={(checked) => setForcePayment(Boolean(checked))}
             />
-            <Label
-              htmlFor="force-payment"
-              className={`text-sm ${
-                !hasRemainingMenus ? "text-gray-400" : "text-gray-600"
-              }`}
-            >
-              Force payment
-            </Label>
+            <div className="flex flex-col">
+              <Label
+                htmlFor="force-payment"
+                className={`text-xs sm:text-sm ${
+                  allowForcePayment ? "text-gray-700" : "text-gray-400"
+                }`}
+              >
+                Force payment
+              </Label>
+              <span className="text-[11px] sm:text-xs text-gray-500">
+                {!isOrderPayed && !isOrderServed && (
+                  <p className="text-xs sm:text-sm text-red-600">
+                    This order is not fully served. Use{" "}
+                    <strong>Force payment</strong> only if you really need to
+                    bypass the service checks.
+                  </p>
+                )}
+              </span>
+            </div>
           </div>
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:gap-2">
             <Button
               variant="khp-destructive"
               className="sm:w-auto w-full"
@@ -135,7 +148,7 @@ function OrderManagementActions({
               variant="khp-default"
               className="sm:w-auto w-full"
               onClick={handlePay}
-              disabled={!canPay || isPending}
+              disabled={payButtonDisabled}
             >
               {pendingAction === "pay" ? "Processing..." : "Mark as paid"}
             </Button>

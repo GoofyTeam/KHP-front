@@ -37,6 +37,7 @@ import type {
   CreateOrderStepAction,
   CreateOrderStepInput,
   MarkStepMenuServedAction,
+  PayOrderAction,
   StepMenuPayload,
 } from "@/app/(mainapp)/waiters/table/[orderId]/actions";
 
@@ -65,6 +66,7 @@ function TakinOrders({
   tableCurrentOrder,
   actions,
   initialStepId,
+  onRefresh,
 }: {
   availableMenus: TakinOrdersQueryQuery["menus"]["data"];
   tableCurrentOrder: TakinOrdersQueryQuery["order"];
@@ -74,8 +76,10 @@ function TakinOrders({
     cancelStepMenu: CancelStepMenuAction;
     markStepMenuServed: MarkStepMenuServedAction;
     cancelOrder: CancelOrderAction;
+    payOrder: PayOrderAction;
   };
   initialStepId?: string | null;
+  onRefresh?: () => Promise<void> | void;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -89,15 +93,11 @@ function TakinOrders({
   const [pendingMenuAction, setPendingMenuAction] = useState<
     "serve" | "cancel" | null
   >(null);
-  const [isCancelingOrder, setIsCancelingOrder] = useState(false);
 
-  const {
-    createStep,
-    addMenuToStep,
-    cancelStepMenu,
-    markStepMenuServed,
-    cancelOrder,
-  } = actions;
+  const menusData = useMemo(() => availableMenus ?? [], [availableMenus]);
+
+  const { createStep, addMenuToStep, cancelStepMenu, markStepMenuServed } =
+    actions;
 
   const hasOrder = Boolean(tableCurrentOrder);
 
@@ -110,7 +110,7 @@ function TakinOrders({
     if (!tableCurrentOrder) {
       return [];
     }
-    return tableCurrentOrder.steps;
+    return [...tableCurrentOrder.steps].sort((a, b) => a.position - b.position);
   }, [tableCurrentOrder]);
 
   const currentStepDetails = useMemo<OrderStep | null>(() => {
@@ -171,19 +171,19 @@ function TakinOrders({
   const availableTypes = useMemo(() => {
     return Array.from(
       new Set(
-        (availableMenus ?? [])
+        (menusData ?? [])
           .map((m) => m.menu_type?.name)
           .filter((v): v is string => !!v)
       )
     ).sort();
-  }, [availableMenus]);
+  }, [menusData]);
 
   const filteredMenuItems = useMemo(() => {
     if (selectedType === "all") {
-      return availableMenus;
+      return menusData;
     }
-    return availableMenus.filter((m) => m.menu_type?.name === selectedType);
-  }, [availableMenus, selectedType]);
+    return menusData.filter((m) => m.menu_type?.name === selectedType);
+  }, [menusData, selectedType]);
 
   const addMenuToDraft = useCallback(
     (menu: TakinOrdersQueryQuery["menus"]["data"][number]) => {
@@ -298,6 +298,7 @@ function TakinOrders({
 
       setDraftStepMenus([]);
       setIsSubmitting(false);
+      await onRefresh?.();
       router.refresh();
     });
   }, [
@@ -305,6 +306,7 @@ function TakinOrders({
     createStep,
     currentStep,
     draftStepMenus,
+    onRefresh,
     router,
     startTransition,
     tableCurrentOrder,
@@ -322,6 +324,7 @@ function TakinOrders({
         if (!result.success) {
           setActionError(result.error);
         } else {
+          await onRefresh?.();
           router.refresh();
         }
 
@@ -329,7 +332,7 @@ function TakinOrders({
         setPendingMenuAction(null);
       });
     },
-    [markStepMenuServed, router, startTransition]
+    [markStepMenuServed, onRefresh, router, startTransition]
   );
 
   const handleCancelStepMenu = useCallback(
@@ -344,6 +347,7 @@ function TakinOrders({
         if (!result.success) {
           setActionError(result.error);
         } else {
+          await onRefresh?.();
           router.refresh();
         }
 
@@ -351,33 +355,10 @@ function TakinOrders({
         setPendingMenuAction(null);
       });
     },
-    [cancelStepMenu, router, startTransition]
+    [cancelStepMenu, onRefresh, router, startTransition]
   );
 
-  const handleCancelOrder = useCallback(() => {
-    if (!tableCurrentOrder) {
-      setActionError("No order selected");
-      return;
-    }
-
-    setActionError(null);
-    setIsCancelingOrder(true);
-
-    startTransition(async () => {
-      const result = await cancelOrder();
-
-      if (!result.success) {
-        setActionError(result.error);
-        setIsCancelingOrder(false);
-        return;
-      }
-
-      setIsCancelingOrder(false);
-      setDraftStepMenus([]);
-      setCurrentStep("new");
-      router.refresh();
-    });
-  }, [cancelOrder, router, startTransition, tableCurrentOrder]);
+  console.log({ draftStepMenus });
 
   return (
     <div className="grid lg:grid-cols-3 gap-6">
@@ -544,13 +525,19 @@ function TakinOrders({
                         {item.note && item.note.length > 0 ? item.note : "—"}
                       </p>
                       <div className="flex flex-wrap gap-2">
-                        {item.status === "READY" && (
+                        {item.status !== "SERVED" && (
                           <Button
                             size="sm"
                             variant="khp-default"
+                            className={
+                              item.status === "READY"
+                                ? ""
+                                : "pointer-events-none opacity-60"
+                            }
                             disabled={
-                              pendingMenuId === item.id &&
-                              pendingMenuAction === "serve"
+                              item.status !== "READY" ||
+                              (pendingMenuId === item.id &&
+                                pendingMenuAction === "serve")
                             }
                             onClick={() => handleServeStepMenu(item.id)}
                           >
@@ -683,11 +670,7 @@ function TakinOrders({
                         disabled={isSubmitting || isPending}
                         variant="khp-default"
                       >
-                        {isSubmitting
-                          ? "Submitting..."
-                          : currentStep === "new"
-                            ? "Create step"
-                            : "Add to step"}
+                        {isSubmitting ? "Submitting..." : "Send to kitchen"}
                       </Button>
                       <Button
                         variant="outline"

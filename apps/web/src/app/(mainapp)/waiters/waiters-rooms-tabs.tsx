@@ -1,7 +1,10 @@
 "use client";
 
 import TableCard from "@/components/orders/table-card";
-import type { GetRoomsQuery } from "@/graphql/generated/graphql";
+import {
+  GetRoomsDocument,
+  type GetRoomsQuery,
+} from "@/graphql/generated/graphql";
 import {
   Tabs,
   TabsContent,
@@ -12,33 +15,59 @@ import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
+import { useQuery } from "@apollo/client";
 import type { CreateOrderForTableAction } from "./actions";
 
 type Room = NonNullable<GetRoomsQuery["rooms"]>["data"][number];
 type Table = NonNullable<Room>["tables"][number];
 
+function extractRooms(data?: GetRoomsQuery): Room[] {
+  const list = data?.rooms?.data ?? [];
+  return list.filter((room): room is Room => Boolean(room));
+}
+
 interface WaitersRoomsTabsProps {
-  rooms: Room[];
   createOrderForTable: CreateOrderForTableAction;
 }
 
-function WaitersRoomsTabs({
-  rooms,
-  createOrderForTable,
-}: WaitersRoomsTabsProps) {
+function WaitersRoomsTabs({ createOrderForTable }: WaitersRoomsTabsProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("all");
   const [pendingTableId, setPendingTableId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [orderError, setOrderError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const normalizedRooms = useMemo(() => rooms ?? [], [rooms]);
+  const {
+    data: liveRoomsData,
+    loading: roomsLoading,
+    error: roomsQueryError,
+  } = useQuery(GetRoomsDocument, {
+    pollInterval: 5000,
+    fetchPolicy: "network-only",
+    nextFetchPolicy: "network-only",
+  });
+
+  const normalizedRooms = useMemo(
+    () => extractRooms(liveRoomsData),
+    [liveRoomsData]
+  );
+
+  const errorMessages = useMemo(() => {
+    const messages: string[] = [];
+    if (roomsQueryError?.message) {
+      messages.push(roomsQueryError.message);
+    }
+    if (orderError) {
+      messages.push(orderError);
+    }
+    return messages;
+  }, [roomsQueryError, orderError]);
 
   const handleCreateOrder = (table: Table) => {
     if (!table?.id) return;
 
     const tableId = String(table.id);
-    setError(null);
+    setOrderError(null);
     setPendingTableId(tableId);
 
     startTransition(async () => {
@@ -48,7 +77,7 @@ function WaitersRoomsTabs({
         const message = result.success
           ? "Unable to retrieve the new order identifier."
           : result.error;
-        setError(message);
+        setOrderError(message);
       } else {
         router.push(`/waiters/table/${result.data.orderId}`);
       }
@@ -57,13 +86,23 @@ function WaitersRoomsTabs({
     });
   };
 
-  if (!normalizedRooms || normalizedRooms.length === 0) {
+  if (roomsLoading && normalizedRooms.length === 0) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-6 w-6 animate-spin text-khp-primary" />
+      </div>
+    );
+  }
+
+  if (!roomsLoading && normalizedRooms.length === 0) {
     return (
       <div className="flex items-center justify-center py-12">
         <p className="text-gray-500">No rooms available.</p>
       </div>
     );
   }
+
+  console.log("liveRoomsData Rooms:", liveRoomsData);
 
   return (
     <Tabs
@@ -74,8 +113,8 @@ function WaitersRoomsTabs({
       <TabsList className="border-b border-khp-secondary bg-background sticky top-0 z-10">
         <TabsTrigger value="all">All Rooms</TabsTrigger>
         {normalizedRooms.map((room) => (
-          <TabsTrigger key={room?.id} value={String(room?.id)}>
-            {room?.name}
+          <TabsTrigger key={room.id} value={String(room.id)}>
+            {room.name}
           </TabsTrigger>
         ))}
       </TabsList>
@@ -85,7 +124,7 @@ function WaitersRoomsTabs({
         className="w-full border border-khp-primary/20 rounded-md min-h-96 gap-y-2 flex flex-col p-4"
       >
         {normalizedRooms.map((room) => {
-          if (!room || !room.tables || room.tables.length === 0) return null;
+          if (!room.tables || room.tables.length === 0) return null;
           const tables = room.tables;
 
           return (
@@ -133,7 +172,6 @@ function WaitersRoomsTabs({
       </TabsContent>
 
       {normalizedRooms.map((room) => {
-        if (!room) return null;
         if (!room.tables || room.tables.length === 0) return null;
         const roomId = String(room.id);
         const showRoom = activeTab === "all" || activeTab === roomId;
@@ -187,9 +225,11 @@ function WaitersRoomsTabs({
         );
       })}
 
-      {error && (
-        <div className="mt-4 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600">
-          {error}
+      {errorMessages.length > 0 && (
+        <div className="mt-4 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600 space-y-1">
+          {errorMessages.map((message, index) => (
+            <p key={`${message}-${index}`}>{message}</p>
+          ))}
         </div>
       )}
     </Tabs>
@@ -197,4 +237,3 @@ function WaitersRoomsTabs({
 }
 
 export default WaitersRoomsTabs;
-

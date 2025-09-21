@@ -466,6 +466,8 @@ export type Order = {
   company: Company;
   /** Date de création de la commande. */
   created_at: Scalars['DateTime']['output'];
+  /** Historique des actions liées à la commande (ordre chronologique). */
+  histories: Array<OrderHistory>;
   /** Identifiant unique. */
   id: Scalars['ID']['output'];
   /** Horodatage du paiement de la commande. */
@@ -514,6 +516,45 @@ export enum OrderByRelationWithColumnAggregateFunction {
   Min = 'MIN',
   /** Sum. */
   Sum = 'SUM'
+}
+
+/** Historique des actions effectuées sur une commande. */
+export type OrderHistory = {
+  __typename?: 'OrderHistory';
+  /** Type d'action enregistrée. */
+  action: OrderHistoryActionEnum;
+  /** Entreprise liée à l'entrée. */
+  company: Company;
+  /** Date de création de l'entrée. */
+  created_at: Scalars['DateTime']['output'];
+  /** Identifiant unique de l'entrée. */
+  id: Scalars['ID']['output'];
+  /** Commande associée à l'entrée. */
+  order: Order;
+  /** Étape concernée, le cas échéant. */
+  order_step?: Maybe<OrderStep>;
+  /** Informations métier associées à l'action. */
+  payload?: Maybe<Scalars['JSON']['output']>;
+  /** Raison associée à l'action (si applicable). */
+  reason?: Maybe<Scalars['String']['output']>;
+  /** Menu d'étape concerné, le cas échéant. */
+  step_menu?: Maybe<StepMenu>;
+  /** Date de dernière mise à jour. */
+  updated_at: Scalars['DateTime']['output'];
+  /** Utilisateur ayant réalisé l'action. */
+  user?: Maybe<User>;
+};
+
+/** Liste des actions possibles sur l'historique des commandes. */
+export enum OrderHistoryActionEnum {
+  OrderCreated = 'ORDER_CREATED',
+  OrderStatusUpdated = 'ORDER_STATUS_UPDATED',
+  OrderStepCreated = 'ORDER_STEP_CREATED',
+  OrderStepStatusUpdated = 'ORDER_STEP_STATUS_UPDATED',
+  StepMenuAdded = 'STEP_MENU_ADDED',
+  StepMenuRemoved = 'STEP_MENU_REMOVED',
+  StepMenuStatusUpdated = 'STEP_MENU_STATUS_UPDATED',
+  StepMenuUpdated = 'STEP_MENU_UPDATED'
 }
 
 /** Options de tri disponibles pour les commandes. */
@@ -1435,6 +1476,11 @@ export type UserPaginator = {
   paginatorInfo: PaginatorInfo;
 };
 
+export type ChefsOrderStepsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ChefsOrderStepsQuery = { __typename?: 'Query', orderSteps: { __typename?: 'OrderStepPaginator', data: Array<{ __typename?: 'OrderStep', id: string, position: number, status: OrderStepStatusEnum, created_at: any, stepMenus: Array<{ __typename?: 'StepMenu', id: string, note?: string | null, status: StepMenuStatusEnum, quantity: number, created_at: any, menu: { __typename?: 'Menu', id: string, name: string, description?: string | null, image_url?: string | null, service_type: MenuServiceTypeEnum, price: number } }>, order: { __typename?: 'Order', id: string, status: OrderStatusEnum, created_at: any, table: { __typename?: 'Table', id: string, label: string, room: { __typename?: 'Room', name: string } } } }>, paginatorInfo: { __typename?: 'PaginatorInfo', total: number, count: number, currentPage: number, hasMorePages: boolean } } };
+
 export type GetAllergensQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -1610,6 +1656,7 @@ export type TakinOrdersQueryQueryVariables = Exact<{
 export type TakinOrdersQueryQuery = { __typename?: 'Query', order?: { __typename?: 'Order', id: string, price: number, served_at?: any | null, pending_at?: any | null, payed_at?: any | null, canceled_at?: any | null, status: OrderStatusEnum, created_at: any, steps: Array<{ __typename?: 'OrderStep', id: string, created_at: any, position: number, served_at?: any | null, status: OrderStepStatusEnum, stepMenus: Array<{ __typename?: 'StepMenu', id: string, created_at: any, quantity: number, status: StepMenuStatusEnum, note?: string | null, served_at?: any | null, menu: { __typename?: 'Menu', name: string, price: number, allergens: Array<AllergenEnum>, image_url?: string | null } }> }>, table: { __typename?: 'Table', id: string, label: string } } | null, menus: { __typename?: 'MenuPaginator', data: Array<{ __typename?: 'Menu', id: string, name: string, image_url?: string | null, price: number, public_priority: number, service_type: MenuServiceTypeEnum, allergens: Array<AllergenEnum>, menu_type?: { __typename?: 'MenuType', id: string, name: string } | null }> } };
 
 
+export const ChefsOrderStepsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ChefsOrderSteps"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"orderSteps"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"statuses"},"value":{"kind":"ListValue","values":[{"kind":"EnumValue","value":"IN_PREP"},{"kind":"EnumValue","value":"READY"}]}},{"kind":"Argument","name":{"kind":"Name","value":"orderBy"},"value":{"kind":"ListValue","values":[{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"column"},"value":{"kind":"EnumValue","value":"CREATED_AT"}},{"kind":"ObjectField","name":{"kind":"Name","value":"order"},"value":{"kind":"EnumValue","value":"ASC"}}]}]}},{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"50"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"data"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"position"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"created_at"}},{"kind":"Field","name":{"kind":"Name","value":"stepMenus"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"note"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"quantity"}},{"kind":"Field","name":{"kind":"Name","value":"created_at"}},{"kind":"Field","name":{"kind":"Name","value":"menu"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"image_url"}},{"kind":"Field","name":{"kind":"Name","value":"service_type"}},{"kind":"Field","name":{"kind":"Name","value":"price"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"order"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"created_at"}},{"kind":"Field","name":{"kind":"Name","value":"table"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"room"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"paginatorInfo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"count"}},{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"hasMorePages"}}]}}]}}]}}]} as unknown as DocumentNode<ChefsOrderStepsQuery, ChefsOrderStepsQueryVariables>;
 export const GetAllergensDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetAllergens"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"allergens"}}]}}]} as unknown as DocumentNode<GetAllergensQuery, GetAllergensQueryVariables>;
 export const GetCategoriesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetCategories"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"first"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},"defaultValue":{"kind":"IntValue","value":"10"}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"page"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}},"defaultValue":{"kind":"IntValue","value":"1"}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"search"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"categories"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"Variable","name":{"kind":"Name","value":"first"}}},{"kind":"Argument","name":{"kind":"Name","value":"page"},"value":{"kind":"Variable","name":{"kind":"Name","value":"page"}}},{"kind":"Argument","name":{"kind":"Name","value":"search"},"value":{"kind":"Variable","name":{"kind":"Name","value":"search"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"data"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"created_at"}},{"kind":"Field","name":{"kind":"Name","value":"updated_at"}},{"kind":"Field","name":{"kind":"Name","value":"shelfLives"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"shelf_life_hours"}},{"kind":"Field","name":{"kind":"Name","value":"locationType"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"paginatorInfo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"count"}},{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"firstItem"}},{"kind":"Field","name":{"kind":"Name","value":"hasMorePages"}},{"kind":"Field","name":{"kind":"Name","value":"lastItem"}},{"kind":"Field","name":{"kind":"Name","value":"lastPage"}},{"kind":"Field","name":{"kind":"Name","value":"perPage"}},{"kind":"Field","name":{"kind":"Name","value":"total"}}]}}]}}]}}]} as unknown as DocumentNode<GetCategoriesQuery, GetCategoriesQueryVariables>;
 export const GetCompanyOptionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetCompanyOptions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"me"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"company"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"open_food_facts_language"}}]}}]}}]}}]} as unknown as DocumentNode<GetCompanyOptionsQuery, GetCompanyOptionsQueryVariables>;
