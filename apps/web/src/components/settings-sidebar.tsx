@@ -168,8 +168,6 @@ export function SettingsMenuButton() {
     </Sheet>
   );
 }
-
-// Composant principal pour la sidebar des paramètres
 export function SettingsSidebar() {
   const isMobile = !useBreakpoint("md");
   const router = useRouter();
@@ -186,7 +184,6 @@ export function SettingsSidebar() {
     }
   };
 
-  // Sur mobile, on n'affiche rien car le bouton est maintenant dans l'AppSidebarWrapper
   if (isMobile) {
     return null;
   }
