@@ -37,15 +37,17 @@ import {
 } from "@/graphql/generated/graphql";
 import { createAllergenOptions } from "@workspace/ui/lib/allergens";
 import { updateIngredientAction } from "@/app/(mainapp)/ingredient/actions";
+import {
+  ACCEPTED_IMAGE_TYPES,
+  WANTED_IMAGE_SIZE,
+} from "@workspace/ui/lib/const";
+import { compressImageFile } from "@workspace/ui/lib/compress-img";
 
 type IngredientData = NonNullable<GetIngredientQuery["ingredient"]>;
 
 interface EditIngredientFormProps {
   ingredient: IngredientData;
 }
-
-const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/jpg"] as const;
 
 const editIngredientSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters long"),
@@ -55,13 +57,11 @@ const editIngredientSchema = z.object({
     .refine(
       (file) => {
         if (!file) return true;
-        return (
-          ACCEPTED_IMAGE_TYPES.includes(
-            file.type as (typeof ACCEPTED_IMAGE_TYPES)[number]
-          ) && file.size <= MAX_IMAGE_SIZE_BYTES
+        return ACCEPTED_IMAGE_TYPES.includes(
+          file.type as (typeof ACCEPTED_IMAGE_TYPES)[number]
         );
       },
-      { message: "L'image doit être un fichier JPEG ou PNG de moins de 10Mo" }
+      { message: "Image must be an accepted format" }
     ),
   unit: z.string().nonempty("Unit is required"),
   base_quantity: z
@@ -208,8 +208,25 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
             : null,
       };
 
-      if (values.image) {
-        updateData.image = values.image;
+      if (values.image instanceof File) {
+        const compressed = await compressImageFile(values.image, {
+          maxSizeBytes: WANTED_IMAGE_SIZE,
+          maxWidth: 1600,
+          maxHeight: 1600,
+          mimeType: "image/jpeg", // ou "image/webp" si accepté côté back
+        });
+        if (compressed.size > WANTED_IMAGE_SIZE) {
+          form.setError("image", {
+            type: "validate",
+            message: "Image exceeds 2MB after compression.",
+          });
+          return;
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        form.setValue("image", compressed as any, { shouldValidate: false });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (updateData as any).image = compressed;
       }
 
       if (
@@ -337,7 +354,6 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
                         type="file"
                         name={name}
                         accept={ACCEPTED_IMAGE_TYPES.join(",")}
-                        max={MAX_IMAGE_SIZE_BYTES}
                         capture="environment"
                         ref={(element: HTMLInputElement | null) => {
                           ref(element);

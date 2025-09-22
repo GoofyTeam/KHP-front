@@ -1,6 +1,8 @@
 "use client";
 
-import { useRef } from "react";
+import { useCallback, useRef } from "react";
+import { WANTED_IMAGE_SIZE } from "@workspace/ui/lib/const";
+import { compressImageFile } from "@workspace/ui/lib/compress-img";
 
 export function useCamera() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -58,47 +60,35 @@ export function useCamera() {
     streamRef.current = null;
   };
 
-  const takePhoto = async (
-    fileName = `image-${Date.now()}.jpg`
-  ): Promise<File> => {
-    const video = videoRef.current;
-    if (!video) throw new Error("Camera not ready");
+  const takePhoto = useCallback(
+    async (filename = `capture-${Date.now()}.jpg`) => {
+      const video = videoRef.current;
+      if (!video) {
+        throw new Error("Camera not ready");
+      }
+      const w = video.videoWidth || video.clientWidth;
+      const h = video.videoHeight || video.clientHeight;
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext("2d")!.drawImage(video, 0, 0, w, h);
 
-    const canvas = document.createElement("canvas");
-    const videoWidth = video.videoWidth || 1080;
-    const videoHeight = video.videoHeight || 1080;
-    const squareSize = Math.min(videoWidth, videoHeight);
+      const blob: Blob = await new Promise((res) =>
+        canvas.toBlob((b) => res(b ?? new Blob()), "image/jpeg", 0.92)
+      );
+      const file = new File([blob], filename, { type: "image/jpeg" });
 
-    canvas.width = squareSize;
-    canvas.height = squareSize;
+      const compressed = await compressImageFile(file, {
+        maxSizeBytes: WANTED_IMAGE_SIZE,
+        maxWidth: 1600,
+        maxHeight: 1600,
+        mimeType: "image/jpeg", // ou "image/webp"
+      });
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("Could not get canvas context");
-
-    const sx = (videoWidth - squareSize) / 2;
-    const sy = (videoHeight - squareSize) / 2;
-    ctx.drawImage(
-      video,
-      sx,
-      sy,
-      squareSize,
-      squareSize,
-      0,
-      0,
-      squareSize,
-      squareSize
-    );
-
-    const blob: Blob = await new Promise((resolve, reject) =>
-      canvas.toBlob(
-        (b) =>
-          b ? resolve(b) : reject(new Error("Failed to create image blob")),
-        "image/jpeg",
-        1
-      )
-    );
-    return new File([blob], fileName, { type: "image/jpeg" });
-  };
+      return compressed;
+    },
+    []
+  );
 
   return { videoRef, start, stop, takePhoto };
 }

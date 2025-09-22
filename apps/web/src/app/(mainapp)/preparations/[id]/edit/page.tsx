@@ -46,6 +46,11 @@ import {
 import { getAllMeasurementUnitsOnlyValues } from "@workspace/ui/lib/measurement-units";
 import { updatePreparationAction } from "./action";
 import { Tabs, TabsContent } from "@workspace/ui/components/tabs";
+import {
+  ACCEPTED_IMAGE_TYPES,
+  WANTED_IMAGE_SIZE,
+} from "@workspace/ui/lib/const";
+import { compressImageFile } from "@workspace/ui/lib/compress-img";
 
 const preparationItemsSchema = z.object({
   id: z.string().nonempty(),
@@ -69,9 +74,6 @@ const preparationItemsSchema = z.object({
   storage_unit: z.string().optional(),
 });
 
-const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/jpg"] as const;
-
 const updatePreparationSchema = z
   .object({
     name: z.string().min(2, "Name must be at least 2 characters long"),
@@ -81,13 +83,11 @@ const updatePreparationSchema = z
       .refine(
         (file) => {
           if (!file) return true;
-          return (
-            ACCEPTED_IMAGE_TYPES.includes(
-              file.type as (typeof ACCEPTED_IMAGE_TYPES)[number]
-            ) && file.size <= MAX_IMAGE_SIZE_BYTES
+          return ACCEPTED_IMAGE_TYPES.includes(
+            file.type as (typeof ACCEPTED_IMAGE_TYPES)[number]
           );
         },
-        { message: "L'image doit être un fichier JPEG ou PNG de moins de 10Mo" }
+        { message: "Image must be an accepted format" }
       ),
     unit: z.string().nonempty("Unit is required"),
     base_quantity: z
@@ -350,7 +350,27 @@ export default function UpdatePreparationPage() {
 
   const onSubmit = form.handleSubmit(async (values) => {
     try {
-      const result = await updatePreparationAction(id, values);
+      let payload = values;
+      if (values.image instanceof File) {
+        const compressed = await compressImageFile(values.image, {
+          maxSizeBytes: WANTED_IMAGE_SIZE,
+          maxWidth: 1600,
+          maxHeight: 1600,
+          mimeType: "image/jpeg",
+        });
+        if (compressed.size > WANTED_IMAGE_SIZE) {
+          form.setError("image", {
+            type: "validate",
+            message: "Image exceeds 2MB after compression.",
+          });
+          return;
+        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        form.setValue("image", compressed as any, { shouldValidate: false });
+        payload = { ...values, image: compressed };
+      }
+
+      const result = await updatePreparationAction(id, payload);
 
       if (result.success) {
         apolloClient.refetchQueries({
@@ -508,7 +528,6 @@ export default function UpdatePreparationPage() {
                             type="file"
                             name={name}
                             accept={ACCEPTED_IMAGE_TYPES.join(",")}
-                            max={MAX_IMAGE_SIZE_BYTES}
                             capture="environment"
                             ref={(element: HTMLInputElement | null) => {
                               ref(element);
