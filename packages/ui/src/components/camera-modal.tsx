@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { Button } from "./button";
+import { Button } from "@workspace/ui/components/button";
 import { Camera, X, Link as LinkIcon } from "lucide-react";
-import { useCamera } from "../hooks/use-camera";
+import { useCamera } from "@workspace/ui/hooks/use-camera";
 
 interface CameraModalProps {
   open: boolean;

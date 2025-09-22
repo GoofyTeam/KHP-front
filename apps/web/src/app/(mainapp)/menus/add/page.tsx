@@ -39,9 +39,11 @@ import {
   MenuServiceTypeEnum,
 } from "@/graphql/generated/graphql";
 import { Tabs, TabsContent } from "@workspace/ui/components/tabs";
-
-const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/jpg"] as const;
+import {
+  ACCEPTED_IMAGE_TYPES,
+  WANTED_IMAGE_SIZE,
+} from "@workspace/ui/lib/const";
+import { compressImageFile } from "@workspace/ui/lib/compress-img";
 
 const SERVICE_TYPE_OPTIONS = [
   {
@@ -72,12 +74,10 @@ const createMenuSchema = z
         message: "Menu image is required",
       })
       .refine((file) => {
-        return (
-          ACCEPTED_IMAGE_TYPES.includes(
-            file.type as (typeof ACCEPTED_IMAGE_TYPES)[number]
-          ) && file.size <= MAX_IMAGE_SIZE_BYTES
+        return ACCEPTED_IMAGE_TYPES.includes(
+          file.type as (typeof ACCEPTED_IMAGE_TYPES)[number]
         );
-      }, "Image must be a JPEG or PNG file and less than 10MB"),
+      }, "Image must be an accepted format"),
     description: z.string().optional(),
     price: z.number().min(1, "Price must be a positive number"),
     is_a_la_carte: z.boolean(),
@@ -190,6 +190,25 @@ export default function CreateMenusPage() {
   };
 
   async function onMenusCreateSubmit(values: CreateMenuFormValues) {
+    if (values.image instanceof File) {
+      const compressed = await compressImageFile(values.image, {
+        maxSizeBytes: WANTED_IMAGE_SIZE,
+        maxWidth: 1600,
+        maxHeight: 1600,
+        mimeType: "image/jpeg",
+      });
+      if (compressed.size > WANTED_IMAGE_SIZE) {
+        form.setError("image", {
+          type: "validate",
+          message: "Image exceeds 2MB after compression.",
+        });
+        return;
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      form.setValue("image", compressed as any, { shouldValidate: false });
+      values = { ...values, image: compressed };
+    }
+
     const res = await createMenuAction(values);
 
     if (res.success) {
@@ -339,7 +358,6 @@ export default function CreateMenusPage() {
                             type="file"
                             name={name}
                             accept={ACCEPTED_IMAGE_TYPES.join(",")}
-                            max={MAX_IMAGE_SIZE_BYTES}
                             capture="environment"
                             ref={(e: HTMLInputElement | null) => {
                               ref(e);

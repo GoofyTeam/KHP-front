@@ -40,6 +40,11 @@ import {
   GetMenuTypesQuery,
   MenuServiceTypeEnum,
 } from "@/graphql/generated/graphql";
+import {
+  ACCEPTED_IMAGE_TYPES,
+  WANTED_IMAGE_SIZE,
+} from "@workspace/ui/lib/const";
+import { compressImageFile } from "@workspace/ui/lib/compress-img";
 
 const menuItemsSchema = z.object({
   entity_id: z.string().nonempty("Entity ID is required"),
@@ -51,9 +56,6 @@ const menuItemsSchema = z.object({
   // UI-only: fixed storage unit for display in location select
   storage_unit: z.string().optional(),
 });
-
-const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/jpg"] as const;
 
 const SERVICE_TYPE_OPTIONS = [
   {
@@ -73,15 +75,12 @@ const updateMenuSchema = z
       .union([
         z.instanceof(File).refine(
           (file) => {
-            return (
-              ACCEPTED_IMAGE_TYPES.includes(
-                file.type as (typeof ACCEPTED_IMAGE_TYPES)[number]
-              ) && file.size <= MAX_IMAGE_SIZE_BYTES
+            return ACCEPTED_IMAGE_TYPES.includes(
+              file.type as (typeof ACCEPTED_IMAGE_TYPES)[number]
             );
           },
           {
-            message:
-              "L'image doit être un fichier JPEG ou PNG de moins de 10Mo",
+            message: "Image must be an accepted format",
           }
         ),
         z.string(), // Pour l'URL existante
@@ -287,7 +286,28 @@ export default function UpdateMenusPage() {
   const onMenusUpdateSubmit = form.handleSubmit(
     async (values: UpdateMenuFormValues) => {
       try {
-        const res = await updateMenuAction(id, values);
+        let payload = values;
+        if (values.image instanceof File) {
+          const compressed = await compressImageFile(values.image, {
+            maxSizeBytes: WANTED_IMAGE_SIZE,
+            maxWidth: 1600,
+            maxHeight: 1600,
+            mimeType: "image/jpeg",
+          });
+          if (compressed.size > WANTED_IMAGE_SIZE) {
+            form.setError("image", {
+              type: "validate",
+              message: "Image exceeds 2MB after compression.",
+            });
+            return;
+          }
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          form.setValue("image", compressed as any, { shouldValidate: false });
+          payload = { ...values, image: compressed };
+        }
+
+        const res = await updateMenuAction(id, payload);
 
         if (res.success) {
           // Invalider le cache Apollo en arrière-plan (sans attendre)

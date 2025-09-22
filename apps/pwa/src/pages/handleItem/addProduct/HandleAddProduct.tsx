@@ -27,6 +27,8 @@ import { Minus, Plus } from "lucide-react";
 import { handleItemSchema } from "./handleItemSchema";
 import { ImageAdd } from "@workspace/ui/components/image-placeholder";
 import { extractApiErrorMessage } from "../../../lib/error-utils";
+import { WANTED_IMAGE_SIZE } from "@workspace/ui/lib/const";
+import { compressImageFile } from "@workspace/ui/lib/compress-img";
 
 function HandleAddProduct() {
   const navigate = useNavigate();
@@ -81,7 +83,28 @@ function HandleAddProduct() {
   async function onSubmit(values: z.infer<typeof handleItemSchema>) {
     setServerError(null);
     try {
-      await addProductSubmit(values, barcode, internalId, product!);
+      let payload = values;
+
+      if (values.image instanceof File) {
+        const compressed = await compressImageFile(values.image, {
+          maxSizeBytes: WANTED_IMAGE_SIZE,
+          maxWidth: 1600,
+          maxHeight: 1600,
+          mimeType: "image/jpeg",
+        });
+        if (compressed.size > WANTED_IMAGE_SIZE) {
+          form.setError("image", {
+            type: "validate",
+            message: "Image exceeds 2MB after compression.",
+          });
+          return;
+        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        form.setValue("image", compressed as any, { shouldValidate: false });
+        payload = { ...values, image: compressed };
+      }
+
+      await addProductSubmit(payload, barcode, internalId, product!);
     } catch (err) {
       setServerError(extractApiErrorMessage(err));
     }

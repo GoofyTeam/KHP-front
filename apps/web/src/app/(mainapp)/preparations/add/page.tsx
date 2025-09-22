@@ -37,6 +37,11 @@ import { getAllMeasurementUnitsOnlyValues } from "@workspace/ui/lib/measurement-
 import { Label } from "@workspace/ui/components/label";
 import { createPreparationAction } from "@/app/(mainapp)/preparations/add/action";
 import { Tabs, TabsContent } from "@workspace/ui/components/tabs";
+import {
+  ACCEPTED_IMAGE_TYPES,
+  WANTED_IMAGE_SIZE,
+} from "@workspace/ui/lib/const";
+import { compressImageFile } from "@workspace/ui/lib/compress-img";
 
 const preparationItemsSchema = z.object({
   id: z.string().nonempty(),
@@ -48,9 +53,6 @@ const preparationItemsSchema = z.object({
   location_id: z.string().nonempty("Location is required"),
 });
 
-const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/jpg"] as const;
-
 const createMenuSchema = z
   .object({
     name: z.string().min(2, "Name must be at least 2 characters long"),
@@ -59,12 +61,10 @@ const createMenuSchema = z
         message: "Menu image is required",
       })
       .refine((file) => {
-        return (
-          ACCEPTED_IMAGE_TYPES.includes(
-            file.type as (typeof ACCEPTED_IMAGE_TYPES)[number]
-          ) && file.size <= MAX_IMAGE_SIZE_BYTES
+        return ACCEPTED_IMAGE_TYPES.includes(
+          file.type as (typeof ACCEPTED_IMAGE_TYPES)[number]
         );
-      }, "Image must be a JPEG or PNG file and less than 10MB"),
+      }, "Image must be an accepted format"),
     unit: z.string().nonempty("Unit is required"),
     base_quantity: z
       .string()
@@ -313,6 +313,25 @@ export default function CreatePreparationPage() {
   );
 
   async function onPreparationCreateSubmit(values: CreateMenuFormValues) {
+    if (values.image instanceof File) {
+      const compressed = await compressImageFile(values.image, {
+        maxSizeBytes: WANTED_IMAGE_SIZE,
+        maxWidth: 1600,
+        maxHeight: 1600,
+        mimeType: "image/jpeg",
+      });
+      if (compressed.size > WANTED_IMAGE_SIZE) {
+        form.setError("image", {
+          type: "validate",
+          message: "Image exceeds 2MB after compression.",
+        });
+        return;
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      form.setValue("image", compressed as any, { shouldValidate: false });
+      values = { ...values, image: compressed };
+    }
+
     const result = await createPreparationAction(values);
 
     if (result.success) {
@@ -434,7 +453,6 @@ export default function CreatePreparationPage() {
                             type="file"
                             name={name}
                             accept={ACCEPTED_IMAGE_TYPES.join(",")}
-                            max={MAX_IMAGE_SIZE_BYTES}
                             capture="environment"
                             ref={(e: HTMLInputElement | null) => {
                               ref(e);
