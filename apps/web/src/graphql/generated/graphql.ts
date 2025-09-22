@@ -76,7 +76,21 @@ export type CategoryShelfLife = {
 
 export type Company = {
   __typename?: 'Company';
+  /** Ligne d'adresse principale. */
+  address_line?: Maybe<Scalars['String']['output']>;
+  /** Horaires d'ouverture de la semaine. */
+  businessHours: Array<CompanyBusinessHour>;
   categories: Array<Category>;
+  /** Ville. */
+  city?: Maybe<Scalars['String']['output']>;
+  /** Adresse e-mail de contact. */
+  contact_email?: Maybe<Scalars['String']['output']>;
+  /** Nom de la personne à contacter. */
+  contact_name?: Maybe<Scalars['String']['output']>;
+  /** Numéro de téléphone principal. */
+  contact_phone?: Maybe<Scalars['String']['output']>;
+  /** Pays. */
+  country?: Maybe<Scalars['String']['output']>;
   /** When the company was created. */
   created_at: Scalars['DateTime']['output'];
   /** Unique primary key. */
@@ -84,15 +98,31 @@ export type Company = {
   /** Types de localisation associés à cette entreprise. */
   locationTypes: Array<LocationType>;
   locations: Array<Location>;
+  /** Logo ou image de présentation de l'entreprise. */
+  logo_path?: Maybe<Scalars['String']['output']>;
   /** Company name. */
   name: Scalars['String']['output'];
   /** Langue préférée pour les données OpenFoodFacts (fr ou en). */
   open_food_facts_language?: Maybe<Scalars['String']['output']>;
+  /** Code postal. */
+  postal_code?: Maybe<Scalars['String']['output']>;
   /** Preparations associated with this company. */
   preparations: Array<Preparation>;
   /** Paramètres visibles publiquement pour la carte des menus. */
   public_menu_settings: PublicMenuSettings;
   /** When the company was last updated. */
+  updated_at: Scalars['DateTime']['output'];
+};
+
+export type CompanyBusinessHour = {
+  __typename?: 'CompanyBusinessHour';
+  closes_at: Scalars['String']['output'];
+  created_at: Scalars['DateTime']['output'];
+  day_of_week: Scalars['Int']['output'];
+  id: Scalars['ID']['output'];
+  is_overnight: Scalars['Boolean']['output'];
+  opens_at: Scalars['String']['output'];
+  sequence: Scalars['Int']['output'];
   updated_at: Scalars['DateTime']['output'];
 };
 

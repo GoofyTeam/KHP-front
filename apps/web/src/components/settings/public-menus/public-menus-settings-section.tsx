@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useApolloClient } from "@apollo/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
@@ -15,9 +15,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@workspace/ui/components/form";
-import { Input } from "@workspace/ui/components/input";
+import { PrefixInput } from "@workspace/ui/components/prefix-input";
 import { Button } from "@workspace/ui/components/button";
-import { ClipboardCopy } from "lucide-react";
 import { Switch } from "@workspace/ui/components/switch";
 import { toast } from "sonner";
 import {
@@ -28,6 +27,24 @@ import {
   updatePublicMenusSettingsAction,
   type UpdatePublicMenusSettingsInput,
 } from "@/app/(mainapp)/settings/public-menus/actions";
+
+const buildPublicMenusBaseUrl = (origin?: string | null) => {
+  const trimmedOrigin = origin?.trim();
+
+  if (!trimmedOrigin) {
+    return "https://dash.goofykhp.fr/public-menus/";
+  }
+
+  const sanitizedOrigin = trimmedOrigin.replace(/\/+$/, "");
+
+  return `${sanitizedOrigin}/public-menus/`;
+};
+
+const DEFAULT_PUBLIC_MENUS_BASE_URL = buildPublicMenusBaseUrl(
+  process.env.NEXT_PUBLIC_SITE_URL ??
+    process.env.NEXT_PUBLIC_APP_URL ??
+    (process.env.NODE_ENV === "production" ? "https://dash.goofykhp.fr" : null)
+);
 
 const publicMenusSchema = z.object({
   public_menu_card_url: z
@@ -47,6 +64,9 @@ function PublicMenusSettingsSection({
   const apolloClient = useApolloClient();
   const publicMenuSettings = companySettings?.public_menu_settings;
   const [isPending, startTransition] = useTransition();
+  const [publicMenusBaseUrl, setPublicMenusBaseUrl] = useState(
+    DEFAULT_PUBLIC_MENUS_BASE_URL
+  );
 
   const form = useForm<z.infer<typeof publicMenusSchema>>({
     resolver: zodResolver(publicMenusSchema),
@@ -61,6 +81,8 @@ function PublicMenusSettingsSection({
   const isBusy = isLoading || isSubmitting || isPending;
 
   useEffect(() => {
+    setPublicMenusBaseUrl(buildPublicMenusBaseUrl(window.location.origin));
+
     if (!publicMenuSettings) return;
 
     form.reset({
@@ -170,29 +192,18 @@ function PublicMenusSettingsSection({
                   </FormDescription>
                 </div>
                 <FormControl>
-                  <div className="flex justify-start items-center gap-0.5">
-                    <p className="text-khp-text/70 text-md select-none font-medium">
-                      https://dash.goofykhp.fr/public-menus/
-                    </p>
-                    <Input variant="khp-default" {...field} disabled={isBusy} />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      aria-label="Copy to clipboard"
-                      className="!p-1 rounded-md hover:bg-khp-primary/10"
-                      disabled={isBusy}
-                      onClick={() => {
-                        if (!field.value) return;
-
-                        navigator.clipboard.writeText(
-                          `https://dash.goofykhp.fr/public-menus/${field.value}`
-                        );
-                      }}
-                    >
-                      <ClipboardCopy size={32} className="text-khp-primary" />
-                    </Button>
-                  </div>
+                  <PrefixInput
+                    prefix={publicMenusBaseUrl}
+                    value={field.value ?? ""}
+                    onChange={(value) => field.onChange(value)}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    disabled={isBusy}
+                    showCopyButton
+                    className="w-full bg-khp-surface border-khp-primary/25"
+                    prefixClassName="bg-khp-primary/15 text-khp-text/70 border-khp-primary/25"
+                    copyButtonClassName="border-khp-primary/25 text-khp-text/70 hover:bg-khp-primary/5"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
