@@ -3,10 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CheckedState } from "@radix-ui/react-checkbox";
 import { toast } from "sonner";
-import { AlertTriangle, XCircle } from "lucide-react";
 
 import { Button } from "@workspace/ui/components/button";
 import { Checkbox } from "@workspace/ui/components/checkbox";
+import { StatusIcon } from "@workspace/ui/components/status-icon";
 import {
   Table,
   TableBody,
@@ -16,6 +16,7 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import { cn } from "@workspace/ui/lib/utils";
+import { formatExpirationDate } from "@workspace/ui/lib/date-utils";
 
 import { httpClient } from "@/lib/httpClient";
 import type { ExpiryTableItem } from "./types";
@@ -28,26 +29,6 @@ const quantityFormatter = new Intl.NumberFormat("fr-FR", {
   minimumFractionDigits: 0,
   maximumFractionDigits: 2,
 });
-
-function formatExpirationDate(value: string): string {
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) {
-    return value;
-  }
-
-  return parsed.toLocaleDateString("fr-FR", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
-}
-
-function StatusIcon({ status }: { status: string }) {
-  if (status === "expired") {
-    return <XCircle className="h-4 w-4 text-khp-error" aria-hidden />;
-  }
-  return <AlertTriangle className="h-4 w-4 text-khp-warning" aria-hidden />;
-}
 
 export function ExpiryTable({ items }: ExpiryTableProps) {
   const [rows, setRows] = useState(items);
