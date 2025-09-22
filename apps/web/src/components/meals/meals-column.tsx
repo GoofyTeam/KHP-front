@@ -99,7 +99,7 @@ export const columns: ColumnDef<Meals>[] = [
   }, */
   {
     accessorKey: "is_a_la_carte",
-    header: "Actually on the menu ?",
+    header: 'Actually "a la carte" ?',
     cell: ({ row }) =>
       row.original.is_a_la_carte ? (
         <p className="text-green-600 flex items-center gap-1">
