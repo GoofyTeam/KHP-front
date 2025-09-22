@@ -26,7 +26,7 @@ export async function createRoomAction(
   return executeHttpAction(
     () =>
       httpClient.post<RoomCreateResponse, RoomCreateInput>("/api/rooms", input),
-    "Échec de la création de la salle : "
+    "Failure to create room: "
   );
 }
 
@@ -58,7 +58,7 @@ export async function createTableAction(
         `/api/rooms/${roomId}/tables`,
         input
       ),
-    "Échec de la création des tables : "
+    "Failure to create table(s): "
   );
 }
 
@@ -77,7 +77,7 @@ export async function deleteRoomAction(
 ): Promise<ActionResult<RoomDeleteResponse>> {
   return executeHttpAction(
     () => httpClient.delete<RoomDeleteResponse>(`/api/rooms/${input.roomId}`),
-    "Échec de la suppression de la salle : "
+    "Failure to delete room: "
   );
 }
 
@@ -100,6 +100,6 @@ export async function deleteTableAction(
       httpClient.delete<TableDeleteResponse>(
         `/api/rooms/${input.roomId}/tables/${input.tableId}`
       ),
-    "Échec de la suppression de la table : "
+    "Failure to delete table: "
   );
 }

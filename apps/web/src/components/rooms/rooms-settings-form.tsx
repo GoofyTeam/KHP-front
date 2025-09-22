@@ -136,12 +136,12 @@ function RoomsSettingsForm() {
         addRoomForm.reset();
       } else {
         addRoomForm.setError("root", {
-          message: result.error || "Error updating quick access button",
+          message: result.error || "Error creating room",
         });
       }
     } catch {
       addRoomForm.setError("root", {
-        message: "Error updating quick access button",
+        message: "Error creating room",
       });
     }
   };
@@ -159,12 +159,12 @@ function RoomsSettingsForm() {
         addTableForm.reset();
       } else {
         addTableForm.setError("root", {
-          message: result.error || "Error updating quick access button",
+          message: result.error || "Error creating table",
         });
       }
     } catch {
       addTableForm.setError("root", {
-        message: "Error updating quick access button",
+        message: "Error creating table",
       });
     }
   };
@@ -181,12 +181,12 @@ function RoomsSettingsForm() {
         deleteRoomForm.reset();
       } else {
         deleteRoomForm.setError("root", {
-          message: result.error || "Error updating quick access button",
+          message: result.error || "Error deleting room",
         });
       }
     } catch {
       deleteRoomForm.setError("root", {
-        message: "Error updating quick access button",
+        message: "Error deleting room",
       });
     }
   };
@@ -204,12 +204,12 @@ function RoomsSettingsForm() {
         deleteTableForm.reset();
       } else {
         deleteTableForm.setError("root", {
-          message: result.error || "Error updating quick access button",
+          message: result.error || "Error deleting table",
         });
       }
     } catch {
       deleteTableForm.setError("root", {
-        message: "Error updating quick access button",
+        message: "Error deleting table",
       });
     }
   };

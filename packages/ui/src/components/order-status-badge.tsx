@@ -46,7 +46,7 @@ function OrderStatusBadge({
 
   return (
     <Badge
-      className={`text-xs px-2 py-1 ${bgColor} ${textColor} border ${bgColor.replace("bg-", "border-")} ${className ?? ""} rounder-md`}
+      className={`text-xs px-2 py-1 ${bgColor} ${textColor} border ${bgColor.replace("bg-", "border-")} ${className ?? ""} rounded-md`}
     >
       {label}
     </Badge>
