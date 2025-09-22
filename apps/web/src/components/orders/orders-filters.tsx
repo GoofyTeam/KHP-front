@@ -5,8 +5,9 @@ import { useDebounce } from "@uidotdev/usehooks";
 
 import { MultiSelect } from "@workspace/ui/components/multi-select";
 import { DatePickerFilter } from "@workspace/ui/components/date-picker";
-import { useOrdersStore } from "@/stores/orders-store";
 import type { GetOrdersQuery } from "@/graphql/generated/graphql";
+import { OrderStatusEnum } from "@/graphql/generated/graphql";
+import type { OrdersFilters } from "@/stores/orders-store";
 
 type Room = { id: string; name: string };
 type Table = NonNullable<GetOrdersQuery["orders"]["data"]>[number]["table"];
@@ -14,18 +15,36 @@ type Table = NonNullable<GetOrdersQuery["orders"]["data"]>[number]["table"];
 interface OrdersFiltersProps {
   rooms: Room[];
   tables: (Table & { room: Room })[];
+  filters: OrdersFilters;
+  onFiltersChange: (filters: Partial<OrdersFilters>) => void;
 }
 
-const statusOptions = [
-  { label: "Pending", value: "PENDING" },
-  { label: "Served", value: "SERVED" },
-  { label: "Paid", value: "PAYED" },
-  { label: "Canceled", value: "CANCELED" },
-];
+const getStatusLabel = (status: OrderStatusEnum): string => {
+  switch (status) {
+    case OrderStatusEnum.Pending:
+      return "Pending";
+    case OrderStatusEnum.Served:
+      return "Served";
+    case OrderStatusEnum.Payed:
+      return "Paid";
+    case OrderStatusEnum.Canceled:
+      return "Canceled";
+    default:
+      return status;
+  }
+};
 
-export default function OrdersFilters({ rooms, tables }: OrdersFiltersProps) {
-  const { setFilters, filters } = useOrdersStore();
+const statusOptions = Object.values(OrderStatusEnum).map((status) => ({
+  label: getStatusLabel(status),
+  value: status,
+}));
 
+export default function OrdersFilters({
+  rooms,
+  tables,
+  filters,
+  onFiltersChange,
+}: OrdersFiltersProps) {
   const [roomFilters, setRoomFilters] = useState<string[]>(
     filters.roomIds || []
   );
@@ -110,7 +129,7 @@ export default function OrdersFilters({ rooms, tables }: OrdersFiltersProps) {
   );
 
   useEffect(() => {
-    setFilters({
+    onFiltersChange({
       roomIds: debouncedRooms,
       tableIds: debouncedTables,
       statuses: debouncedStatuses,
@@ -122,7 +141,7 @@ export default function OrdersFilters({ rooms, tables }: OrdersFiltersProps) {
     debouncedTables,
     debouncedStatuses,
     debouncedDateFilters,
-    setFilters,
+    onFiltersChange,
   ]);
 
   return (

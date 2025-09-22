@@ -5,8 +5,11 @@ import { OrdersTable } from "@/components/orders/orders-columns";
 import OrdersFilters from "@/components/orders/orders-filters";
 import { GetOrdersDocument } from "@/graphql/generated/graphql";
 import { useMemo } from "react";
+import { useOrdersStore } from "@/stores/orders-store";
 
 export default function OrdersPage() {
+  const { setFilters, filters } = useOrdersStore();
+
   const { data } = useQuery(GetOrdersDocument, {
     variables: { first: 200, page: 1 },
     fetchPolicy: "cache-and-network",
@@ -49,7 +52,12 @@ export default function OrdersPage() {
 
   return (
     <div className="space-y-4">
-      <OrdersFilters rooms={rooms} tables={tables} />
+      <OrdersFilters
+        rooms={rooms}
+        tables={tables}
+        filters={filters}
+        onFiltersChange={setFilters}
+      />
       <OrdersTable />
     </div>
   );

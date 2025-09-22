@@ -2,7 +2,7 @@
 
 import { GetOrdersQuery } from "@/graphql/generated/graphql";
 import { ColumnDef } from "@tanstack/react-table";
-import { Badge } from "@workspace/ui/components/badge";
+import OrderStatusBadge from "@workspace/ui/components/order-status-badge";
 import { OrdersDataTable } from "./orders-data-table";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -22,15 +22,7 @@ const ordersColumns: ColumnDef<Order>[] = [
     header: "Status",
     accessorKey: "status",
     cell: ({ row }) => {
-      const status = row.original.status;
-
-      let badgeClass = "bg-gray-100 text-gray-800";
-      if (status === "PENDING") badgeClass = "bg-orange-100 text-orange-800";
-      if (status === "SERVED") badgeClass = "bg-green-100 text-green-800";
-      if (status === "PAYED") badgeClass = "bg-blue-100 text-blue-800";
-      if (status === "CANCELED") badgeClass = "bg-red-100 text-red-800";
-
-      return <Badge className={badgeClass}>{status}</Badge>;
+      return <OrderStatusBadge status={row.original.status} />;
     },
   },
   {

@@ -55,7 +55,7 @@ export function OrdersDataTable<TValue>({
       table_id?: string;
       start_date?: string;
       end_date?: string;
-    } = { first: 20, page: 1 }; // Start with page 1, smaller page size
+    } = { first: 20, page: 1 };
 
     if (filters.statuses.length > 0) {
       vars.statuses = filters.statuses as OrderStatusEnum[];
@@ -217,7 +217,7 @@ export function OrdersDataTable<TValue>({
                   onClick={() => router.push(`/orders/${original.id}`)}
                   tabIndex={0}
                   role="link"
-                  aria-label={`Voir détails de la commande ${original.id}`}
+                  aria-label={`View order details ${original.id}`}
                   className="hover:cursor-pointer hover:bg-khp-primary/10 border-b border-khp-text-secondary/30 focus:outline-2 focus:outline-offset-2 focus:outline-khp-primary h-16"
                 >
                   {row.getVisibleCells().map((cell) => (
@@ -253,7 +253,7 @@ export function OrdersDataTable<TValue>({
                 colSpan={columns.length}
                 className="h-24 text-center text-muted-foreground px-2"
               >
-                Aucune commande trouvée.
+                No orders found.
               </TableCell>
             </TableRow>
           )}
@@ -268,7 +268,7 @@ export function OrdersDataTable<TValue>({
                     <div className="flex items-center space-x-2">
                       <Skeleton className="h-8 w-8 rounded-full" />
                       <span className="text-sm text-muted-foreground">
-                        Chargement...
+                        Loading...
                       </span>
                     </div>
                   )}
