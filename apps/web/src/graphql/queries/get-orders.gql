@@ -1,27 +1,39 @@
-query GetOrders {
-  orders {
+query GetOrders(
+  $statuses: [OrderStatusEnum!]
+  $table_id: ID
+  $first: Int = 50
+  $page: Int = 1
+) {
+  orders(statuses: $statuses, table_id: $table_id, first: $first, page: $page) {
+    paginatorInfo {
+      count
+      currentPage
+      firstItem
+      hasMorePages
+      lastItem
+      lastPage
+      perPage
+      total
+    }
     data {
       id
-      status
       price
+      status
       table {
+        id
         label
-        id
-      }
-      steps {
-        id
-        status
-        position
-        stepMenus {
+        room {
           id
-          status
-          quantity
-        }
-        menus {
           name
         }
       }
-      created_at
+      steps {
+        stepMenus {
+          menu {
+            name
+          }
+        }
+      }
     }
   }
 }
