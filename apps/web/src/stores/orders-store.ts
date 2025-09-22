@@ -4,6 +4,8 @@ export interface OrdersFilters {
   roomIds: string[];
   tableIds: string[];
   statuses: string[];
+  startDate?: Date;
+  endDate?: Date;
 }
 
 interface OrdersStore {
@@ -16,6 +18,8 @@ const initialFilters: OrdersFilters = {
   roomIds: [],
   tableIds: [],
   statuses: [],
+  startDate: undefined,
+  endDate: undefined,
 };
 
 export const useOrdersStore = create<OrdersStore>((set) => ({

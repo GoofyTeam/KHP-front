@@ -4,29 +4,23 @@ import { useState, useCallback, useMemo, useEffect } from "react";
 import { useDebounce } from "@uidotdev/usehooks";
 
 import { MultiSelect } from "@workspace/ui/components/multi-select";
+import { DatePickerFilter } from "@workspace/ui/components/date-picker";
 import { useOrdersStore } from "@/stores/orders-store";
+import type { GetOrdersQuery } from "@/graphql/generated/graphql";
 
-interface Room {
-  id: string;
-  name: string;
-}
-
-interface Table {
-  id: string;
-  label: string;
-  room: Room;
-}
+type Room = { id: string; name: string };
+type Table = NonNullable<GetOrdersQuery["orders"]["data"]>[number]["table"];
 
 interface OrdersFiltersProps {
   rooms: Room[];
-  tables: Table[];
+  tables: (Table & { room: Room })[];
 }
 
 const statusOptions = [
-  { label: "En attente", value: "PENDING" },
-  { label: "Servi", value: "SERVED" },
-  { label: "Payé", value: "PAYED" },
-  { label: "Annulé", value: "CANCELED" },
+  { label: "Pending", value: "PENDING" },
+  { label: "Served", value: "SERVED" },
+  { label: "Paid", value: "PAYED" },
+  { label: "Canceled", value: "CANCELED" },
 ];
 
 export default function OrdersFilters({ rooms, tables }: OrdersFiltersProps) {
@@ -41,10 +35,18 @@ export default function OrdersFilters({ rooms, tables }: OrdersFiltersProps) {
   const [statusFilters, setStatusFilters] = useState<string[]>(
     filters.statuses || []
   );
+  const [dateFilters, setDateFilters] = useState<{
+    startDate?: Date;
+    endDate?: Date;
+  }>({
+    startDate: filters.startDate,
+    endDate: filters.endDate,
+  });
 
   const debouncedRooms = useDebounce(roomFilters, 100);
   const debouncedTables = useDebounce(tableFilters, 100);
   const debouncedStatuses = useDebounce(statusFilters, 100);
+  const debouncedDateFilters = useDebounce(dateFilters, 300);
 
   const roomOptions = useMemo(() => {
     return rooms
@@ -100,41 +102,61 @@ export default function OrdersFilters({ rooms, tables }: OrdersFiltersProps) {
     setStatusFilters(statuses);
   }, []);
 
+  const handleDateChange = useCallback(
+    (dates: { startDate?: Date; endDate?: Date }) => {
+      setDateFilters(dates);
+    },
+    []
+  );
+
   useEffect(() => {
     setFilters({
       roomIds: debouncedRooms,
       tableIds: debouncedTables,
       statuses: debouncedStatuses,
+      startDate: debouncedDateFilters.startDate,
+      endDate: debouncedDateFilters.endDate,
     });
-  }, [debouncedRooms, debouncedTables, debouncedStatuses, setFilters]);
+  }, [
+    debouncedRooms,
+    debouncedTables,
+    debouncedStatuses,
+    debouncedDateFilters,
+    setFilters,
+  ]);
 
   return (
     <div className="flex items-center justify-between space-x-2 mb-4">
       <div className="flex flex-col-reverse md:flex-row w-full items-center gap-2">
-        <div className="flex w-full md:w-auto items-center space-x-2">
+        <div className="flex w-full md:w-auto items-center space-x-2 flex-wrap gap-2">
+          <DatePickerFilter
+            onDateChange={handleDateChange}
+            initialStartDate={filters.startDate}
+            initialEndDate={filters.endDate}
+          />
           <MultiSelect
             options={statusOptions}
             onValueChange={handleStatusesChange}
             value={statusFilters}
-            placeholder="Filtrer par statut"
+            placeholder="Filter by status"
             variant="default"
-            className="w-full md:w-auto min-w-[180px]"
+            className="w-full md:w-auto min-w-[180px] [&_[data-selected=true]]:bg-khp-primary [&_[data-selected=true]]:text-white [&_button:hover]:border-khp-primary [&_button:focus]:border-khp-primary [&_button:focus]:ring-khp-primary/20"
           />
           <MultiSelect
             options={roomOptions}
             onValueChange={handleRoomsChange}
             value={roomFilters}
-            placeholder="Filtrer par salle"
+            placeholder="Filter by room"
             variant="default"
-            className="w-full md:w-auto min-w-[180px]"
+            className="w-full md:w-auto min-w-[180px] [&_[data-selected=true]]:bg-khp-primary [&_[data-selected=true]]:text-white [&_button:hover]:border-khp-primary [&_button:focus]:border-khp-primary [&_button:focus]:ring-khp-primary/20"
           />
           <MultiSelect
             options={tableOptions}
             onValueChange={handleTablesChange}
             value={tableFilters}
-            placeholder="Filtrer par table"
+            placeholder="Filter by table"
             variant="default"
-            className="w-full md:w-auto min-w-[180px]"
+            className="w-full md:w-auto min-w-[180px] [&_[data-selected=true]]:bg-khp-primary [&_[data-selected=true]]:text-white [&_button:hover]:border-khp-primary [&_button:focus]:border-khp-primary [&_button:focus]:ring-khp-primary/20"
             disabled={roomFilters.length === 0}
           />
         </div>

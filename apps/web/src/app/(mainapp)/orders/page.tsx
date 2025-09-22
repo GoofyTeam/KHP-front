@@ -7,17 +7,19 @@ import { GetOrdersDocument } from "@/graphql/generated/graphql";
 import { useMemo } from "react";
 
 export default function OrdersPage() {
-  // Fetch all orders without filters to get all available rooms and tables
   const { data } = useQuery(GetOrdersDocument, {
-    variables: { first: 200, page: 1 }, // Get more orders to extract all rooms/tables
+    variables: { first: 200, page: 1 },
     fetchPolicy: "cache-and-network",
   });
 
-  // Extract unique rooms and tables from orders data
   const { rooms, tables } = useMemo(() => {
     const orders = data?.orders?.data ?? [];
     const roomsMap = new Map();
-    const tablesArray: any[] = [];
+    const tablesArray: Array<{
+      id: string;
+      label: string;
+      room: { id: string; name: string };
+    }> = [];
 
     orders.forEach((order) => {
       if (order.table?.room) {

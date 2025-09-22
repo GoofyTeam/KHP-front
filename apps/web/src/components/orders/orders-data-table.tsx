@@ -26,6 +26,7 @@ import { Skeleton } from "@workspace/ui/components/skeleton";
 import {
   GetOrdersDocument,
   type GetOrdersQuery,
+  OrderStatusEnum,
 } from "@/graphql/generated/graphql";
 
 type Order = NonNullable<GetOrdersQuery["orders"]["data"]>[number];
@@ -41,25 +42,46 @@ export function OrdersDataTable<TValue>({
   const { filters } = useOrdersStore();
 
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
-    id: false,
-  });
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [currentPage, setCurrentPage] = useState(1);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   // Prepare GraphQL variables from filters
   const variables = useMemo(() => {
-    const vars: any = { first: 20, page: 1 }; // Start with page 1, smaller page size
+    const vars: {
+      first: number;
+      page: number;
+      statuses?: OrderStatusEnum[];
+      table_id?: string;
+      start_date?: string;
+      end_date?: string;
+    } = { first: 20, page: 1 }; // Start with page 1, smaller page size
 
-    // Add status filter if any statuses are selected
     if (filters.statuses.length > 0) {
-      vars.statuses = filters.statuses;
+      vars.statuses = filters.statuses as OrderStatusEnum[];
     }
 
-    // Add table filter if exactly one table is selected
-    // Note: GraphQL only supports single table_id, not multiple
     if (filters.tableIds.length === 1) {
       vars.table_id = filters.tableIds[0];
+    }
+
+    if (filters.startDate) {
+      const year = filters.startDate.getFullYear();
+      const month = String(filters.startDate.getMonth() + 1).padStart(2, "0");
+      const day = String(filters.startDate.getDate()).padStart(2, "0");
+      vars.start_date = `${year}-${month}-${day} 00:00:00`;
+    }
+
+    if (filters.endDate) {
+      const year = filters.endDate.getFullYear();
+      const month = String(filters.endDate.getMonth() + 1).padStart(2, "0");
+      const day = String(filters.endDate.getDate()).padStart(2, "0");
+      vars.end_date = `${year}-${month}-${day} 23:59:59`;
+    } else if (filters.startDate && !filters.endDate) {
+      const year = filters.startDate.getFullYear();
+      const month = String(filters.startDate.getMonth() + 1).padStart(2, "0");
+      const day = String(filters.startDate.getDate()).padStart(2, "0");
+      vars.end_date = `${year}-${month}-${day} 23:59:59`;
     }
 
     return vars;
@@ -78,18 +100,15 @@ export function OrdersDataTable<TValue>({
   const pageInfo = data?.orders?.paginatorInfo;
   const hasMorePages = pageInfo?.hasMorePages ?? false;
 
-  // Apply client-side room filter (since GraphQL doesn't support room filtering directly)
   const orders: Order[] = useMemo(() => {
     let filteredOrders = data?.orders?.data ?? [];
 
-    // Filter by room (client-side only, since GraphQL doesn't support room filter)
     if (filters.roomIds.length > 0) {
       filteredOrders = filteredOrders.filter((order) =>
         filters.roomIds.includes(order.table.room?.id?.toString() || "")
       );
     }
 
-    // Filter by multiple tables (client-side, when more than one table is selected)
     if (filters.tableIds.length > 1) {
       filteredOrders = filteredOrders.filter((order) =>
         filters.tableIds.includes(order.table.id?.toString() || "")
@@ -99,13 +118,11 @@ export function OrdersDataTable<TValue>({
     return filteredOrders;
   }, [data?.orders?.data, filters.roomIds, filters.tableIds]);
 
-  // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
     refetch();
   }, [filters, refetch]);
 
-  // Infinite scroll logic
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el || !hasMorePages || loading) return;
@@ -215,7 +232,6 @@ export function OrdersDataTable<TValue>({
               );
             })
           ) : loading ? (
-            // Loading skeleton
             Array.from({ length: 5 }).map((_, index) => (
               <TableRow
                 key={`skeleton-${index}`}
@@ -241,7 +257,6 @@ export function OrdersDataTable<TValue>({
               </TableCell>
             </TableRow>
           )}
-          {/* Infinite scroll sentinel */}
           {hasMorePages && (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-16">

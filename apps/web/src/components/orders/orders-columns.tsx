@@ -4,17 +4,26 @@ import { GetOrdersQuery } from "@/graphql/generated/graphql";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@workspace/ui/components/badge";
 import { OrdersDataTable } from "./orders-data-table";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 export type Order = NonNullable<GetOrdersQuery["orders"]["data"]>[number];
 
 const ordersColumns: ColumnDef<Order>[] = [
+  {
+    header: () => <span className="pl-2">ID</span>,
+    accessorKey: "id",
+    cell: ({ row }) => {
+      const id = row.original.id;
+      return <span className="pl-2">{id}</span>;
+    },
+  },
   {
     header: "Status",
     accessorKey: "status",
     cell: ({ row }) => {
       const status = row.original.status;
 
-      // Couleurs selon le statut
       let badgeClass = "bg-gray-100 text-gray-800";
       if (status === "PENDING") badgeClass = "bg-orange-100 text-orange-800";
       if (status === "SERVED") badgeClass = "bg-green-100 text-green-800";
@@ -22,6 +31,22 @@ const ordersColumns: ColumnDef<Order>[] = [
       if (status === "CANCELED") badgeClass = "bg-red-100 text-red-800";
 
       return <Badge className={badgeClass}>{status}</Badge>;
+    },
+  },
+  {
+    id: "created_date",
+    header: "Date",
+    cell: ({ row }) => {
+      const order = row.original;
+
+      if (!order.created_at) return "-";
+
+      try {
+        const date = new Date(order.created_at);
+        return format(date, "dd/MM/yyyy HH:mm", { locale: fr });
+      } catch {
+        return "-";
+      }
     },
   },
   {
@@ -37,7 +62,6 @@ const ordersColumns: ColumnDef<Order>[] = [
     header: "Menu",
     cell: ({ row }) => {
       const order = row.original;
-      // Récupère tous les noms de menus des étapes
       const menuNames =
         order.steps?.flatMap(
           (step) =>
@@ -46,13 +70,12 @@ const ordersColumns: ColumnDef<Order>[] = [
               .filter(Boolean) || []
         ) || [];
 
-      // Affiche les noms uniques, séparés par des virgules
       const uniqueMenuNames = [...new Set(menuNames)];
       return uniqueMenuNames.length > 0 ? uniqueMenuNames.join(", ") : "-";
     },
   },
   {
-    header: "Prix",
+    header: "Price",
     accessorKey: "price",
     cell: ({ row }) => {
       const price = row.original.price;

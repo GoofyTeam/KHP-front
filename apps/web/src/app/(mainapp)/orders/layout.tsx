@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AutoBreadcrumb } from "@/components/auto-breadcrumb";
 
 export const metadata: Metadata = {
-  title: "KHP | Commandes",
+  title: "KHP | Orders",
   description: "Orders Management - View and manage your company's orders",
 };
 
@@ -18,7 +18,7 @@ export default function OrdersLayout({
           <AutoBreadcrumb
             listClassName="text-xl font-semibold"
             overrides={{
-              "/orders": "Commandes",
+              "/orders": "Orders",
             }}
           />
         </div>
