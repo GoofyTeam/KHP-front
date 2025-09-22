@@ -226,49 +226,71 @@ export default function ProductPage() {
             variant="khp-outline"
             className="pointer-events-auto w-full"
             size="lg"
-            asChild
+            disabled={totalQuantity <= 0}
+            asChild={totalQuantity > 0}
           >
-            <Link to="/move-quantity" search={{ internalId: id }}>
+            {totalQuantity > 0 ? (
+              <Link to="/move-quantity" search={{ internalId: id }}>
+                <span className="flex items-center">
+                  <Package
+                    strokeWidth={1.5}
+                    size={128}
+                    className="text-khp-primary !h-8 !w-8"
+                  />
+                  <ArrowRightLeft
+                    strokeWidth={1.5}
+                    size={64}
+                    className="text-khp-primary !h-8 !w-8"
+                  />
+                  <Package
+                    strokeWidth={1.5}
+                    size={128}
+                    className="text-khp-primary !h-8 !w-8"
+                  />
+                </span>
+              </Link>
+            ) : (
               <span className="flex items-center">
-                <Package
-                  strokeWidth={1.5}
-                  size={128}
-                  className="text-khp-primary !h-8 !w-8"
-                />
+                <Package strokeWidth={1.5} size={128} className="!h-8 !w-8" />
                 <ArrowRightLeft
                   strokeWidth={1.5}
                   size={64}
-                  className="text-khp-primary !h-8 !w-8"
+                  className="!h-8 !w-8"
                 />
-                <Package
-                  strokeWidth={1.5}
-                  size={128}
-                  className="text-khp-primary !h-8 !w-8"
-                />
+                <Package strokeWidth={1.5} size={128} className="!h-8 !w-8" />
               </span>
-            </Link>
+            )}
           </Button>
           <Button
             variant="khp-destructive"
             className="pointer-events-auto w-full"
             size="lg"
-            asChild
+            disabled={totalQuantity <= 0}
+            asChild={totalQuantity > 0}
           >
-            <Link
-              to="/handle-item"
-              search={{
-                mode: "internalId",
-                type: "remove-quantity",
-                scanMode: "remove-mode",
-                internalId: id,
-              }}
-            >
+            {totalQuantity > 0 ? (
+              <Link
+                to="/handle-item"
+                search={{
+                  mode: "internalId",
+                  type: "remove-quantity",
+                  scanMode: "remove-mode",
+                  internalId: id,
+                }}
+              >
+                <PackageMinus
+                  strokeWidth={1.5}
+                  size={128}
+                  className="text-white !h-8 !w-8"
+                />
+              </Link>
+            ) : (
               <PackageMinus
                 strokeWidth={1.5}
                 size={128}
-                className="text-white !h-8 !w-8"
+                className="!h-8 !w-8"
               />
-            </Link>
+            )}
           </Button>
         </div>
 

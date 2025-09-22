@@ -11,7 +11,6 @@ import {
 import {
   LocationSelect,
   locationSelectMapper,
-  LocationsFromCompany,
 } from "@workspace/ui/components/location-select";
 import { QuantityInput } from "@workspace/ui/components/quantity-input";
 import { cn } from "@workspace/ui/lib/utils";
@@ -25,10 +24,11 @@ function MoveQuantity() {
   const { product, availableLocations } = useLoaderData({
     from: "/_protected/move-quantity",
   });
+
   const form = useForm<z.infer<typeof moveQuantitySchema>>({
     resolver: zodResolver(moveQuantitySchema),
     defaultValues: {
-      product_id: product.product_internal_id,
+      product_id: product.product_internal_id || "",
       quantity: "",
       source_id: "",
       destination_id: "",
@@ -107,11 +107,7 @@ function MoveQuantity() {
               name="destination_id"
               render={({ field }) => (
                 <LocationSelect
-                  quantities={
-                    locationSelectMapper(
-                      availableLocations as unknown as LocationsFromCompany[]
-                    ) || []
-                  }
+                  quantities={locationSelectMapper(availableLocations) || []}
                   value={field.value}
                   onValueChange={field.onChange}
                   placeholder="Select destination location"

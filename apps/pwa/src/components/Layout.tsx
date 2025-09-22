@@ -2,7 +2,7 @@ import * as React from "react";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { ArrowLeft } from "lucide-react";
-import { useRouter, useLocation, useMatch } from "@tanstack/react-router";
+import { useLocation, useMatch, useNavigate } from "@tanstack/react-router";
 import { useProduct } from "../stores/product-store";
 import { useHandleItemStore } from "../stores/handleitem-store";
 
@@ -21,8 +21,8 @@ const PAGE_TITLES: Record<string, string> = {
 };
 
 export function Layout({ children, className }: LayoutProps) {
-  const router = useRouter();
   const location = useLocation();
+  const navigate = useNavigate();
   const { currentProduct } = useProduct();
   const handleItemTitle = useHandleItemStore((state) => state.pageTitle);
 
@@ -36,6 +36,10 @@ export function Layout({ children, className }: LayoutProps) {
   });
   const handleItemMatch = useMatch({
     from: "/_protected/handle-item",
+    shouldThrow: false,
+  });
+  const moveQuantityMatch = useMatch({
+    from: "/_protected/move-quantity",
     shouldThrow: false,
   });
   const scanMatch = useMatch({
@@ -60,7 +64,44 @@ export function Layout({ children, className }: LayoutProps) {
   }
 
   const handleGoBack = () => {
-    router.history.back();
+    if (historyMatch) {
+      const productId = historyMatch.params.id;
+      navigate({ to: "/products/$id", params: { id: productId } });
+      return;
+    }
+
+    if (productMatch) {
+      navigate({ to: "/inventory" });
+      return;
+    }
+
+    if (handleItemMatch) {
+      const internalId =
+        handleItemMatch.loaderData?.productId ||
+        handleItemMatch.search?.internalId;
+      if (internalId) {
+        navigate({ to: "/products/$id", params: { id: internalId } });
+        return;
+      }
+      navigate({ to: "/inventory" });
+      return;
+    }
+
+    if (moveQuantityMatch) {
+      const internalId = moveQuantityMatch.search?.internalId;
+      if (internalId) {
+        navigate({ to: "/products/$id", params: { id: internalId } });
+        return;
+      }
+      navigate({ to: "/inventory" });
+      return;
+    }
+
+    if (scanMatch) {
+      navigate({ to: "/inventory" });
+      return;
+    }
+    navigate({ to: "/inventory" });
   };
 
   const shouldShowBackButton = !PAGES_WITHOUT_BACK_BUTTON.includes(
