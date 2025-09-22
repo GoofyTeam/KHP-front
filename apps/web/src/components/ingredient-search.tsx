@@ -42,7 +42,6 @@ type IngredientSearchProps = {
 export const IngredientSearch: React.FC<IngredientSearchProps> = ({
   onSelect,
   placeholder = "Search ingredients...",
-  className,
 }) => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
