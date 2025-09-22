@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { GalleryVerticalEnd } from "lucide-react";
 import { httpClient } from "@/lib/httpClient";
 import { LoginForm, LoginFormValues } from "@/components/login-form";
@@ -10,6 +10,7 @@ const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || "KHP";
 
 export default function Login() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -19,7 +20,9 @@ export default function Login() {
 
     try {
       await httpClient.post("/api/login", values);
-      router.push("/dashboard");
+      const fromParam = searchParams.get("from");
+      const nextPath = resolveRedirectPath(fromParam);
+      router.push(nextPath);
     } catch (error: unknown) {
       console.error("Login error:", error);
       setErrors({
@@ -60,4 +63,21 @@ export default function Login() {
       </div>
     </div>
   );
+}
+
+function resolveRedirectPath(path: string | null): string {
+  if (!path || !path.startsWith("/")) return "/dashboard";
+
+  const disallowedPrefixes = [
+    "/login",
+    "/register",
+    "/forgot-password",
+    "/reset-password",
+  ];
+
+  if (disallowedPrefixes.some((prefix) => path === prefix || path.startsWith(`${prefix}/`))) {
+    return "/dashboard";
+  }
+
+  return path;
 }
