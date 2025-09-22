@@ -11,9 +11,11 @@ import {
   Zap,
   SquareMenu,
   ListOrdered,
+  LogOut,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useBreakpoint } from "@workspace/ui/hooks/use-breakpoint";
 import { useState } from "react";
 
@@ -33,6 +35,7 @@ import {
   SheetTrigger,
 } from "@workspace/ui/components/sheet";
 import { Button } from "@workspace/ui/components/button";
+import { httpClient } from "@/lib/httpClient";
 
 const settingsNavItems = [
   {
@@ -169,6 +172,19 @@ export function SettingsMenuButton() {
 // Composant principal pour la sidebar des paramètres
 export function SettingsSidebar() {
   const isMobile = !useBreakpoint("md");
+  const router = useRouter();
+  const [logoutLoading, setLogoutLoading] = useState(false);
+
+  const handleLogout = async () => {
+    setLogoutLoading(true);
+
+    try {
+      await httpClient.post("/api/logout");
+      router.push("/login");
+    } catch {
+      setLogoutLoading(false);
+    }
+  };
 
   // Sur mobile, on n'affiche rien car le bouton est maintenant dans l'AppSidebarWrapper
   if (isMobile) {
@@ -176,14 +192,34 @@ export function SettingsSidebar() {
   }
 
   return (
-    <div className="w-64 h-full bg-card border border-border rounded-lg p-4">
+    <div className="w-64 h-full bg-card border border-border rounded-lg p-4 flex flex-col">
       <div className="mb-6">
         <h2 className="text-lg font-semibold text-foreground">Settings</h2>
         <p className="text-sm text-muted-foreground">
           Manage your account and preferences
         </p>
       </div>
-      <NavigationMenu />
+      <div className="flex-1 overflow-auto">
+        <NavigationMenu />
+      </div>
+      <div className="mt-6 space-y-2">
+        <Button
+          type="button"
+          onClick={handleLogout}
+          variant="khp-destructive"
+          className="w-full"
+          disabled={logoutLoading}
+        >
+          <div className="flex items-center justify-center gap-2">
+            {logoutLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <LogOut className="h-4 w-4" />
+            )}
+            {logoutLoading ? "Logging out..." : "Logout"}
+          </div>
+        </Button>
+      </div>
     </div>
   );
 }

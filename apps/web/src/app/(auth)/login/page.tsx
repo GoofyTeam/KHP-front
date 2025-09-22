@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { GalleryVerticalEnd } from "lucide-react";
 import { httpClient } from "@/lib/httpClient";
@@ -9,6 +9,14 @@ import { LoginForm, LoginFormValues } from "@/components/login-form";
 const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || "KHP";
 
 export default function Login() {
+  return (
+    <Suspense fallback={<LoginFallback />}>
+      <LoginContent />
+    </Suspense>
+  );
+}
+
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -63,6 +71,10 @@ export default function Login() {
       </div>
     </div>
   );
+}
+
+function LoginFallback() {
+  return <div className="min-h-svh" />;
 }
 
 function resolveRedirectPath(path: string | null): string {
