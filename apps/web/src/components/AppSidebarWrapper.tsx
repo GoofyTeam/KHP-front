@@ -18,6 +18,8 @@ const getSidebarDefaultState = (currentPath: string): boolean => {
     "/settings",
     "/menus",
     "/preparations",
+    "/waiters",
+    "/chefs",
   ];
 
   if (

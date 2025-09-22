@@ -18,6 +18,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@workspace/ui/components/sidebar";
+import { Separator } from "@workspace/ui/components/separator";
 
 interface NavigationItem {
   title: string;
@@ -28,6 +29,7 @@ interface NavigationItem {
 
 interface SidebarConfig {
   navigation: NavigationItem[];
+  specificScreens?: NavigationItem[];
 }
 
 const defaultConfig: SidebarConfig = {
@@ -53,8 +55,28 @@ const defaultConfig: SidebarConfig = {
     {
       title: "Menus",
       url: "/menus",
-      icon: "ChefHat",
+      icon: "SquareMenu",
       activePatterns: ["/menus", "/menu"],
+    },
+    {
+      title: "Orders",
+      url: "/orders",
+      icon: "Receipt",
+      activePatterns: ["/orders", "/order"],
+    },
+  ],
+  specificScreens: [
+    {
+      title: "Waiters",
+      url: "/waiters",
+      icon: "HandPlatter",
+      activePatterns: ["/waiters"],
+    },
+    {
+      title: "Chefs",
+      url: "/chefs",
+      icon: "ChefHat",
+      activePatterns: ["/chefs"],
     },
   ],
 };
@@ -151,6 +173,35 @@ export function AppSidebar({
                   </SidebarMenuItem>
                 );
               })}
+              <Separator className="my-2" />
+              {config.specificScreens &&
+                config.specificScreens.map((item) => {
+                  const ItemIcon = getIcon(item.icon);
+                  const isActive = isRouteActive(pathname, item);
+
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        size="lg"
+                        tooltip={item.title}
+                        isActive={isActive}
+                        asChild
+                      >
+                        <Link
+                          href={item.url}
+                          className={`relative transition-all duration-200 ease-in-out active:scale-95 ${
+                            !isActive
+                              ? "hover:!bg-transparent hover:!text-current before:absolute before:inset-0 before:border before:border-transparent before:rounded-md before:transition-colors before:duration-200 hover:before:border-khp-primary"
+                              : ""
+                          }`}
+                        >
+                          <ItemIcon className="size-5" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
