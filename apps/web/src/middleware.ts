@@ -7,16 +7,15 @@ interface UserData {
   company_id?: number;
 }
 
-const protectedRoutes = [
-  "/dashboard",
-  "/profile",
-  "/settings",
-  "/account",
-  "/ingredient",
-  "/menus",
-  "/stocks",
-  "/preparations",
+const publicRoutes = [
+  "/",
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/reset-password",
+  "/public-menus/*",
 ];
+
 const authRoutes = [
   "/login",
   "/register",
@@ -71,7 +70,7 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (isProtectedRoute(path) && !isAuthenticated) {
+  if (!isPublicRoute(path) && !isAuthenticated) {
     const url = new URL("/login", req.url);
     url.searchParams.set("from", path);
     return NextResponse.redirect(url);
@@ -94,12 +93,6 @@ export default async function middleware(req: NextRequest) {
     if (userData.id) response.headers.set("x-user-id", userData.id.toString());
     if (userData.name) response.headers.set("x-user-name", userData.name);
   }
-
-  response.headers.set("x-mw-api-url", API_URL || "EMPTY");
-  response.headers.set(
-    "x-mw-has-cookie",
-    String(!!req.cookies.get("khp_session"))
-  );
 
   return response;
 }
@@ -130,16 +123,25 @@ async function checkAuthenticationAndGetUser(
   }
 }
 
-function isProtectedRoute(path: string): boolean {
-  return protectedRoutes.some(
-    (route) => path === route || path.startsWith(`${route}/`)
-  );
+function isAuthRoute(path: string): boolean {
+  return authRoutes.some((route) => matchesRoute(path, route));
 }
 
-function isAuthRoute(path: string): boolean {
-  return authRoutes.some(
-    (route) => path === route || path.startsWith(`${route}/`)
-  );
+function isPublicRoute(path: string): boolean {
+  return publicRoutes.some((route) => matchesRoute(path, route));
+}
+
+function matchesRoute(path: string, route: string): boolean {
+  if (route.endsWith("/*")) {
+    const baseRoute = route.slice(0, -2);
+    return path === baseRoute || path.startsWith(`${baseRoute}/`);
+  }
+
+  if (route === "/") {
+    return path === route;
+  }
+
+  return path === route || path.startsWith(`${route}/`);
 }
 
 export const config = {
