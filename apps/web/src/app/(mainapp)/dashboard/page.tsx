@@ -13,6 +13,7 @@ import {
 import { LowStock } from "@/components/LowStock";
 import { Orders } from "@/components/Orders";
 import { Perishable } from "@/components/Perishable";
+import { formatTime, formatLongDate } from "@workspace/ui/lib/date-utils";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -20,16 +21,9 @@ export const revalidate = 0;
 
 function WelcomePanel({ className }: { className?: string }) {
   const now = new Date();
-  const currentDate = now.toLocaleDateString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-  const currentTime = now.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const currentDateString = now.toISOString();
+  const currentDate = formatLongDate(currentDateString, "en-US");
+  const currentTime = formatTime(currentDateString, "en-US");
 
   return (
     <section
