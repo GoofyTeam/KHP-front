@@ -14,7 +14,7 @@
   },
   "scripts": {
     "introspect": "node ./scripts/introspect.mjs",
-    "codegen": "node --require ./scripts/mock-cpus.cjs ../../node_modules/.bin/graphql-codegen --config codegen.ts"
+    "codegen": "node --require ./scripts/mock-cpus.cjs ../../node_modules/@graphql-codegen/cli/cjs/bin.js --config codegen.ts"
   },
   "dependencies": {
     "@graphql-typed-document-node/core": "^3.2.0",
