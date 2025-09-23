@@ -19,7 +19,7 @@ import {
 import {
   SearchIngredientsDocument,
   type SearchIngredientsQuery,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 
 import { getAllMeasurementUnitsOnlyValues } from "@workspace/ui/lib/measurement-units";
 

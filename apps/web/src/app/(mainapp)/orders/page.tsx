@@ -3,7 +3,7 @@
 import { useQuery } from "@apollo/client";
 import { OrdersTable } from "@/components/orders/orders-columns";
 import OrdersFilters from "@/components/orders/orders-filters";
-import { GetOrdersDocument } from "@/graphql/generated/graphql";
+import { GetOrdersDocument } from "@workspace/graphql";
 import { useMemo } from "react";
 import { useOrdersStore } from "@/stores/orders-store";
 

@@ -3,7 +3,7 @@ import {
   GetThresholdDocument,
   GetOrdersDocument,
   GetPerishableDocument,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 import { query } from "@/lib/ApolloClient";
 import { QuickAccessButton } from "@workspace/ui/components/quick-access-button";
 import {

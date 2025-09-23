@@ -37,7 +37,7 @@ import {
   GetMenuTypesDocument,
   GetMenuTypesQuery,
   MenuServiceTypeEnum,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 import { Tabs, TabsContent } from "@workspace/ui/components/tabs";
 import {
   ACCEPTED_IMAGE_TYPES,

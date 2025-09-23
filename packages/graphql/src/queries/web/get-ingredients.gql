@@ -1,0 +1,10 @@
+query GetIngredients($page: Int!, $search: String, $categoryIds: [ID!]) {
+  ingredients(page: $page, search: $search, categoryIds: $categoryIds) {
+    data {
+      ...IngredientListItemFields
+    }
+    paginatorInfo {
+      ...PaginatorInfoFields
+    }
+  }
+}

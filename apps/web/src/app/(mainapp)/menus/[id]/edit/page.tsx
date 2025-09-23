@@ -39,7 +39,7 @@ import {
   GetMenuTypesDocument,
   GetMenuTypesQuery,
   MenuServiceTypeEnum,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 import {
   ACCEPTED_IMAGE_TYPES,
   WANTED_IMAGE_SIZE,

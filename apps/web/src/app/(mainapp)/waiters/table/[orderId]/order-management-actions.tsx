@@ -7,7 +7,7 @@ import { Card, CardContent } from "@workspace/ui/components/card";
 import { Switch } from "@workspace/ui/components/switch";
 import { Label } from "@workspace/ui/components/label";
 import type { CancelOrderAction, PayOrderAction } from "./actions";
-import { OrderStatusEnum } from "@/graphql/generated/graphql";
+import { OrderStatusEnum } from "@workspace/graphql";
 import { cn } from "@workspace/ui/lib/utils";
 
 interface OrderManagementActionsProps {

@@ -22,7 +22,7 @@ import { toast } from "sonner";
 import {
   GetPublicMenusSettingsDocument,
   GetPublicMenusSettingsQuery,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 import {
   updatePublicMenusSettingsAction,
   type UpdatePublicMenusSettingsInput,

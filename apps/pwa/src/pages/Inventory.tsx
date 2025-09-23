@@ -9,7 +9,7 @@ import { Input } from "@workspace/ui/components/input";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@workspace/ui/components/button";
 import { ScanBarcode } from "lucide-react";
-import type { GetCompanyProductsQuery } from "../graphql/getCompanyProducts.gql";
+import type { GetCompanyProductsQuery } from "@workspace/graphql";
 
 function InventoryPage() {
   const { data, pageInfo } = useLoaderData({

@@ -1,6 +1,6 @@
 import { query } from "@/lib/ApolloClient";
 
-import { GetMenuByIdDocument } from "@/graphql/generated/graphql";
+import { GetMenuByIdDocument } from "@workspace/graphql";
 import Link from "next/link";
 import { Button } from "@workspace/ui/components/button";
 import { ChevronLeft, Edit } from "lucide-react";

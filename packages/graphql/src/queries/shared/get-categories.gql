@@ -1,0 +1,10 @@
+query GetCategories($first: Int! = 10, $page: Int = 1, $search: String) {
+  categories(first: $first, page: $page, search: $search) {
+    data {
+      ...CategoryWithShelfLives
+    }
+    paginatorInfo {
+      ...PaginatorInfoFields
+    }
+  }
+}

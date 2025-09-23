@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { MenuServiceTypeEnum } from '@/graphql/generated/graphql';
+import { MenuServiceTypeEnum } from '@workspace/graphql';
 import { createMenuAction, updateMenuAction } from '@/app/(mainapp)/menus/add/action';
 import type { CreateMenuFormValues } from '@/app/(mainapp)/menus/add/page';
 import type { UpdateMenuFormValues } from '@/app/(mainapp)/menus/[id]/edit/page';

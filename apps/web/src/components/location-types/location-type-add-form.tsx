@@ -15,7 +15,7 @@ import {
 } from "@workspace/ui/components/form";
 import { CheckCircleIcon, Loader2Icon } from "lucide-react";
 import { createLocationTypeAction } from "@/app/(mainapp)/settings/location-types/actions";
-import { GetLocationTypesDocument } from "@/graphql/generated/graphql";
+import { GetLocationTypesDocument } from "@workspace/graphql";
 
 type LocationTypeFormValues = {
   name: string;

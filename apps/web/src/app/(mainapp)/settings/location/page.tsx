@@ -27,8 +27,8 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card";
 import { Plus, MapPin, Trash2, AlertTriangle, Loader2 } from "lucide-react";
-import type { Location } from "@/graphql/generated/graphql";
-import { GetLocationsDocument } from "@/graphql/generated/graphql";
+import type { Location } from "@workspace/graphql";
+import { GetLocationsDocument } from "@workspace/graphql";
 import { deleteLocationAction } from "./actions";
 
 type DeleteFormData = {

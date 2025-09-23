@@ -8,10 +8,10 @@ import {
   useImperativeHandle,
 } from "react";
 import { useQuery } from "@apollo/client";
-import { GetMenuCategoriesDocument } from "@/graphql/generated/graphql";
+import { GetMenuCategoriesDocument } from "@workspace/graphql";
 import { Button } from "@workspace/ui/components/button";
 import { Trash2, Edit, Loader2, Tag, Plus } from "lucide-react";
-import type { MenuCategory } from "@/graphql/generated/graphql";
+import type { MenuCategory } from "@workspace/graphql";
 
 export interface MenuCategoriesListRef {
   refresh: () => Promise<void>;

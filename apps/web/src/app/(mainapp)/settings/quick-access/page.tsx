@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQuery } from "@apollo/client";
 import { Button } from "@workspace/ui/components/button";
 import { Settings, RotateCcw, Loader2 } from "lucide-react";
-import { GetQuickAccessesDocument } from "@/graphql/generated/graphql";
+import { GetQuickAccessesDocument } from "@workspace/graphql";
 import QuickAccessButtonForm from "@/components/quickaccess/quick-access-button-form";
 import ResetDialog from "@/components/quickaccess/reset-dialog";
 

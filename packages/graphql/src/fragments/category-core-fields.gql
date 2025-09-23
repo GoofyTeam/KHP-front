@@ -1,0 +1,16 @@
+fragment CategoryCoreFields on Category {
+  id
+  name
+  created_at
+  updated_at
+}
+
+fragment CategoryWithShelfLives on Category {
+  ...CategoryCoreFields
+  shelfLives {
+    shelf_life_hours
+    locationType {
+      ...LocationTypeFields
+    }
+  }
+}

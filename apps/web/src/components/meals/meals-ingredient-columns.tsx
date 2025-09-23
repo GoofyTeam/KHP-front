@@ -1,6 +1,6 @@
 "use client";
 
-import { GetMenuByIdQuery } from "@/graphql/generated/graphql";
+import { GetMenuByIdQuery } from "@workspace/graphql";
 import {
   convertMeasurement,
   type MeasurementUnitType,

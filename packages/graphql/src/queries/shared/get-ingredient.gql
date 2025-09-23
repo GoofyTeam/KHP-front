@@ -1,0 +1,9 @@
+query GetIngredient($id: ID, $barcode: String, $includeStockMovements: Boolean! = false) {
+  ingredient(id: $id, barcode: $barcode) {
+    ...IngredientCoreFields
+    stockMovements(orderBy: [{ column: CREATED_AT, order: DESC }])
+      @include(if: $includeStockMovements) {
+      ...StockMovementFields
+    }
+  }
+}

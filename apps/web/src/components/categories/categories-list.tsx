@@ -3,10 +3,10 @@
 import { useCallback, forwardRef, useImperativeHandle } from "react";
 import { useForm } from "react-hook-form";
 import { useQuery } from "@apollo/client";
-import { GetCategoriesDocument } from "@/graphql/generated/graphql";
+import { GetCategoriesDocument } from "@workspace/graphql";
 import { Button } from "@workspace/ui/components/button";
 import { Trash2, Edit, Loader2, Tags, Plus } from "lucide-react";
-import type { Category } from "@/graphql/generated/graphql";
+import type { Category } from "@workspace/graphql";
 
 export interface CategoriesListRef {
   refresh: () => Promise<void>;

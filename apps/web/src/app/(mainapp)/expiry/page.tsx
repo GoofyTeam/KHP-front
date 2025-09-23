@@ -6,7 +6,7 @@ import type { ExpiryStatus, ExpiryTableItem } from "@/components/expiry/types";
 import {
   GetPerishableDocument,
   type GetPerishableQuery,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 import { query } from "@/lib/ApolloClient";
 
 export const metadata: Metadata = {

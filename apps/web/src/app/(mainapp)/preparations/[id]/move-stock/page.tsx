@@ -1,5 +1,5 @@
 import { query } from "@/lib/ApolloClient";
-import { GetPreparationByIdDocument } from "@/graphql/generated/graphql";
+import { GetPreparationByIdDocument } from "@workspace/graphql";
 import { fetchLocations } from "@/queries/locations-query";
 import { MoveQuantityForm } from "./move-quantity-form";
 import { Button } from "@workspace/ui/components/button";

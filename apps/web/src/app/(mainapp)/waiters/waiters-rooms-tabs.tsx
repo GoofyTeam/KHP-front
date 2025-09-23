@@ -4,7 +4,7 @@ import TableCard from "@/components/orders/table-card";
 import {
   GetRoomsDocument,
   type GetRoomsQuery,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 import {
   Tabs,
   TabsContent,

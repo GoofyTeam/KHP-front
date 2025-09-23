@@ -2,13 +2,11 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import HandleItem from "../../pages/handleItem/HandleItem";
 import { graphqlRequest } from "../../lib/graph-client";
 import {
-  GetLocations,
+  GetLocationsDocument,
   type GetLocationsQuery,
-} from "../../graphql/getLocations.gql";
-import {
-  GetCategories,
+  GetCategoriesDocument,
   type GetCategoriesQuery,
-} from "../../graphql/getCategories.gql";
+} from "@workspace/graphql";
 
 import handleScanType from "../../lib/handleScanType";
 import z from "zod";
@@ -54,10 +52,10 @@ export const Route = createFileRoute("/_protected/handle-item")({
     }
   },
   loader: async ({ deps: { mode, type, barcode, internalId, scanMode } }) => {
-    const locationQuery = await graphqlRequest<GetLocationsQuery>(GetLocations);
+    const locationQuery = await graphqlRequest<GetLocationsQuery>(GetLocationsDocument);
     const availableLocations = locationQuery.locations.data || [];
     const categoriesQuery =
-      await graphqlRequest<GetCategoriesQuery>(GetCategories);
+      await graphqlRequest<GetCategoriesQuery>(GetCategoriesDocument);
     const categories = categoriesQuery.categories.data || [];
 
     const productToFetch = internalId ?? barcode;

@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import ProductPage from "../../pages/Product";
 import { graphqlRequest } from "../../lib/graph-client";
-import { GetProduct, GetProductQuery } from "../../graphql/getProduct.gql";
+import { GetProductDocument, type GetProductQuery } from "@workspace/graphql";
 
 export const Route = createFileRoute("/_protected/products/$id")({
   loader: async ({ params }) => {
-    const result = await graphqlRequest<GetProductQuery>(GetProduct, {
+    const result = await graphqlRequest<GetProductQuery>(GetProductDocument, {
       id: params.id,
     });
 

@@ -4,7 +4,7 @@ import React from "react";
 import { AlertTriangle, XCircle } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@workspace/ui/lib/utils";
-import { GetPerishableQuery } from "@/graphql/generated/graphql";
+import { GetPerishableQuery } from "@workspace/graphql";
 
 // --- Types
 export type PerishableItem = {

@@ -1,4 +1,4 @@
-import { MenuServiceTypeEnum } from "@/graphql/generated/graphql";
+import { MenuServiceTypeEnum } from "@workspace/graphql";
 
 export const MENU_SERVICE_TYPE_LABELS: Record<MenuServiceTypeEnum, string> = {
   [MenuServiceTypeEnum.Direct]: "Direct service",

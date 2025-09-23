@@ -13,7 +13,7 @@ import { Loader2 } from "lucide-react";
 import {
   GetLocationTypesDocument,
   type LocationType,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 
 interface LocationTypeSelectorProps {
   value?: string;

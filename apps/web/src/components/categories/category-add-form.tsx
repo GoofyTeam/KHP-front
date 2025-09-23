@@ -27,7 +27,7 @@ import {
 import {
   GetCategoriesDocument,
   GetLocationTypesDocument,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 
 interface CategoryAddFormProps {
   onCategoryAdded?: () => void;

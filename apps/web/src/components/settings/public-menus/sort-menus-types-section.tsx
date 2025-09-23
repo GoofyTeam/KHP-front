@@ -17,7 +17,7 @@ import {
   GetMenuTypesDocument,
   type GetMenuTypesQuery,
   type MenuType,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 
 import { updateMenuTypeAction } from "@/app/(mainapp)/settings/menu-types/actions";
 

@@ -1,11 +1,9 @@
 import {
-  GetIngredient,
-  GetIngredientQuery,
-} from "../graphql/getIngredient.gql";
-import {
-  OpenFoodFactsProxy,
-  OpenFoodFactsProxyQuery,
-} from "../graphql/openFoodFactsProxy.gql";
+  GetIngredientDocument,
+  type GetIngredientQuery,
+  OpenFoodFactsProxyDocument,
+  type OpenFoodFactsProxyQuery,
+} from "@workspace/graphql";
 import { HandleItemSearch } from "../routes/_protected/handle-item";
 import { graphqlRequest } from "./graph-client";
 
@@ -38,8 +36,8 @@ const handleScanType = async (
 
   if (mode === "barcode") {
     const resultByBarcode = await graphqlRequest<GetIngredientQuery>(
-      GetIngredient,
-      { barcode: productId! }
+      GetIngredientDocument,
+      { barcode: productId!, includeStockMovements: false }
     );
     if (resultByBarcode.ingredient) {
       wantedData = {
@@ -58,7 +56,7 @@ const handleScanType = async (
     }
 
     const result = await graphqlRequest<OpenFoodFactsProxyQuery>(
-      OpenFoodFactsProxy,
+      OpenFoodFactsProxyDocument,
       {
         barcode: productId,
         page: 1,
@@ -88,9 +86,10 @@ const handleScanType = async (
       product_base_unit: result.search.unit ?? "",
     };
   } else if (mode === "internalId") {
-    const result = await graphqlRequest<GetIngredientQuery>(GetIngredient, {
-      id: productId,
-    });
+    const result = await graphqlRequest<GetIngredientQuery>(
+      GetIngredientDocument,
+      { id: productId, includeStockMovements: false }
+    );
 
     if (!result.ingredient) {
       throw new Error("Product not found");

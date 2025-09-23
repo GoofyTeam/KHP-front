@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import type { ComponentProps } from 'react';
 import { vi } from 'vitest';
 import OrderManagementActions from '../order-management-actions';
-import { OrderStatusEnum } from '@/graphql/generated/graphql';
+import { OrderStatusEnum } from '@workspace/graphql';
 
 const navigationMocks = vi.hoisted(() => ({
   refresh: vi.fn(),

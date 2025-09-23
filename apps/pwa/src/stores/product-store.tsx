@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { GetProductQuery } from "../graphql/getProduct.gql";
+import type { GetProductQuery } from "@workspace/graphql";
 
 // Utiliser les types GraphQL générés
 type ProductData = NonNullable<GetProductQuery["ingredient"]>;

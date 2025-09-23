@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@workspace/ui/components/button";
 import { AlertCircle, CheckCircle } from "lucide-react";
-import type { GetIngredientQuery } from "@/graphql/generated/graphql";
+import type { GetIngredientQuery } from "@workspace/graphql";
 import type { LocationRow } from "@/queries/locations-query";
 import { QuantityInput } from "@workspace/ui/components/quantity-input";
 import { LocationSelect } from "@workspace/ui/components/location-select";

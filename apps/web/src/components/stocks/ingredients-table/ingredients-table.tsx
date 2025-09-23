@@ -21,10 +21,10 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 
-import { GetIngredientsDocument } from "@/graphql/generated/graphql";
+import { GetIngredientsDocument } from "@workspace/graphql";
 import { useStocksStore } from "@/stores/stocks-store";
 import { useIngredientsColumns } from "./ingredients-columns";
-import type { GetIngredientsQuery } from "@/graphql/generated/graphql";
+import type { GetIngredientsQuery } from "@workspace/graphql";
 
 export function IngredientsTable() {
   const router = useRouter();

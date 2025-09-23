@@ -1,6 +1,6 @@
 "use client";
 
-import { GetMenusQuery } from "@/graphql/generated/graphql";
+import { GetMenusQuery } from "@workspace/graphql";
 import { ColumnDef } from "@tanstack/react-table";
 import { StockStatus } from "@workspace/ui/components/stock-status";
 import { Check, X } from "lucide-react";

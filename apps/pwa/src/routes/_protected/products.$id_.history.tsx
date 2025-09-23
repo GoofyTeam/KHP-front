@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import ProductHistoryPage from "../../pages/ProductHistory";
 import { graphqlRequest } from "../../lib/graph-client";
-import { GetProduct, GetProductQuery } from "../../graphql/getProduct.gql";
+import { GetProductDocument, type GetProductQuery } from "@workspace/graphql";
 
 import z from "zod";
 
@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_protected/products/$id_/history")({
     const { id } = params;
     const { filter, selectedMonth } = deps;
 
-    const productData = await graphqlRequest<GetProductQuery>(GetProduct, {
+    const productData = await graphqlRequest<GetProductQuery>(GetProductDocument, {
       id,
     });
 

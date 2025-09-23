@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import InventoryPage from "../../pages/Inventory";
 import { graphqlRequest } from "../../lib/graph-client";
 import {
-  GetCompanyProducts,
+  GetCompanyProductsDocument,
   type GetCompanyProductsQuery,
-} from "../../graphql/getCompanyProducts.gql";
+} from "@workspace/graphql";
 import z from "zod";
 
 export const Route = createFileRoute("/_protected/inventory")({
@@ -25,7 +25,7 @@ export const Route = createFileRoute("/_protected/inventory")({
     }
 
     const result = await graphqlRequest<GetCompanyProductsQuery>(
-      GetCompanyProducts,
+      GetCompanyProductsDocument,
       variables
     );
 

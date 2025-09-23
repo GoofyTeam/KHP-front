@@ -34,7 +34,7 @@ Runs at http://localhost:3000.
 
 This app generates GraphQL artifacts before `dev` and `build`:
 
-- `npm run introspect` fetches the schema from `https://back.goofykhp.fr/graphql` and writes `src/graphql/schema/schema.graphql`.
+- `npm run introspect` fetches the schema from `https://back.goofykhp.fr/graphql` and writes it to `../../packages/graphql/src/schema/schema.graphql` shared by both apps.
 - `npm run codegen` (run automatically) executes `graphql-codegen` using `codegen.ts`.
 
 Ensure you have network access on first run.

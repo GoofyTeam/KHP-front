@@ -1,20 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-vi.mock('../../graphql/getIngredient.gql', () => ({
-  GetIngredient: 'GET_INGREDIENT_DOC',
-  __esModule: true,
-}))
-
-vi.mock('../../graphql/openFoodFactsProxy.gql', () => ({
-  OpenFoodFactsProxy: 'OPEN_FOOD_FACTS_DOC',
+vi.mock('@workspace/graphql', () => ({
+  GetIngredientDocument: 'GET_INGREDIENT_DOC',
+  OpenFoodFactsProxyDocument: 'OPEN_FOOD_FACTS_DOC',
   __esModule: true,
 }))
 
 import handleScanType from '../handleScanType'
 import { graphqlRequest } from '../graph-client'
-import { GetIngredient } from '../../graphql/getIngredient.gql'
-import { OpenFoodFactsProxy } from '../../graphql/openFoodFactsProxy.gql'
-import type { GetIngredientQuery } from '../../graphql/getIngredient.gql'
-import type { OpenFoodFactsProxyQuery } from '../../graphql/openFoodFactsProxy.gql'
+import {
+  GetIngredientDocument,
+  OpenFoodFactsProxyDocument,
+  type GetIngredientQuery,
+  type OpenFoodFactsProxyQuery,
+} from '@workspace/graphql'
 
 vi.mock('../graph-client', () => ({
   graphqlRequest: vi.fn(),
@@ -45,8 +43,9 @@ describe('handleScanType', () => {
     const result = await handleScanType('barcode', '1234567890')
 
     expect(mockGraphqlRequest).toHaveBeenCalledTimes(1)
-    expect(mockGraphqlRequest).toHaveBeenCalledWith(GetIngredient, {
+    expect(mockGraphqlRequest).toHaveBeenCalledWith(GetIngredientDocument, {
       barcode: '1234567890',
+      includeStockMovements: false,
     })
     expect(result).toMatchObject({
       product_image: 'https://img',
@@ -77,10 +76,11 @@ describe('handleScanType', () => {
 
     const result = await handleScanType('barcode', '0987654321')
 
-    expect(mockGraphqlRequest).toHaveBeenNthCalledWith(1, GetIngredient, {
+    expect(mockGraphqlRequest).toHaveBeenNthCalledWith(1, GetIngredientDocument, {
       barcode: '0987654321',
+      includeStockMovements: false,
     })
-    expect(mockGraphqlRequest).toHaveBeenNthCalledWith(2, OpenFoodFactsProxy, {
+    expect(mockGraphqlRequest).toHaveBeenNthCalledWith(2, OpenFoodFactsProxyDocument, {
       barcode: '0987654321',
       page: 1,
     })
@@ -104,8 +104,9 @@ describe('handleScanType', () => {
     await expect(handleScanType('internalId', 'ING-404')).rejects.toThrow(
       'Product not found'
     )
-    expect(mockGraphqlRequest).toHaveBeenCalledWith(GetIngredient, {
+    expect(mockGraphqlRequest).toHaveBeenCalledWith(GetIngredientDocument, {
       id: 'ING-404',
+      includeStockMovements: false,
     })
   })
 

@@ -11,8 +11,8 @@
     "test:watch": "vitest -w",
     "test:run": "vitest run",
     "preview": "next build && next start",
-    "introspect": "get-graphql-schema https://back.goofykhp.fr/graphql > src/graphql/schema/schema.graphql",
-    "codegen": "npm run introspect && graphql-codegen --config codegen.ts"
+    "introspect": "get-graphql-schema https://back.goofykhp.fr/graphql > ../../packages/graphql/src/schema/schema.graphql",
+    "codegen": "npm --workspace @workspace/graphql run codegen"
   },
   "dependencies": {
     "@apollo/client": "^3.13.9",

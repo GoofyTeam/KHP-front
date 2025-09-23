@@ -27,8 +27,8 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card";
 import { Plus, Tags, Trash2, AlertTriangle, Loader2 } from "lucide-react";
-import type { Category } from "@/graphql/generated/graphql";
-import { GetCategoriesDocument } from "@/graphql/generated/graphql";
+import type { Category } from "@workspace/graphql";
+import { GetCategoriesDocument } from "@workspace/graphql";
 import { deleteCategoryAction } from "./actions";
 
 type PageFormData = {

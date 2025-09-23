@@ -15,7 +15,7 @@ import {
 import {
   GetLocationsDocument,
   GetPreparationByIdQuery,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 import { Input } from "@workspace/ui/components/input";
 import { LoadMoreSelect } from "@workspace/ui/components/load-more-select";
 import { NetworkStatus, useQuery } from "@apollo/client";

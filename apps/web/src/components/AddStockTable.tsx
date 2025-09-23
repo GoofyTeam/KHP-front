@@ -29,7 +29,7 @@ import {
   GetLocationsDocument,
   GetCategoriesDocument,
   GetUnitDocument,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 import { useQuery } from "@apollo/client";
 import {
   ChevronLeft,

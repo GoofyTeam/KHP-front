@@ -1,0 +1,4 @@
+fragment LocationSummaryFields on Location {
+  id
+  name
+}

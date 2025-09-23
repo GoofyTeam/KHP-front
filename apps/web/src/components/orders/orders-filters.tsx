@@ -5,8 +5,8 @@ import { useDebounce } from "@uidotdev/usehooks";
 
 import { MultiSelect } from "@workspace/ui/components/multi-select";
 import { DatePickerFilter } from "@workspace/ui/components/date-picker";
-import type { GetOrdersQuery } from "@/graphql/generated/graphql";
-import { OrderStatusEnum } from "@/graphql/generated/graphql";
+import type { GetOrdersQuery } from "@workspace/graphql";
+import { OrderStatusEnum } from "@workspace/graphql";
 import type { OrdersFilters } from "@/stores/orders-store";
 
 type Room = { id: string; name: string };

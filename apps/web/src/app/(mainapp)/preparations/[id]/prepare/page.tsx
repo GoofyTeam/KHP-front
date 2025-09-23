@@ -1,5 +1,5 @@
 import { CategoryBadge } from "@/components/category-badge";
-import { GetPreparationByIdDocument } from "@/graphql/generated/graphql";
+import { GetPreparationByIdDocument } from "@workspace/graphql";
 import { query } from "@/lib/ApolloClient";
 import { Button } from "@workspace/ui/components/button";
 import { ImagePlaceholder } from "@workspace/ui/components/image-placeholder";

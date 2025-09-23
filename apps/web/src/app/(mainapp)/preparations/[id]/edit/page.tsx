@@ -42,7 +42,7 @@ import {
   type GetCategoriesQuery,
   GetPreparationByIdDocument,
   type GetPreparationByIdQuery,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 import { getAllMeasurementUnitsOnlyValues } from "@workspace/ui/lib/measurement-units";
 import { updatePreparationAction } from "./action";
 import { Tabs, TabsContent } from "@workspace/ui/components/tabs";

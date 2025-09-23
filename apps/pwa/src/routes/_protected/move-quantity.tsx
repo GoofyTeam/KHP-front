@@ -1,9 +1,9 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { graphqlRequest } from "../../lib/graph-client";
 import {
-  GetLocations,
-  GetLocationsQuery,
-} from "../../graphql/getLocations.gql";
+  GetLocationsDocument,
+  type GetLocationsQuery,
+} from "@workspace/graphql";
 import handleScanType from "../../lib/handleScanType";
 import { useHandleItemStore } from "../../stores/handleitem-store";
 import MoveQuantity from "../../pages/handleItem/movequantity/MoveQuantity";
@@ -30,7 +30,7 @@ export const Route = createFileRoute("/_protected/move-quantity")({
     }
   },
   loader: async ({ deps: { internalId } }) => {
-    const locationQuery = await graphqlRequest<GetLocationsQuery>(GetLocations);
+    const locationQuery = await graphqlRequest<GetLocationsQuery>(GetLocationsDocument);
     const availableLocations = locationQuery.locations.data || [];
 
     const productData = await handleScanType("internalId", internalId);

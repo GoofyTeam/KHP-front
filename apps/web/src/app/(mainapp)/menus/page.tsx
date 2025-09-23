@@ -4,8 +4,8 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { useQuery } from "@apollo/client";
 import { DataTable } from "@/components/meals/meals-data-table";
 import { columns } from "@/components/meals/meals-column";
-import { GetMenusDocument } from "@/graphql/generated/graphql";
-import type { GetMenusQuery } from "@/graphql/generated/graphql";
+import { GetMenusDocument } from "@workspace/graphql";
+import type { GetMenusQuery } from "@workspace/graphql";
 
 export default function MenusPage() {
   const [currentPage, setCurrentPage] = useState(1);

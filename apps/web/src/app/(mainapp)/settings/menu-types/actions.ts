@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import type { MenuType } from "@/graphql/generated/graphql";
+import type { MenuType } from "@workspace/graphql";
 import { httpClient } from "@/lib/httpClient";
 
 type ActionResult<T = unknown> =

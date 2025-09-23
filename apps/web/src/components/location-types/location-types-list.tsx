@@ -8,11 +8,11 @@ import {
   useImperativeHandle,
 } from "react";
 import { useQuery } from "@apollo/client";
-import { GetLocationTypesDocument } from "@/graphql/generated/graphql";
+import { GetLocationTypesDocument } from "@workspace/graphql";
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
 import { Trash2, Edit, Loader2, Layers, Plus, Shield } from "lucide-react";
-import type { LocationType } from "@/graphql/generated/graphql";
+import type { LocationType } from "@workspace/graphql";
 
 export interface LocationTypesListRef {
   refresh: () => Promise<void>;

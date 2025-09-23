@@ -18,7 +18,7 @@ export default defineConfig({
   plugins: [
     //graphqlLoader(),
     typedGraphQL({
-      schemaPath: "./src/graphql/generated/schema.graphql",
+      schemaPath: "../../packages/graphql/src/schema/schema.graphql",
       generateDeclarations: true,
       codegenPluginConfigs: {
         typescript: {

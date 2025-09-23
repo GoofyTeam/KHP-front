@@ -6,7 +6,7 @@ import {
   MenuServiceTypeEnum,
   OrderStatusEnum,
   StepMenuStatusEnum,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 import { NetworkStatus, useQuery } from "@apollo/client";
 import { Card, CardContent } from "@workspace/ui/components/card";
 import { Separator } from "@workspace/ui/components/separator";

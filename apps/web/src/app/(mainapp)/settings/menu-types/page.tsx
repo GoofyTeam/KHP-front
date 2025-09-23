@@ -37,7 +37,7 @@ import { MenuTypeEditForm } from "@/components/menu-types/menu-type-edit-form";
 import {
   GetMenuTypesDocument,
   type MenuType,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 import { deleteMenuTypeAction } from "./actions";
 
 type DeleteFormData = {

@@ -1,0 +1,27 @@
+{
+  "name": "@workspace/graphql",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "files": [
+    "src"
+  ],
+  "exports": {
+    ".": "./src/index.ts",
+    "./generated": "./src/generated/index.ts",
+    "./fragments/*": "./src/fragments/*.gql",
+    "./queries/*": "./src/queries/*"
+  },
+  "scripts": {
+    "codegen": "node --require ./scripts/mock-cpus.cjs ../../node_modules/.bin/graphql-codegen --config codegen.ts"
+  },
+  "dependencies": {
+    "@graphql-typed-document-node/core": "^3.2.0",
+    "graphql": "^16.11.0"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.7",
+    "@workspace/typescript-config": "file:../typescript-config",
+    "typescript": "^5.8.2"
+  }
+}

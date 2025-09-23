@@ -1,0 +1,27 @@
+query GetOrders {
+  orders {
+    data {
+      id
+      status
+      price
+      table {
+        label
+        id
+      }
+      steps {
+        id
+        status
+        position
+        stepMenus {
+          id
+          status
+          quantity
+        }
+        menus {
+          name
+        }
+      }
+      created_at
+    }
+  }
+}

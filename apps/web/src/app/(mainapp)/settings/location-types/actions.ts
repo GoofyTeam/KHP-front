@@ -2,7 +2,7 @@
 
 import { httpClient } from "@/lib/httpClient";
 import { revalidatePath } from "next/cache";
-import type { LocationType } from "@/graphql/generated/graphql";
+import type { LocationType } from "@workspace/graphql";
 
 type ActionResult<T = unknown> =
   | { success: true; data?: T }
