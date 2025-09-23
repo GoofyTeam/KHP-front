@@ -1,0 +1,14 @@
+query GetBusinessHours {
+  me {
+    company {
+      id
+      businessHours {
+        opens_at
+        closes_at
+        day_of_week
+        sequence
+        is_overnight
+      }
+    }
+  }
+}
