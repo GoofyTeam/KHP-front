@@ -255,7 +255,7 @@ class HttpClient {
     T,
     D extends RequestData | FormData = RequestData | FormData,
   >(
-    method: "GET" | "POST" | "PUT" | "DELETE",
+    method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH",
     endpoint: string,
     data?: D,
     options: RequestInit = {},
@@ -416,6 +416,14 @@ class HttpClient {
     options?: RequestInit
   ): Promise<T> {
     return this.request<T, D>("PUT", endpoint, data, options);
+  }
+
+  async patch<T, D extends RequestData | FormData = RequestData | FormData>(
+    endpoint: string,
+    data?: D,
+    options?: RequestInit
+  ): Promise<T> {
+    return this.request<T, D>("PATCH", endpoint, data, options);
   }
 
   async delete<T>(endpoint: string, options?: RequestInit): Promise<T> {

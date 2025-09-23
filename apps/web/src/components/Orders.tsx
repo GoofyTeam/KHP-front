@@ -5,7 +5,7 @@ import { Clock, CheckCircle, XCircle, Banknote } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@workspace/ui/lib/utils";
 import { GetOrdersQuery } from "@/graphql/generated/graphql";
-import { formatTime } from "@/lib/date-utils";
+import { formatTime } from "@workspace/ui/lib/date-utils";
 
 interface TableData {
   label: string;
