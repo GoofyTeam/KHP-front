@@ -4,9 +4,11 @@ import { OrderStatus } from "@workspace/ui/lib/order";
 function OrderStatusBadge({
   status,
   className,
+  size = "default",
 }: {
   status: OrderStatus;
   className?: string;
+  size?: "default" | "large";
 }) {
   let bgColor = "";
   let textColor = "";
@@ -44,9 +46,14 @@ function OrderStatusBadge({
       label = "Unknown";
   }
 
+  const sizeClasses =
+    size === "large"
+      ? "text-base px-6 py-3 font-semibold"
+      : "text-xs px-2 py-1";
+
   return (
     <Badge
-      className={`text-xs px-2 py-1 ${bgColor} ${textColor} border ${bgColor.replace("bg-", "border-")} ${className ?? ""} rounded-md`}
+      className={`${sizeClasses} ${bgColor} ${textColor} border ${bgColor.replace("bg-", "border-")} ${className ?? ""} rounded-md`}
     >
       {label}
     </Badge>

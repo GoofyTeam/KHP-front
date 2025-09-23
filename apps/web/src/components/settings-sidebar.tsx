@@ -151,7 +151,7 @@ export function SettingsMenuButton() {
           <span className="sr-only">Open settings menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-80">
+      <SheetContent side="right" className="w-80 flex flex-col">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
@@ -161,7 +161,7 @@ export function SettingsMenuButton() {
             Navigate between different settings sections
           </SheetDescription>
         </SheetHeader>
-        <div className="mt-6">
+        <div className="mt-6 p-4 px-2 flex-1 overflow-auto">
           <NavigationMenu onItemClick={() => setIsMenuOpen(false)} />
         </div>
       </SheetContent>
@@ -199,7 +199,7 @@ export function SettingsSidebar() {
       <div className="flex-1 overflow-auto">
         <NavigationMenu />
       </div>
-      <div className="mt-6 space-y-2">
+      <div className="mt-6 space-y-2 ">
         <Button
           type="button"
           onClick={handleLogout}
