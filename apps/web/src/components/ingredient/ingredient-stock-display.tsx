@@ -7,7 +7,7 @@ import { formatQuantity } from "../../lib/formatQuantity";
 import {
   GetIngredientQuery,
   GetPreparationByIdQuery,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 
 type IngredientData = NonNullable<GetIngredientQuery["ingredient"]>;
 type PreparationData = NonNullable<GetPreparationByIdQuery["preparation"]>;

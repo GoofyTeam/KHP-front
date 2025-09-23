@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@workspace/ui/components/button";
 import { ImagePlaceholder } from "@workspace/ui/components/image-placeholder";
-import { GetIngredientQuery } from "@/graphql/generated/graphql";
+import { GetIngredientQuery } from "@workspace/graphql";
 import { CategoryBadge } from "../category-badge";
 import { Edit, PackageMinus, PackagePlus } from "lucide-react";
 import DeleteIngredient from "./delete-ingredient";

@@ -34,8 +34,8 @@ import {
   Loader2,
   Shield,
 } from "lucide-react";
-import type { LocationType } from "@/graphql/generated/graphql";
-import { GetLocationTypesDocument } from "@/graphql/generated/graphql";
+import type { LocationType } from "@workspace/graphql";
+import { GetLocationTypesDocument } from "@workspace/graphql";
 import { deleteLocationTypeAction } from "./actions";
 
 type DeleteFormData = {

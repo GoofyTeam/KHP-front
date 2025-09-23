@@ -24,7 +24,7 @@ import {
 import {
   GetMenuTypesDocument,
   type MenuType,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 
 const menuTypeSchema = z.object({
   name: z

@@ -1,7 +1,7 @@
 "use server";
 
 import { httpClient } from "@/lib/httpClient";
-import type { Category } from "@/graphql/generated/graphql";
+import type { Category } from "@workspace/graphql";
 import { type ActionResult, executeHttpAction } from "@/lib/actionUtils";
 
 export interface CreateCategoryInput {

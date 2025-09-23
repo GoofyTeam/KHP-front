@@ -1,0 +1,10 @@
+query GetLocationTypes($first: Int, $page: Int) {
+  locationTypes(first: $first, page: $page) {
+    data {
+      ...LocationTypeFields
+    }
+    paginatorInfo {
+      ...PaginatorInfoFields
+    }
+  }
+}

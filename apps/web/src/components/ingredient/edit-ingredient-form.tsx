@@ -34,7 +34,7 @@ import {
   GetCategoriesDocument,
   GetAllergensDocument,
   type GetIngredientQuery,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 import { createAllergenOptions } from "@workspace/ui/lib/allergens";
 import { updateIngredientAction } from "@/app/(mainapp)/ingredient/actions";
 import {

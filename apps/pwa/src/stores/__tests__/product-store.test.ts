@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import type { GetProductQuery } from '../../graphql/getProduct.gql'
+import type { GetProductQuery } from '@workspace/graphql'
 import { useProduct } from '../product-store'
 
 const resetStore = () =>

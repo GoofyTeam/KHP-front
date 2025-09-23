@@ -1,0 +1,10 @@
+query getCompanyProducts($searchQuery: String, $page: Int!) {
+  ingredients(search: $searchQuery, page: $page) {
+    data {
+      ...IngredientListItemFields
+    }
+    paginatorInfo {
+      hasMorePages
+    }
+  }
+}

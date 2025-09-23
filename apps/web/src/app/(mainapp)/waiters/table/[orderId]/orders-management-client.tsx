@@ -6,7 +6,7 @@ import {
   StepMenuStatusEnum,
   TakinOrdersQueryDocument,
   type TakinOrdersQueryQuery,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 import { useQuery } from "@apollo/client";
 import { Badge } from "@workspace/ui/components/badge";
 import { Loader2 } from "lucide-react";

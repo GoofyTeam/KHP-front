@@ -10,7 +10,7 @@ import {
   OrderStepStatusEnum,
   StepMenuStatusEnum,
   type TakinOrdersQueryQuery,
-} from '@/graphql/generated/graphql';
+} from '@workspace/graphql';
 
 const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 

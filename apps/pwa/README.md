@@ -30,7 +30,7 @@ Default port: http://localhost:5173.
 
 ### GraphQL Introspection
 
-Before `dev`, the `introspect` command downloads the GraphQL schema from `https://back.goofykhp.fr/graphql` to `src/graphql/generated/schema.graphql`. Network is required on first launch.
+Before `dev`, the `introspect` command downloads the GraphQL schema from `https://back.goofykhp.fr/graphql` to `../../packages/graphql/src/schema/schema.graphql`. Network is required on first launch.
 
 ## Build & Preview
 

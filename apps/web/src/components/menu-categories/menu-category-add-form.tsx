@@ -17,7 +17,7 @@ import {
 } from "@workspace/ui/components/form";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { createMenuCategoryAction } from "@/app/(mainapp)/settings/menu-categories/actions";
-import { GetMenuCategoriesDocument } from "@/graphql/generated/graphql";
+import { GetMenuCategoriesDocument } from "@workspace/graphql";
 
 const menuCategorySchema = z.object({
   name: z

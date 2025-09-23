@@ -11,7 +11,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { getStepStatusIcon, OrderStepStatus } from "@workspace/ui/lib/order";
 import { cn } from "@workspace/ui/lib/utils";
-import type { TakinOrdersQueryQuery } from "@/graphql/generated/graphql";
+import type { TakinOrdersQueryQuery } from "@workspace/graphql";
 
 type OrderStep = NonNullable<TakinOrdersQueryQuery["order"]>["steps"][number];
 

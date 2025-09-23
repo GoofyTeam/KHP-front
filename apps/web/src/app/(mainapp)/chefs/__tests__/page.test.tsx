@@ -6,7 +6,7 @@ import {
   MenuServiceTypeEnum,
   OrderStatusEnum,
   StepMenuStatusEnum,
-} from '@/graphql/generated/graphql';
+} from '@workspace/graphql';
 import { NetworkStatus, useQuery } from '@apollo/client';
 
 vi.mock('@apollo/client', async () => {

@@ -1,6 +1,6 @@
 import { ImagePlaceholder } from "@workspace/ui/components/image-placeholder";
 import { CategoryBadge } from "../category-badge";
-import { GetIngredientQuery } from "@/graphql/generated/graphql";
+import { GetIngredientQuery } from "@workspace/graphql";
 
 type IngredientData = NonNullable<GetIngredientQuery["ingredient"]>;
 

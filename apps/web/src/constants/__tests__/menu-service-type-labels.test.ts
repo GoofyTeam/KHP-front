@@ -4,7 +4,7 @@ import {
   getMenuServiceTypeLabel,
   MENU_SERVICE_TYPE_LABELS,
 } from '../menu-service-type-labels';
-import { MenuServiceTypeEnum } from '@/graphql/generated/graphql';
+import { MenuServiceTypeEnum } from '@workspace/graphql';
 
 describe('getMenuServiceTypeLabel', () => {
   test('returns placeholder when service type is missing', () => {

@@ -13,7 +13,7 @@ import {
   PackagePlus,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { GetProductQuery } from "../graphql/getProduct.gql";
+import type { GetProductQuery } from "@workspace/graphql";
 import { LocationSelect } from "@workspace/ui/components/location-select";
 import { ImagePlaceholder } from "@workspace/ui/components/image-placeholder";
 

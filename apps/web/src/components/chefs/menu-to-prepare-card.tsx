@@ -1,4 +1,4 @@
-import { ChefsOrderStepsQuery } from "@/graphql/generated/graphql";
+import { ChefsOrderStepsQuery } from "@workspace/graphql";
 import { Badge } from "@workspace/ui/components/badge";
 import { Card, CardContent } from "@workspace/ui/components/card";
 import { getUrgencyColor, getWaitingTime } from "@workspace/ui/lib/order";

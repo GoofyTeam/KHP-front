@@ -2,7 +2,7 @@
 
 import { httpClient } from "@/lib/httpClient";
 import { revalidatePath } from "next/cache";
-import type { MenuCategory } from "@/graphql/generated/graphql";
+import type { MenuCategory } from "@workspace/graphql";
 
 type ActionResult<T = unknown> =
   | { success: true; data?: T }

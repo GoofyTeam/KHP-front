@@ -3,7 +3,7 @@ import { query } from "@/lib/ApolloClient";
 import {
   GetIngredientDocument,
   GetIngredientQuery,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 
 /**
  * Fetch a single ingredient by ID
@@ -14,7 +14,7 @@ export async function fetchIngredient(
   try {
     const { data, error } = await query({
       query: GetIngredientDocument,
-      variables: { id },
+      variables: { id, includeStockMovements: true },
     });
 
     if (error) {

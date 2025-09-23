@@ -1,6 +1,6 @@
 "use client";
 
-import { TakinOrdersQueryQuery } from "@/graphql/generated/graphql";
+import { TakinOrdersQueryQuery } from "@workspace/graphql";
 import { Button } from "@workspace/ui/components/button";
 import {
   Card,

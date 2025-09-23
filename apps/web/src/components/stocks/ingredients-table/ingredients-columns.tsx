@@ -11,7 +11,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
-import type { GetIngredientsQuery } from "@/graphql/generated/graphql";
+import type { GetIngredientsQuery } from "@workspace/graphql";
 
 type IngredientRow = GetIngredientsQuery["ingredients"]["data"][number];
 

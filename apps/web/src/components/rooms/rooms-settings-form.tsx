@@ -1,6 +1,6 @@
 "use client";
 
-import { GetRoomsDocument } from "@/graphql/generated/graphql";
+import { GetRoomsDocument } from "@workspace/graphql";
 import { useQuery } from "@apollo/client";
 import { Card, CardContent, CardHeader } from "@workspace/ui/components/card";
 import {

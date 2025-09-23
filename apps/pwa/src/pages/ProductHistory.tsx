@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select";
 import { Filter, X, Loader2 } from "lucide-react";
-import { GetProductQuery } from "../graphql/getProduct.gql";
+import type { GetProductQuery } from "@workspace/graphql";
 import { LocationSelect } from "@workspace/ui/components/location-select";
 import { MovementHistory } from "@workspace/ui/components/movement-history";
 import { movementHistoryFromStockMovements } from "@workspace/ui/lib/movement-history";

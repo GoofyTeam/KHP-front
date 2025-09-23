@@ -10,7 +10,7 @@ import {
   GetMenuTypesDocument,
   GetMenuTypesQuery,
   type MenuType,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 
 export interface MenuTypesListRef {
   refresh: () => Promise<void>;

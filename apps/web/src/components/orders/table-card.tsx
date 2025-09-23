@@ -1,6 +1,6 @@
 "use client";
 
-import { GetRoomsQuery } from "@/graphql/generated/graphql";
+import { GetRoomsQuery } from "@workspace/graphql";
 import {
   Card,
   CardAction,

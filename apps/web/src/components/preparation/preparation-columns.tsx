@@ -1,6 +1,6 @@
 "use client";
 
-import { GetPreparationsQuery } from "@/graphql/generated/graphql";
+import { GetPreparationsQuery } from "@workspace/graphql";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@workspace/ui/components/badge";
 import { Package } from "lucide-react";

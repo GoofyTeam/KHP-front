@@ -29,7 +29,7 @@ import Link from "next/link";
 import {
   GetPreparationsDocument,
   type GetPreparationsQuery,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 
 type Preparation = NonNullable<
   GetPreparationsQuery["preparations"]["data"]

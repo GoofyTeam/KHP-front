@@ -2,7 +2,7 @@ import { query } from "@/lib/ApolloClient";
 import {
   GetLocationsDocument,
   type GetLocationsQuery,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 
 /**
  * Fetch all available locations

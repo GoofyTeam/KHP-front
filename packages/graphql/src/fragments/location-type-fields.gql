@@ -1,0 +1,5 @@
+fragment LocationTypeFields on LocationType {
+  id
+  name
+  is_default
+}

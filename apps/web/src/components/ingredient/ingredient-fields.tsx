@@ -23,7 +23,7 @@ import {
   GetMeasurementUnitsDocument,
   GetCategoriesDocument,
   GetAllergensDocument,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 import { createAllergenOptions } from "@workspace/ui/lib/allergens";
 
 type EditIngredientFormData = {

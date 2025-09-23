@@ -1,0 +1,43 @@
+fragment IngredientQuantityFields on IngredientQuantity {
+  quantity
+  location {
+    ...LocationSummaryFields
+    locationType {
+      ...LocationTypeFields
+    }
+  }
+}
+
+fragment StockMovementFields on StockMovement {
+  id
+  type
+  quantity
+  quantity_before
+  quantity_after
+  created_at
+  location {
+    ...LocationSummaryFields
+  }
+}
+
+fragment IngredientListItemFields on Ingredient {
+  id
+  name
+  unit
+  image_url
+  category {
+    ...CategorySummaryFields
+  }
+  quantities {
+    ...IngredientQuantityFields
+  }
+}
+
+fragment IngredientCoreFields on Ingredient {
+  ...IngredientListItemFields
+  base_quantity
+  base_unit
+  allergens
+  created_at
+  updated_at
+}

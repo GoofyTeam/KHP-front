@@ -1,6 +1,6 @@
 "use client";
 
-import { GetOrdersQuery } from "@/graphql/generated/graphql";
+import { GetOrdersQuery } from "@workspace/graphql";
 import { ColumnDef } from "@tanstack/react-table";
 import OrderStatusBadge from "@workspace/ui/components/order-status-badge";
 import { OrdersDataTable } from "./orders-data-table";

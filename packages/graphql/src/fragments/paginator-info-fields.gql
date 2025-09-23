@@ -1,0 +1,10 @@
+fragment PaginatorInfoFields on PaginatorInfo {
+  count
+  currentPage
+  firstItem
+  hasMorePages
+  lastItem
+  lastPage
+  perPage
+  total
+}

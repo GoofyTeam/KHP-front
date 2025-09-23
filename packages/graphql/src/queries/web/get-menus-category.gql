@@ -1,0 +1,10 @@
+query GetMenuCategories($first: Int, $page: Int) {
+  menuCategories(first: $first, page: $page) {
+    data {
+      ...MenuCategoryFields
+    }
+    paginatorInfo {
+      ...PaginatorInfoFields
+    }
+  }
+}

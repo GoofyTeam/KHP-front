@@ -1,0 +1,56 @@
+query GetOrders(
+  $first: Int! = 20
+  $page: Int
+  $statuses: [OrderStatusEnum!]
+  $table_id: ID
+  $user_id: ID
+  $start_date: DateTime
+  $end_date: DateTime
+  $orderBy: [QueryOrdersOrderByOrderByClause!]
+) {
+  orders(
+    first: $first
+    page: $page
+    statuses: $statuses
+    table_id: $table_id
+    user_id: $user_id
+    start_date: $start_date
+    end_date: $end_date
+    orderBy: $orderBy
+  ) {
+    data {
+      id
+      status
+      price
+      created_at
+      table {
+        id
+        label
+        room {
+          id
+          name
+        }
+      }
+      steps {
+        id
+        status
+        position
+        stepMenus {
+          id
+          status
+          quantity
+          menu {
+            id
+            name
+          }
+        }
+        menus {
+          name
+        }
+      }
+    }
+    paginatorInfo {
+      ...PaginatorInfoFields
+    }
+  }
+}

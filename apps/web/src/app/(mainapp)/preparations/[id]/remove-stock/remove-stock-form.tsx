@@ -10,7 +10,7 @@ import { PackageMinus, AlertTriangle, CheckCircle } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { QuantityInput } from "@workspace/ui/components/quantity-input";
 import { LocationSelect } from "@workspace/ui/components/location-select";
-import { GetPreparationByIdQuery } from "@/graphql/generated/graphql";
+import { GetPreparationByIdQuery } from "@workspace/graphql";
 import { removePreparationQuantityAction } from "../actions";
 import {
   Form,

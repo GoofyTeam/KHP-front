@@ -16,8 +16,8 @@ import {
 import { CheckCircleIcon, Loader2Icon } from "lucide-react";
 import { updateLocationAction } from "@/app/(mainapp)/settings/location/actions";
 import { LocationTypeSelector } from "./location-type-selector";
-import type { Location } from "@/graphql/generated/graphql";
-import { GetLocationsDocument } from "@/graphql/generated/graphql";
+import type { Location } from "@workspace/graphql";
+import { GetLocationsDocument } from "@workspace/graphql";
 
 type LocationFormValues = {
   name: string;

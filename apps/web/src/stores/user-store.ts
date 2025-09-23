@@ -5,7 +5,7 @@ import { ApolloClient, ApolloError, useApolloClient } from "@apollo/client";
 import {
   GetMeDocument,
   type GetMeQuery as GetMeQueryType,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 
 // Type basé sur la réponse GraphQL GetMe
 type User = {

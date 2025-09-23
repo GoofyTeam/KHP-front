@@ -1,5 +1,5 @@
 import { query } from "@/lib/ApolloClient";
-import { GetCategoriesDocument } from "@/graphql/generated/graphql";
+import { GetCategoriesDocument } from "@workspace/graphql";
 import StocksFilters from "@/components/stocks/stocks-filters";
 import { IngredientsTable } from "@/components/stocks/ingredients-table/ingredients-table";
 

@@ -10,7 +10,7 @@ import { Trash2, AlertTriangle, CheckCircle } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { QuantityInput } from "@workspace/ui/components/quantity-input";
 import { LocationSelect } from "@workspace/ui/components/location-select";
-import { GetIngredientQuery } from "@/graphql/generated/graphql";
+import { GetIngredientQuery } from "@workspace/graphql";
 import { createLossAction } from "@/app/(mainapp)/loss/actions";
 import {
   Select,

@@ -1,0 +1,10 @@
+query GetLocations($first: Int, $page: Int, $orderBy: [OrderByClause!]) {
+  locations(first: $first, page: $page, orderBy: $orderBy) {
+    data {
+      ...LocationCoreFields
+    }
+    paginatorInfo {
+      ...PaginatorInfoFields
+    }
+  }
+}

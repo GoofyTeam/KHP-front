@@ -2,7 +2,7 @@
 
 import { httpClient } from "@/lib/httpClient";
 import { query } from "@/lib/ApolloClient";
-import { GetIngredientsDocument } from "@/graphql/generated/graphql";
+import { GetIngredientsDocument } from "@workspace/graphql";
 import { type ActionResult, executeHttpAction } from "@/lib/actionUtils";
 
 export type IngredientQuantityInput = {

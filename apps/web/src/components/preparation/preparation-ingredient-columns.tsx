@@ -1,6 +1,6 @@
 "use client";
 
-import { GetPreparationByIdQuery } from "@/graphql/generated/graphql";
+import { GetPreparationByIdQuery } from "@workspace/graphql";
 import {
   convertMeasurement,
   type MeasurementUnitType,

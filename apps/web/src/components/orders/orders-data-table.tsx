@@ -27,7 +27,7 @@ import {
   GetOrdersDocument,
   type GetOrdersQuery,
   OrderStatusEnum,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 
 type Order = NonNullable<GetOrdersQuery["orders"]["data"]>[number];
 

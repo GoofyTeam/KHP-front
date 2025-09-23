@@ -25,11 +25,11 @@ import {
   updateCategoryAction,
   type UpdateCategoryInput,
 } from "@/app/(mainapp)/settings/categories/actions";
-import type { Category } from "@/graphql/generated/graphql";
+import type { Category } from "@workspace/graphql";
 import {
   GetCategoriesDocument,
   GetLocationTypesDocument,
-} from "@/graphql/generated/graphql";
+} from "@workspace/graphql";
 
 interface CategoryEditFormProps {
   category: Category;

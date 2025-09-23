@@ -1,6 +1,6 @@
 import PublicMenusSettingsSection from "@/components/settings/public-menus/public-menus-settings-section";
 import SortMenuTypesSection from "@/components/settings/public-menus/sort-menus-types-section";
-import { GetPublicMenusSettingsDocument } from "@/graphql/generated/graphql";
+import { GetPublicMenusSettingsDocument } from "@workspace/graphql";
 import { query } from "@/lib/ApolloClient";
 
 export default async function PublicMenusSettingsPage() {

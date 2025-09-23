@@ -1,0 +1,4 @@
+fragment CategorySummaryFields on Category {
+  id
+  name
+}

@@ -4,7 +4,7 @@ import React from "react";
 import { AlertTriangle, XCircle, Plus } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@workspace/ui/lib/utils";
-import { GetThresholdQuery } from "@/graphql/generated/graphql";
+import { GetThresholdQuery } from "@workspace/graphql";
 
 // --- Types
 export type LowStockItem = {

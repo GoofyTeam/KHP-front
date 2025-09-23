@@ -24,7 +24,7 @@ import {
 } from "@workspace/ui/components/form";
 import { toast } from "sonner";
 import { updateCompanyOptionsAction } from "@/app/(mainapp)/settings/company/actions";
-import { GetCompanyOptionsDocument } from "@/graphql/generated/graphql";
+import { GetCompanyOptionsDocument } from "@workspace/graphql";
 
 const companyOptionsSchema = z.object({
   open_food_facts_language: z.enum(["fr", "en"]),

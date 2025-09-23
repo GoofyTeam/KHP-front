@@ -1,0 +1,23 @@
+query GetPreparations($page: Int!, $search: String) {
+  preparations(page: $page, search: $search) {
+    data {
+      id
+      name
+      image_url
+      allergens
+      unit
+      quantities {
+        quantity
+        location {
+          ...LocationSummaryFields
+        }
+      }
+      categories {
+        ...CategorySummaryFields
+      }
+    }
+    paginatorInfo {
+      ...PaginatorInfoFields
+    }
+  }
+}
