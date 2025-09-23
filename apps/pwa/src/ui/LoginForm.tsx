@@ -10,6 +10,7 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import api from "../lib/api";
+import { prefetchEssentialData } from "../lib/prefetch";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
@@ -34,12 +35,21 @@ export function LoginForm({
         password,
       });
 
+      if (typeof window !== "undefined") {
+        localStorage.setItem("khp:last-authenticated", "true");
+      }
+
+      void prefetchEssentialData({ force: true });
+
       navigate({
         to: "/inventory",
         replace: true,
       });
     } catch (error) {
       console.error("Login failed:", error);
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("khp:last-authenticated");
+      }
     } finally {
       setIsLoading(false);
     }

@@ -1,3 +1,5 @@
+/// <reference lib="webworker" />
+
 import { precacheAndRoute, cleanupOutdatedCaches } from "workbox-precaching";
 import { clientsClaim, skipWaiting } from "workbox-core";
 import { registerRoute } from "workbox-routing";
@@ -35,15 +37,32 @@ registerRoute(
   })
 );
 
-const bgSyncPlugin = new BackgroundSyncPlugin("apiQueue", {
-  maxRetentionTime: 24 * 60, // réessaie pendant 24h
+const mutationSyncPlugin = new BackgroundSyncPlugin("mutationQueue", {
+  maxRetentionTime: 24 * 60, // retry for 24h
 });
 
-registerRoute(
-  /\/api\/sync/,
-  new NetworkOnly({ plugins: [bgSyncPlugin] }),
-  "POST"
-);
+const mutationMatcher = ({ url, request }: { url: URL; request: Request }) => {
+  if (request.method === "GET") return false;
+  const sameOrigin = url.origin === self.location.origin;
+  const isApiCall = url.pathname.startsWith("/api/");
+  const isGraphQL = url.pathname === "/graphql";
+  return sameOrigin && (isApiCall || isGraphQL);
+};
+
+const mutationMethods = [
+  "POST",
+  "PUT",
+  "PATCH",
+  "DELETE",
+] as const;
+
+mutationMethods.forEach((method) => {
+  registerRoute(
+    mutationMatcher,
+    new NetworkOnly({ plugins: [mutationSyncPlugin] }),
+    method
+  );
+});
 
 registerRoute(
   ({ url }) => url.pathname.endsWith("sql-wasm.wasm"),

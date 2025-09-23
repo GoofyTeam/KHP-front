@@ -8,8 +8,11 @@ import {
 import { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import api from "../lib/api";
+import { prefetchEssentialData } from "../lib/prefetch";
 import { Layout } from "../components/Layout";
 import NotFoundPage from "../pages/NotFound";
+
+const OFFLINE_AUTH_KEY = "khp:last-authenticated";
 
 function NotFoundComponent() {
   return (
@@ -27,6 +30,12 @@ export const Route = createRootRoute({
     try {
       await api.get("/api/user");
 
+      if (typeof window !== "undefined") {
+        localStorage.setItem(OFFLINE_AUTH_KEY, "true");
+      }
+
+      await prefetchEssentialData();
+
       if (location.pathname === "/login" || location.pathname === "/") {
         throw redirect({
           to: "/inventory",
@@ -35,6 +44,19 @@ export const Route = createRootRoute({
       }
     } catch (error) {
       console.error("Error in root route beforeLoad:", error);
+
+      const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+      const hasOfflineAuth =
+        typeof window !== "undefined" &&
+        localStorage.getItem(OFFLINE_AUTH_KEY) === "true";
+
+      if (isOffline && hasOfflineAuth) {
+        return;
+      }
+
+      if (!isOffline && typeof window !== "undefined") {
+        localStorage.removeItem(OFFLINE_AUTH_KEY);
+      }
 
       if (location.pathname !== "/login") {
         throw redirect({

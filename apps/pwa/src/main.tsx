@@ -8,6 +8,16 @@ import "@workspace/ui/globals.css";
 import { Guard } from "./components/guard-device";
 import PWABadge from "./PWABadge";
 import MobileInstallBanner from "./components/MobileInstallBanner";
+import api from "./lib/api";
+import { initializeOfflineStatusListeners } from "./lib/offline-status";
+
+if (typeof navigator === "undefined" || navigator.onLine) {
+  void api.flushOfflineQueue().catch((error) => {
+    console.error("Failed to flush offline queue on startup", error);
+  });
+}
+
+initializeOfflineStatusListeners(api.getBaseUrl());
 
 export const router = createRouter({ routeTree });
 declare module "@tanstack/react-router" {

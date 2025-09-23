@@ -35,6 +35,8 @@ interface LoaderData {
   };
   currentFilter: string;
   currentSelectedMonth?: string;
+  source?: "network" | "cache";
+  cacheTimestamp?: number;
 }
 
 type FilterPreset = "all" | "today" | "week" | "month";
@@ -56,7 +58,14 @@ export default function ProductHistoryPage() {
     paginatorInfo,
     currentFilter,
     currentSelectedMonth,
+    source,
+    cacheTimestamp,
   } = loaderData;
+
+  const isOfflineData = source === "cache";
+  const lastUpdatedLabel = cacheTimestamp
+    ? new Date(cacheTimestamp).toLocaleString()
+    : null;
 
   console.log("🎯 ProductHistory data:", {
     product,
@@ -167,6 +176,12 @@ export default function ProductHistoryPage() {
   return (
     <div className="pb-20">
       <div className="sticky top-16 z-90 flex flex-col gap-4 p-2 bg-khp-background">
+        {isOfflineData && (
+          <div className="bg-amber-100 text-amber-900 border border-amber-200 px-3 py-2 rounded-md text-sm">
+            Données consultées hors connexion
+            {lastUpdatedLabel && ` — mise à jour le ${lastUpdatedLabel}`}.
+          </div>
+        )}
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold">{product.name}</h2>
           <Button

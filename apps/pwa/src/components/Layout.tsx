@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { useLocation, useMatch, useNavigate } from "@tanstack/react-router";
 import { useProduct } from "../stores/product-store";
 import { useHandleItemStore } from "../stores/handleitem-store";
+import { OfflineStatusBanner } from "./OfflineStatusBanner";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -137,7 +138,10 @@ export function Layout({ children, className }: LayoutProps) {
           </div>
         </div>
       </header>
-      <main>{children}</main>
+      <main>
+        {!scanMatch && <OfflineStatusBanner />}
+        {children}
+      </main>
     </div>
   );
 }

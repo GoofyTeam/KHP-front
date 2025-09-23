@@ -32,14 +32,46 @@ function RegisterLosses() {
   const { internalId } = useSearch({
     from: "/_protected/handle-item",
   });
-  const { product, type } = useLoaderData({
+  const { product, type, status } = useLoaderData({
     from: "/_protected/handle-item",
-  });
+  }) as {
+    product: WantedDataType | null;
+    type: z.infer<typeof registerLossesSchema>["type"];
+    status?: "ok" | "missing-offline";
+  };
 
-  const form = useForm<z.infer<typeof registerLossesSchema>>({
+  if (!product || status === "missing-offline") {
+    return (
+      <div className="flex min-h-[75svh] flex-col items-center justify-center gap-4 p-6 text-center">
+        <p className="text-sm text-muted-foreground">
+          Impossible d'enregistrer une perte hors connexion pour ce produit.
+          Ouvre-le en ligne au moins une fois pour le synchroniser.
+        </p>
+        <Button
+          variant="khp-default"
+          onClick={() =>
+            navigate({
+              to: "/inventory",
+              replace: true,
+            })
+          }
+        >
+          Retour à l'inventaire
+        </Button>
+      </div>
+    );
+  }
+
+  const typedType = type as z.infer<typeof registerLossesSchema>["type"];
+
+  const form = useForm<
+    z.infer<typeof registerLossesSchema>,
+    undefined,
+    z.infer<typeof registerLossesSchema>
+  >({
     resolver: zodResolver(registerLossesSchema),
     defaultValues: {
-      type,
+      type: typedType,
       product_id: product.product_internal_id || internalId || "",
       location_id: "",
       quantity: "",
@@ -80,7 +112,7 @@ function RegisterLosses() {
     <div className="flex flex-col items-center justify-center min-h-[75svh] my-4">
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(async (values) => {
+          onSubmit={form.handleSubmit(async (values: z.infer<typeof registerLossesSchema>) => {
             setServerError(null);
             try {
               await registerLossesSubmit(values);

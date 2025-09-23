@@ -1,4 +1,4 @@
-import { Link, useLoaderData, useParams } from "@tanstack/react-router";
+import { Link, useLoaderData, useParams, useNavigate } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 import { useProduct } from "../stores/product-store";
 import { StockStatus } from "@workspace/ui/components/stock-status";
@@ -29,11 +29,24 @@ const defaultHistoryScrollClass =
 
 export default function ProductPage() {
   const { id } = useParams({ from: "/_protected/products/$id" });
+  const navigate = useNavigate();
   const loaderData = useLoaderData({
     from: "/_protected/products/$id",
-  }) as { data: ProductData; meta: unknown };
+  }) as {
+    data: ProductData | null;
+    meta: {
+      source?: "network" | "cache" | "missing-offline";
+      cacheTimestamp?: number | null;
+      loadedAt?: string | null;
+    };
+  };
 
   const product = loaderData?.data;
+  const dataSource = loaderData?.meta;
+  const isOfflineData = dataSource?.source === "cache";
+  const lastUpdatedLabel = dataSource?.cacheTimestamp
+    ? new Date(dataSource.cacheTimestamp).toLocaleString()
+    : null;
 
   const [selectedLocation, setSelectedLocation] = useState<string>("all");
   const { setCurrentProduct } = useProduct();
@@ -46,20 +59,22 @@ export default function ProductPage() {
     };
   }, [product, setCurrentProduct]);
 
-  const uniqueQuantities = (product?.quantities || []).reduce(
+  type ProductQuantities = NonNullable<ProductData["quantities"]>;
+
+  const uniqueQuantities = (product?.quantities ?? []).reduce<ProductQuantities>(
     (acc, current) => {
       const existing = acc.find(
         (item) => item.location.id === current.location.id
       );
       if (!existing) {
         acc.push(current);
-      } else if (current.quantity > existing.quantity) {
+      } else if ((current.quantity ?? 0) > (existing.quantity ?? 0)) {
         const index = acc.indexOf(existing);
         acc[index] = current;
       }
       return acc;
     },
-    [] as NonNullable<typeof product.quantities>
+    []
   );
 
   const totalQuantity = uniqueQuantities.reduce(
@@ -110,13 +125,27 @@ export default function ProductPage() {
   }, [locations]);
 
   if (!product) {
+    const offlineUnavailable = dataSource?.source === "missing-offline";
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p className="text-lg">Loading product...</p>
-          <p className="text-sm text-gray-500 mt-2">
-            ID: {id} | Data: {loaderData ? "Present" : "Missing"}
+      <div className="flex items-center justify-center min-h-screen p-6">
+        <div className="text-center space-y-3">
+          <h2 className="text-xl font-semibold">Produit indisponible hors connexion</h2>
+          <p className="text-sm text-muted-foreground">
+            {offlineUnavailable
+              ? "Ce produit n'a pas été synchronisé auparavant. Réessayez une fois la connexion rétablie."
+              : "Chargement du produit..."}
           </p>
+          <Button
+            variant="khp-default"
+            onClick={() =>
+              navigate({
+                to: "/inventory",
+                replace: true,
+              })
+            }
+          >
+            Retour à l'inventaire
+          </Button>
         </div>
       </div>
     );
@@ -137,6 +166,12 @@ export default function ProductPage() {
         <title>{product?.name || "Product"} - KHP</title>
       </Helmet>
       <div className="p-6 flex flex-col gap-4 ">
+        {isOfflineData && (
+          <div className="bg-amber-100 text-amber-900 border border-amber-200 px-3 py-2 rounded-md text-sm">
+            Données consultées hors connexion
+            {lastUpdatedLabel && ` — mise à jour le ${lastUpdatedLabel}`}.
+          </div>
+        )}
         <div className="flex flex-col justify-center items-center">
           {product.image_url ? (
             <img
