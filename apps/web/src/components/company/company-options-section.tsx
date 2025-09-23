@@ -32,7 +32,7 @@ const companyOptionsSchema = z.object({
 
 type CompanyOptionsFormData = z.infer<typeof companyOptionsSchema>;
 
-export function CompanySettingsSection() {
+export function CompanyOptionsSection() {
   const apolloClient = useApolloClient();
   const { data, loading } = useQuery(GetCompanyOptionsDocument, {
     fetchPolicy: "network-only",
@@ -52,14 +52,12 @@ export function CompanySettingsSection() {
     if (data?.me?.company) {
       const company = data.me.company;
 
-      const processedLanguage =
-        company.open_food_facts_language === "en" ||
-        company.open_food_facts_language === "fr"
-          ? company.open_food_facts_language
-          : "fr";
-
       form.reset({
-        open_food_facts_language: processedLanguage,
+        open_food_facts_language:
+          company.open_food_facts_language === "en" ||
+          company.open_food_facts_language === "fr"
+            ? company.open_food_facts_language
+            : "fr",
       });
     }
   }, [data, form]);
@@ -70,8 +68,7 @@ export function CompanySettingsSection() {
         const result = await updateCompanyOptionsAction(values);
 
         if (result.success) {
-          toast.success("Company options updated successfully.");
-          // Force une nouvelle requête en invalidant le cache
+          toast.success("Options updated successfully");
           await apolloClient.refetchQueries({
             include: [GetCompanyOptionsDocument],
             updateCache(cache) {
@@ -79,22 +76,22 @@ export function CompanySettingsSection() {
             },
           });
         } else {
-          toast.error(result.error || "An error occurred while updating.");
+          toast.error(result.error || "An error occurred");
         }
       } catch {
-        toast.error("An unexpected error occurred.");
+        toast.error("An unexpected error occurred");
       }
     });
   };
 
   return (
-    <div className="bg-khp-surface rounded-2xl shadow-lg border border-khp-primary/20 overflow-hidden w-full">
+    <div className="bg-khp-surface rounded-2xl shadow-lg border border-khp-primary/20 overflow-hidden">
       <div className="bg-gradient-to-r from-khp-primary/5 to-khp-primary/10 px-6 py-5 border-b border-khp-primary/20">
         <h2 className="text-xl font-semibold text-khp-primary">
           Company Options
         </h2>
         <p className="text-sm text-khp-text/70 mt-1">
-          Configure your company&apos;s general settings
+          Configure your company&apos;s display and menu exposure preferences
         </p>
       </div>
 
@@ -105,14 +102,8 @@ export function CompanySettingsSection() {
             name="open_food_facts_language"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-khp-text">
-                  Open Food Facts Language
-                </FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  disabled={isPending || form.formState.isSubmitting || loading}
-                >
+                <FormLabel>Open Food Facts Language</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a language" />
@@ -123,8 +114,8 @@ export function CompanySettingsSection() {
                     <SelectItem value="en">English</SelectItem>
                   </SelectContent>
                 </Select>
-                <FormDescription className="!text-khp-secondary/20">
-                  Language used for Open Food Facts nutritional data
+                <FormDescription>
+                  Language used to query Open Food Facts
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -141,7 +132,7 @@ export function CompanySettingsSection() {
                 ? "Saving..."
                 : loading
                   ? "Loading..."
-                  : "Save changes"}
+                  : "Save Options"}
             </Button>
           </div>
         </form>
@@ -149,3 +140,4 @@ export function CompanySettingsSection() {
     </div>
   );
 }
+
