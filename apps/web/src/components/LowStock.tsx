@@ -1,11 +1,10 @@
 ﻿"use client";
 
 import React from "react";
-import { useQuery } from "@apollo/client";
 import { AlertTriangle, XCircle, Plus } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@workspace/ui/lib/utils";
-import { GetThresholdDocument, GetThresholdQuery } from "@workspace/graphql";
+import { GetThresholdQuery } from "@workspace/graphql";
 
 // --- Types
 export type LowStockItem = {
@@ -19,6 +18,7 @@ export type LowStockItem = {
 };
 
 export type LowStockProps = {
+  thresholdData: GetThresholdQuery | null | undefined;
   className?: string;
 };
 
@@ -124,16 +124,7 @@ function EmptyState() {
 }
 
 // --- Main component
-export function LowStock({ className }: LowStockProps) {
-  // Fetch threshold data directly in this component
-  const {
-    data: thresholdData,
-    loading,
-    error,
-  } = useQuery(GetThresholdDocument, {
-    errorPolicy: "all",
-  });
-
+export function LowStock({ thresholdData, className }: LowStockProps) {
   const data = transformThresholdDataToLowStockItems(
     thresholdData || {
       ingredientTreshold: [],
