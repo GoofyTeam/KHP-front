@@ -7,6 +7,9 @@ import {
   Minus,
   Calendar,
   Check,
+  User,
+  ChefHat,
+  Utensils,
   type LucideProps,
 } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
@@ -102,7 +105,13 @@ export const QuickAccessButton: FC<QuickAccessButtonProps> = ({
             ? Calendar
             : normalizedIcon === "check"
               ? Check
-              : Plus;
+              : normalizedIcon === "user"
+                ? User
+                : normalizedIcon === "chefhat"
+                  ? ChefHat
+                  : normalizedIcon === "utensils"
+                    ? Utensils
+                    : Plus;
 
   const normalizedColor = normalizeQuickAccessColor(color);
 
