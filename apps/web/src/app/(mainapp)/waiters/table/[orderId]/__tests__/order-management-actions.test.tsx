@@ -8,14 +8,14 @@ import { OrderStatusEnum } from '@workspace/graphql';
 
 const navigationMocks = vi.hoisted(() => ({
   refresh: vi.fn(),
-  redirect: vi.fn(),
+  replace: vi.fn(),
 }));
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
     refresh: navigationMocks.refresh,
+    replace: navigationMocks.replace,
   }),
-  redirect: navigationMocks.redirect,
 }));
 
 describe('OrderManagementActions', () => {
@@ -31,7 +31,7 @@ describe('OrderManagementActions', () => {
 
   beforeEach(() => {
     navigationMocks.refresh.mockClear();
-    navigationMocks.redirect.mockClear();
+    navigationMocks.replace.mockClear();
   });
 
   it('disables force payment toggle when order is already served', () => {
@@ -68,7 +68,7 @@ describe('OrderManagementActions', () => {
 
     expect(payOrder).toHaveBeenCalledWith({ force: true });
     expect(navigationMocks.refresh).toHaveBeenCalled();
-    expect(navigationMocks.redirect).toHaveBeenCalledWith('/waiters');
+    expect(navigationMocks.replace).toHaveBeenCalledWith('/waiters');
   });
 
   it('shows an error message when cancel action fails', async () => {
@@ -88,6 +88,6 @@ describe('OrderManagementActions', () => {
 
     expect(cancelOrder).toHaveBeenCalled();
     expect(await screen.findByText('Unable to cancel')).toBeInTheDocument();
-    expect(navigationMocks.redirect).not.toHaveBeenCalled();
+    expect(navigationMocks.replace).not.toHaveBeenCalled();
   });
 });
