@@ -15,7 +15,7 @@ import {
   Loader2,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useBreakpoint } from "@workspace/ui/hooks/use-breakpoint";
 import { useState } from "react";
 
@@ -35,7 +35,8 @@ import {
   SheetTrigger,
 } from "@workspace/ui/components/sheet";
 import { Button } from "@workspace/ui/components/button";
-import { httpClient } from "@/lib/httpClient";
+import { useApolloClient } from "@apollo/client";
+import { performCompleteLogout } from "@/lib/logout-utils";
 
 const settingsNavItems = [
   {
@@ -170,18 +171,13 @@ export function SettingsMenuButton() {
 }
 export function SettingsSidebar() {
   const isMobile = !useBreakpoint("md");
-  const router = useRouter();
+  const apolloClient = useApolloClient();
   const [logoutLoading, setLogoutLoading] = useState(false);
 
   const handleLogout = async () => {
     setLogoutLoading(true);
-
-    try {
-      await httpClient.post("/api/logout");
-      router.push("/login");
-    } catch {
-      setLogoutLoading(false);
-    }
+    await performCompleteLogout(apolloClient);
+    window.location.href = "/login";
   };
 
   if (isMobile) {
