@@ -1,17 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@workspace/ui/components/button";
+import { Button } from "./button";
 import { Camera, X, Folder } from "lucide-react";
-import { FormLabel } from "@workspace/ui/components/form";
-import { CameraModal } from "@workspace/ui/components/camera-modal";
-import { ImagePlaceholder } from "@workspace/ui/components/image-placeholder";
+import { FormLabel } from "./form";
+import { CameraModal } from "./camera-modal";
+import { ImagePlaceholder } from "./image-placeholder";
+import { compressImageFile } from "../lib/compress-img";
+import { WANTED_IMAGE_SIZE } from "../lib/const";
 
 interface ImageUploaderProps {
   imagePreview: string | null;
   onImageCapture: (file: File) => void;
   onClearImage: () => void;
   ingredientName: string;
+  label?: string;
+  onCompressionError?: (error: string) => void;
 }
 
 export function ImageUploader({
@@ -19,13 +23,52 @@ export function ImageUploader({
   onImageCapture,
   onClearImage,
   ingredientName,
+  label = "Image",
+  onCompressionError,
 }: ImageUploaderProps) {
   const [cameraOpen, setCameraOpen] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
-      onImageCapture(file);
+      await processImageFile(file);
+    }
+  };
+
+  const processImageFile = async (file: File) => {
+    setIsCompressing(true);
+
+    try {
+      const compressed = await compressImageFile(file, {
+        maxSizeBytes: WANTED_IMAGE_SIZE,
+        maxWidth: 1600,
+        maxHeight: 1600,
+        mimeType: "image/jpeg",
+      });
+
+      if (compressed.size > WANTED_IMAGE_SIZE) {
+        const errorMessage = "Image exceeds 1.5MB after compression.";
+        if (onCompressionError) {
+          onCompressionError(errorMessage);
+        } else {
+          console.error(errorMessage);
+        }
+        return;
+      }
+
+      onImageCapture(compressed);
+    } catch (error) {
+      const errorMessage = "Failed to compress image. Please try again.";
+      if (onCompressionError) {
+        onCompressionError(errorMessage);
+      } else {
+        console.error("Image compression failed:", error);
+      }
+    } finally {
+      setIsCompressing(false);
     }
   };
 
@@ -34,13 +77,13 @@ export function ImageUploader({
       <CameraModal
         open={cameraOpen}
         onClose={() => setCameraOpen(false)}
-        onCapture={onImageCapture}
+        onCapture={processImageFile}
         defaultFilename={`ingredient-${ingredientName}-${Date.now()}.jpg`}
       />
 
       <div className="space-y-4">
         <FormLabel className="text-lg font-semibold text-khp-text-primary">
-          Ingredient Image
+          {label}
         </FormLabel>
 
         <div className="relative w-72 h-72 mx-auto">
@@ -86,22 +129,32 @@ export function ImageUploader({
             type="button"
             variant="outline"
             onClick={() => setCameraOpen(true)}
+            disabled={isCompressing}
             className="flex-1 h-14 text-lg font-medium border-2 flex items-center gap-3"
           >
             <Camera className="w-6 h-6" />
-            {imagePreview ? "Change Photo" : "Take Photo"}
+            {isCompressing
+              ? "Compressing..."
+              : imagePreview
+                ? "Change Photo"
+                : "Take Photo"}
           </Button>
 
           <label htmlFor="file-input" className="flex-1">
             <Button
               type="button"
               variant="outline"
+              disabled={isCompressing}
               className="w-full h-14 text-lg font-medium border-2 flex items-center gap-3 cursor-pointer"
               asChild
             >
               <span>
                 <Folder className="w-6 h-6" />
-                {imagePreview ? "Change File" : "Select File"}
+                {isCompressing
+                  ? "Compressing..."
+                  : imagePreview
+                    ? "Change File"
+                    : "Select File"}
               </span>
             </Button>
             <input
@@ -109,6 +162,7 @@ export function ImageUploader({
               type="file"
               accept="image/*"
               onChange={handleFileSelect}
+              disabled={isCompressing}
               className="hidden"
             />
           </label>

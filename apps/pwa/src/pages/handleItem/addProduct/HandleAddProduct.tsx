@@ -18,14 +18,14 @@ import {
   SelectItem,
 } from "@workspace/ui/components/select";
 import { cn } from "@workspace/ui/lib/utils";
-import { useState, useRef, ChangeEvent } from "react";
+import { useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import z from "zod";
 import { getAllMeasurementUnits } from "@workspace/ui/lib/measurement-units";
 import { addProductSubmit } from "./add-product-submit";
 import { Minus, Plus } from "lucide-react";
 import { handleItemSchema } from "./handleItemSchema";
-import { ImageAdd } from "@workspace/ui/components/image-placeholder";
+import { ImageUploader } from "@workspace/ui/components/image-uploader";
 import { extractApiErrorMessage } from "../../../lib/error-utils";
 import { WANTED_IMAGE_SIZE } from "@workspace/ui/lib/const";
 import { compressImageFile } from "@workspace/ui/lib/compress-img";
@@ -40,7 +40,6 @@ function HandleAddProduct() {
   });
 
   const [filePreview, setFilePreview] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const [serverError, setServerError] = useState<string | null>(null);
 
   const storageUnitDefault = getAllMeasurementUnits().find(
@@ -80,6 +79,20 @@ function HandleAddProduct() {
     name: "stockEntries",
   });
 
+  const handleImageCapture = (file: File) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFilePreview(reader.result as string);
+      form.setValue("image", file);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleClearImage = () => {
+    setFilePreview(null);
+    form.setValue("image", undefined);
+  };
+
   async function onSubmit(values: z.infer<typeof handleItemSchema>) {
     setServerError(null);
     try {
@@ -113,57 +126,18 @@ function HandleAddProduct() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[75svh] my-4">
       <Form {...form}>
-        {filePreview || product?.product_image ? (
-          <img
-            src={filePreview || product?.product_image || ""}
-            alt={form.getValues().product_name || "Product Image"}
-            className="aspect-square object-cover max-w-1/2 w-full my-6 rounded-md"
-            onClick={() => inputRef.current?.click()}
-          />
-        ) : (
-          <ImageAdd iconSize={32} onClick={() => inputRef.current?.click()} />
-        )}
+        <ImageUploader
+          imagePreview={filePreview || product?.product_image || null}
+          onImageCapture={handleImageCapture}
+          onClearImage={handleClearImage}
+          ingredientName={form.watch("product_name") || "product"}
+          label="Product Image"
+        />
 
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-4 flex flex-col items-center px-4 w-full max-w-md"
         >
-          <FormField
-            control={form.control}
-            name="image"
-            render={({ field: { ref, onChange, name } }) => (
-              <FormItem className="hidden">
-                <FormControl>
-                  <Input
-                    variant="khp-default"
-                    type="file"
-                    name={name}
-                    accept="image/*"
-                    capture="environment"
-                    ref={(e: HTMLInputElement | null) => {
-                      ref(e);
-                      inputRef.current = e;
-                    }}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                          setFilePreview(reader.result as string);
-                          onChange(file);
-                        };
-                        reader.readAsDataURL(file);
-                      } else {
-                        setFilePreview(null);
-                        onChange(undefined);
-                      }
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           <FormField
             control={form.control}
             name="product_name"

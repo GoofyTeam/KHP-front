@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { SubmitErrorHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 import {
@@ -14,13 +14,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@workspace/ui/components/form";
-import { ImageAdd } from "@workspace/ui/components/image-placeholder";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { Switch } from "@workspace/ui/components/switch";
 import { IngredientPickerField } from "@/components/meals/IngredientPickerField";
 import { Button } from "@workspace/ui/components/button";
-import { AlertCircle, ChefHat, Package, X } from "lucide-react";
+import { AlertCircle, ChefHat, Package } from "lucide-react";
 import {
   Select,
   SelectTrigger,
@@ -45,6 +44,7 @@ import {
   WANTED_IMAGE_SIZE,
 } from "@workspace/ui/lib/const";
 import { compressImageFile } from "@workspace/ui/lib/compress-img";
+import { ImageUploader } from "@workspace/ui/components/image-uploader";
 
 const menuItemsSchema = z.object({
   entity_id: z.string().nonempty("Entity ID is required"),
@@ -156,7 +156,6 @@ export default function UpdateMenusPage() {
   });
 
   const [filePreview, setFilePreview] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const [priceInput, setPriceInput] = useState<string>("");
   const [activeTab, setActiveTab] = useState<string>("details");
@@ -254,12 +253,18 @@ export default function UpdateMenusPage() {
     }
   }, [menuFetched, form]);
 
-  const handleRemoveImage = () => {
+  const handleImageCapture = (file: File) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFilePreview(reader.result as string);
+      form.setValue("image", file);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleClearImage = () => {
     setFilePreview(null);
     form.setValue("image", undefined);
-    if (inputRef.current) {
-      inputRef.current.value = "";
-    }
   };
 
   const handleValidationErrors: SubmitErrorHandler<UpdateMenuFormValues> = (
@@ -436,35 +441,19 @@ export default function UpdateMenusPage() {
             <TabsContent value="details" className="mt-0">
               <div className="w-full max-w-4xl mx-auto flex flex-col min-h-[600px]">
                 <div className="flex-1 space-y-6">
-                  {filePreview ||
-                  (menuFetched?.image_url &&
-                    form.watch("image") !== undefined) ? (
-                    <div className="relative max-w-1/2 w-full my-6 mx-auto">
-                      <img
-                        src={filePreview || menuFetched?.image_url || undefined}
-                        alt={"Menu Image"}
-                        className="aspect-square object-cover w-full h-full rounded-md cursor-pointer hover:opacity-80 transition-opacity"
-                        onClick={() => inputRef.current?.click()}
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute top-2 right-2 h-8 w-8 rounded-full shadow-lg"
-                        onClick={handleRemoveImage}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="relative max-w-1/2 w-full my-6 mx-auto">
-                      <ImageAdd
-                        className="w-full aspect-square"
-                        iconSize={32}
-                        onClick={() => inputRef.current?.click()}
-                      />
-                    </div>
-                  )}
+                  <ImageUploader
+                    imagePreview={
+                      filePreview ||
+                      (menuFetched?.image_url &&
+                      form.watch("image") !== undefined
+                        ? menuFetched.image_url
+                        : null)
+                    }
+                    onImageCapture={handleImageCapture}
+                    onClearImage={handleClearImage}
+                    ingredientName={form.watch("name") || "menu"}
+                    label="Menu Image"
+                  />
 
                   {form.formState.errors.image && (
                     <div className="w-full text-red-500 text-sm mt-1 text-center">
@@ -472,44 +461,6 @@ export default function UpdateMenusPage() {
                         "Please select an image."}
                     </div>
                   )}
-
-                  <FormField
-                    control={form.control}
-                    name="image"
-                    render={({ field: { ref, onChange, name } }) => (
-                      <FormItem className="hidden">
-                        <FormControl>
-                          <Input
-                            variant="khp-default"
-                            type="file"
-                            name={name}
-                            accept="image/jpeg, image/png, image/jpg"
-                            max={1048576}
-                            capture="environment"
-                            ref={(e: HTMLInputElement | null) => {
-                              ref(e);
-                              inputRef.current = e;
-                            }}
-                            onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                const reader = new FileReader();
-                                reader.onloadend = () => {
-                                  setFilePreview(reader.result as string);
-                                  onChange(file);
-                                };
-                                reader.readAsDataURL(file);
-                              } else {
-                                setFilePreview(null);
-                                onChange(undefined);
-                              }
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
                   <FormField
                     control={form.control}

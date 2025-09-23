@@ -18,16 +18,16 @@ import {
   SelectItem,
 } from "@workspace/ui/components/select";
 import { cn } from "@workspace/ui/lib/utils";
-import { useState, useRef, ChangeEvent } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { getAllMeasurementUnits } from "@workspace/ui/lib/measurement-units";
-import { Image } from "lucide-react";
 import { handleUpdateProductSchema } from "./handleUpdateProductSchema";
 import { updateProductSubmit } from "./update-product";
 import { extractApiErrorMessage } from "../../../lib/error-utils";
 import { compressImageFile } from "@workspace/ui/lib/compress-img";
 import { WANTED_IMAGE_SIZE } from "@workspace/ui/lib/const";
+import { ImageUploader } from "@workspace/ui/components/image-uploader";
 
 function HandleUpdateProduct() {
   const navigate = useNavigate();
@@ -39,7 +39,6 @@ function HandleUpdateProduct() {
   });
 
   const [filePreview, setFilePreview] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof handleUpdateProductSchema>>({
@@ -54,6 +53,20 @@ function HandleUpdateProduct() {
       product_base_unit: undefined,
     },
   });
+
+  const handleImageCapture = (file: File) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFilePreview(reader.result as string);
+      form.setValue("image", file);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleClearImage = () => {
+    setFilePreview(null);
+    form.setValue("image", undefined);
+  };
 
   async function onSubmit(values: z.infer<typeof handleUpdateProductSchema>) {
     setServerError(null);
@@ -88,63 +101,18 @@ function HandleUpdateProduct() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[75svh] my-4">
       <Form {...form}>
-        {filePreview || product?.product_image ? (
-          <img
-            src={filePreview || product?.product_image || ""}
-            alt={form.getValues().product_name || "Product Image"}
-            className="aspect-square object-cover max-w-1/2 w-full my-6 rounded-md"
-            onClick={() => inputRef.current?.click()}
-          />
-        ) : (
-          <div
-            className="aspect-square h-34 w-34 border border-khp-primary rounded-lg flex flex-col items-center justify-center my-4 cursor-pointer hover:bg-khp-primary/10"
-            onClick={() => inputRef.current?.click()}
-          >
-            <Image className="text-khp-primary" strokeWidth={1} size={32} />
-            <p className="text-khp-primary font-light">Add a picture</p>
-          </div>
-        )}
+        <ImageUploader
+          imagePreview={filePreview || product?.product_image || null}
+          onImageCapture={handleImageCapture}
+          onClearImage={handleClearImage}
+          ingredientName={form.watch("product_name") || "product"}
+          label="Product Image"
+        />
 
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-4 flex flex-col items-center px-4 w-full max-w-md"
         >
-          <FormField
-            control={form.control}
-            name="image"
-            render={({ field: { ref, onChange, name } }) => (
-              <FormItem className="hidden">
-                <FormControl>
-                  <Input
-                    variant="khp-default"
-                    type="file"
-                    name={name}
-                    accept="image/*"
-                    capture="environment"
-                    ref={(e: HTMLInputElement | null) => {
-                      ref(e);
-                      inputRef.current = e;
-                    }}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                          setFilePreview(reader.result as string);
-                          onChange(file);
-                        };
-                        reader.readAsDataURL(file);
-                      } else {
-                        setFilePreview(null);
-                        onChange(undefined);
-                      }
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           <FormField
             control={form.control}
             name="product_name"
