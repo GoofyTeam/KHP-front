@@ -1,6 +1,6 @@
 "use client";
 
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent } from "@workspace/ui/components/card";
@@ -70,7 +70,7 @@ function OrderManagementActions({
       } else {
         setForcePayment(false);
         router.refresh();
-        redirect("/waiters");
+        router.replace("/waiters");
       }
     });
   };
@@ -88,7 +88,7 @@ function OrderManagementActions({
         setError(result.error);
       } else {
         router.refresh();
-        redirect("/waiters");
+        router.replace("/waiters");
       }
     });
   };
