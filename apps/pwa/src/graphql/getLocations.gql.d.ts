@@ -14,6 +14,7 @@ import {
   CategoryPaginator,
   CategoryShelfLife,
   Company,
+  CompanyBusinessHour,
   CompanyOrderByField,
   CompanyOrderByOrderByClause,
   CompanyPaginator,

@@ -36,7 +36,6 @@ import {
   ChevronRight,
   EllipsisVertical,
   Camera,
-
 } from "lucide-react";
 
 // hooks mobile
@@ -663,13 +662,13 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
                 </TableHead>
                 <TableHead className="px-2 text-left md:w-[10%]">Qty</TableHead>
                 <TableHead className="px-2 text-left md:w-[15%]">
-                  Unit
+                  Storage Unit
                 </TableHead>
                 <TableHead className="px-2 text-left md:w-[10%]">
-                  Base Qty
+                  Quantity for one portion
                 </TableHead>
                 <TableHead className="px-2 text-left md:w-[15%]">
-                  Base Unit
+                  Portion Unit
                 </TableHead>
                 <TableHead className="px-2 text-left md:w-[20%]">
                   Category
@@ -802,10 +801,10 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
                         variant="khp-product"
                         className="truncate w-full"
                       >
-                        <SelectValue placeholder="Select unit">
+                        <SelectValue placeholder="Storage unit">
                           {draft.unit
                             ? draft.unit.toUpperCase()
-                            : "Select unit"}
+                            : "Storage unit"}
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
@@ -844,7 +843,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
                         draft.unit.toUpperCase()
                       ) : (
                         <span className="text-muted-foreground">
-                          Select unit
+                          Storage unit
                         </span>
                       )}
                     </div>
@@ -864,7 +863,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
                           base_quantity: parseFloat(e.target.value) || 0,
                         }))
                       }
-                      placeholder="Base quantity"
+                      placeholder="Quantity for one portion"
                     />
                   ) : (
                     <div
@@ -882,7 +881,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
                         draft.base_quantity
                       ) : (
                         <span className="text-muted-foreground">
-                          Base quantity
+                          Quantity for one portion
                         </span>
                       )}
                     </div>
@@ -905,7 +904,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
                         <SelectValue placeholder="Select base unit">
                           {draft.base_unit
                             ? draft.base_unit.toUpperCase()
-                            : "Select base unit"}
+                            : "Select portion unit"}
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
@@ -944,7 +943,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
                         draft.base_unit.toUpperCase()
                       ) : (
                         <span className="text-muted-foreground">
-                          Select base unit
+                          Select portion unit
                         </span>
                       )}
                     </div>
@@ -1292,7 +1291,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
                           {...common}
                           ref={visibleInputRef}
                           type="number"
-                          placeholder="Base quantity"
+                          placeholder="Quantity for one portion"
                           value={draft.base_quantity || ""}
                           onChange={(e) =>
                             setDraft((d) => ({
@@ -1340,7 +1339,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
                           <span className="truncate max-w-[5rem]">
                             {draft.base_unit
                               ? draft.base_unit.toUpperCase()
-                              : "Base Unit"}
+                              : "Portion unit"}
                           </span>
                         </button>
                       </div>

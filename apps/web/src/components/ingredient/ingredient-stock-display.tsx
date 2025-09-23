@@ -75,7 +75,9 @@ export function IngredientStockDisplay({
       <div className="space-y-4 w-full">
         <div className="flex items-center justify-center gap-4 text-sm">
           <div className="flex items-center gap-1">
-            <span className="text-khp-text-secondary">Base:</span>
+            <span className="text-khp-text-secondary">
+              Quantity for one portion:
+            </span>
             <span className="font-medium text-khp-text-primary">
               {ingredient?.base_quantity
                 ? formatQuantity(ingredient.base_quantity)
@@ -84,7 +86,7 @@ export function IngredientStockDisplay({
           </div>
           <div className="w-px h-4 bg-khp-border"></div>
           <div className="flex items-center gap-1">
-            <span className="text-khp-text-secondary">Unit:</span>
+            <span className="text-khp-text-secondary">Portion unit:</span>
             <span className="font-medium text-khp-text-primary">
               {ingredient?.base_unit || "-"}
             </span>

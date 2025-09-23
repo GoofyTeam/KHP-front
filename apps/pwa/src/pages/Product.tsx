@@ -155,7 +155,9 @@ export default function ProductPage() {
           {/* Affichage des informations de base pour les ingrédients */}
           <div className="flex items-center justify-center gap-4 text-sm mt-2">
             <div className="flex items-center gap-1">
-              <span className="text-muted-foreground">Base:</span>
+              <span className="text-muted-foreground">
+                Quantity for one portion:
+              </span>
               <span className="font-medium text-foreground">
                 {product?.base_quantity
                   ? formatQuantity(product.base_quantity)
@@ -164,7 +166,7 @@ export default function ProductPage() {
             </div>
             <div className="w-px h-4 bg-border"></div>
             <div className="flex items-center gap-1">
-              <span className="text-muted-foreground">Unit:</span>
+              <span className="text-muted-foreground">Portion unit:</span>
               <span className="font-medium text-foreground">
                 {product?.base_unit || "-"}
               </span>

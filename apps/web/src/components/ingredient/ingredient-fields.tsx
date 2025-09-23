@@ -116,7 +116,7 @@ export function IngredientFields({ form }: IngredientFieldsProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-lg font-semibold text-khp-text-primary">
-                Unit
+                Storage Unit
               </FormLabel>
               <FormControl>
                 <Select
@@ -206,7 +206,7 @@ export function IngredientFields({ form }: IngredientFieldsProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-lg font-semibold text-khp-text-primary">
-                Base Quantity
+                Quantity for one portion
               </FormLabel>
               <FormControl>
                 <Input
@@ -234,7 +234,7 @@ export function IngredientFields({ form }: IngredientFieldsProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-lg font-semibold text-khp-text-primary">
-                Base Unit
+                Portion Unit
               </FormLabel>
               <FormControl>
                 <Select

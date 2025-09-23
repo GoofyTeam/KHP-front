@@ -233,7 +233,9 @@ function HandleUpdateProduct() {
               name="quantityPerUnit"
               render={({ field }) => (
                 <FormItem className="w-full">
-                  <FormLabel className="text-lg">Quantity per unit</FormLabel>
+                  <FormLabel className="text-lg">
+                    Quantity for one portion
+                  </FormLabel>
                   <FormControl>
                     <Input
                       variant="khp-default-pwa"
@@ -255,9 +257,7 @@ function HandleUpdateProduct() {
               name="product_base_unit"
               render={({ field }) => (
                 <FormItem className="w-full">
-                  <FormLabel className="text-lg">
-                    Base unit for one unit
-                  </FormLabel>
+                  <FormLabel className="text-lg">Portion Unit</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}

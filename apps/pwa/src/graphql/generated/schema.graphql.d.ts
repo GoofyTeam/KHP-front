@@ -90,9 +90,39 @@ export type Company = {
   open_food_facts_language?: Maybe<Scalars['String']['output']>;
   /** Paramètres visibles publiquement pour la carte des menus. */
   public_menu_settings: PublicMenuSettings;
+  /** Logo ou image de présentation de l'entreprise. */
+  logo_path?: Maybe<Scalars['String']['output']>;
+  /** Nom de la personne à contacter. */
+  contact_name?: Maybe<Scalars['String']['output']>;
+  /** Adresse e-mail de contact. */
+  contact_email?: Maybe<Scalars['String']['output']>;
+  /** Numéro de téléphone principal. */
+  contact_phone?: Maybe<Scalars['String']['output']>;
+  /** Ligne d'adresse principale. */
+  address_line?: Maybe<Scalars['String']['output']>;
+  /** Code postal. */
+  postal_code?: Maybe<Scalars['String']['output']>;
+  /** Ville. */
+  city?: Maybe<Scalars['String']['output']>;
+  /** Pays. */
+  country?: Maybe<Scalars['String']['output']>;
+  /** Horaires d'ouverture de la semaine. */
+  businessHours: Array<CompanyBusinessHour>;
   /** When the company was created. */
   created_at: Scalars['DateTime']['output'];
   /** When the company was last updated. */
+  updated_at: Scalars['DateTime']['output'];
+};
+
+export type CompanyBusinessHour = {
+  __typename?: 'CompanyBusinessHour';
+  id: Scalars['ID']['output'];
+  day_of_week: Scalars['Int']['output'];
+  opens_at: Scalars['String']['output'];
+  closes_at: Scalars['String']['output'];
+  is_overnight: Scalars['Boolean']['output'];
+  sequence: Scalars['Int']['output'];
+  created_at: Scalars['DateTime']['output'];
   updated_at: Scalars['DateTime']['output'];
 };
 

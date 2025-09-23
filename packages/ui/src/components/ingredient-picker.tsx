@@ -241,7 +241,7 @@ export function IngredientPickerUI({
                         onValueChange={(v) => onChangeUnit(it.id, v)}
                       >
                         <SelectTrigger className="w-auto h-9">
-                          <SelectValue placeholder="Unit" />
+                          <SelectValue placeholder="Storage Unit" />
                         </SelectTrigger>
                         <SelectContent>
                           {unitsSelections?.map((u) => (

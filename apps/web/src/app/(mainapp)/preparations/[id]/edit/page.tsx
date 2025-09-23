@@ -570,7 +570,8 @@ export default function UpdatePreparationPage() {
                         render={({ field }) => (
                           <FormItem className="w-full">
                             <FormLabel>
-                              Unit <span className="text-red-500">*</span>
+                              Portion Unit{" "}
+                              <span className="text-red-500">*</span>
                             </FormLabel>
                             <FormControl>
                               <Select

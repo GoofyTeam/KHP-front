@@ -102,7 +102,7 @@ export function useIngredientsColumns(
       },
       {
         accessorKey: "unit",
-        header: "Unit",
+        header: "Storage Unit",
         cell: ({ row }) => (
           <div className="text-left">{row.getValue("unit")}</div>
         ),

@@ -58,7 +58,7 @@ const preparationColumns: ColumnDef<Preparation>[] = [
     },
   },
   {
-    header: "Unit",
+    header: "Storage Unit",
     accessorKey: "unit",
   },
   {
