@@ -11,7 +11,8 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
-    "introspect": "turbo run introspect"
+    "introspect": "turbo run introspect",
+    "test": "turbo run test"
   },
   "devDependencies": {
     "lefthook": "^1.11.14",
