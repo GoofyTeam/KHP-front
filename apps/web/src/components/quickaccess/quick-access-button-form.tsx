@@ -35,6 +35,7 @@ import {
   Minus,
 } from "lucide-react";
 import { updateQuickAccessAction } from "@/app/(mainapp)/settings/quick-access/actions";
+import { cn } from "@workspace/ui/lib/utils";
 
 type QuickAccessButtonData = {
   id: number;
@@ -260,7 +261,10 @@ export default function QuickAccessButtonForm({
                           >
                             <div className="flex items-center gap-3">
                               <div
-                                className={`w-4 h-4 rounded-full ${option.color} shadow-sm`}
+                                className={cn(
+                                  "w-4 h-4 rounded-full shadow-sm",
+                                  option.color
+                                )}
                               />
                               <span className="font-medium text-khp-text-primary">
                                 {option.label}

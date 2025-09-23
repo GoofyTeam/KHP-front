@@ -18,6 +18,7 @@ import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { Switch } from "@workspace/ui/components/switch";
 import { IngredientPickerField } from "@/components/meals/IngredientPickerField";
+import { cn } from "@workspace/ui/lib/utils";
 import { Button } from "@workspace/ui/components/button";
 import { AlertCircle, ChefHat, Package } from "lucide-react";
 import {
@@ -621,7 +622,10 @@ export default function CreateMenusPage() {
                       .map((line, idx) => (
                         <p
                           key={idx}
-                          className={`text-sm ${idx === 0 ? "font-medium" : ""} text-khp-error`}
+                          className={cn(
+                            "text-sm text-khp-error",
+                            idx === 0 ? "font-medium" : ""
+                          )}
                         >
                           {line}
                         </p>

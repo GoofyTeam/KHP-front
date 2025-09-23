@@ -14,6 +14,7 @@ import {
   GetLocationTypesDocument,
   type LocationType,
 } from "@workspace/graphql";
+import { cn } from "@workspace/ui/lib/utils";
 
 interface LocationTypeSelectorProps {
   value?: string;
@@ -43,7 +44,7 @@ export function LocationTypeSelector({
 
   if (loading) {
     return (
-      <div className={`space-y-2 ${className}`}>
+      <div className={cn("space-y-2", className)}>
         {showLabel && (
           <h3 className="text-base font-semibold text-khp-text-primary">
             {label}
@@ -59,7 +60,7 @@ export function LocationTypeSelector({
 
   if (error || locationTypes.length === 0) {
     return (
-      <div className={`space-y-2 ${className}`}>
+      <div className={cn("space-y-2", className)}>
         {showLabel && (
           <h3 className="text-base font-semibold text-khp-text-primary">
             {label}
@@ -86,7 +87,7 @@ export function LocationTypeSelector({
     : null;
 
   return (
-    <div className={`space-y-2 ${className}`}>
+    <div className={cn("space-y-2", className)}>
       {showLabel && (
         <h3 className="text-base font-semibold text-khp-text-primary">
           {label}

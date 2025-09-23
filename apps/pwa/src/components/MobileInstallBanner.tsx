@@ -1,5 +1,6 @@
 import InstallPWAButton from "./InstallPWAButton";
 import { useEffect, useState } from "react";
+import { cn } from "@workspace/ui/lib/utils";
 
 function isTouchDevice() {
   if (typeof window === "undefined") return false;
@@ -43,9 +44,10 @@ export default function MobileInstallBanner() {
   return (
     <div className="fixed inset-x-0 bottom-4 z-50 flex justify-center px-4 pointer-events-none">
       <div
-        className={`pointer-events-auto flex items-center gap-3 rounded-xl border border-[rgba(76,175,80,0.25)] bg-white px-4 py-3 shadow-lg ${
-          visible ? '' : 'hidden'
-        }`}
+        className={cn(
+          "pointer-events-auto flex items-center gap-3 rounded-xl border border-[rgba(76,175,80,0.25)] bg-white px-4 py-3 shadow-lg",
+          visible ? "" : "hidden"
+        )}
       >
         <span className="text-sm text-slate-900 font-medium">
           Install KHP for better experience

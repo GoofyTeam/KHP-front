@@ -17,6 +17,7 @@ type AllergenCode = Parameters<typeof AllegernsBadge>[0]["allergens"];
 
 import type { RestaurantCardMenu } from "@/queries/restaurant-card-query";
 import { Label } from "@workspace/ui/components/label";
+import { cn } from "@workspace/ui/lib/utils";
 
 const priceFormatter = new Intl.NumberFormat("fr-FR", {
   style: "currency",
@@ -230,20 +231,18 @@ export function PublicMenuCardClient({
       .map(([key, group]) => ({ key, ...group }))
       .map((group) => ({
         ...group,
-        menus: group.menus
-          .slice()
-          .sort((a, b) => {
-            const priorityA =
-              typeof a.priority === "number" ? a.priority : ORDER_FALLBACK;
-            const priorityB =
-              typeof b.priority === "number" ? b.priority : ORDER_FALLBACK;
+        menus: group.menus.slice().sort((a, b) => {
+          const priorityA =
+            typeof a.priority === "number" ? a.priority : ORDER_FALLBACK;
+          const priorityB =
+            typeof b.priority === "number" ? b.priority : ORDER_FALLBACK;
 
-            if (priorityA !== priorityB) {
-              return priorityA - priorityB;
-            }
+          if (priorityA !== priorityB) {
+            return priorityA - priorityB;
+          }
 
-            return a.name.localeCompare(b.name, "fr", { sensitivity: "base" });
-          }),
+          return a.name.localeCompare(b.name, "fr", { sensitivity: "base" });
+        }),
       }))
       .sort((a, b) => {
         if (a.sortIndex !== b.sortIndex) {
@@ -492,7 +491,12 @@ interface StockBadgeProps {
 function StockBadge({ hasStock }: StockBadgeProps) {
   return (
     <span
-      className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${hasStock ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"}`}
+      className={cn(
+        "rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide",
+        hasStock
+          ? "bg-emerald-100 text-emerald-700"
+          : "bg-rose-100 text-rose-700"
+      )}
     >
       {hasStock ? "Available" : "Unavailable"}
     </span>

@@ -18,6 +18,7 @@ import {
 import { LowStock } from "@/components/LowStock";
 import { Orders } from "@/components/Orders";
 import { Perishable } from "@/components/Perishable";
+import { cn } from "@workspace/ui/lib/utils";
 import { LiveWelcomePanel } from "@/components/LiveWelcomePanel";
 import Link from "next/link";
 
@@ -191,9 +192,10 @@ export function DashboardClient() {
               {extraAccess && (
                 <Link
                   href={getQuickAccessUrl(extraAccess.url_key)}
-                  className={`block rounded-md px-4 py-4 text-center font-semibold text-white ${getQuickAccessBgClass(
-                    extraAccess.icon_color
-                  )}`}
+                  className={cn(
+                    "block rounded-md px-4 py-4 text-center font-semibold text-white",
+                    getQuickAccessBgClass(extraAccess.icon_color)
+                  )}
                 >
                   {extraAccess.name}
                 </Link>

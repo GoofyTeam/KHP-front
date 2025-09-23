@@ -9,6 +9,7 @@ import type { LocationRow } from "@/queries/locations-query";
 import { QuantityInput } from "@workspace/ui/components/quantity-input";
 import { LocationSelect } from "@workspace/ui/components/location-select";
 import { moveIngredientQuantityAction } from "@/app/(mainapp)/ingredient/actions";
+import { cn } from "@workspace/ui/lib/utils";
 
 type IngredientData = NonNullable<GetIngredientQuery["ingredient"]>;
 
@@ -219,7 +220,12 @@ export function MoveQuantityForm({
               Remaining at Source:
             </span>
             <span
-              className={`font-bold ${selectedSourceLocation && selectedSourceLocation.quantity - moveQuantity < 0 ? "text-khp-error" : "text-khp-primary"}`}
+              className={cn(
+                "font-bold",
+                selectedSourceLocation && selectedSourceLocation.quantity - moveQuantity < 0 
+                  ? "text-khp-error" 
+                  : "text-khp-primary"
+              )}
             >
               {selectedSourceLocation
                 ? Math.max(

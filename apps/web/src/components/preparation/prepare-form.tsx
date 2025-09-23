@@ -27,6 +27,7 @@ import {
   type MenuItemForm,
 } from "@/components/meals/IngredientPickerField";
 import { preparePreparationAction } from "@/app/(mainapp)/preparations/[id]/prepare/action";
+import { cn } from "@workspace/ui/lib/utils";
 
 const overrideItemSchema: z.ZodType<MenuItemForm> = z
   .object({
@@ -338,7 +339,10 @@ function PreparePreparationForm({
                 .map((line, idx) => (
                   <p
                     key={idx}
-                    className={`text-sm ${idx === 0 ? "font-semibold" : ""} text-khp-error`}
+                    className={cn(
+                      "text-sm text-khp-error",
+                      idx === 0 ? "font-semibold" : ""
+                    )}
                   >
                     {line}
                   </p>

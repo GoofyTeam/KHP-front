@@ -42,6 +42,7 @@ import {
 } from "@workspace/ui/lib/const";
 import { compressImageFile } from "@workspace/ui/lib/compress-img";
 import { ImageUploader } from "@workspace/ui/components/image-uploader";
+import { cn } from "@workspace/ui/lib/utils";
 
 type IngredientData = NonNullable<GetIngredientQuery["ingredient"]>;
 
@@ -457,9 +458,10 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
                     {rootErrorLines?.map((line, idx) => (
                       <p
                         key={idx}
-                        className={`text-sm ${
+                        className={cn(
+                          "text-sm text-khp-error",
                           idx === 0 ? "font-medium" : ""
-                        } text-khp-error`}
+                        )}
                       >
                         {line}
                       </p>
