@@ -4,17 +4,19 @@ import { useState, useTransition } from "react";
 import { Button } from "@workspace/ui/components/button";
 import { Loader2Icon, LogOut } from "lucide-react";
 import { useApolloClient } from "@apollo/client";
+import { useRouter } from "next/navigation";
 import { performCompleteLogout } from "@/lib/logout-utils";
 
 export function LogoutSection() {
   const apolloClient = useApolloClient();
+  const router = useRouter();
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [isPending] = useTransition();
 
   const handleLogout = async () => {
     setLogoutLoading(true);
     await performCompleteLogout(apolloClient);
-    window.location.href = "/login";
+    router.push("/login");
   };
 
   return (

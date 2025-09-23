@@ -15,7 +15,7 @@ import {
   Loader2,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useBreakpoint } from "@workspace/ui/hooks/use-breakpoint";
 import { useState } from "react";
 
@@ -172,12 +172,13 @@ export function SettingsMenuButton() {
 export function SettingsSidebar() {
   const isMobile = !useBreakpoint("md");
   const apolloClient = useApolloClient();
+  const router = useRouter();
   const [logoutLoading, setLogoutLoading] = useState(false);
 
   const handleLogout = async () => {
     setLogoutLoading(true);
     await performCompleteLogout(apolloClient);
-    window.location.href = "/login";
+    router.push("/login");
   };
 
   if (isMobile) {
