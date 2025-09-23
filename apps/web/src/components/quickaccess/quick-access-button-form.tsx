@@ -33,6 +33,9 @@ import {
   Check,
   Calendar,
   Minus,
+  User,
+  ChefHat,
+  Utensils,
 } from "lucide-react";
 import { updateQuickAccessAction } from "@/app/(mainapp)/settings/quick-access/actions";
 import { cn } from "@workspace/ui/lib/utils";
@@ -57,6 +60,9 @@ const iconOptions = [
   { value: "Check", label: "Check", icon: Check },
   { value: "Calendar", label: "Calendar", icon: Calendar },
   { value: "Minus", label: "Minus", icon: Minus },
+  { value: "User", label: "User", icon: User },
+  { value: "ChefHat", label: "Chef Hat", icon: ChefHat },
+  { value: "Utensils", label: "Utensils", icon: Utensils },
 ];
 
 const urlKeyOptions = [

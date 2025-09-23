@@ -35,10 +35,11 @@ export const getQuickAccessBgClass = (color: unknown): string =>
 // URL key to URL mapping
 export const quickAccessUrlMap: Record<string, string> = {
   add_to_stock: "/stocks/add",
-  take_order: "/dashboard",
   menu_card: "/menus",
   stock: "/stocks",
-  move_quantity: "/dashboard",
+  order: "/orders",
+  waiters_page: "/waiters",
+  chefs_page: "/chefs",
 };
 
 export const getQuickAccessUrl = (urlKey: string): string => {
