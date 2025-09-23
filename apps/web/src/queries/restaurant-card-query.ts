@@ -20,6 +20,32 @@ export interface RestaurantCardMenu {
   allergens: string[];
 }
 
+export interface RestaurantCardContactInformation {
+  name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+}
+
+export interface RestaurantCardAddress {
+  line?: string | null;
+  postal_code?: string | null;
+  city?: string | null;
+  country?: string | null;
+}
+
+export interface RestaurantCardBusinessHour {
+  day_of_week: number;
+  opens_at: string;
+  closes_at: string;
+  is_overnight: boolean;
+  sequence: number;
+}
+
+export interface RestaurantCardSettings {
+  show_out_of_stock_menus_on_card?: boolean;
+  show_menu_images?: boolean;
+}
+
 export interface RestaurantCardCompany {
   name: string;
   slug?: string | null;
@@ -27,6 +53,12 @@ export interface RestaurantCardCompany {
   menus: RestaurantCardMenu[];
   show_menu_images?: boolean;
   show_out_of_stock_menus_on_card?: boolean;
+  logo_path?: string | null;
+  logo_url?: string | null;
+  contact?: RestaurantCardContactInformation | null;
+  address?: RestaurantCardAddress | null;
+  business_hours?: RestaurantCardBusinessHour[] | null;
+  settings?: RestaurantCardSettings | null;
 }
 
 interface RestaurantCardResponse {
@@ -61,10 +93,26 @@ export async function fetchRestaurantCard(
       };
     }
 
+    const normalizedShowMenuImages =
+      response.company.settings?.show_menu_images ??
+      response.company.show_menu_images ??
+      true;
+    const normalizedShowOutOfStock =
+      response.company.settings?.show_out_of_stock_menus_on_card ??
+      response.company.show_out_of_stock_menus_on_card ??
+      false;
+
     return {
       status: "success",
       company: {
         ...response.company,
+        show_menu_images: normalizedShowMenuImages,
+        show_out_of_stock_menus_on_card: normalizedShowOutOfStock,
+        settings: {
+          ...response.company.settings,
+          show_menu_images: normalizedShowMenuImages,
+          show_out_of_stock_menus_on_card: normalizedShowOutOfStock,
+        },
         menus: sortMenusForDisplay(response.company.menus ?? []),
       },
     };
