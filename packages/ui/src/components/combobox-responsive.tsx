@@ -105,7 +105,6 @@ function StatusList({
   onSelect: (item: ItemComboboxResponsive) => void;
   inputRef?: React.Ref<HTMLInputElement>;
 }) {
-  console.log("items", items);
   return (
     <Command>
       <CommandInput
