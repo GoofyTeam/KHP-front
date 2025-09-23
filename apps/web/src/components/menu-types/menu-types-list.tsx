@@ -11,6 +11,7 @@ import {
   GetMenuTypesQuery,
   type MenuType,
 } from "@workspace/graphql";
+import { cn } from "@workspace/ui/lib/utils";
 
 export interface MenuTypesListRef {
   refresh: () => Promise<void>;
@@ -129,11 +130,12 @@ export const MenuTypesList = forwardRef<MenuTypesListRef, MenuTypesListProps>(
             return (
               <div
                 key={menuType.id}
-                className={`h-20 py-3 px-4 cursor-pointer hover:bg-khp-primary/10 focus:bg-khp-primary/15 transition-colors rounded-md border flex items-center justify-between ${
+                className={cn(
+                  "h-20 py-3 px-4 cursor-pointer hover:bg-khp-primary/10 focus:bg-khp-primary/15 transition-colors rounded-md border flex items-center justify-between",
                   isSelected
                     ? "border-khp-primary bg-khp-primary/10"
                     : "border-khp-border bg-white hover:border-khp-primary/30"
-                }`}
+                )}
                 onClick={() => onEdit?.(menuType)}
               >
                 <div className="flex flex-col gap-1">

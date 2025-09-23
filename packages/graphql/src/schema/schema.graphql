@@ -1,3 +1,21 @@
+enum UnitEnum {
+  kg
+  hg
+  dag
+  g
+  dg
+  cg
+  mg
+  kL
+  hL
+  daL
+  L
+  dL
+  cL
+  mL
+  unit
+}
+
 enum AllergenEnum {
   gluten
   fruits_a_coque
@@ -15,682 +33,9 @@ enum AllergenEnum {
   mollusques
 }
 
-type Category {
-  """Unique primary key."""
-  id: ID!
-
-  """Category name."""
-  name: String!
-
-  """Ingredients in this category."""
-  ingredients: [Ingredient!]!
-
-  """Preparations in this category."""
-  preparations: [Preparation!]!
-
-  """The company that owns this category."""
-  company: Company!
-
-  """Shelf life durations by location type."""
-  shelfLives: [CategoryShelfLife!]!
-
-  """When the Category was created."""
-  created_at: DateTime!
-
-  """When the Category was last updated."""
-  updated_at: DateTime!
-}
-
-"""A paginated list of Category items."""
-type CategoryPaginator {
-  """Pagination information about the list of items."""
-  paginatorInfo: PaginatorInfo!
-
-  """A list of Category items."""
-  data: [Category!]!
-}
-
-type CategoryShelfLife {
-  """The location type for this shelf life."""
-  locationType: LocationType!
-
-  """Shelf life in hours for the category at this location type."""
-  shelf_life_hours: Int!
-}
-
-type Company {
-  """Unique primary key."""
-  id: ID!
-
-  """Company name."""
-  name: String!
-
-  """Preparations associated with this company."""
-  preparations: [Preparation!]!
-  categories: [Category!]!
-  locations: [Location!]!
-
-  """Types de localisation associés à cette entreprise."""
-  locationTypes: [LocationType!]!
-
-  """Langue préférée pour les données OpenFoodFacts (fr ou en)."""
-  open_food_facts_language: String
-
-  """Paramètres visibles publiquement pour la carte des menus."""
-  public_menu_settings: PublicMenuSettings!
-
-  """Logo ou image de présentation de l'entreprise."""
-  logo_path: String
-
-  """Nom de la personne à contacter."""
-  contact_name: String
-
-  """Adresse e-mail de contact."""
-  contact_email: String
-
-  """Numéro de téléphone principal."""
-  contact_phone: String
-
-  """Ligne d'adresse principale."""
-  address_line: String
-
-  """Code postal."""
-  postal_code: String
-
-  """Ville."""
-  city: String
-
-  """Pays."""
-  country: String
-
-  """Horaires d'ouverture de la semaine."""
-  businessHours: [CompanyBusinessHour!]!
-
-  """When the company was created."""
-  created_at: DateTime!
-
-  """When the company was last updated."""
-  updated_at: DateTime!
-}
-
-type CompanyBusinessHour {
-  id: ID!
-  day_of_week: Int!
-  opens_at: String!
-  closes_at: String!
-  is_overnight: Boolean!
-  sequence: Int!
-  created_at: DateTime!
-  updated_at: DateTime!
-}
-
-"""Champs disponibles pour le tri des entreprises."""
-enum CompanyOrderByField {
-  ID
-  NAME
-  CREATED_AT
-  UPDATED_AT
-}
-
-"""Options de tri pour les entreprises."""
-input CompanyOrderByOrderByClause {
-  """Champ sur lequel effectuer le tri."""
-  field: CompanyOrderByField!
-
-  """Direction du tri."""
-  order: SortOrder!
-}
-
-"""A paginated list of Company items."""
-type CompanyPaginator {
-  """Pagination information about the list of items."""
-  paginatorInfo: PaginatorInfo!
-
-  """A list of Company items."""
-  data: [Company!]!
-}
-
-scalar Date
-
-"""
-A datetime string with format `Y-m-d H:i:s`, e.g. `2018-05-23 13:43:32`.
-"""
-scalar DateTime
-
-type Ingredient {
-  """Unique primary key."""
-  id: ID!
-
-  """Ingredient name."""
-  name: String!
-
-  """Unit of measurement for the ingredient."""
-  unit: UnitEnum!
-
-  """Quantity for one unit of the ingredient."""
-  base_quantity: Float!
-
-  """Unit for the base quantity of the ingredient."""
-  base_unit: UnitEnum!
-
-  """Optional minimum stock quantity before alerting."""
-  threshold: Float
-
-  """Allergens contained in the ingredient."""
-  allergens: [AllergenEnum!]!
-  quantities: [IngredientQuantity!]!
-
-  """The company that owns this ingredient."""
-  company: Company!
-  category: Category!
-  image_url: String
-
-  """Historique des mouvements de stock pour cet ingrédient"""
-  stockMovements(orderBy: [StockMovementOrderByClause!]): [StockMovement!]!
-  withdrawals_today_count: Int!
-
-  """Number of withdrawals for this ingredient today."""
-  withdrawals_this_week_count: Int!
-
-  """Number of withdrawals for this ingredient this week."""
-  withdrawals_this_month_count: Int!
-
-  """When the ingredient was created."""
-  created_at: DateTime!
-
-  """When the ingredient was last updated."""
-  updated_at: DateTime!
-}
-
-input IngredientOrderByClause {
-  column: IngredientOrderByField!
-  order: SortOrder! = ASC
-}
-
-enum IngredientOrderByField {
-  ID
-  NAME
-  CREATED_AT
-  UPDATED_AT
-  WITHDRAWALS_TODAY
-  WITHDRAWALS_THIS_WEEK
-  WITHDRAWALS_THIS_MONTH
-}
-
-"""A paginated list of Ingredient items."""
-type IngredientPaginator {
-  """Pagination information about the list of items."""
-  paginatorInfo: PaginatorInfo!
-
-  """A list of Ingredient items."""
-  data: [Ingredient!]!
-}
-
-type IngredientQuantity {
-  """Le stock de l'ingrédient."""
-  quantity: Float!
-
-  """La localisation de ce stock."""
-  location: Location!
-}
-
-scalar JSON
-
-type Location {
-  """Unique primary key."""
-  id: ID!
-
-  """Location name."""
-  name: String!
-
-  """Location company."""
-  company: Company!
-
-  """Type de localisation (Congélateur, Réfrigérateur, etc.)"""
-  locationType: LocationType
-
-  """When the location was created."""
-  created_at: DateTime!
-
-  """When the location was last updated."""
-  updated_at: DateTime!
-
-  """Ingredients stored in this location."""
-  ingredients: [Ingredient!]!
-}
-
-"""Champs disponibles pour le tri des emplacements."""
-enum LocationOrderByField {
-  ID
-  NAME
-  CREATED_AT
-  UPDATED_AT
-}
-
-"""Options de tri pour les emplacements."""
-input LocationOrderByOrderByClause {
-  """Champ sur lequel effectuer le tri."""
-  field: LocationOrderByField!
-
-  """Direction du tri."""
-  order: SortOrder!
-}
-
-"""A paginated list of Location items."""
-type LocationPaginator {
-  """Pagination information about the list of items."""
-  paginatorInfo: PaginatorInfo!
-
-  """A list of Location items."""
-  data: [Location!]!
-}
-
-"""Type de localisation pour organiser les emplacements de stockage"""
-type LocationType {
-  """Identifiant unique."""
-  id: ID!
-
-  """Nom du type de localisation."""
-  name: String!
-
-  """Indique si c'est un type par défaut (non modifiable)."""
-  is_default: Boolean!
-
-  """L'entreprise à laquelle appartient ce type."""
-  company: Company!
-
-  """Emplacements utilisant ce type de localisation."""
-  locations: [Location!]!
-
-  """Date de création du type."""
-  created_at: DateTime!
-
-  """Date de dernière mise à jour du type."""
-  updated_at: DateTime!
-}
-
-"""Champs disponibles pour le tri des types de localisation."""
-enum LocationTypeOrderByField {
-  ID
-  NAME
-  IS_DEFAULT
-  CREATED_AT
-  UPDATED_AT
-}
-
-"""Options de tri pour les types de localisation."""
-input LocationTypeOrderByOrderByClause {
-  """Champ sur lequel effectuer le tri."""
-  field: LocationTypeOrderByField!
-
-  """Direction du tri."""
-  order: SortOrder!
-}
-
-"""A paginated list of LocationType items."""
-type LocationTypePaginator {
-  """Pagination information about the list of items."""
-  paginatorInfo: PaginatorInfo!
-
-  """A list of LocationType items."""
-  data: [LocationType!]!
-}
-
-"""Représente une perte d'ingrédient ou de préparation."""
-type Loss {
-  """Identifiant unique."""
-  id: ID!
-
-  """Type d'entité concernée par cette perte (ingredient ou preparation)."""
-  loss_item_type: String!
-
-  """ID de l'entité concernée."""
-  loss_item_id: ID!
-
-  """L'emplacement où la perte a eu lieu."""
-  location: Location!
-
-  """L'entreprise à laquelle appartient cette perte."""
-  company: Company!
-
-  """L'utilisateur qui a enregistré la perte."""
-  user: User
-
-  """Quantité perdue."""
-  quantity: Float!
-
-  """Raison de la perte."""
-  reason: String!
-
-  """Date et heure de création de la perte."""
-  created_at: DateTime!
-
-  """Date et heure de dernière mise à jour de la perte."""
-  updated_at: DateTime!
-}
-
-"""Statistiques des pertes par type."""
-type LossesStats {
-  ingredient: Float!
-  preparation: Float!
-  total: Float!
-}
-
-input LossOrderByClause {
-  field: LossOrderByField!
-  order: SortOrder!
-}
-
-enum LossOrderByField {
-  ID
-  QUANTITY
-  CREATED_AT
-  UPDATED_AT
-}
-
-"""A paginated list of Loss items."""
-type LossPaginator {
-  """Pagination information about the list of items."""
-  paginatorInfo: PaginatorInfo!
-
-  """A list of Loss items."""
-  data: [Loss!]!
-}
-
-"""Raison de perte prédéfinie pour une entreprise."""
-type LossReason {
-  """Identifiant unique."""
-  id: ID!
-
-  """Nom de la raison."""
-  name: String!
-
-  """Entreprise associée."""
-  company: Company!
-
-  """Date de création."""
-  created_at: DateTime!
-
-  """Date de mise à jour."""
-  updated_at: DateTime!
-}
-
-"""Type représentant une unité de mesure"""
-type MeasurementUnitType {
-  """Valeur utilisée en interne (ex: 'kg', 'L')"""
-  value: String!
-
-  """Libellé français (ex: 'Kilogramme (kg)')"""
-  label: String!
-
-  """Catégorie de l'unité (masse, volume ou unité)"""
-  category: String!
-}
-
-type Menu {
-  id: ID!
-  name: String!
-  description: String
-  image_url: String
-  is_a_la_carte: Boolean!
-  service_type: MenuServiceTypeEnum!
-  is_returnable: Boolean!
-  available(quantity: Int! = 1): Boolean!
-  type: String!
-  menu_type_id: ID!
-  public_priority: Int!
-  menu_type: MenuType
-  price: Float!
-  categories: [MenuCategory!]!
-  allergens: [AllergenEnum!]!
-  items: [MenuItem!]!
-  created_at: DateTime!
-  updated_at: DateTime!
-}
-
-type MenuCategory {
-  """Unique primary key."""
-  id: ID!
-
-  """Category name."""
-  name: String!
-
-  """Menus in this category."""
-  menus: [Menu!]!
-
-  """The company that owns this category."""
-  company: Company!
-
-  """When the category was created."""
-  created_at: DateTime!
-
-  """When the category was last updated."""
-  updated_at: DateTime!
-}
-
-"""A paginated list of MenuCategory items."""
-type MenuCategoryPaginator {
-  """Pagination information about the list of items."""
-  paginatorInfo: PaginatorInfo!
-
-  """A list of MenuCategory items."""
-  data: [MenuCategory!]!
-}
-
-type MenuItem {
-  id: ID!
-  location: Location!
-  quantity: Float!
-  unit: UnitEnum!
-  entity: MenuItemEntity!
-}
-
-union MenuItemEntity = Ingredient | Preparation
-
-"""A paginated list of Menu items."""
-type MenuPaginator {
-  """Pagination information about the list of items."""
-  paginatorInfo: PaginatorInfo!
-
-  """A list of Menu items."""
-  data: [Menu!]!
-}
-
 enum MenuServiceTypeEnum {
   PREP
   DIRECT
-}
-
-type MenuType {
-  id: ID!
-  name: String!
-  public_index: Int!
-}
-
-"""Représente un produit alimentaire issu d'OpenFoodFacts"""
-type OpenFoodFactsProduct {
-  barcode: String
-  product_name: String
-  base_quantity: Float
-  unit: String
-  categories: [String]
-  imageUrl: String
-  is_already_in_database: Boolean
-  ingredient_id: ID
-}
-
-"""Représente une commande passée dans l'établissement."""
-type Order {
-  """Identifiant unique."""
-  id: ID!
-
-  """Table associée à la commande."""
-  table: Table!
-
-  """Entreprise propriétaire de la commande."""
-  company: Company!
-
-  """Utilisateur qui a créé la commande."""
-  user: User!
-
-  """Statut actuel de la commande."""
-  status: OrderStatusEnum!
-
-  """Horodatage du passage de la commande en statut PENDING."""
-  pending_at: DateTime
-
-  """Horodatage du service de la commande."""
-  served_at: DateTime
-
-  """Horodatage du paiement de la commande."""
-  payed_at: DateTime
-
-  """Horodatage de l'annulation éventuelle."""
-  canceled_at: DateTime
-
-  """
-  Prix total TTC calculé à partir des menus de toutes les étapes (prix × quantité).
-  """
-  price: Float!
-
-  """Étapes associées à la commande."""
-  steps: [OrderStep!]!
-
-  """Historique des actions liées à la commande (ordre chronologique)."""
-  histories: [OrderHistory!]!
-
-  """Date de création de la commande."""
-  created_at: DateTime!
-
-  """Date de dernière mise à jour."""
-  updated_at: DateTime!
-}
-
-"""Allows ordering a list of records."""
-input OrderByClause {
-  """The column that is used for ordering."""
-  column: String!
-
-  """The direction that is used for ordering."""
-  order: SortOrder!
-}
-
-"""
-Aggregate functions when ordering by a relation without specifying a column.
-"""
-enum OrderByRelationAggregateFunction {
-  """Amount of items."""
-  COUNT
-}
-
-"""
-Aggregate functions when ordering by a relation that may specify a column.
-"""
-enum OrderByRelationWithColumnAggregateFunction {
-  """Average."""
-  AVG
-
-  """Minimum."""
-  MIN
-
-  """Maximum."""
-  MAX
-
-  """Sum."""
-  SUM
-
-  """Amount of items."""
-  COUNT
-}
-
-"""Historique des actions effectuées sur une commande."""
-type OrderHistory {
-  """Identifiant unique de l'entrée."""
-  id: ID!
-
-  """Commande associée à l'entrée."""
-  order: Order!
-
-  """Étape concernée, le cas échéant."""
-  order_step: OrderStep
-
-  """Menu d'étape concerné, le cas échéant."""
-  step_menu: StepMenu
-
-  """Entreprise liée à l'entrée."""
-  company: Company!
-
-  """Utilisateur ayant réalisé l'action."""
-  user: User
-
-  """Type d'action enregistrée."""
-  action: OrderHistoryActionEnum!
-
-  """Informations métier associées à l'action."""
-  payload: JSON
-
-  """Raison associée à l'action (si applicable)."""
-  reason: String
-
-  """Date de création de l'entrée."""
-  created_at: DateTime!
-
-  """Date de dernière mise à jour."""
-  updated_at: DateTime!
-}
-
-"""Liste des actions possibles sur l'historique des commandes."""
-enum OrderHistoryActionEnum {
-  ORDER_CREATED
-  ORDER_STATUS_UPDATED
-  ORDER_STEP_CREATED
-  ORDER_STEP_STATUS_UPDATED
-  STEP_MENU_ADDED
-  STEP_MENU_UPDATED
-  STEP_MENU_REMOVED
-  STEP_MENU_STATUS_UPDATED
-}
-
-"""Options de tri disponibles pour les commandes."""
-input OrderOrderByClause {
-  """Colonne utilisée pour le tri."""
-  column: OrderOrderByField!
-
-  """Direction du tri."""
-  order: SortOrder! = ASC
-}
-
-"""Colonnes triables pour les commandes."""
-enum OrderOrderByField {
-  ID
-  STATUS
-  TABLE_ID
-  USER_ID
-  PENDING_AT
-  SERVED_AT
-  PAYED_AT
-  CANCELED_AT
-  CREATED_AT
-  UPDATED_AT
-}
-
-"""A paginated list of Order items."""
-type OrderPaginator {
-  """Pagination information about the list of items."""
-  paginatorInfo: PaginatorInfo!
-
-  """A list of Order items."""
-  data: [Order!]!
-}
-
-"""Statistiques agrégées sur les commandes."""
-type OrdersStats {
-  pending: Int!
-  served: Int!
-  payed: Int!
-  canceled: Int!
-  total: Int!
-  revenue: Float!
 }
 
 enum OrderStatusEnum {
@@ -700,232 +45,16 @@ enum OrderStatusEnum {
   CANCELED
 }
 
-"""Étape individuelle d'une commande."""
-type OrderStep {
-  """Identifiant unique."""
-  id: ID!
-
-  """Commande à laquelle appartient l'étape."""
-  order: Order!
-
-  """Position de l'étape dans le flux de service."""
-  position: Int!
-
-  """Statut actuel de l'étape."""
-  status: OrderStepStatusEnum!
-
-  """Horodatage du service de l'étape."""
-  served_at: DateTime
-
-  """
-  Prix TTC de l'étape calculé en sommant prix × quantité des menus associés.
-  """
-  price: Float!
-
-  """Menus associés à cette étape."""
-  stepMenus: [StepMenu!]!
-
-  """Menus liés via la relation pivot."""
-  menus: [Menu!]!
-
-  """Date de création de l'étape."""
-  created_at: DateTime!
-
-  """Date de dernière mise à jour."""
-  updated_at: DateTime!
-}
-
-"""Options de tri disponibles pour les étapes de commande."""
-input OrderStepOrderByClause {
-  """Colonne utilisée pour le tri."""
-  column: OrderStepOrderByField!
-
-  """Direction du tri."""
-  order: SortOrder! = ASC
-}
-
-"""Colonnes triables pour les étapes de commande."""
-enum OrderStepOrderByField {
-  ID
-  ORDER_ID
-  POSITION
-  STATUS
-  SERVED_AT
-  CREATED_AT
-  UPDATED_AT
-}
-
-"""A paginated list of OrderStep items."""
-type OrderStepPaginator {
-  """Pagination information about the list of items."""
-  paginatorInfo: PaginatorInfo!
-
-  """A list of OrderStep items."""
-  data: [OrderStep!]!
-}
-
 enum OrderStepStatusEnum {
   IN_PREP
   READY
   SERVED
 }
 
-"""Information about pagination using a fully featured paginator."""
-type PaginatorInfo {
-  """Number of items in the current page."""
-  count: Int!
-
-  """Index of the current page."""
-  currentPage: Int!
-
-  """Index of the first item in the current page."""
-  firstItem: Int
-
-  """Are there more pages after this one?"""
-  hasMorePages: Boolean!
-
-  """Index of the last item in the current page."""
-  lastItem: Int
-
-  """Index of the last available page."""
-  lastPage: Int!
-
-  """Number of items per page."""
-  perPage: Int!
-
-  """Number of total available items."""
-  total: Int!
-}
-
-type Perishable {
-  id: ID!
-  ingredient: Ingredient!
-  location: Location!
-  quantity: Float!
-  is_read: Boolean!
-  expiration_at: DateTime!
-  created_at: DateTime!
-  updated_at: DateTime!
-}
-
-enum PerishableFilter {
-  FRESH
-  SOON
-  EXPIRED
-}
-
-type Preparation {
-  """Unique primary key."""
-  id: ID!
-
-  """Preparation name."""
-  name: String!
-
-  """Unit of measurement for the preparation."""
-  unit: UnitEnum!
-
-  """Quantity for one unit of the preparation."""
-  base_quantity: Float!
-
-  """Unit for the base quantity of the preparation."""
-  base_unit: UnitEnum!
-
-  """Allergens contained in this preparation."""
-  allergens: [AllergenEnum!]!
-
-  """The company that produces this preparation."""
-  company: Company!
-
-  """Threshold below which the preparation is considered understocked."""
-  threshold: Float
-  entities: [PreparationEntity!]!
-  locations: [Location!]!
-
-  """The categories associated with this preparation."""
-  categories: [Category!]!
-  quantities: [PreparationQuantity!]!
-  preparable_quantity: PreparationPreparableQuantity!
-  image_url: String
-
-  """Historique des mouvements de stock pour cette préparation"""
-  stockMovements: [StockMovement!]!
-  withdrawals_today_count: Int!
-
-  """Number of withdrawals for this ingredient today."""
-  withdrawals_this_week_count: Int!
-
-  """Number of withdrawals for this ingredient this week."""
-  withdrawals_this_month_count: Int!
-
-  """When the preparation was created."""
-  created_at: DateTime!
-
-  """When the preparation was last updated."""
-  updated_at: DateTime!
-}
-
-type PreparationEntity {
-  id: ID!
-  entity: PreparationEntityItem!
-  preparation: Preparation!
-  location: Location!
-  quantity: Float!
-  unit: UnitEnum!
-}
-
-union PreparationEntityItem = Ingredient | Preparation
-
-input PreparationOrderByClause {
-  column: PreparationOrderByField!
-  order: SortOrder! = ASC
-}
-
-enum PreparationOrderByField {
-  ID
-  NAME
-  CREATED_AT
-  UPDATED_AT
-  WITHDRAWALS_TODAY
-  WITHDRAWALS_THIS_WEEK
-  WITHDRAWALS_THIS_MONTH
-}
-
-"""A paginated list of Preparation items."""
-type PreparationPaginator {
-  """Pagination information about the list of items."""
-  paginatorInfo: PaginatorInfo!
-
-  """A list of Preparation items."""
-  data: [Preparation!]!
-}
-
-type PreparationPreparableQuantity {
-  """Quantité maximale préparable avec le stock actuel."""
-  quantity: Float!
-
-  """Unité associée à la préparation."""
-  unit: UnitEnum!
-}
-
-type PreparationQuantity {
-  """Le stock de la préparation."""
-  quantity: Float!
-
-  """La localisation de ce stock."""
-  location: Location!
-}
-
-type PublicMenuSettings {
-  """Identifiant public unique pour partager la carte du restaurant."""
-  public_menu_card_url: String!
-
-  """
-  Affiche aussi les menus qui n'ont pas assez de stock sur la carte publique.
-  """
-  show_out_of_stock_menus_on_card: Boolean!
-
-  """Affiche les images des menus sur la carte publique."""
-  show_menu_images: Boolean!
+enum StepMenuStatusEnum {
+  IN_PREP
+  READY
+  SERVED
 }
 
 type Query {
@@ -1366,50 +495,734 @@ type Query {
   ): UserPaginator!
 }
 
-"""Order by clause for Query.orders.orderBy."""
-input QueryOrdersOrderByOrderByClause {
-  """The column that is used for ordering."""
+"""
+A datetime string with format `Y-m-d H:i:s`, e.g. `2018-05-23 13:43:32`.
+"""
+scalar DateTime
+
+scalar Date
+
+scalar JSON
+
+"""Directions for ordering a list of records."""
+enum SortOrder {
+  """Sort records in ascending order."""
+  ASC
+
+  """Sort records in descending order."""
+  DESC
+}
+
+type Category {
+  """Unique primary key."""
+  id: ID!
+
+  """Category name."""
+  name: String!
+
+  """Ingredients in this category."""
+  ingredients: [Ingredient!]!
+
+  """Preparations in this category."""
+  preparations: [Preparation!]!
+
+  """The company that owns this category."""
+  company: Company!
+
+  """Shelf life durations by location type."""
+  shelfLives: [CategoryShelfLife!]!
+
+  """When the Category was created."""
+  created_at: DateTime!
+
+  """When the Category was last updated."""
+  updated_at: DateTime!
+}
+
+type CategoryShelfLife {
+  """The location type for this shelf life."""
+  locationType: LocationType!
+
+  """Shelf life in hours for the category at this location type."""
+  shelf_life_hours: Int!
+}
+
+type Company {
+  """Unique primary key."""
+  id: ID!
+
+  """Company name."""
+  name: String!
+
+  """Preparations associated with this company."""
+  preparations: [Preparation!]!
+  categories: [Category!]!
+  locations: [Location!]!
+
+  """Types de localisation associés à cette entreprise."""
+  locationTypes: [LocationType!]!
+
+  """Langue préférée pour les données OpenFoodFacts (fr ou en)."""
+  open_food_facts_language: String
+
+  """Paramètres visibles publiquement pour la carte des menus."""
+  public_menu_settings: PublicMenuSettings!
+
+  """Logo ou image de présentation de l'entreprise."""
+  logo_path: String
+
+  """Nom de la personne à contacter."""
+  contact_name: String
+
+  """Adresse e-mail de contact."""
+  contact_email: String
+
+  """Numéro de téléphone principal."""
+  contact_phone: String
+
+  """Ligne d'adresse principale."""
+  address_line: String
+
+  """Code postal."""
+  postal_code: String
+
+  """Ville."""
+  city: String
+
+  """Pays."""
+  country: String
+
+  """Horaires d'ouverture de la semaine."""
+  businessHours: [CompanyBusinessHour!]!
+
+  """When the company was created."""
+  created_at: DateTime!
+
+  """When the company was last updated."""
+  updated_at: DateTime!
+}
+
+type CompanyBusinessHour {
+  id: ID!
+  day_of_week: Int!
+  opens_at: String!
+  closes_at: String!
+  is_overnight: Boolean!
+  sequence: Int!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+"""Options de tri pour les entreprises."""
+input CompanyOrderByOrderByClause {
+  """Champ sur lequel effectuer le tri."""
+  field: CompanyOrderByField!
+
+  """Direction du tri."""
+  order: SortOrder!
+}
+
+"""Champs disponibles pour le tri des entreprises."""
+enum CompanyOrderByField {
+  ID
+  NAME
+  CREATED_AT
+  UPDATED_AT
+}
+
+type PublicMenuSettings {
+  """Identifiant public unique pour partager la carte du restaurant."""
+  public_menu_card_url: String!
+
+  """
+  Affiche aussi les menus qui n'ont pas assez de stock sur la carte publique.
+  """
+  show_out_of_stock_menus_on_card: Boolean!
+
+  """Affiche les images des menus sur la carte publique."""
+  show_menu_images: Boolean!
+}
+
+type Ingredient {
+  """Unique primary key."""
+  id: ID!
+
+  """Ingredient name."""
+  name: String!
+
+  """Unit of measurement for the ingredient."""
+  unit: UnitEnum!
+
+  """Quantity for one unit of the ingredient."""
+  base_quantity: Float!
+
+  """Unit for the base quantity of the ingredient."""
+  base_unit: UnitEnum!
+
+  """Optional minimum stock quantity before alerting."""
+  threshold: Float
+
+  """Allergens contained in the ingredient."""
+  allergens: [AllergenEnum!]!
+  quantities: [IngredientQuantity!]!
+
+  """The company that owns this ingredient."""
+  company: Company!
+  category: Category!
+  image_url: String
+
+  """Historique des mouvements de stock pour cet ingrédient"""
+  stockMovements(orderBy: [StockMovementOrderByClause!]): [StockMovement!]!
+  withdrawals_today_count: Int!
+
+  """Number of withdrawals for this ingredient today."""
+  withdrawals_this_week_count: Int!
+
+  """Number of withdrawals for this ingredient this week."""
+  withdrawals_this_month_count: Int!
+
+  """When the ingredient was created."""
+  created_at: DateTime!
+
+  """When the ingredient was last updated."""
+  updated_at: DateTime!
+}
+
+enum IngredientOrderByField {
+  ID
+  NAME
+  CREATED_AT
+  UPDATED_AT
+  WITHDRAWALS_TODAY
+  WITHDRAWALS_THIS_WEEK
+  WITHDRAWALS_THIS_MONTH
+}
+
+input IngredientOrderByClause {
+  column: IngredientOrderByField!
+  order: SortOrder! = ASC
+}
+
+type IngredientQuantity {
+  """Le stock de l'ingrédient."""
+  quantity: Float!
+
+  """La localisation de ce stock."""
+  location: Location!
+}
+
+type Location {
+  """Unique primary key."""
+  id: ID!
+
+  """Location name."""
+  name: String!
+
+  """Location company."""
+  company: Company!
+
+  """Type de localisation (Congélateur, Réfrigérateur, etc.)"""
+  locationType: LocationType
+
+  """When the location was created."""
+  created_at: DateTime!
+
+  """When the location was last updated."""
+  updated_at: DateTime!
+
+  """Ingredients stored in this location."""
+  ingredients: [Ingredient!]!
+}
+
+"""Options de tri pour les emplacements."""
+input LocationOrderByOrderByClause {
+  """Champ sur lequel effectuer le tri."""
+  field: LocationOrderByField!
+
+  """Direction du tri."""
+  order: SortOrder!
+}
+
+"""Champs disponibles pour le tri des emplacements."""
+enum LocationOrderByField {
+  ID
+  NAME
+  CREATED_AT
+  UPDATED_AT
+}
+
+"""Type de localisation pour organiser les emplacements de stockage"""
+type LocationType {
+  """Identifiant unique."""
+  id: ID!
+
+  """Nom du type de localisation."""
+  name: String!
+
+  """Indique si c'est un type par défaut (non modifiable)."""
+  is_default: Boolean!
+
+  """L'entreprise à laquelle appartient ce type."""
+  company: Company!
+
+  """Emplacements utilisant ce type de localisation."""
+  locations: [Location!]!
+
+  """Date de création du type."""
+  created_at: DateTime!
+
+  """Date de dernière mise à jour du type."""
+  updated_at: DateTime!
+}
+
+"""Options de tri pour les types de localisation."""
+input LocationTypeOrderByOrderByClause {
+  """Champ sur lequel effectuer le tri."""
+  field: LocationTypeOrderByField!
+
+  """Direction du tri."""
+  order: SortOrder!
+}
+
+"""Champs disponibles pour le tri des types de localisation."""
+enum LocationTypeOrderByField {
+  ID
+  NAME
+  IS_DEFAULT
+  CREATED_AT
+  UPDATED_AT
+}
+
+"""Représente une perte d'ingrédient ou de préparation."""
+type Loss {
+  """Identifiant unique."""
+  id: ID!
+
+  """Type d'entité concernée par cette perte (ingredient ou preparation)."""
+  loss_item_type: String!
+
+  """ID de l'entité concernée."""
+  loss_item_id: ID!
+
+  """L'emplacement où la perte a eu lieu."""
+  location: Location!
+
+  """L'entreprise à laquelle appartient cette perte."""
+  company: Company!
+
+  """L'utilisateur qui a enregistré la perte."""
+  user: User
+
+  """Quantité perdue."""
+  quantity: Float!
+
+  """Raison de la perte."""
+  reason: String!
+
+  """Date et heure de création de la perte."""
+  created_at: DateTime!
+
+  """Date et heure de dernière mise à jour de la perte."""
+  updated_at: DateTime!
+}
+
+"""Statistiques des pertes par type."""
+type LossesStats {
+  ingredient: Float!
+  preparation: Float!
+  total: Float!
+}
+
+input LossOrderByClause {
+  field: LossOrderByField!
+  order: SortOrder!
+}
+
+enum LossOrderByField {
+  ID
+  QUANTITY
+  CREATED_AT
+  UPDATED_AT
+}
+
+"""Raison de perte prédéfinie pour une entreprise."""
+type LossReason {
+  """Identifiant unique."""
+  id: ID!
+
+  """Nom de la raison."""
+  name: String!
+
+  """Entreprise associée."""
+  company: Company!
+
+  """Date de création."""
+  created_at: DateTime!
+
+  """Date de mise à jour."""
+  updated_at: DateTime!
+}
+
+"""Type représentant une unité de mesure"""
+type MeasurementUnitType {
+  """Valeur utilisée en interne (ex: 'kg', 'L')"""
+  value: String!
+
+  """Libellé français (ex: 'Kilogramme (kg)')"""
+  label: String!
+
+  """Catégorie de l'unité (masse, volume ou unité)"""
+  category: String!
+}
+
+type Menu {
+  id: ID!
+  name: String!
+  description: String
+  image_url: String
+  is_a_la_carte: Boolean!
+  service_type: MenuServiceTypeEnum!
+  is_returnable: Boolean!
+  available(quantity: Int! = 1): Boolean!
+  type: String!
+  menu_type_id: ID!
+  public_priority: Int!
+  menu_type: MenuType
+  price: Float!
+  categories: [MenuCategory!]!
+  allergens: [AllergenEnum!]!
+  items: [MenuItem!]!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type MenuType {
+  id: ID!
+  name: String!
+  public_index: Int!
+}
+
+type MenuItem {
+  id: ID!
+  location: Location!
+  quantity: Float!
+  unit: UnitEnum!
+  entity: MenuItemEntity!
+}
+
+union MenuItemEntity = Ingredient | Preparation
+
+type MenuCategory {
+  """Unique primary key."""
+  id: ID!
+
+  """Category name."""
+  name: String!
+
+  """Menus in this category."""
+  menus: [Menu!]!
+
+  """The company that owns this category."""
+  company: Company!
+
+  """When the category was created."""
+  created_at: DateTime!
+
+  """When the category was last updated."""
+  updated_at: DateTime!
+}
+
+"""Représente une commande passée dans l'établissement."""
+type Order {
+  """Identifiant unique."""
+  id: ID!
+
+  """Table associée à la commande."""
+  table: Table!
+
+  """Entreprise propriétaire de la commande."""
+  company: Company!
+
+  """Utilisateur qui a créé la commande."""
+  user: User!
+
+  """Statut actuel de la commande."""
+  status: OrderStatusEnum!
+
+  """Horodatage du passage de la commande en statut PENDING."""
+  pending_at: DateTime
+
+  """Horodatage du service de la commande."""
+  served_at: DateTime
+
+  """Horodatage du paiement de la commande."""
+  payed_at: DateTime
+
+  """Horodatage de l'annulation éventuelle."""
+  canceled_at: DateTime
+
+  """
+  Prix total TTC calculé à partir des menus de toutes les étapes (prix × quantité).
+  """
+  price: Float!
+
+  """Étapes associées à la commande."""
+  steps: [OrderStep!]!
+
+  """Historique des actions liées à la commande (ordre chronologique)."""
+  histories: [OrderHistory!]!
+
+  """Date de création de la commande."""
+  created_at: DateTime!
+
+  """Date de dernière mise à jour."""
+  updated_at: DateTime!
+}
+
+"""Statistiques agrégées sur les commandes."""
+type OrdersStats {
+  pending: Int!
+  served: Int!
+  payed: Int!
+  canceled: Int!
+  total: Int!
+  revenue: Float!
+}
+
+"""Options de tri disponibles pour les commandes."""
+input OrderOrderByClause {
+  """Colonne utilisée pour le tri."""
   column: OrderOrderByField!
 
-  """The direction that is used for ordering."""
-  order: SortOrder!
+  """Direction du tri."""
+  order: SortOrder! = ASC
 }
 
-"""Order by clause for Query.orderSteps.orderBy."""
-input QueryOrderStepsOrderByOrderByClause {
-  """The column that is used for ordering."""
+"""Colonnes triables pour les commandes."""
+enum OrderOrderByField {
+  ID
+  STATUS
+  TABLE_ID
+  USER_ID
+  PENDING_AT
+  SERVED_AT
+  PAYED_AT
+  CANCELED_AT
+  CREATED_AT
+  UPDATED_AT
+}
+
+"""Historique des actions effectuées sur une commande."""
+type OrderHistory {
+  """Identifiant unique de l'entrée."""
+  id: ID!
+
+  """Commande associée à l'entrée."""
+  order: Order!
+
+  """Étape concernée, le cas échéant."""
+  order_step: OrderStep
+
+  """Menu d'étape concerné, le cas échéant."""
+  step_menu: StepMenu
+
+  """Entreprise liée à l'entrée."""
+  company: Company!
+
+  """Utilisateur ayant réalisé l'action."""
+  user: User
+
+  """Type d'action enregistrée."""
+  action: OrderHistoryActionEnum!
+
+  """Informations métier associées à l'action."""
+  payload: JSON
+
+  """Raison associée à l'action (si applicable)."""
+  reason: String
+
+  """Date de création de l'entrée."""
+  created_at: DateTime!
+
+  """Date de dernière mise à jour."""
+  updated_at: DateTime!
+}
+
+"""Liste des actions possibles sur l'historique des commandes."""
+enum OrderHistoryActionEnum {
+  ORDER_CREATED
+  ORDER_STATUS_UPDATED
+  ORDER_STEP_CREATED
+  ORDER_STEP_STATUS_UPDATED
+  STEP_MENU_ADDED
+  STEP_MENU_UPDATED
+  STEP_MENU_REMOVED
+  STEP_MENU_STATUS_UPDATED
+}
+
+"""Étape individuelle d'une commande."""
+type OrderStep {
+  """Identifiant unique."""
+  id: ID!
+
+  """Commande à laquelle appartient l'étape."""
+  order: Order!
+
+  """Position de l'étape dans le flux de service."""
+  position: Int!
+
+  """Statut actuel de l'étape."""
+  status: OrderStepStatusEnum!
+
+  """Horodatage du service de l'étape."""
+  served_at: DateTime
+
+  """
+  Prix TTC de l'étape calculé en sommant prix × quantité des menus associés.
+  """
+  price: Float!
+
+  """Menus associés à cette étape."""
+  stepMenus: [StepMenu!]!
+
+  """Menus liés via la relation pivot."""
+  menus: [Menu!]!
+
+  """Date de création de l'étape."""
+  created_at: DateTime!
+
+  """Date de dernière mise à jour."""
+  updated_at: DateTime!
+}
+
+"""Options de tri disponibles pour les étapes de commande."""
+input OrderStepOrderByClause {
+  """Colonne utilisée pour le tri."""
   column: OrderStepOrderByField!
 
-  """The direction that is used for ordering."""
-  order: SortOrder!
+  """Direction du tri."""
+  order: SortOrder! = ASC
 }
 
-"""Order by clause for Query.rooms.orderBy."""
-input QueryRoomsOrderByOrderByClause {
-  """The column that is used for ordering."""
-  column: RoomOrderByField!
-
-  """The direction that is used for ordering."""
-  order: SortOrder!
+"""Colonnes triables pour les étapes de commande."""
+enum OrderStepOrderByField {
+  ID
+  ORDER_ID
+  POSITION
+  STATUS
+  SERVED_AT
+  CREATED_AT
+  UPDATED_AT
 }
 
-"""Order by clause for Query.stepMenus.orderBy."""
-input QueryStepMenusOrderByOrderByClause {
-  """The column that is used for ordering."""
-  column: StepMenuOrderByField!
-
-  """The direction that is used for ordering."""
-  order: SortOrder!
+enum PerishableFilter {
+  FRESH
+  SOON
+  EXPIRED
 }
 
-"""Order by clause for Query.tables.orderBy."""
-input QueryTablesOrderByOrderByClause {
-  """The column that is used for ordering."""
-  column: TableOrderByField!
-
-  """The direction that is used for ordering."""
-  order: SortOrder!
+type Perishable {
+  id: ID!
+  ingredient: Ingredient!
+  location: Location!
+  quantity: Float!
+  is_read: Boolean!
+  expiration_at: DateTime!
+  created_at: DateTime!
+  updated_at: DateTime!
 }
+
+type Preparation {
+  """Unique primary key."""
+  id: ID!
+
+  """Preparation name."""
+  name: String!
+
+  """Unit of measurement for the preparation."""
+  unit: UnitEnum!
+
+  """Quantity for one unit of the preparation."""
+  base_quantity: Float!
+
+  """Unit for the base quantity of the preparation."""
+  base_unit: UnitEnum!
+
+  """Allergens contained in this preparation."""
+  allergens: [AllergenEnum!]!
+
+  """The company that produces this preparation."""
+  company: Company!
+
+  """Threshold below which the preparation is considered understocked."""
+  threshold: Float
+  entities: [PreparationEntity!]!
+  locations: [Location!]!
+
+  """The categories associated with this preparation."""
+  categories: [Category!]!
+  quantities: [PreparationQuantity!]!
+  preparable_quantity: PreparationPreparableQuantity!
+  image_url: String
+
+  """Historique des mouvements de stock pour cette préparation"""
+  stockMovements: [StockMovement!]!
+  withdrawals_today_count: Int!
+
+  """Number of withdrawals for this ingredient today."""
+  withdrawals_this_week_count: Int!
+
+  """Number of withdrawals for this ingredient this week."""
+  withdrawals_this_month_count: Int!
+
+  """When the preparation was created."""
+  created_at: DateTime!
+
+  """When the preparation was last updated."""
+  updated_at: DateTime!
+}
+
+type PreparationQuantity {
+  """Le stock de la préparation."""
+  quantity: Float!
+
+  """La localisation de ce stock."""
+  location: Location!
+}
+
+type PreparationPreparableQuantity {
+  """Quantité maximale préparable avec le stock actuel."""
+  quantity: Float!
+
+  """Unité associée à la préparation."""
+  unit: UnitEnum!
+}
+
+enum PreparationOrderByField {
+  ID
+  NAME
+  CREATED_AT
+  UPDATED_AT
+  WITHDRAWALS_TODAY
+  WITHDRAWALS_THIS_WEEK
+  WITHDRAWALS_THIS_MONTH
+}
+
+input PreparationOrderByClause {
+  column: PreparationOrderByField!
+  order: SortOrder! = ASC
+}
+
+type PreparationEntity {
+  id: ID!
+  entity: PreparationEntityItem!
+  preparation: Preparation!
+  location: Location!
+  quantity: Float!
+  unit: UnitEnum!
+}
+
+union PreparationEntityItem = Ingredient | Preparation
 
 """Bouton d’accès rapide configurable pour une entreprise."""
 type QuickAccess {
@@ -1460,25 +1273,19 @@ enum RoomOrderByField {
   UPDATED_AT
 }
 
-"""A paginated list of Room items."""
-type RoomPaginator {
-  """Pagination information about the list of items."""
-  paginatorInfo: PaginatorInfo!
-
-  """A list of Room items."""
-  data: [Room!]!
+"""Représente un produit alimentaire issu d'OpenFoodFacts"""
+type OpenFoodFactsProduct {
+  barcode: String
+  product_name: String
+  base_quantity: Float
+  unit: String
+  categories: [String]
+  imageUrl: String
+  is_already_in_database: Boolean
+  ingredient_id: ID
 }
 
 union SearchResult = Ingredient | Preparation
-
-"""Directions for ordering a list of records."""
-enum SortOrder {
-  """Sort records in ascending order."""
-  ASC
-
-  """Sort records in descending order."""
-  DESC
-}
 
 """Association entre une étape de commande et un menu."""
 type StepMenu {
@@ -1529,21 +1336,6 @@ enum StepMenuOrderByField {
   SERVED_AT
   CREATED_AT
   UPDATED_AT
-}
-
-"""A paginated list of StepMenu items."""
-type StepMenuPaginator {
-  """Pagination information about the list of items."""
-  paginatorInfo: PaginatorInfo!
-
-  """A list of StepMenu items."""
-  data: [StepMenu!]!
-}
-
-enum StepMenuStatusEnum {
-  IN_PREP
-  READY
-  SERVED
 }
 
 """Représente un mouvement de stock d'un ingrédient ou d'une préparation."""
@@ -1608,15 +1400,6 @@ enum StockMovementOrderByField {
   UPDATED_AT
 }
 
-"""A paginated list of StockMovement items."""
-type StockMovementPaginator {
-  """Pagination information about the list of items."""
-  paginatorInfo: PaginatorInfo!
-
-  """A list of StockMovement items."""
-  data: [StockMovement!]!
-}
-
 type Table {
   """Unique primary key."""
   id: ID!
@@ -1635,47 +1418,6 @@ enum TableOrderByField {
   ROOM_ID
   CREATED_AT
   UPDATED_AT
-}
-
-"""A paginated list of Table items."""
-type TablePaginator {
-  """Pagination information about the list of items."""
-  paginatorInfo: PaginatorInfo!
-
-  """A list of Table items."""
-  data: [Table!]!
-}
-
-"""
-Specify if you want to include or exclude trashed results from a query.
-"""
-enum Trashed {
-  """Only return trashed results."""
-  ONLY
-
-  """Return both trashed and non-trashed results."""
-  WITH
-
-  """Only return non-trashed results."""
-  WITHOUT
-}
-
-enum UnitEnum {
-  kg
-  hg
-  dag
-  g
-  dg
-  cg
-  mg
-  kL
-  hL
-  daL
-  L
-  dL
-  cL
-  mL
-  unit
 }
 
 """Account of a person who uses this application."""
@@ -1702,6 +1444,168 @@ type User {
   updated_at: DateTime!
 }
 
+"""Information about pagination using a fully featured paginator."""
+type PaginatorInfo {
+  """Number of items in the current page."""
+  count: Int!
+
+  """Index of the current page."""
+  currentPage: Int!
+
+  """Index of the first item in the current page."""
+  firstItem: Int
+
+  """Are there more pages after this one?"""
+  hasMorePages: Boolean!
+
+  """Index of the last item in the current page."""
+  lastItem: Int
+
+  """Index of the last available page."""
+  lastPage: Int!
+
+  """Number of items per page."""
+  perPage: Int!
+
+  """Number of total available items."""
+  total: Int!
+}
+
+"""A paginated list of Category items."""
+type CategoryPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of Category items."""
+  data: [Category!]!
+}
+
+"""A paginated list of Company items."""
+type CompanyPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of Company items."""
+  data: [Company!]!
+}
+
+"""A paginated list of Ingredient items."""
+type IngredientPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of Ingredient items."""
+  data: [Ingredient!]!
+}
+
+"""A paginated list of Location items."""
+type LocationPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of Location items."""
+  data: [Location!]!
+}
+
+"""A paginated list of LocationType items."""
+type LocationTypePaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of LocationType items."""
+  data: [LocationType!]!
+}
+
+"""A paginated list of Loss items."""
+type LossPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of Loss items."""
+  data: [Loss!]!
+}
+
+"""A paginated list of Menu items."""
+type MenuPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of Menu items."""
+  data: [Menu!]!
+}
+
+"""A paginated list of MenuCategory items."""
+type MenuCategoryPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of MenuCategory items."""
+  data: [MenuCategory!]!
+}
+
+"""A paginated list of Order items."""
+type OrderPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of Order items."""
+  data: [Order!]!
+}
+
+"""A paginated list of OrderStep items."""
+type OrderStepPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of OrderStep items."""
+  data: [OrderStep!]!
+}
+
+"""A paginated list of Preparation items."""
+type PreparationPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of Preparation items."""
+  data: [Preparation!]!
+}
+
+"""A paginated list of Room items."""
+type RoomPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of Room items."""
+  data: [Room!]!
+}
+
+"""A paginated list of StepMenu items."""
+type StepMenuPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of StepMenu items."""
+  data: [StepMenu!]!
+}
+
+"""A paginated list of StockMovement items."""
+type StockMovementPaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of StockMovement items."""
+  data: [StockMovement!]!
+}
+
+"""A paginated list of Table items."""
+type TablePaginator {
+  """Pagination information about the list of items."""
+  paginatorInfo: PaginatorInfo!
+
+  """A list of Table items."""
+  data: [Table!]!
+}
+
 """A paginated list of User items."""
 type UserPaginator {
   """Pagination information about the list of items."""
@@ -1711,3 +1615,98 @@ type UserPaginator {
   data: [User!]!
 }
 
+"""Order by clause for Query.orders.orderBy."""
+input QueryOrdersOrderByOrderByClause {
+  """The column that is used for ordering."""
+  column: OrderOrderByField!
+
+  """The direction that is used for ordering."""
+  order: SortOrder!
+}
+
+"""Order by clause for Query.orderSteps.orderBy."""
+input QueryOrderStepsOrderByOrderByClause {
+  """The column that is used for ordering."""
+  column: OrderStepOrderByField!
+
+  """The direction that is used for ordering."""
+  order: SortOrder!
+}
+
+"""Order by clause for Query.rooms.orderBy."""
+input QueryRoomsOrderByOrderByClause {
+  """The column that is used for ordering."""
+  column: RoomOrderByField!
+
+  """The direction that is used for ordering."""
+  order: SortOrder!
+}
+
+"""Order by clause for Query.stepMenus.orderBy."""
+input QueryStepMenusOrderByOrderByClause {
+  """The column that is used for ordering."""
+  column: StepMenuOrderByField!
+
+  """The direction that is used for ordering."""
+  order: SortOrder!
+}
+
+"""Order by clause for Query.tables.orderBy."""
+input QueryTablesOrderByOrderByClause {
+  """The column that is used for ordering."""
+  column: TableOrderByField!
+
+  """The direction that is used for ordering."""
+  order: SortOrder!
+}
+
+"""
+Aggregate functions when ordering by a relation without specifying a column.
+"""
+enum OrderByRelationAggregateFunction {
+  """Amount of items."""
+  COUNT
+}
+
+"""
+Aggregate functions when ordering by a relation that may specify a column.
+"""
+enum OrderByRelationWithColumnAggregateFunction {
+  """Average."""
+  AVG
+
+  """Minimum."""
+  MIN
+
+  """Maximum."""
+  MAX
+
+  """Sum."""
+  SUM
+
+  """Amount of items."""
+  COUNT
+}
+
+"""Allows ordering a list of records."""
+input OrderByClause {
+  """The column that is used for ordering."""
+  column: String!
+
+  """The direction that is used for ordering."""
+  order: SortOrder!
+}
+
+"""
+Specify if you want to include or exclude trashed results from a query.
+"""
+enum Trashed {
+  """Only return trashed results."""
+  ONLY
+
+  """Return both trashed and non-trashed results."""
+  WITH
+
+  """Only return non-trashed results."""
+  WITHOUT
+}

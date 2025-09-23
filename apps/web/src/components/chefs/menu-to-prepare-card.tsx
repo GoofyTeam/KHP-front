@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { CheckCircle, Clock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { httpClient } from "@/lib/httpClient";
+import { cn } from "@workspace/ui/lib/utils";
 
 type MenuToPrepareCardProps = {
   menuItem: ChefsOrderStepsQuery["orderSteps"]["data"][0]["stepMenus"][0];
@@ -82,7 +83,11 @@ function MenuToPrepareCard({
 
   return (
     <Card
-      className={`khp-card overflow-hidden transition-all duration-200 min-h-[200px] ${cardStateClasses} ${cardInteractionClasses}`}
+      className={cn(
+        "khp-card overflow-hidden transition-all duration-200 min-h-[200px]",
+        cardStateClasses,
+        cardInteractionClasses
+      )}
       onClick={isInPreparation ? handleMarkReady : undefined}
     >
       <CardContent className="p-0 h-full flex flex-col">
@@ -124,7 +129,7 @@ function MenuToPrepareCard({
             <div className="flex items-center justify-between pt-2">
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-gray-500" />
-                <span className={`text-sm font-medium ${urgencyColor}`}>
+                <span className={cn("text-sm font-medium", urgencyColor)}>
                   {waitingTime}
                 </span>
               </div>

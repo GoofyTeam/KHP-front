@@ -11,6 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@workspace/ui/components/sidebar";
+import { cn } from "@workspace/ui/lib/utils";
 
 export function NavUser() {
   const pathname = usePathname();
@@ -45,12 +46,18 @@ export function NavUser() {
             <Settings className="size-5" />
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span
-                className={`truncate font-medium ${isLoading && !user ? "opacity-50" : ""}`}
+                className={cn(
+                  "truncate font-medium",
+                  isLoading && !user ? "opacity-50" : ""
+                )}
               >
                 {user?.name || " "}
               </span>
               <span
-                className={`truncate text-xs ${isLoading && !user ? "opacity-50" : ""}`}
+                className={cn(
+                  "truncate text-xs",
+                  isLoading && !user ? "opacity-50" : ""
+                )}
               >
                 {user?.email || "Loading..."}
               </span>

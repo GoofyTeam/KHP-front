@@ -12,6 +12,7 @@ import { GetMenuCategoriesDocument } from "@workspace/graphql";
 import { Button } from "@workspace/ui/components/button";
 import { Trash2, Edit, Loader2, Tag, Plus } from "lucide-react";
 import type { MenuCategory } from "@workspace/graphql";
+import { cn } from "@workspace/ui/lib/utils";
 
 export interface MenuCategoriesListRef {
   refresh: () => Promise<void>;
@@ -179,11 +180,12 @@ export const MenuCategoriesList = forwardRef<
           return (
             <div
               key={category.id}
-              className={`h-16 py-4 px-4 text-base font-medium cursor-pointer hover:bg-khp-primary/10 focus:bg-khp-primary/15 transition-colors rounded-md border ${
+              className={cn(
+                "h-16 py-4 px-4 text-base font-medium cursor-pointer hover:bg-khp-primary/10 focus:bg-khp-primary/15 transition-colors rounded-md border",
                 isSelected
                   ? "border-khp-primary bg-khp-primary/10"
                   : "border-khp-border bg-white hover:border-khp-primary/30"
-              }`}
+              )}
               onClick={() => onEdit?.(category)}
             >
               <div className="flex items-center justify-between w-full h-full">

@@ -13,6 +13,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
 import { Trash2, Edit, Loader2, Layers, Plus, Shield } from "lucide-react";
 import type { LocationType } from "@workspace/graphql";
+import { cn } from "@workspace/ui/lib/utils";
 
 export interface LocationTypesListRef {
   refresh: () => Promise<void>;
@@ -186,11 +187,12 @@ export const LocationTypesList = forwardRef<
             return (
               <div
                 key={locationType.id}
-                className={`h-16 py-4 px-4 text-base font-medium cursor-pointer hover:bg-khp-primary/10 focus:bg-khp-primary/15 transition-colors rounded-md border ${
+                className={cn(
+                  "h-16 py-4 px-4 text-base font-medium cursor-pointer hover:bg-khp-primary/10 focus:bg-khp-primary/15 transition-colors rounded-md border",
                   isSelected
                     ? "border-khp-primary bg-khp-primary/10"
                     : "border-khp-border bg-white hover:border-khp-primary/30"
-                }`}
+                )}
                 onClick={() => onEdit?.(locationType)}
               >
                 <div className="flex items-center justify-between w-full h-full">

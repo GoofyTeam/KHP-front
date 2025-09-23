@@ -19,6 +19,7 @@ import {
   useSidebar,
 } from "@workspace/ui/components/sidebar";
 import { Separator } from "@workspace/ui/components/separator";
+import { cn } from "@workspace/ui/lib/utils";
 
 interface NavigationItem {
   title: string;
@@ -160,11 +161,12 @@ export function AppSidebar({
                     >
                       <Link
                         href={item.url}
-                        className={`relative transition-all duration-200 ease-in-out active:scale-95 ${
+                        className={cn(
+                          "relative transition-all duration-200 ease-in-out active:scale-95",
                           !isActive
                             ? "hover:!bg-transparent hover:!text-current before:absolute before:inset-0 before:border before:border-transparent before:rounded-md before:transition-colors before:duration-200 hover:before:border-khp-primary"
                             : ""
-                        }`}
+                        )}
                       >
                         <ItemIcon className="size-5" />
                         <span>{item.title}</span>
@@ -189,11 +191,12 @@ export function AppSidebar({
                       >
                         <Link
                           href={item.url}
-                          className={`relative transition-all duration-200 ease-in-out active:scale-95 ${
+                          className={cn(
+                            "relative transition-all duration-200 ease-in-out active:scale-95",
                             !isActive
                               ? "hover:!bg-transparent hover:!text-current before:absolute before:inset-0 before:border before:border-transparent before:rounded-md before:transition-colors before:duration-200 hover:before:border-khp-primary"
                               : ""
-                          }`}
+                          )}
                         >
                           <ItemIcon className="size-5" />
                           <span>{item.title}</span>

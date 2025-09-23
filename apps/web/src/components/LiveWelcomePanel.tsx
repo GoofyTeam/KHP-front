@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { BusinessHoursStatus } from "@/components/BusinessHoursStatus";
 import { formatTime, formatLongDate } from "@workspace/ui/lib/date-utils";
+import { cn } from "@workspace/ui/lib/utils";
 
 interface LiveWelcomePanelProps {
   className?: string;
@@ -36,7 +37,10 @@ export function LiveWelcomePanel({
 
   return (
     <section
-      className={`rounded-md border border-khp-primary/30 bg-white shadow-sm pt-2 flex flex-col min-h-0 ${className}`}
+      className={cn(
+        "rounded-md border border-khp-primary/30 bg-white shadow-sm pt-2 flex flex-col min-h-0",
+        className
+      )}
       aria-label="Welcome"
     >
       <div className="flex-1 flex flex-col items-center justify-center p-8">

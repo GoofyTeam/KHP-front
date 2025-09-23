@@ -26,6 +26,7 @@ import {
   SelectItem,
 } from "@workspace/ui/components/select";
 import { LoadMoreSelect } from "@workspace/ui/components/load-more-select";
+import { cn } from "@workspace/ui/lib/utils";
 
 import { NetworkStatus, useQuery } from "@apollo/client";
 import { GetCategoriesDocument, GetCategoriesQuery } from "@workspace/graphql";
@@ -572,7 +573,10 @@ export default function CreatePreparationPage() {
                     {rootErrorLines?.map((line, idx) => (
                       <p
                         key={idx}
-                        className={`text-sm ${idx === 0 ? "font-medium" : ""} text-khp-error`}
+                        className={cn(
+                          "text-sm text-khp-error",
+                          idx === 0 ? "font-medium" : ""
+                        )}
                       >
                         {line}
                       </p>
