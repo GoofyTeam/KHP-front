@@ -43,11 +43,12 @@ export function useBusinessHoursCountdown(
       const currentDay = now.getDay();
       const currentTime = now.getHours() * 60 + now.getMinutes();
 
-      const todayHours = businessHours.find(
+      // Finding all today's business hours
+      const todayHours = businessHours.filter(
         (bh) => bh.day_of_week === currentDay
       );
 
-      if (!todayHours) {
+      if (!todayHours || todayHours.length === 0) {
         const nextOpenDay = findNextOpenDay(businessHours, currentDay);
         if (nextOpenDay) {
           const timeUntilNext = calculateTimeUntilNextEvent(
@@ -72,60 +73,79 @@ export function useBusinessHoursCountdown(
         return;
       }
 
-      const opensAt = parseTime(todayHours.opens_at);
-      const closesAt = parseTime(todayHours.closes_at);
-
+      // Check all today's time slots
       let isCurrentlyOpen = false;
       let timeUntilNext: string | null = null;
       let nextEvent: "opens" | "closes" | null = null;
       let currentStatus = "";
+      let activeSlot: BusinessHour | null = null;
+      let nextSlot: BusinessHour | null = null;
 
-      if (todayHours.is_overnight) {
-        if (currentTime >= opensAt || currentTime < closesAt) {
-          isCurrentlyOpen = true;
-          if (currentTime >= opensAt) {
-            const tomorrow = new Date(now);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            tomorrow.setHours(Math.floor(closesAt / 60), closesAt % 60, 0, 0);
-            timeUntilNext = formatTimeDifference(
-              tomorrow.getTime() - now.getTime()
-            );
-          } else {
-            const closingTime = new Date(now);
-            closingTime.setHours(
-              Math.floor(closesAt / 60),
-              closesAt % 60,
-              0,
-              0
-            );
-            timeUntilNext = formatTimeDifference(
-              closingTime.getTime() - now.getTime()
-            );
+      // Sort time slots by opening hour
+      const sortedTodayHours = todayHours.sort((a, b) => {
+        const aOpens = parseTime(a.opens_at);
+        const bOpens = parseTime(b.opens_at);
+        return aOpens - bOpens;
+      });
+
+      // Check if we are in an active slot
+      for (const slot of sortedTodayHours) {
+        const opensAt = parseTime(slot.opens_at);
+        const closesAt = parseTime(slot.closes_at);
+
+        if (slot.is_overnight) {
+          // For overnight slots (closing next day)
+          if (currentTime >= opensAt || currentTime < closesAt) {
+            isCurrentlyOpen = true;
+            activeSlot = slot;
+            break;
           }
-          nextEvent = "closes";
-          currentStatus = "Open";
         } else {
-          isCurrentlyOpen = false;
-          const openingTime = new Date(now);
-          openingTime.setHours(Math.floor(opensAt / 60), opensAt % 60, 0, 0);
-          timeUntilNext = formatTimeDifference(
-            openingTime.getTime() - now.getTime()
-          );
-          nextEvent = "opens";
-          currentStatus = "Closed";
+          // For normal slots (same day)
+          if (currentTime >= opensAt && currentTime < closesAt) {
+            isCurrentlyOpen = true;
+            activeSlot = slot;
+            break;
+          }
         }
-      } else {
-        if (currentTime >= opensAt && currentTime < closesAt) {
-          isCurrentlyOpen = true;
+      }
+
+      if (isCurrentlyOpen && activeSlot) {
+        // We are open, calculate time until closing
+        const closesAt = parseTime(activeSlot.closes_at);
+
+        if (activeSlot.is_overnight) {
+          // Closing tomorrow
+          const tomorrow = new Date(now);
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          tomorrow.setHours(Math.floor(closesAt / 60), closesAt % 60, 0, 0);
+          timeUntilNext = formatTimeDifference(
+            tomorrow.getTime() - now.getTime()
+          );
+        } else {
+          // Closing today
           const closingTime = new Date(now);
           closingTime.setHours(Math.floor(closesAt / 60), closesAt % 60, 0, 0);
           timeUntilNext = formatTimeDifference(
             closingTime.getTime() - now.getTime()
           );
-          nextEvent = "closes";
-          currentStatus = "Open";
-        } else if (currentTime < opensAt) {
-          isCurrentlyOpen = false;
+        }
+
+        nextEvent = "closes";
+        currentStatus = "Open";
+      } else {
+        // We are closed, find the next opening slot
+        for (const slot of sortedTodayHours) {
+          const opensAt = parseTime(slot.opens_at);
+          if (currentTime < opensAt) {
+            nextSlot = slot;
+            break;
+          }
+        }
+
+        if (nextSlot) {
+          // There is still a slot today
+          const opensAt = parseTime(nextSlot.opens_at);
           const openingTime = new Date(now);
           openingTime.setHours(Math.floor(opensAt / 60), opensAt % 60, 0, 0);
           timeUntilNext = formatTimeDifference(
@@ -134,17 +154,30 @@ export function useBusinessHoursCountdown(
           nextEvent = "opens";
           currentStatus = "Closed";
         } else {
+          // No more slots today, look for the next day
           const nextOpenDay = findNextOpenDay(businessHours, currentDay);
           if (nextOpenDay) {
-            timeUntilNext = calculateTimeUntilNextEvent(
+            const timeUntilNext = calculateTimeUntilNextEvent(
               now,
               nextOpenDay.day_of_week,
               nextOpenDay.opens_at
             );
-            nextEvent = "opens";
+            setCountdown({
+              isOpen: false,
+              timeUntilNext,
+              nextEvent: "opens",
+              currentStatus: "Closed for today",
+            });
+            return;
+          } else {
+            setCountdown({
+              isOpen: false,
+              timeUntilNext: null,
+              nextEvent: null,
+              currentStatus: "No business hours configured",
+            });
+            return;
           }
-          isCurrentlyOpen = false;
-          currentStatus = "Closed";
         }
       }
 
@@ -170,6 +203,23 @@ function parseTime(timeString: string): number {
   return hours * 60 + minutes;
 }
 
+function formatTimeDifference(milliseconds: number): string {
+  const seconds = Math.floor(milliseconds / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+
+  const remainingMinutes = minutes % 60;
+  const remainingSeconds = seconds % 60;
+
+  if (hours > 0) {
+    return `${hours}h ${remainingMinutes}m ${remainingSeconds}s`;
+  } else if (minutes > 0) {
+    return `${minutes}m ${remainingSeconds}s`;
+  } else {
+    return `${remainingSeconds}s`;
+  }
+}
+
 function findNextOpenDay(
   businessHours: BusinessHour[],
   currentDay: number
@@ -189,43 +239,16 @@ function calculateTimeUntilNextEvent(
   targetDay: number,
   targetTime: string
 ): string {
-  const target = new Date(now);
-  let daysUntilTarget = (targetDay - now.getDay() + 7) % 7;
-
-  if (daysUntilTarget === 0) {
-    daysUntilTarget = 7;
+  const currentDay = now.getDay();
+  let daysUntilTarget = targetDay - currentDay;
+  if (daysUntilTarget <= 0) {
+    daysUntilTarget += 7;
   }
 
-  target.setDate(target.getDate() + daysUntilTarget);
   const [hours, minutes] = targetTime.split(":").map(Number);
-  target.setHours(hours, minutes, 0, 0);
+  const targetDate = new Date(now);
+  targetDate.setDate(targetDate.getDate() + daysUntilTarget);
+  targetDate.setHours(hours, minutes, 0, 0);
 
-  return formatTimeDifference(target.getTime() - now.getTime());
-}
-
-function formatTimeDifference(diffMs: number): string {
-  const totalSeconds = Math.floor(diffMs / 1000);
-  const totalMinutes = Math.floor(totalSeconds / 60);
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  const seconds = totalSeconds % 60;
-
-  if (hours > 24) {
-    const days = Math.floor(hours / 24);
-    const remainingHours = hours % 24;
-    if (remainingHours === 0) {
-      return `${days}d`;
-    }
-    return `${days}d ${remainingHours}h`;
-  }
-
-  if (hours > 0) {
-    return `${hours}h ${minutes}m ${seconds}s`;
-  }
-
-  if (minutes > 0) {
-    return `${minutes}m ${seconds}s`;
-  }
-
-  return `${seconds}s`;
+  return formatTimeDifference(targetDate.getTime() - now.getTime());
 }
