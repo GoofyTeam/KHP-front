@@ -17,26 +17,36 @@ import { Button } from "@workspace/ui/components/button";
 import { IngredientSearch, IngredientSearchResult } from "../ingredient-search";
 import { httpClient } from "../../lib/httpClient";
 
-type AddQuantityRequest = {
-  location_id: number;
-  quantity: number;
-  unit?: string;
+type IngredientQuantityUpdate = {
+  id: number;
+  quantities: {
+    location_id: number;
+    quantity: number;
+  }[];
 };
 
-const addIngredientQuantity = async (
-  ingredientId: string,
-  request: AddQuantityRequest
+type BulkUpdateRequest = {
+  ingredients: IngredientQuantityUpdate[];
+};
+
+const addIngredientQuantitiesBulk = async (
+  ingredients: IngredientQuantityUpdate[]
 ): Promise<{ success: boolean; error?: string }> => {
-  const result = await httpClient.postWithResult(
-    `/api/ingredients/${ingredientId}/add-quantity`,
-    request
-  );
+  try {
+    if (ingredients.length === 0) {
+      return { success: false, error: "No valid ingredients to update" };
+    }
 
-  if (!result.success) {
-    return { success: false, error: result.error };
+    const payload: BulkUpdateRequest = { ingredients };
+    console.log("Sending bulk request:", payload);
+
+    await httpClient.put(`/api/ingredients/bulk/quantities`, payload);
+    return { success: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Bulk update error details:", error);
+    return { success: false, error: message };
   }
-
-  return { success: true };
 };
 
 export type RestockTableRow = {
@@ -166,66 +176,52 @@ export const RestockTable = React.forwardRef<
   const handleSubmitQuantities = React.useCallback(async () => {
     try {
       setIsSubmittingLocal(true);
-      const requests: Array<{
-        ingredientId: string;
-        request: AddQuantityRequest;
-        ingredientName: string;
-      }> = [];
+
+      const ingredientUpdates: IngredientQuantityUpdate[] = [];
 
       selectedIngredients.forEach((ingredient) => {
+        const quantities: { location_id: number; quantity: number }[] = [];
+
         ingredient.quantities.forEach((q) => {
           if (q.quantity > 0) {
-            requests.push({
-              ingredientId: ingredient.id,
-              request: {
-                location_id: parseInt(q.locationId),
-                quantity: q.quantity,
-                unit: ingredient.unit,
-              },
-              ingredientName: ingredient.name,
+            quantities.push({
+              location_id: parseInt(q.locationId),
+              quantity: q.quantity,
             });
           }
         });
-      });
 
-      const results = await Promise.allSettled(
-        requests.map(({ ingredientId, request }) =>
-          addIngredientQuantity(ingredientId, request)
-        )
-      );
-
-      const failures: string[] = [];
-      results.forEach((result, index) => {
-        if (result.status === "rejected") {
-          failures.push(`${requests[index].ingredientName}: ${result.reason}`);
-        } else if (!result.value.success) {
-          failures.push(
-            `${requests[index].ingredientName}: ${result.value.error}`
-          );
+        if (quantities.length > 0) {
+          ingredientUpdates.push({
+            id: parseInt(ingredient.id),
+            quantities: quantities,
+          });
         }
       });
 
-      if (failures.length > 0) {
-        console.error("Some requests failed:", failures);
-        console.warn(
-          `❌ Certaines mises à jour ont échoué:\n${failures.join("\n")}`
-        );
+      if (ingredientUpdates.length === 0) {
+        console.warn("No quantities to update");
+        return;
+      }
+
+      console.log("About to send ingredient updates:", ingredientUpdates);
+      const result = await addIngredientQuantitiesBulk(ingredientUpdates);
+
+      if (!result.success) {
+        console.error("Bulk update failed:", result.error);
+        console.warn(`Update failed: ${result.error}`);
       } else {
         setSelectedIngredients([]);
-
         await apolloClient.resetStore();
-
-        console.log("✅ All quantities updated successfully");
+        console.log("All quantities updated successfully");
       }
 
       if (onSubmit) {
         onSubmit();
       }
     } catch (error) {
-      console.error("❌ Error submitting quantities:", error);
-      console.warn(
-        "❌ Une erreur inattendue s'est produite lors de la mise à jour."
-      );
+      console.error("Error submitting quantities:", error);
+      console.warn("An unexpected error occurred while updating.");
     } finally {
       setIsSubmittingLocal(false);
     }
