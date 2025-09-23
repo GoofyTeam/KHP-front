@@ -1,5 +1,6 @@
 import { Badge } from "@workspace/ui/components/badge";
 import { OrderStatus } from "@workspace/ui/lib/order";
+import { cn } from "@workspace/ui/lib/utils";
 
 function OrderStatusBadge({
   status,
@@ -10,52 +11,70 @@ function OrderStatusBadge({
   className?: string;
   size?: "default" | "large";
 }) {
-  let bgColor = "";
-  let textColor = "";
-  let label = "";
+  const getStatusStyles = (status: OrderStatus) => {
+    switch (status) {
+      case "PENDING":
+        return {
+          bg: "bg-khp-warning/10",
+          text: "text-khp-warning",
+          border: "border-khp-warning/20",
+          label: "Pending",
+        };
+      case "SERVED":
+        return {
+          bg: "bg-khp-info/10",
+          text: "text-khp-info",
+          border: "border-khp-info/20",
+          label: "Served",
+        };
+      case "PAYED":
+        return {
+          bg: "bg-khp-primary/10",
+          text: "text-khp-primary",
+          border: "border-khp-primary/20",
+          label: "Payed",
+        };
+      case "CANCELED":
+        return {
+          bg: "bg-khp-error/10",
+          text: "text-khp-error",
+          border: "border-khp-error/20",
+          label: "Canceled",
+        };
+      case "READY":
+        return {
+          bg: "bg-khp-info/10",
+          text: "text-khp-info",
+          border: "border-khp-info/20",
+          label: "Available",
+        };
+      default:
+        return {
+          bg: "bg-khp-background-secondary",
+          text: "text-khp-text-secondary",
+          border: "border-khp-border",
+          label: "Unknown",
+        };
+    }
+  };
 
-  switch (status) {
-    case "PENDING":
-      bgColor = "bg-yellow-100";
-      textColor = "text-yellow-800";
-      label = "Pending";
-      break;
-    case "SERVED":
-      bgColor = "bg-blue-100";
-      textColor = "text-blue-800";
-      label = "Served";
-      break;
-    case "PAYED":
-      bgColor = "bg-green-100";
-      textColor = "text-green-800";
-      label = "Payed";
-      break;
-    case "CANCELED":
-      bgColor = "bg-red-100";
-      textColor = "text-red-800";
-      label = "Canceled";
-      break;
-    case "READY":
-      bgColor = "bg-purple-100";
-      textColor = "text-purple-800";
-      label = "Available";
-      break;
-    default:
-      bgColor = "bg-gray-100";
-      textColor = "text-gray-800";
-      label = "Unknown";
-  }
-
-  const sizeClasses =
-    size === "large"
-      ? "text-base px-6 py-3 font-semibold"
-      : "text-xs px-2 py-1";
+  const statusStyles = getStatusStyles(status);
+  const sizeClasses = cn(
+    size === "large" ? "text-base px-6 py-3 font-semibold" : "text-xs px-2 py-1"
+  );
 
   return (
     <Badge
-      className={`${sizeClasses} ${bgColor} ${textColor} border ${bgColor.replace("bg-", "border-")} ${className ?? ""} rounded-md`}
+      className={cn(
+        sizeClasses,
+        statusStyles.bg,
+        statusStyles.text,
+        statusStyles.border,
+        "border rounded-md",
+        className
+      )}
     >
-      {label}
+      {statusStyles.label}
     </Badge>
   );
 }

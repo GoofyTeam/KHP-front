@@ -2,7 +2,7 @@ import { query } from "@/lib/ApolloClient";
 import { TakinOrdersQueryDocument } from "@/graphql/generated/graphql";
 import Link from "next/link";
 import { Button } from "@workspace/ui/components/button";
-import { ChevronLeft, Clock, MapPin, Calendar, XCircle } from "lucide-react";
+import { ChevronLeft, Clock, MapPin, Calendar } from "lucide-react";
 import OrderStatusBadge from "@workspace/ui/components/order-status-badge";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -30,19 +30,8 @@ export default async function OrderDetailsPage({
   const order = data.order;
 
   if (!order) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full space-y-4">
-        <XCircle className="h-16 w-16 text-khp-error" />
-        <h1 className="text-2xl font-bold text-khp-text-primary">
-          Order not found
-        </h1>
-        <p className="text-khp-text-secondary">
-          The order you&apos;re looking for doesn&apos;t exist.
-        </p>
-        <Button asChild>
-          <Link href="/orders">Back to Orders</Link>
-        </Button>
-      </div>
+    throw new Error(
+      "Order not found - The order you're looking for doesn't exist or may have been deleted."
     );
   }
 

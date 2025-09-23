@@ -7,9 +7,10 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
-import { Clock, CheckCircle, AlertCircle, Utensils } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { getStepStatusIcon } from "@workspace/ui/lib/order";
+import { cn } from "@workspace/ui/lib/utils";
 import type { TakinOrdersQueryQuery } from "@/graphql/generated/graphql";
 
 type OrderStep = NonNullable<TakinOrdersQueryQuery["order"]>["steps"][number];
@@ -20,41 +21,46 @@ interface OrderStepsDisplayProps {
 
 export function OrderStepsDisplay({ steps }: OrderStepsDisplayProps) {
   const getStepIcon = (status: string) => {
-    switch (status) {
-      case "SERVED":
-        return <CheckCircle className="h-5 w-5 text-khp-primary" />;
-      case "READY":
-        return <Utensils className="h-5 w-5 text-khp-info" />;
-      case "IN_PREP":
-        return <Clock className="h-5 w-5 text-khp-warning" />;
-      default:
-        return <AlertCircle className="h-5 w-5 text-khp-text-secondary" />;
-    }
+    const IconComponent = getStepStatusIcon(status as any);
+    const colorClass =
+      status === "SERVED"
+        ? "text-khp-primary"
+        : status === "READY"
+          ? "text-khp-info"
+          : status === "IN_PREP"
+            ? "text-khp-warning"
+            : "text-khp-text-secondary";
+
+    return <IconComponent className={cn("h-5 w-5", colorClass)} />;
   };
 
   const getStepStatusColor = (status: string) => {
     switch (status) {
       case "SERVED":
-        return "bg-khp-primary/10 text-khp-primary border-khp-primary/20";
+        return cn("bg-khp-primary/10 text-khp-primary border-khp-primary/20");
       case "READY":
-        return "bg-khp-info/10 text-khp-info border-khp-info/20";
+        return cn("bg-khp-info/10 text-khp-info border-khp-info/20");
       case "IN_PREP":
-        return "bg-khp-warning/10 text-khp-warning border-khp-warning/20";
+        return cn("bg-khp-warning/10 text-khp-warning border-khp-warning/20");
       default:
-        return "bg-khp-background-secondary text-khp-text-secondary border-khp-border";
+        return cn(
+          "bg-khp-background-secondary text-khp-text-secondary border-khp-border"
+        );
     }
   };
 
   const getMenuStatusColor = (status: string) => {
     switch (status) {
       case "SERVED":
-        return "bg-khp-primary/10 text-khp-primary border-khp-primary/20";
+        return cn("bg-khp-primary/10 text-khp-primary border-khp-primary/20");
       case "READY":
-        return "bg-khp-info/10 text-khp-info border-khp-info/20";
+        return cn("bg-khp-info/10 text-khp-info border-khp-info/20");
       case "IN_PREP":
-        return "bg-khp-warning/10 text-khp-warning border-khp-warning/20";
+        return cn("bg-khp-warning/10 text-khp-warning border-khp-warning/20");
       default:
-        return "bg-khp-background-secondary text-khp-text-secondary border-khp-border";
+        return cn(
+          "bg-khp-background-secondary text-khp-text-secondary border-khp-border"
+        );
     }
   };
 

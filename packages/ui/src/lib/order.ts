@@ -1,4 +1,12 @@
-import { Clock, Users, CreditCard, ArrowLeft, CheckCircle } from "lucide-react";
+import {
+  Clock,
+  Users,
+  CreditCard,
+  ArrowLeft,
+  CheckCircle,
+  Utensils,
+  AlertCircle,
+} from "lucide-react";
 
 export type OrderStatus = "PENDING" | "SERVED" | "PAYED" | "CANCELED" | "READY";
 export type MenuType = "PREP" | "DIRECT";
@@ -18,6 +26,19 @@ export function getCorrectIcon(status: OrderStatus) {
       return CheckCircle;
     default:
       return Clock;
+  }
+}
+
+export function getStepStatusIcon(status: OrderStepStatus) {
+  switch (status) {
+    case "SERVED":
+      return CheckCircle;
+    case "READY":
+      return Utensils;
+    case "IN_PREP":
+      return Clock;
+    default:
+      return AlertCircle;
   }
 }
 
