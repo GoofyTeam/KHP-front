@@ -4,6 +4,27 @@ query GetCompanyOptions {
       id
       name
       open_food_facts_language
+      logo_path
+      contact_name
+      contact_email
+      contact_phone
+      address_line
+      postal_code
+      city
+      country
+      public_menu_settings {
+        public_menu_card_url
+        show_out_of_stock_menus_on_card
+        show_menu_images
+      }
+      businessHours {
+        id
+        day_of_week
+        opens_at
+        closes_at
+        is_overnight
+        sequence
+      }
     }
   }
 }
