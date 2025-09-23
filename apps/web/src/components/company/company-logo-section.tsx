@@ -103,13 +103,13 @@ export function CompanyLogoSection() {
               />
               <Button
                 type="button"
-                variant="outline"
-                size="sm"
-                className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                variant="destructive"
+                size="icon"
                 onClick={() => {
                   setLogoPreview(null);
                   setSelectedFile(null);
                 }}
+                className="absolute -top-1 -right-1 h-5 w-5 rounded-full"
               >
                 <X className="h-3 w-3" />
               </Button>

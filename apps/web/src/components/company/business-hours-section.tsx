@@ -155,17 +155,52 @@ export function BusinessHoursSection() {
   useEffect(() => {
     if (data?.me?.company?.businessHours) {
       const hours = data.me.company.businessHours;
-      const newWeekHours = { ...weekHours };
 
-      // Reset all days to closed
-      Object.keys(newWeekHours).forEach((day) => {
-        newWeekHours[parseInt(day)] = {
+      // Initialize all days as closed
+      const newWeekHours: Record<number, DayHours> = {
+        1: {
           isOpen: false,
           openTime: "09:00",
           closeTime: "18:00",
           isOvernight: false,
-        };
-      });
+        },
+        2: {
+          isOpen: false,
+          openTime: "09:00",
+          closeTime: "18:00",
+          isOvernight: false,
+        },
+        3: {
+          isOpen: false,
+          openTime: "09:00",
+          closeTime: "18:00",
+          isOvernight: false,
+        },
+        4: {
+          isOpen: false,
+          openTime: "09:00",
+          closeTime: "18:00",
+          isOvernight: false,
+        },
+        5: {
+          isOpen: false,
+          openTime: "09:00",
+          closeTime: "18:00",
+          isOvernight: false,
+        },
+        6: {
+          isOpen: false,
+          openTime: "09:00",
+          closeTime: "18:00",
+          isOvernight: false,
+        },
+        7: {
+          isOpen: false,
+          openTime: "09:00",
+          closeTime: "18:00",
+          isOvernight: false,
+        },
+      };
 
       // Set open days from API data
       hours.forEach((hour) => {
@@ -184,7 +219,7 @@ export function BusinessHoursSection() {
   const handleSave = () => {
     // Convertir l'état local en format API
     const business_hours = Object.entries(weekHours)
-      .filter(([_, dayHours]) => dayHours.isOpen)
+      .filter(([, dayHours]) => dayHours.isOpen)
       .map(([day, dayHours]) => ({
         day_of_week: parseInt(day),
         opens_at: dayHours.openTime,
