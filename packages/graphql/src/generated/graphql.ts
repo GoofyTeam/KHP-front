@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
@@ -1506,59 +1505,29 @@ export type UserPaginator = {
   paginatorInfo: PaginatorInfo;
 };
 
-export type CategoryCoreFieldsFragment = { __typename?: 'Category', id: string, name: string, created_at: any, updated_at: any } & { ' $fragmentName'?: 'CategoryCoreFieldsFragment' };
+export type CategoryCoreFieldsFragment = { __typename?: 'Category', id: string, name: string, created_at: any, updated_at: any };
 
-export type CategoryWithShelfLivesFragment = (
-  { __typename?: 'Category', shelfLives: Array<{ __typename?: 'CategoryShelfLife', shelf_life_hours: number, locationType: (
-      { __typename?: 'LocationType' }
-      & { ' $fragmentRefs'?: { 'LocationTypeFieldsFragment': LocationTypeFieldsFragment } }
-    ) }> }
-  & { ' $fragmentRefs'?: { 'CategoryCoreFieldsFragment': CategoryCoreFieldsFragment } }
-) & { ' $fragmentName'?: 'CategoryWithShelfLivesFragment' };
+export type CategoryWithShelfLivesFragment = { __typename?: 'Category', id: string, name: string, created_at: any, updated_at: any, shelfLives: Array<{ __typename?: 'CategoryShelfLife', shelf_life_hours: number, locationType: { __typename?: 'LocationType', id: string, name: string, is_default: boolean } }> };
 
-export type CategorySummaryFieldsFragment = { __typename?: 'Category', id: string, name: string } & { ' $fragmentName'?: 'CategorySummaryFieldsFragment' };
+export type CategorySummaryFieldsFragment = { __typename?: 'Category', id: string, name: string };
 
-export type IngredientQuantityFieldsFragment = { __typename?: 'IngredientQuantity', quantity: number, location: (
-    { __typename?: 'Location', locationType?: (
-      { __typename?: 'LocationType' }
-      & { ' $fragmentRefs'?: { 'LocationTypeFieldsFragment': LocationTypeFieldsFragment } }
-    ) | null }
-    & { ' $fragmentRefs'?: { 'LocationSummaryFieldsFragment': LocationSummaryFieldsFragment } }
-  ) } & { ' $fragmentName'?: 'IngredientQuantityFieldsFragment' };
+export type IngredientQuantityFieldsFragment = { __typename?: 'IngredientQuantity', quantity: number, location: { __typename?: 'Location', id: string, name: string, locationType?: { __typename?: 'LocationType', id: string, name: string, is_default: boolean } | null } };
 
-export type StockMovementFieldsFragment = { __typename?: 'StockMovement', id: string, type: string, quantity: number, quantity_before?: number | null, quantity_after?: number | null, created_at: any, location: (
-    { __typename?: 'Location' }
-    & { ' $fragmentRefs'?: { 'LocationSummaryFieldsFragment': LocationSummaryFieldsFragment } }
-  ) } & { ' $fragmentName'?: 'StockMovementFieldsFragment' };
+export type StockMovementFieldsFragment = { __typename?: 'StockMovement', id: string, type: string, quantity: number, quantity_before?: number | null, quantity_after?: number | null, created_at: any, location: { __typename?: 'Location', id: string, name: string } };
 
-export type IngredientListItemFieldsFragment = { __typename?: 'Ingredient', id: string, name: string, unit: UnitEnum, image_url?: string | null, category: (
-    { __typename?: 'Category' }
-    & { ' $fragmentRefs'?: { 'CategorySummaryFieldsFragment': CategorySummaryFieldsFragment } }
-  ), quantities: Array<(
-    { __typename?: 'IngredientQuantity' }
-    & { ' $fragmentRefs'?: { 'IngredientQuantityFieldsFragment': IngredientQuantityFieldsFragment } }
-  )> } & { ' $fragmentName'?: 'IngredientListItemFieldsFragment' };
+export type IngredientListItemFieldsFragment = { __typename?: 'Ingredient', id: string, name: string, unit: UnitEnum, image_url?: string | null, category: { __typename?: 'Category', id: string, name: string }, quantities: Array<{ __typename?: 'IngredientQuantity', quantity: number, location: { __typename?: 'Location', id: string, name: string, locationType?: { __typename?: 'LocationType', id: string, name: string, is_default: boolean } | null } }> };
 
-export type IngredientCoreFieldsFragment = (
-  { __typename?: 'Ingredient', base_quantity: number, base_unit: UnitEnum, allergens: Array<AllergenEnum>, created_at: any, updated_at: any }
-  & { ' $fragmentRefs'?: { 'IngredientListItemFieldsFragment': IngredientListItemFieldsFragment } }
-) & { ' $fragmentName'?: 'IngredientCoreFieldsFragment' };
+export type IngredientCoreFieldsFragment = { __typename?: 'Ingredient', base_quantity: number, base_unit: UnitEnum, allergens: Array<AllergenEnum>, created_at: any, updated_at: any, id: string, name: string, unit: UnitEnum, image_url?: string | null, category: { __typename?: 'Category', id: string, name: string }, quantities: Array<{ __typename?: 'IngredientQuantity', quantity: number, location: { __typename?: 'Location', id: string, name: string, locationType?: { __typename?: 'LocationType', id: string, name: string, is_default: boolean } | null } }> };
 
-export type LocationCoreFieldsFragment = (
-  { __typename?: 'Location', created_at: any, updated_at: any, locationType?: (
-    { __typename?: 'LocationType' }
-    & { ' $fragmentRefs'?: { 'LocationTypeFieldsFragment': LocationTypeFieldsFragment } }
-  ) | null }
-  & { ' $fragmentRefs'?: { 'LocationSummaryFieldsFragment': LocationSummaryFieldsFragment } }
-) & { ' $fragmentName'?: 'LocationCoreFieldsFragment' };
+export type LocationCoreFieldsFragment = { __typename?: 'Location', created_at: any, updated_at: any, id: string, name: string, locationType?: { __typename?: 'LocationType', id: string, name: string, is_default: boolean } | null };
 
-export type LocationSummaryFieldsFragment = { __typename?: 'Location', id: string, name: string } & { ' $fragmentName'?: 'LocationSummaryFieldsFragment' };
+export type LocationSummaryFieldsFragment = { __typename?: 'Location', id: string, name: string };
 
-export type LocationTypeFieldsFragment = { __typename?: 'LocationType', id: string, name: string, is_default: boolean } & { ' $fragmentName'?: 'LocationTypeFieldsFragment' };
+export type LocationTypeFieldsFragment = { __typename?: 'LocationType', id: string, name: string, is_default: boolean };
 
-export type MenuCategoryFieldsFragment = { __typename?: 'MenuCategory', id: string, name: string, created_at: any, updated_at: any } & { ' $fragmentName'?: 'MenuCategoryFieldsFragment' };
+export type MenuCategoryFieldsFragment = { __typename?: 'MenuCategory', id: string, name: string, created_at: any, updated_at: any };
 
-export type PaginatorInfoFieldsFragment = { __typename?: 'PaginatorInfo', count: number, currentPage: number, firstItem?: number | null, hasMorePages: boolean, lastItem?: number | null, lastPage: number, perPage: number, total: number } & { ' $fragmentName'?: 'PaginatorInfoFieldsFragment' };
+export type PaginatorInfoFieldsFragment = { __typename?: 'PaginatorInfo', count: number, currentPage: number, firstItem?: number | null, hasMorePages: boolean, lastItem?: number | null, lastPage: number, perPage: number, total: number };
 
 export type GetCompanyProductsQueryVariables = Exact<{
   searchQuery?: InputMaybe<Scalars['String']['input']>;
@@ -1566,23 +1535,14 @@ export type GetCompanyProductsQueryVariables = Exact<{
 }>;
 
 
-export type GetCompanyProductsQuery = { __typename?: 'Query', ingredients: { __typename?: 'IngredientPaginator', data: Array<(
-      { __typename?: 'Ingredient' }
-      & { ' $fragmentRefs'?: { 'IngredientListItemFieldsFragment': IngredientListItemFieldsFragment } }
-    )>, paginatorInfo: { __typename?: 'PaginatorInfo', hasMorePages: boolean } } };
+export type GetCompanyProductsQuery = { __typename?: 'Query', ingredients: { __typename?: 'IngredientPaginator', data: Array<{ __typename?: 'Ingredient', id: string, name: string, unit: UnitEnum, image_url?: string | null, category: { __typename?: 'Category', id: string, name: string }, quantities: Array<{ __typename?: 'IngredientQuantity', quantity: number, location: { __typename?: 'Location', id: string, name: string, locationType?: { __typename?: 'LocationType', id: string, name: string, is_default: boolean } | null } }> }>, paginatorInfo: { __typename?: 'PaginatorInfo', hasMorePages: boolean } } };
 
 export type GetProductQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type GetProductQuery = { __typename?: 'Query', ingredient?: (
-    { __typename?: 'Ingredient', stockMovements: Array<(
-      { __typename?: 'StockMovement' }
-      & { ' $fragmentRefs'?: { 'StockMovementFieldsFragment': StockMovementFieldsFragment } }
-    )> }
-    & { ' $fragmentRefs'?: { 'IngredientCoreFieldsFragment': IngredientCoreFieldsFragment } }
-  ) | null };
+export type GetProductQuery = { __typename?: 'Query', ingredient?: { __typename?: 'Ingredient', base_quantity: number, base_unit: UnitEnum, allergens: Array<AllergenEnum>, created_at: any, updated_at: any, id: string, name: string, unit: UnitEnum, image_url?: string | null, stockMovements: Array<{ __typename?: 'StockMovement', id: string, type: string, quantity: number, quantity_before?: number | null, quantity_after?: number | null, created_at: any, location: { __typename?: 'Location', id: string, name: string } }>, category: { __typename?: 'Category', id: string, name: string }, quantities: Array<{ __typename?: 'IngredientQuantity', quantity: number, location: { __typename?: 'Location', id: string, name: string, locationType?: { __typename?: 'LocationType', id: string, name: string, is_default: boolean } | null } }> } | null };
 
 export type OpenFoodFactsProxyQueryVariables = Exact<{
   barcode?: InputMaybe<Scalars['String']['input']>;
@@ -1599,13 +1559,7 @@ export type GetCategoriesQueryVariables = Exact<{
 }>;
 
 
-export type GetCategoriesQuery = { __typename?: 'Query', categories: { __typename?: 'CategoryPaginator', data: Array<(
-      { __typename?: 'Category' }
-      & { ' $fragmentRefs'?: { 'CategoryWithShelfLivesFragment': CategoryWithShelfLivesFragment } }
-    )>, paginatorInfo: (
-      { __typename?: 'PaginatorInfo' }
-      & { ' $fragmentRefs'?: { 'PaginatorInfoFieldsFragment': PaginatorInfoFieldsFragment } }
-    ) } };
+export type GetCategoriesQuery = { __typename?: 'Query', categories: { __typename?: 'CategoryPaginator', data: Array<{ __typename?: 'Category', id: string, name: string, created_at: any, updated_at: any, shelfLives: Array<{ __typename?: 'CategoryShelfLife', shelf_life_hours: number, locationType: { __typename?: 'LocationType', id: string, name: string, is_default: boolean } }> }>, paginatorInfo: { __typename?: 'PaginatorInfo', count: number, currentPage: number, firstItem?: number | null, hasMorePages: boolean, lastItem?: number | null, lastPage: number, perPage: number, total: number } } };
 
 export type GetIngredientQueryVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -1614,13 +1568,7 @@ export type GetIngredientQueryVariables = Exact<{
 }>;
 
 
-export type GetIngredientQuery = { __typename?: 'Query', ingredient?: (
-    { __typename?: 'Ingredient', stockMovements?: Array<(
-      { __typename?: 'StockMovement' }
-      & { ' $fragmentRefs'?: { 'StockMovementFieldsFragment': StockMovementFieldsFragment } }
-    )> }
-    & { ' $fragmentRefs'?: { 'IngredientCoreFieldsFragment': IngredientCoreFieldsFragment } }
-  ) | null };
+export type GetIngredientQuery = { __typename?: 'Query', ingredient?: { __typename?: 'Ingredient', base_quantity: number, base_unit: UnitEnum, allergens: Array<AllergenEnum>, created_at: any, updated_at: any, id: string, name: string, unit: UnitEnum, image_url?: string | null, stockMovements?: Array<{ __typename?: 'StockMovement', id: string, type: string, quantity: number, quantity_before?: number | null, quantity_after?: number | null, created_at: any, location: { __typename?: 'Location', id: string, name: string } }>, category: { __typename?: 'Category', id: string, name: string }, quantities: Array<{ __typename?: 'IngredientQuantity', quantity: number, location: { __typename?: 'Location', id: string, name: string, locationType?: { __typename?: 'LocationType', id: string, name: string, is_default: boolean } | null } }> } | null };
 
 export type GetLocationsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -1629,13 +1577,7 @@ export type GetLocationsQueryVariables = Exact<{
 }>;
 
 
-export type GetLocationsQuery = { __typename?: 'Query', locations: { __typename?: 'LocationPaginator', data: Array<(
-      { __typename?: 'Location' }
-      & { ' $fragmentRefs'?: { 'LocationCoreFieldsFragment': LocationCoreFieldsFragment } }
-    )>, paginatorInfo: (
-      { __typename?: 'PaginatorInfo' }
-      & { ' $fragmentRefs'?: { 'PaginatorInfoFieldsFragment': PaginatorInfoFieldsFragment } }
-    ) } };
+export type GetLocationsQuery = { __typename?: 'Query', locations: { __typename?: 'LocationPaginator', data: Array<{ __typename?: 'Location', created_at: any, updated_at: any, id: string, name: string, locationType?: { __typename?: 'LocationType', id: string, name: string, is_default: boolean } | null }>, paginatorInfo: { __typename?: 'PaginatorInfo', count: number, currentPage: number, firstItem?: number | null, hasMorePages: boolean, lastItem?: number | null, lastPage: number, perPage: number, total: number } } };
 
 export type ChefsOrderStepsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1664,13 +1606,7 @@ export type GetIngredientsQueryVariables = Exact<{
 }>;
 
 
-export type GetIngredientsQuery = { __typename?: 'Query', ingredients: { __typename?: 'IngredientPaginator', data: Array<(
-      { __typename?: 'Ingredient' }
-      & { ' $fragmentRefs'?: { 'IngredientListItemFieldsFragment': IngredientListItemFieldsFragment } }
-    )>, paginatorInfo: (
-      { __typename?: 'PaginatorInfo' }
-      & { ' $fragmentRefs'?: { 'PaginatorInfoFieldsFragment': PaginatorInfoFieldsFragment } }
-    ) } };
+export type GetIngredientsQuery = { __typename?: 'Query', ingredients: { __typename?: 'IngredientPaginator', data: Array<{ __typename?: 'Ingredient', id: string, name: string, unit: UnitEnum, image_url?: string | null, category: { __typename?: 'Category', id: string, name: string }, quantities: Array<{ __typename?: 'IngredientQuantity', quantity: number, location: { __typename?: 'Location', id: string, name: string, locationType?: { __typename?: 'LocationType', id: string, name: string, is_default: boolean } | null } }> }>, paginatorInfo: { __typename?: 'PaginatorInfo', count: number, currentPage: number, firstItem?: number | null, hasMorePages: boolean, lastItem?: number | null, lastPage: number, perPage: number, total: number } } };
 
 export type GetLocationTypesQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -1678,13 +1614,7 @@ export type GetLocationTypesQueryVariables = Exact<{
 }>;
 
 
-export type GetLocationTypesQuery = { __typename?: 'Query', locationTypes: { __typename?: 'LocationTypePaginator', data: Array<(
-      { __typename?: 'LocationType' }
-      & { ' $fragmentRefs'?: { 'LocationTypeFieldsFragment': LocationTypeFieldsFragment } }
-    )>, paginatorInfo: (
-      { __typename?: 'PaginatorInfo' }
-      & { ' $fragmentRefs'?: { 'PaginatorInfoFieldsFragment': PaginatorInfoFieldsFragment } }
-    ) } };
+export type GetLocationTypesQuery = { __typename?: 'Query', locationTypes: { __typename?: 'LocationTypePaginator', data: Array<{ __typename?: 'LocationType', id: string, name: string, is_default: boolean }>, paginatorInfo: { __typename?: 'PaginatorInfo', count: number, currentPage: number, firstItem?: number | null, hasMorePages: boolean, lastItem?: number | null, lastPage: number, perPage: number, total: number } } };
 
 export type GetMeQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1714,13 +1644,7 @@ export type GetMenuCategoriesQueryVariables = Exact<{
 }>;
 
 
-export type GetMenuCategoriesQuery = { __typename?: 'Query', menuCategories: { __typename?: 'MenuCategoryPaginator', data: Array<(
-      { __typename?: 'MenuCategory' }
-      & { ' $fragmentRefs'?: { 'MenuCategoryFieldsFragment': MenuCategoryFieldsFragment } }
-    )>, paginatorInfo: (
-      { __typename?: 'PaginatorInfo' }
-      & { ' $fragmentRefs'?: { 'PaginatorInfoFieldsFragment': PaginatorInfoFieldsFragment } }
-    ) } };
+export type GetMenuCategoriesQuery = { __typename?: 'Query', menuCategories: { __typename?: 'MenuCategoryPaginator', data: Array<{ __typename?: 'MenuCategory', id: string, name: string, created_at: any, updated_at: any }>, paginatorInfo: { __typename?: 'PaginatorInfo', count: number, currentPage: number, firstItem?: number | null, hasMorePages: boolean, lastItem?: number | null, lastPage: number, perPage: number, total: number } } };
 
 export type GetMenusQueryVariables = Exact<{
   page: Scalars['Int']['input'];
@@ -1729,13 +1653,7 @@ export type GetMenusQueryVariables = Exact<{
 }>;
 
 
-export type GetMenusQuery = { __typename?: 'Query', menus: { __typename?: 'MenuPaginator', data: Array<{ __typename?: 'Menu', id: string, name: string, image_url?: string | null, description?: string | null, public_priority: number, menu_type_id: string, service_type: MenuServiceTypeEnum, is_returnable: boolean, price: number, is_a_la_carte: boolean, available: boolean, created_at: any, updated_at: any, menu_type?: { __typename?: 'MenuType', id: string, name: string } | null, items: Array<{ __typename?: 'MenuItem', id: string, quantity: number, unit: UnitEnum, location: (
-          { __typename?: 'Location' }
-          & { ' $fragmentRefs'?: { 'LocationSummaryFieldsFragment': LocationSummaryFieldsFragment } }
-        ) }> }>, paginatorInfo: (
-      { __typename?: 'PaginatorInfo' }
-      & { ' $fragmentRefs'?: { 'PaginatorInfoFieldsFragment': PaginatorInfoFieldsFragment } }
-    ) } };
+export type GetMenusQuery = { __typename?: 'Query', menus: { __typename?: 'MenuPaginator', data: Array<{ __typename?: 'Menu', id: string, name: string, image_url?: string | null, description?: string | null, public_priority: number, menu_type_id: string, service_type: MenuServiceTypeEnum, is_returnable: boolean, price: number, is_a_la_carte: boolean, available: boolean, created_at: any, updated_at: any, menu_type?: { __typename?: 'MenuType', id: string, name: string } | null, items: Array<{ __typename?: 'MenuItem', id: string, quantity: number, unit: UnitEnum, location: { __typename?: 'Location', id: string, name: string } }> }>, paginatorInfo: { __typename?: 'PaginatorInfo', count: number, currentPage: number, firstItem?: number | null, hasMorePages: boolean, lastItem?: number | null, lastPage: number, perPage: number, total: number } } };
 
 export type GetMostUsedIngredientsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1757,22 +1675,7 @@ export type GetPreparationByIdQueryVariables = Exact<{
 }>;
 
 
-export type GetPreparationByIdQuery = { __typename?: 'Query', preparation?: { __typename?: 'Preparation', id: string, name: string, image_url?: string | null, unit: UnitEnum, base_quantity: number, base_unit: UnitEnum, allergens: Array<AllergenEnum>, categories: Array<(
-      { __typename?: 'Category' }
-      & { ' $fragmentRefs'?: { 'CategorySummaryFieldsFragment': CategorySummaryFieldsFragment } }
-    )>, preparable_quantity: { __typename?: 'PreparationPreparableQuantity', unit: UnitEnum, quantity: number }, quantities: Array<{ __typename?: 'PreparationQuantity', quantity: number, location: (
-        { __typename?: 'Location' }
-        & { ' $fragmentRefs'?: { 'LocationSummaryFieldsFragment': LocationSummaryFieldsFragment } }
-      ) }>, entities: Array<{ __typename?: 'PreparationEntity', id: string, quantity: number, unit: UnitEnum, location: (
-        { __typename?: 'Location' }
-        & { ' $fragmentRefs'?: { 'LocationSummaryFieldsFragment': LocationSummaryFieldsFragment } }
-      ), entity: (
-        { __typename?: 'Ingredient' }
-        & { ' $fragmentRefs'?: { 'IngredientListItemFieldsFragment': IngredientListItemFieldsFragment } }
-      ) | { __typename?: 'Preparation', id: string, name: string, unit: UnitEnum, image_url?: string | null, quantities: Array<{ __typename?: 'PreparationQuantity', quantity: number, location: (
-            { __typename?: 'Location' }
-            & { ' $fragmentRefs'?: { 'LocationSummaryFieldsFragment': LocationSummaryFieldsFragment } }
-          ) }> } }> } | null };
+export type GetPreparationByIdQuery = { __typename?: 'Query', preparation?: { __typename?: 'Preparation', id: string, name: string, image_url?: string | null, unit: UnitEnum, base_quantity: number, base_unit: UnitEnum, allergens: Array<AllergenEnum>, categories: Array<{ __typename?: 'Category', id: string, name: string }>, preparable_quantity: { __typename?: 'PreparationPreparableQuantity', unit: UnitEnum, quantity: number }, quantities: Array<{ __typename?: 'PreparationQuantity', quantity: number, location: { __typename?: 'Location', id: string, name: string } }>, entities: Array<{ __typename?: 'PreparationEntity', id: string, quantity: number, unit: UnitEnum, location: { __typename?: 'Location', id: string, name: string }, entity: { __typename?: 'Ingredient', id: string, name: string, unit: UnitEnum, image_url?: string | null, category: { __typename?: 'Category', id: string, name: string }, quantities: Array<{ __typename?: 'IngredientQuantity', quantity: number, location: { __typename?: 'Location', id: string, name: string, locationType?: { __typename?: 'LocationType', id: string, name: string, is_default: boolean } | null } }> } | { __typename?: 'Preparation', id: string, name: string, unit: UnitEnum, image_url?: string | null, quantities: Array<{ __typename?: 'PreparationQuantity', quantity: number, location: { __typename?: 'Location', id: string, name: string } }> } }> } | null };
 
 export type GetPreparationsQueryVariables = Exact<{
   page: Scalars['Int']['input'];
@@ -1780,16 +1683,7 @@ export type GetPreparationsQueryVariables = Exact<{
 }>;
 
 
-export type GetPreparationsQuery = { __typename?: 'Query', preparations: { __typename?: 'PreparationPaginator', data: Array<{ __typename?: 'Preparation', id: string, name: string, image_url?: string | null, allergens: Array<AllergenEnum>, unit: UnitEnum, quantities: Array<{ __typename?: 'PreparationQuantity', quantity: number, location: (
-          { __typename?: 'Location' }
-          & { ' $fragmentRefs'?: { 'LocationSummaryFieldsFragment': LocationSummaryFieldsFragment } }
-        ) }>, categories: Array<(
-        { __typename?: 'Category' }
-        & { ' $fragmentRefs'?: { 'CategorySummaryFieldsFragment': CategorySummaryFieldsFragment } }
-      )> }>, paginatorInfo: (
-      { __typename?: 'PaginatorInfo' }
-      & { ' $fragmentRefs'?: { 'PaginatorInfoFieldsFragment': PaginatorInfoFieldsFragment } }
-    ) } };
+export type GetPreparationsQuery = { __typename?: 'Query', preparations: { __typename?: 'PreparationPaginator', data: Array<{ __typename?: 'Preparation', id: string, name: string, image_url?: string | null, allergens: Array<AllergenEnum>, unit: UnitEnum, quantities: Array<{ __typename?: 'PreparationQuantity', quantity: number, location: { __typename?: 'Location', id: string, name: string } }>, categories: Array<{ __typename?: 'Category', id: string, name: string }> }>, paginatorInfo: { __typename?: 'PaginatorInfo', count: number, currentPage: number, firstItem?: number | null, hasMorePages: boolean, lastItem?: number | null, lastPage: number, perPage: number, total: number } } };
 
 export type GetPublicMenusSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1813,10 +1707,7 @@ export type GetRoomsQueryVariables = Exact<{
 }>;
 
 
-export type GetRoomsQuery = { __typename?: 'Query', rooms: { __typename?: 'RoomPaginator', data: Array<{ __typename?: 'Room', id: string, code: string, name: string, tables: Array<{ __typename?: 'Table', id: string, label: string, seats: number, orders?: Array<{ __typename?: 'Order', id: string, price: number, status: OrderStatusEnum, created_at: any, pending_at?: any | null }> | null }> }>, paginatorInfo: (
-      { __typename?: 'PaginatorInfo' }
-      & { ' $fragmentRefs'?: { 'PaginatorInfoFieldsFragment': PaginatorInfoFieldsFragment } }
-    ) } };
+export type GetRoomsQuery = { __typename?: 'Query', rooms: { __typename?: 'RoomPaginator', data: Array<{ __typename?: 'Room', id: string, code: string, name: string, tables: Array<{ __typename?: 'Table', id: string, label: string, seats: number, orders?: Array<{ __typename?: 'Order', id: string, price: number, status: OrderStatusEnum, created_at: any, pending_at?: any | null }> | null }> }>, paginatorInfo: { __typename?: 'PaginatorInfo', count: number, currentPage: number, firstItem?: number | null, hasMorePages: boolean, lastItem?: number | null, lastPage: number, perPage: number, total: number } } };
 
 export type GetThresholdQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1838,13 +1729,7 @@ export type SearchIngredientsQueryVariables = Exact<{
 }>;
 
 
-export type SearchIngredientsQuery = { __typename?: 'Query', searchInStock: Array<(
-    { __typename?: 'Ingredient', allergens: Array<AllergenEnum> }
-    & { ' $fragmentRefs'?: { 'IngredientListItemFieldsFragment': IngredientListItemFieldsFragment } }
-  ) | { __typename?: 'Preparation', id: string, name: string, unit: UnitEnum, allergens: Array<AllergenEnum>, quantities: Array<{ __typename?: 'PreparationQuantity', quantity: number, location: (
-        { __typename?: 'Location' }
-        & { ' $fragmentRefs'?: { 'LocationSummaryFieldsFragment': LocationSummaryFieldsFragment } }
-      ) }> }> };
+export type SearchIngredientsQuery = { __typename?: 'Query', searchInStock: Array<{ __typename?: 'Ingredient', allergens: Array<AllergenEnum>, id: string, name: string, unit: UnitEnum, image_url?: string | null, category: { __typename?: 'Category', id: string, name: string }, quantities: Array<{ __typename?: 'IngredientQuantity', quantity: number, location: { __typename?: 'Location', id: string, name: string, locationType?: { __typename?: 'LocationType', id: string, name: string, is_default: boolean } | null } }> } | { __typename?: 'Preparation', id: string, name: string, unit: UnitEnum, allergens: Array<AllergenEnum>, quantities: Array<{ __typename?: 'PreparationQuantity', quantity: number, location: { __typename?: 'Location', id: string, name: string } }> }> };
 
 export type TakinOrdersQueryQueryVariables = Exact<{
   id: Scalars['ID']['input'];

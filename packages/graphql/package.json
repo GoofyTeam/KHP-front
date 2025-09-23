@@ -8,11 +8,12 @@
   ],
   "exports": {
     ".": "./src/index.ts",
-    "./generated": "./src/generated/index.ts",
+    "./generated": "./src/generated/graphql.ts",
     "./fragments/*": "./src/fragments/*.gql",
     "./queries/*": "./src/queries/*"
   },
   "scripts": {
+    "introspect": "get-graphql-schema https://back.goofykhp.fr/graphql > ./src/schema/schema.graphql",
     "codegen": "node --require ./scripts/mock-cpus.cjs ../../node_modules/.bin/graphql-codegen --config codegen.ts"
   },
   "dependencies": {

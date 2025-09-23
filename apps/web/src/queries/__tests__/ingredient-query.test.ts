@@ -32,7 +32,7 @@ describe('fetchIngredient', () => {
     await expect(fetchIngredient('ING-1')).resolves.toBe(ingredient)
     expect(mockQuery).toHaveBeenCalledWith({
       query: expect.anything(),
-      variables: { id: 'ING-1' },
+      variables: { id: 'ING-1', includeStockMovements: true },
     })
     expect(mockNotFound).not.toHaveBeenCalled()
   })
