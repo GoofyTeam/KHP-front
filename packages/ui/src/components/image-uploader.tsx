@@ -1,17 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@workspace/ui/components/button";
+import { Button } from "./button";
 import { Camera, X, Folder } from "lucide-react";
-import { FormLabel } from "@workspace/ui/components/form";
-import { CameraModal } from "@workspace/ui/components/camera-modal";
-import { ImagePlaceholder } from "@workspace/ui/components/image-placeholder";
+import { FormLabel } from "./form";
+import { CameraModal } from "./camera-modal";
+import { ImagePlaceholder } from "./image-placeholder";
 
 interface ImageUploaderProps {
   imagePreview: string | null;
   onImageCapture: (file: File) => void;
   onClearImage: () => void;
   ingredientName: string;
+  label?: string;
 }
 
 export function ImageUploader({
@@ -19,6 +20,7 @@ export function ImageUploader({
   onImageCapture,
   onClearImage,
   ingredientName,
+  label = "Image",
 }: ImageUploaderProps) {
   const [cameraOpen, setCameraOpen] = useState(false);
 
@@ -40,7 +42,7 @@ export function ImageUploader({
 
       <div className="space-y-4">
         <FormLabel className="text-lg font-semibold text-khp-text-primary">
-          Ingredient Image
+          {label}
         </FormLabel>
 
         <div className="relative w-72 h-72 mx-auto">

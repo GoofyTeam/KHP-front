@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { SubmitErrorHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChangeEvent, useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -14,7 +14,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@workspace/ui/components/form";
-import { ImageAdd } from "@workspace/ui/components/image-placeholder";
 import { Input } from "@workspace/ui/components/input";
 import { PreparationEntitiesField } from "@/components/preparation/PreparationEntitiesField";
 import { Button } from "@workspace/ui/components/button";
@@ -42,6 +41,7 @@ import {
   WANTED_IMAGE_SIZE,
 } from "@workspace/ui/lib/const";
 import { compressImageFile } from "@workspace/ui/lib/compress-img";
+import { ImageUploader } from "@workspace/ui/components/image-uploader";
 
 const preparationItemsSchema = z.object({
   id: z.string().nonempty(),
@@ -189,7 +189,6 @@ const CATEGORY_PAGE_SIZE = 20;
 
 export default function CreatePreparationPage() {
   const [filePreview, setFilePreview] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<string>("details");
 
@@ -292,25 +291,22 @@ export default function CreatePreparationPage() {
 
   const unitsSelections = useMemo(getAllMeasurementUnitsOnlyValues, []);
 
-  const handleImageChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>, onChange: (file?: File) => void) => {
-      const file = event.target.files?.[0];
-
-      if (!file) {
-        setFilePreview(null);
-        onChange(undefined);
-        return;
-      }
-
+  const handleImageCapture = useCallback(
+    (file: File) => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setFilePreview(reader.result as string);
-        onChange(file);
+        form.setValue("image", file);
       };
       reader.readAsDataURL(file);
     },
-    [setFilePreview]
+    [form]
   );
+
+  const handleClearImage = useCallback(() => {
+    setFilePreview(null);
+    form.setValue("image", undefined);
+  }, [form]);
 
   async function onPreparationCreateSubmit(values: CreateMenuFormValues) {
     if (values.image instanceof File) {
@@ -405,19 +401,13 @@ export default function CreatePreparationPage() {
             <TabsContent value="details" className="mt-0">
               <div className="w-full max-w-4xl mx-auto flex flex-col min-h-[600px]">
                 <div className="flex-1 space-y-6">
-                  {filePreview ? (
-                    <img
-                      src={filePreview || ""}
-                      alt={"Menu Image"}
-                      className="aspect-square object-cover max-w-1/2 w-full my-6 rounded-md mx-auto"
-                      onClick={() => inputRef.current?.click()}
-                    />
-                  ) : (
-                    <ImageAdd
-                      iconSize={32}
-                      onClick={() => inputRef.current?.click()}
-                    />
-                  )}
+                  <ImageUploader
+                    imagePreview={filePreview}
+                    onImageCapture={handleImageCapture}
+                    onClearImage={handleClearImage}
+                    ingredientName={form.watch("name") || "preparation"}
+                    label="Preparation Image"
+                  />
 
                   {form.formState.errors.image && (
                     <div className="w-full text-red-500 text-sm mt-1 text-center">
@@ -442,31 +432,6 @@ export default function CreatePreparationPage() {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="image"
-                    render={({ field: { ref, onChange, name } }) => (
-                      <FormItem className="hidden">
-                        <FormControl>
-                          <Input
-                            variant="khp-default"
-                            type="file"
-                            name={name}
-                            accept={ACCEPTED_IMAGE_TYPES.join(",")}
-                            capture="environment"
-                            ref={(e: HTMLInputElement | null) => {
-                              ref(e);
-                              inputRef.current = e;
-                            }}
-                            onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                              handleImageChange(event, onChange)
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                   <div className="flex flex-col gap-4 mb-6">
                     <Label className="text-xl font-semibold">Details</Label>
                     <div className="grid grid-cols-2 w-full gap-4">

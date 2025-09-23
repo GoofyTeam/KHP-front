@@ -3,14 +3,7 @@
 import { z } from "zod";
 import { SubmitErrorHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  ChangeEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 import {
@@ -21,11 +14,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@workspace/ui/components/form";
-import { ImageAdd } from "@workspace/ui/components/image-placeholder";
 import { Input } from "@workspace/ui/components/input";
 import { PreparationEntitiesField } from "@/components/preparation/PreparationEntitiesField";
 import { Button } from "@workspace/ui/components/button";
-import { AlertCircle, CookingPot, Loader2, Package, X } from "lucide-react";
+import { AlertCircle, CookingPot, Loader2, Package } from "lucide-react";
 import { LoadMoreSelect } from "@workspace/ui/components/load-more-select";
 import {
   Select,
@@ -51,6 +43,7 @@ import {
   WANTED_IMAGE_SIZE,
 } from "@workspace/ui/lib/const";
 import { compressImageFile } from "@workspace/ui/lib/compress-img";
+import { ImageUploader } from "@workspace/ui/components/image-uploader";
 
 const preparationItemsSchema = z.object({
   id: z.string().nonempty(),
@@ -159,7 +152,6 @@ export default function UpdatePreparationPage() {
   const apolloClient = useApolloClient();
 
   const [filePreview, setFilePreview] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const [activeTab, setActiveTab] = useState("details");
 
   const {
@@ -320,32 +312,21 @@ export default function UpdatePreparationPage() {
     }
   }, [preparationLoading, preparation, preparationError, router]);
 
-  const handleImageChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>, onChange: (file?: File) => void) => {
-      const file = event.target.files?.[0];
-
-      if (!file) {
-        setFilePreview(preparation?.image_url ?? null);
-        onChange(undefined);
-        return;
-      }
-
+  const handleImageCapture = useCallback(
+    (file: File) => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setFilePreview(reader.result as string);
-        onChange(file);
+        form.setValue("image", file);
       };
       reader.readAsDataURL(file);
     },
-    [preparation?.image_url]
+    [form]
   );
 
-  const handleRemoveImage = useCallback(() => {
+  const handleClearImage = useCallback(() => {
     setFilePreview(null);
     form.setValue("image", undefined);
-    if (inputRef.current) {
-      inputRef.current.value = "";
-    }
   }, [form]);
 
   const onSubmit = form.handleSubmit(async (values) => {
@@ -466,33 +447,13 @@ export default function UpdatePreparationPage() {
             <TabsContent value="details" className="mt-0">
               <div className="w-full max-w-4xl mx-auto flex flex-col min-h-[600px]">
                 <div className="flex-1 space-y-6">
-                  {filePreview ? (
-                    <div className="relative max-w-1/2 w-full my-6 mx-auto">
-                      <img
-                        src={filePreview}
-                        alt={form.watch("name") || "Preparation image"}
-                        className="aspect-square object-cover w-full rounded-md cursor-pointer"
-                        onClick={() => inputRef.current?.click()}
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute top-2 right-2 h-8 w-8 rounded-full shadow-lg"
-                        onClick={handleRemoveImage}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="relative max-w-1/2 w-full my-6 mx-auto">
-                      <ImageAdd
-                        className="w-full aspect-square"
-                        iconSize={64}
-                        onClick={() => inputRef.current?.click()}
-                      />
-                    </div>
-                  )}
+                  <ImageUploader
+                    imagePreview={filePreview}
+                    onImageCapture={handleImageCapture}
+                    onClearImage={handleClearImage}
+                    ingredientName={form.watch("name") || "preparation"}
+                    label="Preparation Image"
+                  />
 
                   {form.formState.errors.image && (
                     <div className="w-full text-red-500 text-sm mt-1 text-center">
@@ -517,31 +478,6 @@ export default function UpdatePreparationPage() {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="image"
-                    render={({ field: { ref, onChange, name } }) => (
-                      <FormItem className="hidden">
-                        <FormControl>
-                          <Input
-                            variant="khp-default"
-                            type="file"
-                            name={name}
-                            accept={ACCEPTED_IMAGE_TYPES.join(",")}
-                            capture="environment"
-                            ref={(element: HTMLInputElement | null) => {
-                              ref(element);
-                              inputRef.current = element;
-                            }}
-                            onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                              handleImageChange(event, onChange)
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                   <div className="flex flex-col gap-4 mb-6">
                     <Label className="text-xl font-semibold">Details</Label>
                     <div className="grid grid-cols-2 w-full gap-4">

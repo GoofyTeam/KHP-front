@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { SubmitErrorHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChangeEvent, useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -14,7 +14,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@workspace/ui/components/form";
-import { ImageAdd } from "@workspace/ui/components/image-placeholder";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { Switch } from "@workspace/ui/components/switch";
@@ -44,6 +43,7 @@ import {
   WANTED_IMAGE_SIZE,
 } from "@workspace/ui/lib/const";
 import { compressImageFile } from "@workspace/ui/lib/compress-img";
+import { ImageUploader } from "@workspace/ui/components/image-uploader";
 
 const SERVICE_TYPE_OPTIONS = [
   {
@@ -136,7 +136,6 @@ const MENU_INFO_FIELDS = [
 
 export default function CreateMenusPage() {
   const [filePreview, setFilePreview] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const [priceInput, setPriceInput] = useState<string>("");
   const [activeTab, setActiveTab] = useState<string>("details");
@@ -171,6 +170,20 @@ export default function CreateMenusPage() {
       items: [],
     },
   });
+
+  const handleImageCapture = (file: File) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFilePreview(reader.result as string);
+      form.setValue("image", file);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleClearImage = () => {
+    setFilePreview(null);
+    form.setValue("image", undefined);
+  };
 
   const handleValidationErrors: SubmitErrorHandler<CreateMenuFormValues> = (
     errors
@@ -326,19 +339,13 @@ export default function CreateMenusPage() {
             <TabsContent value="details" className="mt-0">
               <div className="w-full max-w-4xl mx-auto flex flex-col min-h-[600px]">
                 <div className="flex-1 space-y-6">
-                  {filePreview ? (
-                    <img
-                      src={filePreview || ""}
-                      alt={"Menu Image"}
-                      className="aspect-square object-cover max-w-1/2 w-full my-6 rounded-md"
-                      onClick={() => inputRef.current?.click()}
-                    />
-                  ) : (
-                    <ImageAdd
-                      iconSize={32}
-                      onClick={() => inputRef.current?.click()}
-                    />
-                  )}
+                  <ImageUploader
+                    imagePreview={filePreview}
+                    onImageCapture={handleImageCapture}
+                    onClearImage={handleClearImage}
+                    ingredientName={form.watch("name") || "menu"}
+                    label="Menu Image"
+                  />
 
                   {form.formState.errors.image && (
                     <div className="w-full text-red-500 text-sm mt-1 text-center">
@@ -346,43 +353,6 @@ export default function CreateMenusPage() {
                         "Please select an image."}
                     </div>
                   )}
-
-                  <FormField
-                    control={form.control}
-                    name="image"
-                    render={({ field: { ref, onChange, name } }) => (
-                      <FormItem className="hidden">
-                        <FormControl>
-                          <Input
-                            variant="khp-default"
-                            type="file"
-                            name={name}
-                            accept={ACCEPTED_IMAGE_TYPES.join(",")}
-                            capture="environment"
-                            ref={(e: HTMLInputElement | null) => {
-                              ref(e);
-                              inputRef.current = e;
-                            }}
-                            onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                const reader = new FileReader();
-                                reader.onloadend = () => {
-                                  setFilePreview(reader.result as string);
-                                  onChange(file);
-                                };
-                                reader.readAsDataURL(file);
-                              } else {
-                                setFilePreview(null);
-                                onChange(undefined);
-                              }
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
                   <FormField
                     control={form.control}

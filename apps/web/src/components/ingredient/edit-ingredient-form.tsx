@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -14,10 +14,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@workspace/ui/components/form";
-import { ImageAdd } from "@workspace/ui/components/image-placeholder";
 import { Input } from "@workspace/ui/components/input";
 import { Button } from "@workspace/ui/components/button";
-import { AlertCircle, CheckCircle, X } from "lucide-react";
+import { AlertCircle, CheckCircle } from "lucide-react";
 import {
   Select,
   SelectTrigger,
@@ -42,6 +41,7 @@ import {
   WANTED_IMAGE_SIZE,
 } from "@workspace/ui/lib/const";
 import { compressImageFile } from "@workspace/ui/lib/compress-img";
+import { ImageUploader } from "@workspace/ui/components/image-uploader";
 
 type IngredientData = NonNullable<GetIngredientQuery["ingredient"]>;
 
@@ -100,7 +100,6 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
   const [success, setSuccess] = useState(false);
 
   const [filePreview, setFilePreview] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const { data: categoriesData } = useQuery(GetCategoriesDocument, {
     variables: {
@@ -159,32 +158,21 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
     });
   }, [ingredient, form]);
 
-  const handleImageChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>, onChange: (file?: File) => void) => {
-      const file = event.target.files?.[0];
-
-      if (!file) {
-        setFilePreview(ingredient?.image_url ?? null);
-        onChange(undefined);
-        return;
-      }
-
+  const handleImageCapture = useCallback(
+    (file: File) => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setFilePreview(reader.result as string);
-        onChange(file);
+        form.setValue("image", file);
       };
       reader.readAsDataURL(file);
     },
-    [ingredient?.image_url]
+    [form]
   );
 
-  const handleRemoveImage = useCallback(() => {
+  const handleClearImage = useCallback(() => {
     setFilePreview(null);
     form.setValue("image", undefined);
-    if (inputRef.current) {
-      inputRef.current.value = "";
-    }
   }, [form]);
 
   const onSubmit = form.handleSubmit(async (values) => {
@@ -293,33 +281,13 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
         <form onSubmit={onSubmit} className="w-full max-w-6xl mx-auto">
           <div className="w-full max-w-4xl mx-auto flex flex-col min-h-[600px]">
             <div className="flex-1 space-y-6">
-              {filePreview ? (
-                <div className="relative max-w-1/2 w-full my-6 mx-auto">
-                  <img
-                    src={filePreview}
-                    alt={form.watch("name") || "Ingredient image"}
-                    className="aspect-square object-cover w-full rounded-md cursor-pointer"
-                    onClick={() => inputRef.current?.click()}
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="absolute top-2 right-2 h-8 w-8 rounded-full shadow-lg"
-                    onClick={handleRemoveImage}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div className="relative max-w-1/2 w-full my-6 mx-auto">
-                  <ImageAdd
-                    className="w-full aspect-square"
-                    iconSize={64}
-                    onClick={() => inputRef.current?.click()}
-                  />
-                </div>
-              )}
+              <ImageUploader
+                imagePreview={filePreview}
+                onImageCapture={handleImageCapture}
+                onClearImage={handleClearImage}
+                ingredientName={form.watch("name") || "ingredient"}
+                label="Ingredient Image"
+              />
 
               {form.formState.errors.image && (
                 <div className="w-full text-red-500 text-sm mt-1 text-center">
@@ -343,31 +311,6 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="image"
-                render={({ field: { ref, onChange, name } }) => (
-                  <FormItem className="hidden">
-                    <FormControl>
-                      <Input
-                        variant="khp-default"
-                        type="file"
-                        name={name}
-                        accept={ACCEPTED_IMAGE_TYPES.join(",")}
-                        capture="environment"
-                        ref={(element: HTMLInputElement | null) => {
-                          ref(element);
-                          inputRef.current = element;
-                        }}
-                        onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                          handleImageChange(event, onChange)
-                        }
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
               <div className="flex flex-col gap-4 mb-6">
                 <Label className="text-xl font-semibold">Details</Label>
                 <div className="grid grid-cols-2 w-full gap-4">

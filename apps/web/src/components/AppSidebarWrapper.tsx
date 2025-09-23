@@ -21,6 +21,7 @@ const getSidebarDefaultState = (currentPath: string): boolean => {
     "/preparations",
     "/waiters",
     "/chefs",
+    "/orders",
   ];
 
   if (
