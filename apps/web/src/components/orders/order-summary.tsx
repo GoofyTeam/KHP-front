@@ -9,7 +9,7 @@ import {
 import { Badge } from "@workspace/ui/components/badge";
 import { ImagePlaceholder } from "@workspace/ui/components/image-placeholder";
 import { AllegernsBadge } from "@workspace/ui/components/allergens-badge";
-import type { TakinOrdersQueryQuery } from "@/graphql/generated/graphql";
+import type { TakinOrdersQueryQuery } from "@workspace/graphql";
 
 type Order = NonNullable<TakinOrdersQueryQuery["order"]>;
 

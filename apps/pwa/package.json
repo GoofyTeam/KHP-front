@@ -13,13 +13,14 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "generate-pwa-assets": "pwa-assets-generator",
-    "introspect": "get-graphql-schema https://back.goofykhp.fr/graphql > ../../packages/graphql/src/schema/schema.graphql"
+    "introspect": "npm --workspace @workspace/graphql run introspect"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.10",
     "@tanstack/react-router": "^1.125.1",
     "@tanstack/react-router-devtools": "^1.125.1",
     "@uidotdev/usehooks": "^2.4.1",
+    "@workspace/graphql": "^0.0.0",
     "@workspace/ui": "*",
     "date-fns": "^4.1.0",
     "get-graphql-schema": "^2.1.2",

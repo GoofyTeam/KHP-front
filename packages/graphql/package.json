@@ -13,7 +13,7 @@
     "./queries/*": "./src/queries/*"
   },
   "scripts": {
-    "introspect": "get-graphql-schema https://back.goofykhp.fr/graphql > ./src/schema/schema.graphql",
+    "introspect": "node ./scripts/introspect.mjs",
     "codegen": "node --require ./scripts/mock-cpus.cjs ../../node_modules/.bin/graphql-codegen --config codegen.ts"
   },
   "dependencies": {

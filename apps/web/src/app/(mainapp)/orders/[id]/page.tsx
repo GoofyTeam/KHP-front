@@ -1,5 +1,5 @@
 import { query } from "@/lib/ApolloClient";
-import { TakinOrdersQueryDocument } from "@/graphql/generated/graphql";
+import { TakinOrdersQueryDocument } from "@workspace/graphql";
 import Link from "next/link";
 import { Button } from "@workspace/ui/components/button";
 import { ChevronLeft, Clock, MapPin, Calendar } from "lucide-react";

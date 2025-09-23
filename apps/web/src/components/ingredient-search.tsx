@@ -17,7 +17,7 @@ import {
   PopoverTrigger,
 } from "@workspace/ui/components/popover";
 
-import { GetIngredientsDocument } from "@/graphql/generated/graphql";
+import { GetIngredientsDocument } from "@workspace/graphql";
 
 export type IngredientSearchResult = {
   id: string;
