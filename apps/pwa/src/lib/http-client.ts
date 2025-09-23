@@ -5,6 +5,16 @@ import {
   type ResponseType,
   HttpMethod,
 } from "../types/http-client";
+import {
+  deserializeRequestBody,
+  dropQueuedRequest,
+  markRequestAsFailed,
+  queueRequest as enqueueOfflineRequest,
+  readQueuedRequests,
+  serializeRequestBody,
+} from "./offline-queue";
+import type { SerializedRequestBody } from "./offline-queue";
+import type { OfflineRequestRecord } from "./offline-db";
 
 export class ImprovedHttpClient {
   private baseUrl: string;
@@ -18,6 +28,9 @@ export class ImprovedHttpClient {
     string,
     { data: unknown; timestamp: number; ttl: number }
   >();
+  private static clients = new Set<ImprovedHttpClient>();
+  private static queueListenerBound = false;
+  private isProcessingQueue = false;
 
   constructor(config: HttpClientConfig) {
     this.baseUrl = config.baseUrl;
@@ -31,6 +44,7 @@ export class ImprovedHttpClient {
       endpoint: config.csrfConfig?.endpoint ?? "/sanctum/csrf-cookie",
     };
     this.csrfToken = this.readCookie(this.csrfConfig.cookieName);
+    this.registerClient();
   }
 
   async initCSRF(): Promise<void> {
@@ -148,12 +162,248 @@ export class ImprovedHttpClient {
     return cached.data as T;
   }
 
+  private registerClient(): void {
+    ImprovedHttpClient.clients.add(this);
+
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (!ImprovedHttpClient.queueListenerBound) {
+      window.addEventListener("online", () => {
+        ImprovedHttpClient.clients.forEach((client) => {
+          client.processQueuedRequests().catch((error) => {
+            console.error("Failed to process offline queue", error);
+          });
+        });
+      });
+      ImprovedHttpClient.queueListenerBound = true;
+    }
+
+    if (navigator.onLine) {
+      void this.processQueuedRequests();
+    }
+  }
+
   private setCache(key: string, data: unknown, ttl = 300000): void {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
       ttl,
     });
+  }
+
+  private shouldQueueRequest(method?: string): boolean {
+    if (!method) return false;
+    const normalized = method.toUpperCase();
+    return (
+      normalized === HttpMethod.POST ||
+      normalized === HttpMethod.PUT ||
+      normalized === HttpMethod.PATCH ||
+      normalized === HttpMethod.DELETE
+    );
+  }
+
+  private isLikelyOffline(error: unknown): boolean {
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      return true;
+    }
+
+    if (error instanceof TypeError) {
+      return true;
+    }
+
+    if (
+      error instanceof Error &&
+      (error.message.includes("Failed to fetch") ||
+        error.message.includes("NetworkError"))
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private extractRelativePath(url: string): string {
+    try {
+      const base = new URL(this.baseUrl);
+      const target = new URL(url, this.baseUrl);
+      if (base.origin === target.origin) {
+        return `${target.pathname}${target.search}`;
+      }
+      return target.toString();
+    } catch {
+      return url;
+    }
+  }
+
+  private resolveUrl(path: string): string {
+    try {
+      return new URL(path, this.baseUrl).toString();
+    } catch {
+      if (path.startsWith("http")) {
+        return path;
+      }
+      const separator = path.startsWith("/") ? "" : "/";
+      return `${this.baseUrl}${separator}${path}`;
+    }
+  }
+
+  private normalizeHeaders(
+    headers: HeadersInit | undefined
+  ): Record<string, string> {
+    const normalized: Record<string, string> = {};
+    if (!headers) return normalized;
+
+    if (headers instanceof Headers) {
+      headers.forEach((value, key) => {
+        normalized[key] = value;
+      });
+      return normalized;
+    }
+
+    if (Array.isArray(headers)) {
+      headers.forEach(([key, value]) => {
+        normalized[key] = value;
+      });
+      return normalized;
+    }
+
+    Object.entries(headers).forEach(([key, value]) => {
+      if (typeof value !== "undefined") {
+        normalized[key] = value;
+      }
+    });
+
+    return normalized;
+  }
+
+  private async broadcastQueueSize(): Promise<void> {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    try {
+      const records = await readQueuedRequests();
+      const count = records.filter(
+        (record) => record.baseUrl === this.baseUrl
+      ).length;
+      window.dispatchEvent(
+        new CustomEvent("khp:offline-queue", {
+          detail: { count, timestamp: Date.now() },
+        })
+      );
+    } catch (error) {
+      console.warn("Failed to broadcast offline queue size", error);
+    }
+  }
+
+  private async addToOfflineQueue(
+    requestConfig: Pick<RequestInit, "method" | "headers"> & { url: string },
+    serializedBody: SerializedRequestBody,
+    requiresCsrf: boolean
+  ): Promise<void> {
+    const headersForQueue = this.normalizeHeaders(requestConfig.headers);
+
+    if (requiresCsrf) {
+      delete headersForQueue[this.csrfConfig.headerName];
+    }
+
+    const clonedBody = deserializeRequestBody(serializedBody);
+
+    await enqueueOfflineRequest({
+      baseUrl: this.baseUrl,
+      path: this.extractRelativePath(requestConfig.url),
+      method: requestConfig.method ?? HttpMethod.GET,
+      headers: headersForQueue,
+      body: clonedBody ?? null,
+      requiresCsrf,
+    });
+
+    await this.broadcastQueueSize();
+  }
+
+  private async processQueuedRequests(): Promise<void> {
+    if (this.isProcessingQueue) {
+      return;
+    }
+
+    this.isProcessingQueue = true;
+    try {
+      const records = await readQueuedRequests();
+      for (const record of records) {
+        if (record.baseUrl !== this.baseUrl) {
+          continue;
+        }
+
+        try {
+          await this.executeQueuedRequest(record);
+          await dropQueuedRequest(record.id);
+        } catch (error) {
+          console.warn("Failed to replay queued request", record.path, error);
+          await markRequestAsFailed(record, error);
+        }
+      }
+
+      await this.broadcastQueueSize();
+    } finally {
+      this.isProcessingQueue = false;
+    }
+  }
+
+  public async flushOfflineQueue(): Promise<void> {
+    await this.processQueuedRequests();
+  }
+
+  public getBaseUrl(): string {
+    return this.baseUrl;
+  }
+
+  private async executeQueuedRequest(
+    record: OfflineRequestRecord
+  ): Promise<void> {
+    const url = this.resolveUrl(record.path);
+
+    const headers: Record<string, string> = {
+      ...(record.headers ?? {}),
+    };
+
+    if (record.requiresCsrf) {
+      if (!this.csrfToken) {
+        await this.initCSRF();
+      }
+
+      if (this.csrfToken) {
+        headers[this.csrfConfig.headerName] = this.csrfToken;
+      }
+    }
+
+    const bodyPayload = record.body as SerializedRequestBody | undefined;
+    const body = deserializeRequestBody(bodyPayload);
+
+    let response = await fetch(url, {
+      method: record.method,
+      headers,
+      body,
+      credentials: "include",
+    });
+
+    if (response.status === 419 && record.requiresCsrf) {
+      await this.initCSRF();
+      if (this.csrfToken) {
+        headers[this.csrfConfig.headerName] = this.csrfToken;
+        response = await fetch(url, {
+          method: record.method,
+          headers,
+          body: deserializeRequestBody(bodyPayload),
+          credentials: "include",
+        });
+      }
+    }
+
+    if (!response.ok) {
+      throw await this.createHttpError(response);
+    }
   }
 
   private async withRetry<T>(
@@ -197,6 +447,12 @@ export class ImprovedHttpClient {
       cache,
       signal,
     } = options;
+
+    if (typeof navigator !== "undefined" && navigator.onLine) {
+      void this.processQueuedRequests();
+    }
+
+    const shouldQueue = this.shouldQueueRequest(method);
 
     if (
       !this.csrfToken &&
@@ -255,6 +511,10 @@ export class ImprovedHttpClient {
       requestConfig = this.interceptors.request(requestConfig);
     }
 
+    const serializedBodyForQueue: SerializedRequestBody = shouldQueue
+      ? serializeRequestBody(requestConfig.body ?? undefined)
+      : ({ kind: "none" } as SerializedRequestBody);
+
     const cacheKey = this.getCacheKey(requestConfig.url, requestConfig);
     if (method === "GET" && cache !== false) {
       const cached = this.getFromCache<Res>(cacheKey);
@@ -271,8 +531,9 @@ export class ImprovedHttpClient {
     const executeRequest = async (
       currentRetries = retries ?? this.retries
     ): Promise<Res> => {
+      let freshHeaders: Record<string, string> = {};
       try {
-        const freshHeaders: Record<string, string> = {
+        freshHeaders = {
           ...this.defaultHeaders,
           ...headers,
           ...(this.csrfToken
@@ -367,6 +628,27 @@ export class ImprovedHttpClient {
         return data;
       } catch (error) {
         clearTimeout(timeoutId);
+        if (shouldQueue && this.isLikelyOffline(error)) {
+          try {
+            const queueHeaders = { ...freshHeaders };
+            const requiresCsrf = Boolean(
+              queueHeaders[this.csrfConfig.headerName]
+            );
+            await this.addToOfflineQueue(
+              {
+                url: requestConfig.url,
+                method: requestConfig.method,
+                headers: queueHeaders,
+              },
+              serializedBodyForQueue,
+              requiresCsrf
+            );
+            return { queued: true } as Res;
+          } catch (queueError) {
+            console.error("Failed to enqueue offline request", queueError);
+          }
+        }
+
         if (error instanceof Error && error.name === "AbortError") {
           throw new Error("Request timeout");
         }

@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import HandleItem from "../../pages/handleItem/HandleItem";
-import { graphqlRequest } from "../../lib/graph-client";
+import { graphqlRequestWithOffline } from "../../lib/offline-graphql";
 import {
   GetLocationsDocument,
   type GetLocationsQuery,
@@ -9,6 +9,7 @@ import {
 } from "@workspace/graphql";
 
 import handleScanType from "../../lib/handleScanType";
+import { saveIngredientSnapshot } from "../../lib/ingredient-cache";
 import z from "zod";
 import { handleTypes } from "./scan.$scanType";
 import { scanModeEnum } from "../../pages/Scan";
@@ -52,17 +53,93 @@ export const Route = createFileRoute("/_protected/handle-item")({
     }
   },
   loader: async ({ deps: { mode, type, barcode, internalId, scanMode } }) => {
-    const locationQuery = await graphqlRequest<GetLocationsQuery>(GetLocationsDocument);
-    const availableLocations = locationQuery.locations.data || [];
-    const categoriesQuery =
-      await graphqlRequest<GetCategoriesQuery>(GetCategoriesDocument);
-    const categories = categoriesQuery.categories.data || [];
-
     const productToFetch = internalId ?? barcode;
     if (!productToFetch && mode !== "manual")
       throw new Error("Product identifier is required");
 
-    const productData = await handleScanType(mode, productToFetch);
+    let scanResult;
+    try {
+      scanResult = await handleScanType(mode, productToFetch);
+    } catch (error) {
+      const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+      if (isOffline) {
+        return {
+          availableLocations: [] as GetLocationsQuery["locations"]["data"],
+          categories: [] as GetCategoriesQuery["categories"]["data"],
+          product: null,
+          type,
+          productId: productToFetch,
+          dataSources: {
+            locations: { source: "missing-offline" as const, timestamp: null },
+            categories: { source: "missing-offline" as const, timestamp: null },
+            product: { source: "missing-offline" as const, timestamp: null },
+          },
+          status: "missing-offline" as const,
+        };
+      }
+      throw error;
+    }
+
+    const productData = scanResult.data;
+
+    await saveIngredientSnapshot(productData, {
+      barcode: barcode ?? undefined,
+    });
+
+    const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+
+    let availableLocations: GetLocationsQuery["locations"]["data"] = [];
+    let locationsSource: "network" | "cache" | "missing-offline" = "network";
+    let locationsTimestamp: number | null = null;
+
+    try {
+      const { data, source, timestamp } =
+        await graphqlRequestWithOffline<GetLocationsQuery>(
+          GetLocationsDocument
+        );
+      availableLocations = data.locations.data || [];
+      locationsSource = source;
+      locationsTimestamp = timestamp;
+    } catch (error) {
+      if (!isOffline) {
+        throw error;
+      }
+      const fallback = (productData.quantities || [])
+        .map((qty) => qty.location)
+        .filter(
+          (loc): loc is NonNullable<typeof loc> => loc != null
+        )
+        .map((loc) => ({
+          __typename: loc.__typename ?? "Location",
+          id: loc.id,
+          name: loc.name,
+          locationType: loc.locationType ?? null,
+        }));
+      availableLocations = fallback as unknown as GetLocationsQuery["locations"]["data"];
+      locationsSource = "missing-offline";
+      locationsTimestamp = null;
+    }
+
+    let categories = [] as GetCategoriesQuery["categories"]["data"];
+    let categoriesSource: "network" | "cache" | "missing-offline" = "network";
+    let categoriesTimestamp: number | null = null;
+
+    try {
+      const { data, source, timestamp } =
+        await graphqlRequestWithOffline<GetCategoriesQuery>(
+          GetCategoriesDocument
+        );
+      categories = data.categories.data || [];
+      categoriesSource = source;
+      categoriesTimestamp = timestamp;
+    } catch (error) {
+      if (!isOffline) {
+        throw error;
+      }
+      categories = [];
+      categoriesSource = "missing-offline";
+      categoriesTimestamp = null;
+    }
 
     if (scanMode === "search-mode" && productData.product_already_in_database) {
       redirect({
@@ -118,6 +195,21 @@ export const Route = createFileRoute("/_protected/handle-item")({
       product: productData,
       type,
       productId: productToFetch,
+      dataSources: {
+        locations: {
+          source: locationsSource,
+          timestamp: locationsTimestamp,
+        },
+        categories: {
+          source: categoriesSource,
+          timestamp: categoriesTimestamp,
+        },
+        product: {
+          source: scanResult.source,
+          timestamp: scanResult.timestamp,
+        },
+      },
+      status: "ok" as const,
     };
   },
   component: HandleItem,

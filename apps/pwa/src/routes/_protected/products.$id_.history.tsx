@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import ProductHistoryPage from "../../pages/ProductHistory";
-import { graphqlRequest } from "../../lib/graph-client";
+import { graphqlRequestWithOffline } from "../../lib/offline-graphql";
 import { GetProductDocument, type GetProductQuery } from "@workspace/graphql";
 
 import z from "zod";
@@ -20,9 +20,13 @@ export const Route = createFileRoute("/_protected/products/$id_/history")({
     const { id } = params;
     const { filter, selectedMonth } = deps;
 
-    const productData = await graphqlRequest<GetProductQuery>(GetProductDocument, {
-      id,
-    });
+    const { data: productData, source, timestamp } =
+      await graphqlRequestWithOffline<GetProductQuery>(
+        GetProductDocument,
+        {
+          id,
+        }
+      );
 
     if (!productData.ingredient) {
       throw new Error("Product not found");
@@ -103,6 +107,8 @@ export const Route = createFileRoute("/_protected/products/$id_/history")({
       },
       currentFilter: filter,
       currentSelectedMonth: selectedMonth,
+      source,
+      cacheTimestamp: timestamp,
     };
   },
   component: ProductHistoryPage,

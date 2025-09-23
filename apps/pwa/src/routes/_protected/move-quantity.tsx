@@ -1,10 +1,11 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { graphqlRequest } from "../../lib/graph-client";
+import { graphqlRequestWithOffline } from "../../lib/offline-graphql";
 import {
   GetLocationsDocument,
   type GetLocationsQuery,
 } from "@workspace/graphql";
 import handleScanType from "../../lib/handleScanType";
+import { saveIngredientSnapshot } from "../../lib/ingredient-cache";
 import { useHandleItemStore } from "../../stores/handleitem-store";
 import MoveQuantity from "../../pages/handleItem/movequantity/MoveQuantity";
 
@@ -30,10 +31,61 @@ export const Route = createFileRoute("/_protected/move-quantity")({
     }
   },
   loader: async ({ deps: { internalId } }) => {
-    const locationQuery = await graphqlRequest<GetLocationsQuery>(GetLocationsDocument);
-    const availableLocations = locationQuery.locations.data || [];
+    let scanResult;
+    try {
+      scanResult = await handleScanType("internalId", internalId);
+    } catch (error) {
+      const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+      if (isOffline) {
+        return {
+          product: null,
+          availableLocations: [] as GetLocationsQuery["locations"]["data"],
+          dataSources: {
+            product: { source: "missing-offline" as const, timestamp: null },
+            locations: { source: "missing-offline" as const, timestamp: null },
+          },
+          status: "missing-offline" as const,
+        };
+      }
+      throw error;
+    }
 
-    const productData = await handleScanType("internalId", internalId);
+    const productData = scanResult.data;
+
+    await saveIngredientSnapshot(productData);
+
+    const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+
+    let availableLocations: GetLocationsQuery["locations"]["data"] = [];
+    let locationsSource: "network" | "cache" | "missing-offline" = "network";
+    let locationsTimestamp: number | null = null;
+
+    try {
+      const { data, source, timestamp } =
+        await graphqlRequestWithOffline<GetLocationsQuery>(
+          GetLocationsDocument
+        );
+      availableLocations = data.locations.data || [];
+      locationsSource = source;
+      locationsTimestamp = timestamp;
+    } catch (error) {
+      if (!isOffline) {
+        throw error;
+      }
+      availableLocations = ((productData.quantities || [])
+        .map((qty) => qty.location)
+        .filter(
+          (loc): loc is NonNullable<typeof loc> => loc != null
+        )
+        .map((loc) => ({
+          __typename: loc.__typename ?? "Location",
+          id: loc.id,
+          name: loc.name,
+          locationType: loc.locationType ?? null,
+        })) as unknown) as GetLocationsQuery["locations"]["data"];
+      locationsSource = "missing-offline";
+      locationsTimestamp = null;
+    }
 
     // Vérifier si le produit a des quantités disponibles pour le déplacement
     const getTotalQuantity = (product: {
@@ -67,7 +119,21 @@ export const Route = createFileRoute("/_protected/move-quantity")({
       .getState()
       .setPageTitle(`Move quantity for ${productData.product_name}`);
 
-    return { product: productData, availableLocations };
+    return {
+      product: productData,
+      availableLocations,
+      dataSources: {
+        product: {
+          source: scanResult.source,
+          timestamp: scanResult.timestamp,
+        },
+        locations: {
+          source: locationsSource,
+          timestamp: locationsTimestamp,
+        },
+      },
+      status: "ok" as const,
+    };
   },
   component: MoveQuantity,
 });
