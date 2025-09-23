@@ -1,25 +1,22 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@workspace/ui/components/button";
 import { Loader2Icon, LogOut } from "lucide-react";
-import { httpClient } from "@/lib/httpClient";
+import { useApolloClient } from "@apollo/client";
+import { useRouter } from "next/navigation";
+import { performCompleteLogout } from "@/lib/logout-utils";
 
 export function LogoutSection() {
+  const apolloClient = useApolloClient();
   const router = useRouter();
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [isPending] = useTransition();
 
   const handleLogout = async () => {
     setLogoutLoading(true);
-
-    try {
-      await httpClient.post("/api/logout");
-      router.push("/login");
-    } catch {
-      setLogoutLoading(false);
-    }
+    await performCompleteLogout(apolloClient);
+    router.push("/login");
   };
 
   return (

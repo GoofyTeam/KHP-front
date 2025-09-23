@@ -35,7 +35,8 @@ import {
   SheetTrigger,
 } from "@workspace/ui/components/sheet";
 import { Button } from "@workspace/ui/components/button";
-import { httpClient } from "@/lib/httpClient";
+import { useApolloClient } from "@apollo/client";
+import { performCompleteLogout } from "@/lib/logout-utils";
 
 const settingsNavItems = [
   {
@@ -170,18 +171,14 @@ export function SettingsMenuButton() {
 }
 export function SettingsSidebar() {
   const isMobile = !useBreakpoint("md");
+  const apolloClient = useApolloClient();
   const router = useRouter();
   const [logoutLoading, setLogoutLoading] = useState(false);
 
   const handleLogout = async () => {
     setLogoutLoading(true);
-
-    try {
-      await httpClient.post("/api/logout");
-      router.push("/login");
-    } catch {
-      setLogoutLoading(false);
-    }
+    await performCompleteLogout(apolloClient);
+    router.push("/login");
   };
 
   if (isMobile) {
