@@ -62,7 +62,9 @@ const urlKeyOptions = [
   { value: "add_to_stock", label: "Add to Stock" },
   { value: "menu_card", label: "Menu Card" },
   { value: "stock", label: "Stock" },
-  { value: "take_order", label: "Take Order" },
+  { value: "waiters_page", label: "Waiters Page" },
+  { value: "chefs_page", label: "Chefs Page" },
+  { value: "order", label: "Orders Page" },
 ];
 
 const colorOptions = [
