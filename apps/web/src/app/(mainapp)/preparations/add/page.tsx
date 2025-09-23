@@ -28,10 +28,7 @@ import {
 import { LoadMoreSelect } from "@workspace/ui/components/load-more-select";
 
 import { NetworkStatus, useQuery } from "@apollo/client";
-import {
-  GetCategoriesDocument,
-  GetCategoriesQuery,
-} from "@workspace/graphql";
+import { GetCategoriesDocument, GetCategoriesQuery } from "@workspace/graphql";
 import { getAllMeasurementUnitsOnlyValues } from "@workspace/ui/lib/measurement-units";
 import { Label } from "@workspace/ui/components/label";
 import { createPreparationAction } from "@/app/(mainapp)/preparations/add/action";
@@ -57,10 +54,10 @@ const createMenuSchema = z
   .object({
     name: z.string().min(2, "Name must be at least 2 characters long"),
     image: z
-      .instanceof(File, {
-        message: "Menu image is required",
-      })
+      .instanceof(File)
+      .optional()
       .refine((file) => {
+        if (!file) return true;
         return ACCEPTED_IMAGE_TYPES.includes(
           file.type as (typeof ACCEPTED_IMAGE_TYPES)[number]
         );

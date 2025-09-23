@@ -69,15 +69,14 @@ const menuItemsSchema = z.object({
 const createMenuSchema = z
   .object({
     name: z.string().min(2, "Name must be at least 2 characters long"),
-    image: z
-      .instanceof(File, {
-        message: "Menu image is required",
-      })
-      .refine((file) => {
+    image: z.union([
+      z.instanceof(File).refine((file) => {
         return ACCEPTED_IMAGE_TYPES.includes(
           file.type as (typeof ACCEPTED_IMAGE_TYPES)[number]
         );
       }, "Image must be an accepted format"),
+      z.undefined(),
+    ]),
     description: z.string().optional(),
     price: z.number().min(1, "Price must be a positive number"),
     is_a_la_carte: z.boolean(),
