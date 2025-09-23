@@ -38,12 +38,12 @@ export function MoveQuantityForm({
   const [apiError, setApiError] = useState<string | null>(null);
 
   const availableSourceQuantities = ingredient.quantities.filter(
-    (q) => q.quantity > 0
+    (q) => q.quantity > 0,
   );
 
   const selectedSourceLocation = formData.sourceLocationIndex
     ? availableSourceQuantities.find(
-        (q) => q.location.id === formData.sourceLocationIndex
+        (q) => q.location.id === formData.sourceLocationIndex,
       )
     : null;
 
@@ -55,12 +55,12 @@ export function MoveQuantityForm({
       : parseFloat(formData.quantityOTP) || 0;
 
   const existingDestinations = ingredient.quantities.filter(
-    (q) => q.location.id !== selectedSourceLocation?.location.id
+    (q) => q.location.id !== selectedSourceLocation?.location.id,
   );
 
   const newDestinations = allLocations
     .filter(
-      (loc) => !ingredient.quantities.some((q) => q.location.id === loc.id)
+      (loc) => !ingredient.quantities.some((q) => q.location.id === loc.id),
     )
     .map((location) => ({
       quantity: 0,
@@ -102,7 +102,7 @@ export function MoveQuantityForm({
     try {
       const selectedDestination = formData.destinationLocationIndex
         ? destinationQuantities.find(
-            (q) => q.location.id === formData.destinationLocationIndex
+            (q) => q.location.id === formData.destinationLocationIndex,
           )
         : null;
 
@@ -224,7 +224,7 @@ export function MoveQuantityForm({
               {selectedSourceLocation
                 ? Math.max(
                     0,
-                    selectedSourceLocation.quantity - moveQuantity
+                    selectedSourceLocation.quantity - moveQuantity,
                   ).toFixed(3)
                 : (0 - moveQuantity).toFixed(3)}{" "}
               {ingredient.unit}
@@ -238,7 +238,7 @@ export function MoveQuantityForm({
               <span className="font-bold text-khp-success">
                 {(() => {
                   const selectedDestination = destinationQuantities.find(
-                    (q) => q.location.id === formData.destinationLocationIndex
+                    (q) => q.location.id === formData.destinationLocationIndex,
                   );
                   const currentDestinationQuantity =
                     selectedDestination?.quantity || 0;

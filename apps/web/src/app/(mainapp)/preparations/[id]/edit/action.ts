@@ -6,7 +6,7 @@ import { executeHttpAction, type ActionResult } from "@/lib/actionUtils";
 
 export async function updatePreparationAction(
   id: string,
-  data: UpdatePreparationFormValues
+  data: UpdatePreparationFormValues,
 ): Promise<ActionResult> {
   return executeHttpAction(async () => {
     const formData = new FormData();
@@ -36,7 +36,10 @@ export async function updatePreparationAction(
       data.entities.forEach((entity, index) => {
         formData.append(`entities[${index}][id]`, entity.id);
         formData.append(`entities[${index}][type]`, entity.type);
-        formData.append(`entities[${index}][quantity]`, String(entity.quantity));
+        formData.append(
+          `entities[${index}][quantity]`,
+          String(entity.quantity),
+        );
         formData.append(`entities[${index}][unit]`, entity.unit);
         formData.append(`entities[${index}][location_id]`, entity.location_id);
       });

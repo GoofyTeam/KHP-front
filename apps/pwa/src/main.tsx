@@ -32,6 +32,6 @@ if (!rootElement.innerHTML) {
           <MobileInstallBanner />
         </Guard>
       </HelmetProvider>
-    </StrictMode>
+    </StrictMode>,
   );
 }

@@ -9,7 +9,7 @@ export async function updateUserInfoAction(input: {
 }): Promise<ActionResult> {
   return executeHttpAction(
     () => httpClient.put<unknown>("/api/user/update/info", input),
-    "Validation error: "
+    "Validation error: ",
   );
 }
 
@@ -20,6 +20,6 @@ export async function updatePasswordAction(input: {
 }): Promise<ActionResult> {
   return executeHttpAction(
     () => httpClient.put("/api/user/update/password", input),
-    "Password validation error: "
+    "Password validation error: ",
   );
 }

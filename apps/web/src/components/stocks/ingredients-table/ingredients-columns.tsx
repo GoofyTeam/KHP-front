@@ -16,7 +16,7 @@ import type { GetIngredientsQuery } from "@/graphql/generated/graphql";
 type IngredientRow = GetIngredientsQuery["ingredients"]["data"][number];
 
 export function useIngredientsColumns(
-  isRegisterLostMode: boolean
+  isRegisterLostMode: boolean,
 ): ColumnDef<IngredientRow>[] {
   return useMemo(
     () => [
@@ -82,7 +82,7 @@ export function useIngredientsColumns(
           const ingredient = row.original;
           const total = ingredient.quantities.reduce(
             (sum, q) => sum + q.quantity,
-            0
+            0,
           );
           return (
             <div className="font-medium text-left">{total.toFixed(1)}</div>
@@ -91,11 +91,11 @@ export function useIngredientsColumns(
         sortingFn: (rowA, rowB) => {
           const totalA = rowA.original.quantities.reduce(
             (sum, q) => sum + q.quantity,
-            0
+            0,
           );
           const totalB = rowB.original.quantities.reduce(
             (sum, q) => sum + q.quantity,
-            0
+            0,
           );
           return totalA - totalB;
         },
@@ -177,6 +177,6 @@ export function useIngredientsColumns(
         },
       },
     ],
-    [isRegisterLostMode]
+    [isRegisterLostMode],
   );
 }

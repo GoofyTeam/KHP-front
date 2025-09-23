@@ -4,7 +4,7 @@ import { handleAddQuantitySchema } from "./handleAddQuantitySchema";
 import { router } from "../../../main";
 
 export const addQuantitySubmit = async (
-  values: z.infer<typeof handleAddQuantitySchema>
+  values: z.infer<typeof handleAddQuantitySchema>,
 ) => {
   try {
     await api.post(`/api/ingredients/${values.product_id}/add-quantity`, {
@@ -28,7 +28,7 @@ export const addQuantitySubmit = async (
       error.message.includes("CSRF token expired")
     ) {
       console.log(
-        "CSRF error detected, but operation might have succeeded. Attempting navigation..."
+        "CSRF error detected, but operation might have succeeded. Attempting navigation...",
       );
 
       // Wait a bit and then navigate anyway

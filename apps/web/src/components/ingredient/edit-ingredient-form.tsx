@@ -58,10 +58,10 @@ const editIngredientSchema = z.object({
       (file) => {
         if (!file) return true;
         return ACCEPTED_IMAGE_TYPES.includes(
-          file.type as (typeof ACCEPTED_IMAGE_TYPES)[number]
+          file.type as (typeof ACCEPTED_IMAGE_TYPES)[number],
         );
       },
-      { message: "Image must be an accepted format" }
+      { message: "Image must be an accepted format" },
     ),
   unit: z.string().nonempty("Unit is required"),
   base_quantity: z
@@ -127,7 +127,7 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
     (category) => ({
       value: category.id,
       label: category.name,
-    })
+    }),
   );
 
   const unitsOptions = (unitsData?.measurementUnits ?? []).map((unit) => ({
@@ -176,7 +176,7 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
       };
       reader.readAsDataURL(file);
     },
-    [ingredient?.image_url]
+    [ingredient?.image_url],
   );
 
   const handleRemoveImage = useCallback(() => {

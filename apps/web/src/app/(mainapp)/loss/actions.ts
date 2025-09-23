@@ -5,7 +5,7 @@ import type { RequestData } from "@/lib/httpClient";
 import { type ActionResult, executeHttpAction } from "@/lib/actionUtils";
 
 function buildQueryString(
-  params: Record<string, string | number | undefined>
+  params: Record<string, string | number | undefined>,
 ): string {
   const searchParams = new URLSearchParams();
 
@@ -58,16 +58,16 @@ export interface PaginatedLosses {
 }
 
 export async function createLossAction(
-  input: CreateLossInput
+  input: CreateLossInput,
 ): Promise<ActionResult> {
   return executeHttpAction(
     () => httpClient.post<unknown, CreateLossInput>("/api/losses", input),
-    "Loss creation error: "
+    "Loss creation error: ",
   );
 }
 
 export async function getLossesAction(
-  input: GetLossesInput = {}
+  input: GetLossesInput = {},
 ): Promise<ActionResult<PaginatedLosses>> {
   return executeHttpAction(() => {
     const queryString = buildQueryString({
@@ -86,27 +86,27 @@ export async function getLossesAction(
 export async function getLossAction(id: number): Promise<ActionResult<Loss>> {
   return executeHttpAction(
     () => httpClient.get<Loss>(`/api/losses/${id}`),
-    "Failed to fetch loss: "
+    "Failed to fetch loss: ",
   );
 }
 
 export async function deleteLossAction(id: number): Promise<ActionResult> {
   return executeHttpAction(
     () => httpClient.delete(`/api/losses/${id}`),
-    "Failed to delete loss: "
+    "Failed to delete loss: ",
   );
 }
 
 export async function updateLossAction(
   id: number,
-  input: Partial<CreateLossInput>
+  input: Partial<CreateLossInput>,
 ): Promise<ActionResult> {
   return executeHttpAction(
     () =>
       httpClient.put<unknown, Partial<CreateLossInput>>(
         `/api/losses/${id}`,
-        input
+        input,
       ),
-    "Failed to update loss: "
+    "Failed to update loss: ",
   );
 }

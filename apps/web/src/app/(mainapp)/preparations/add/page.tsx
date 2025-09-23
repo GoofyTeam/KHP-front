@@ -62,7 +62,7 @@ const createMenuSchema = z
       })
       .refine((file) => {
         return ACCEPTED_IMAGE_TYPES.includes(
-          file.type as (typeof ACCEPTED_IMAGE_TYPES)[number]
+          file.type as (typeof ACCEPTED_IMAGE_TYPES)[number],
         );
       }, "Image must be an accepted format"),
     unit: z.string().nonempty("Unit is required"),
@@ -178,7 +178,7 @@ function buildSubmissionErrorMessage(result: CreatePreparationActionResult) {
   }
   if (tips.length === 0) {
     tips.push(
-      "Check required fields, image format/size, and your network connection."
+      "Check required fields, image format/size, and your network connection.",
     );
   }
 
@@ -274,10 +274,10 @@ export default function CreatePreparationPage() {
   });
 
   const handleValidationErrors: SubmitErrorHandler<CreateMenuFormValues> = (
-    errors
+    errors,
   ) => {
     const hasDetailErrors = PREPARATION_DETAILS_FIELDS.some((field) =>
-      Boolean(errors[field])
+      Boolean(errors[field]),
     );
 
     if (hasDetailErrors) {
@@ -309,7 +309,7 @@ export default function CreatePreparationPage() {
       };
       reader.readAsDataURL(file);
     },
-    [setFilePreview]
+    [setFilePreview],
   );
 
   async function onPreparationCreateSubmit(values: CreateMenuFormValues) {
@@ -342,7 +342,7 @@ export default function CreatePreparationPage() {
     console.error(
       "Failed to create preparation:",
       result.error,
-      result.details
+      result.details,
     );
 
     form.setError("root", {
@@ -361,7 +361,7 @@ export default function CreatePreparationPage() {
         <form
           onSubmit={form.handleSubmit(
             onPreparationCreateSubmit,
-            handleValidationErrors
+            handleValidationErrors,
           )}
           className="w-full max-w-6xl mx-auto"
         >

@@ -4,11 +4,11 @@ import { type ActionResult, executeHttpAction } from "@/lib/actionUtils";
 import { httpClient } from "@/lib/httpClient";
 
 export type CreateOrderForTableAction = (
-  tableId: string
+  tableId: string,
 ) => Promise<ActionResult<{ orderId: string }>>;
 
 export async function createOrderForTableAction(
-  tableId: string
+  tableId: string,
 ): Promise<ActionResult<{ orderId: string }>> {
   return executeHttpAction(async () => {
     const response = await httpClient.post<{

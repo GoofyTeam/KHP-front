@@ -25,7 +25,7 @@ describe("PWABadge", () => {
     render(<PWABadge />);
     expect(screen.getByRole("alert")).toBeInTheDocument();
     expect(
-      screen.getByText(/New content available|App ready to work offline/)
+      screen.getByText(/New content available|App ready to work offline/),
     ).toBeInTheDocument();
   });
 

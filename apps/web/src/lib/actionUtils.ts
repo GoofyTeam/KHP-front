@@ -7,7 +7,7 @@ export type ActionResult<T = unknown> =
  */
 export function handleActionError<T = unknown>(
   error: unknown,
-  prefix = ""
+  prefix = "",
 ): ActionResult<T> {
   if (error instanceof Error) {
     // Parse HTTP status codes from error messages (format: "STATUS: message")
@@ -94,7 +94,7 @@ export function handleActionError<T = unknown>(
  */
 export async function executeHttpAction<T>(
   httpCall: () => Promise<T>,
-  errorPrefix = ""
+  errorPrefix = "",
 ): Promise<ActionResult<T>> {
   try {
     const result = await httpCall();

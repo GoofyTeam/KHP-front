@@ -68,7 +68,7 @@ export const Route = createFileRoute("/_protected/products/$id_/history")({
             const currentMonthStart = new Date(
               today.getFullYear(),
               today.getMonth(),
-              1
+              1,
             );
             return movementDate >= currentMonthStart && movementDate <= now;
           }
@@ -82,7 +82,7 @@ export const Route = createFileRoute("/_protected/products/$id_/history")({
     const sortedMovements = filteredMovements.sort(
       (a, b) =>
         new Date(b.created_at || "").getTime() -
-        new Date(a.created_at || "").getTime()
+        new Date(a.created_at || "").getTime(),
     );
 
     console.log("📊 Filtered stockMovements:", {

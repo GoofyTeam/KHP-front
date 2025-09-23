@@ -5,7 +5,7 @@ import { handleUpdateProductSchema } from "./handleUpdateProductSchema";
 
 export const updateProductSubmit = async (
   values: z.infer<typeof handleUpdateProductSchema>,
-  internalId: string | null | undefined
+  internalId: string | null | undefined,
 ) => {
   if (!internalId) {
     throw new Error("Internal ID is required to update product");

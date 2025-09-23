@@ -148,7 +148,7 @@ export const getAllMeasurementUnitsOnlyValues = (): {
 };
 
 export const getMeasurementUnitsByCategory = (
-  category: MeasurementCategory
+  category: MeasurementCategory,
 ): MeasurementUnitInfo[] => {
   return getAllMeasurementUnits().filter((unit) => unit.category === category);
 };
@@ -200,7 +200,7 @@ const VOLUME_TO_L: Record<MeasurementUnitType, number> = {
 export function convertMeasurement(
   value: number,
   from: MeasurementUnitType,
-  to: MeasurementUnitType
+  to: MeasurementUnitType,
 ): number | null {
   if (from === to) return value;
 
@@ -234,4 +234,3 @@ export function convertMeasurement(
 
   return null;
 }
-

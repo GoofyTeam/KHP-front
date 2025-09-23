@@ -12,7 +12,7 @@ type Options = {
 
 export async function compressImageFile(
   file: File,
-  opts: Options = {}
+  opts: Options = {},
 ): Promise<File> {
   const {
     maxSizeBytes = TWO_MB,
@@ -53,7 +53,7 @@ export async function compressImageFile(
 
   const toBlob = (q: number) =>
     new Promise<Blob>((resolve) =>
-      canvas.toBlob((b) => resolve(b ?? new Blob()), mimeType, q)
+      canvas.toBlob((b) => resolve(b ?? new Blob()), mimeType, q),
     );
 
   let q = initialQuality;
@@ -77,7 +77,7 @@ export async function compressImageFile(
 
   const name = file.name.replace(
     /\.(heic|heif)$/i,
-    mimeType === "image/webp" ? ".webp" : ".jpg"
+    mimeType === "image/webp" ? ".webp" : ".jpg",
   );
   return new File([blob], name, { type: mimeType });
 }

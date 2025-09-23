@@ -173,8 +173,8 @@ function TakinOrders({
       new Set(
         (menusData ?? [])
           .map((m) => m.menu_type?.name)
-          .filter((v): v is string => !!v)
-      )
+          .filter((v): v is string => !!v),
+      ),
     ).sort();
   }, [menusData]);
 
@@ -212,7 +212,7 @@ function TakinOrders({
         return next;
       });
     },
-    []
+    [],
   );
 
   const updateDraftQuantity = useCallback(
@@ -223,16 +223,16 @@ function TakinOrders({
         }
 
         return prev.map((item) =>
-          item.menuId === menuId ? { ...item, quantity } : item
+          item.menuId === menuId ? { ...item, quantity } : item,
         );
       });
     },
-    []
+    [],
   );
 
   const updateDraftNote = useCallback((menuId: string, note: string) => {
     setDraftStepMenus((prev) =>
-      prev.map((item) => (item.menuId === menuId ? { ...item, note } : item))
+      prev.map((item) => (item.menuId === menuId ? { ...item, note } : item)),
     );
   }, []);
 
@@ -332,7 +332,7 @@ function TakinOrders({
         setPendingMenuAction(null);
       });
     },
-    [markStepMenuServed, onRefresh, router, startTransition]
+    [markStepMenuServed, onRefresh, router, startTransition],
   );
 
   const handleCancelStepMenu = useCallback(
@@ -355,7 +355,7 @@ function TakinOrders({
         setPendingMenuAction(null);
       });
     },
-    [cancelStepMenu, onRefresh, router, startTransition]
+    [cancelStepMenu, onRefresh, router, startTransition],
   );
 
   console.log({ draftStepMenus });

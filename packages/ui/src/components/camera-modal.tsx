@@ -79,7 +79,7 @@ export function CameraModal({
               onClick={async () => {
                 try {
                   const file = await takePhoto(
-                    defaultFilename || `ingredient-${Date.now()}.jpg`
+                    defaultFilename || `ingredient-${Date.now()}.jpg`,
                   );
                   onCapture(file);
                   onClose();

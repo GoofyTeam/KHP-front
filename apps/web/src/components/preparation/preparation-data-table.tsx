@@ -58,12 +58,12 @@ export function PreparationDataTable<TValue>({
       variables: { page: 1, search: search || undefined },
       fetchPolicy: "cache-and-network",
       notifyOnNetworkStatusChange: true,
-    }
+    },
   );
 
   const preparations: Preparation[] = useMemo(
     () => data?.preparations?.data ?? [],
-    [data?.preparations?.data]
+    [data?.preparations?.data],
   );
 
   const pageInfo = data?.preparations?.paginatorInfo;
@@ -102,7 +102,7 @@ export function PreparationDataTable<TValue>({
           });
         }
       },
-      { rootMargin: "200px" }
+      { rootMargin: "200px" },
     );
 
     observer.observe(el);
@@ -175,7 +175,7 @@ export function PreparationDataTable<TValue>({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );
@@ -207,7 +207,7 @@ export function PreparationDataTable<TValue>({
                       <TableCell key={cell.id} className="px-2 text-left">
                         {flexRender(
                           cell.column.columnDef.cell,
-                          cell.getContext()
+                          cell.getContext(),
                         )}
                       </TableCell>
                     ))}

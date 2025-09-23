@@ -17,7 +17,7 @@ describe("Guard", () => {
 
   function setQueries(values: Record<string, boolean>) {
     (useMediaQuery as unknown as jest.Mock).mockImplementation(
-      (q: string) => values[q] ?? false
+      (q: string) => values[q] ?? false,
     );
   }
 
@@ -33,7 +33,7 @@ describe("Guard", () => {
 
     render(<Guard isProd={true}>content</Guard>);
     expect(
-      screen.getByText(/optimized for mobile and tablet devices/i)
+      screen.getByText(/optimized for mobile and tablet devices/i),
     ).toBeInTheDocument();
   });
 
@@ -63,7 +63,7 @@ describe("Guard", () => {
 
     render(<Guard isProd={true}>content</Guard>);
     expect(
-      screen.getByText(/rotate your device to portrait/i)
+      screen.getByText(/rotate your device to portrait/i),
     ).toBeInTheDocument();
   });
 });

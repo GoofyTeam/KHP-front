@@ -9,10 +9,10 @@ export function Guard({
   children: ReactNode;
 }) {
   const hoverNoneAndPointerCoarse = useMediaQuery(
-    "(hover: none) and (pointer: coarse)"
+    "(hover: none) and (pointer: coarse)",
   );
   const anyHoverNoneAndAnyPointerCoarse = useMediaQuery(
-    "(any-hover: none) and (any-pointer: coarse)"
+    "(any-hover: none) and (any-pointer: coarse)",
   );
 
   const isTouch =
@@ -26,7 +26,7 @@ export function Guard({
 
   const displayMode = useMediaQuery("(display-mode: standalone)");
   const screenDisplayMode = useMediaQuery(
-    "screen and (display-mode: standalone)"
+    "screen and (display-mode: standalone)",
   );
 
   const isStandalone = displayMode || screenDisplayMode;
@@ -51,7 +51,7 @@ export function Guard({
             height={180}
             alt="QR to open the app on mobile or tablet"
             src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
-              currentUrl
+              currentUrl,
             )}`}
           />
         ) : null}

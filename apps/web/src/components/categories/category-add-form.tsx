@@ -41,7 +41,7 @@ export function CategoryAddForm({ onCategoryAdded }: CategoryAddFormProps) {
     {
       fetchPolicy: "cache-and-network",
       errorPolicy: "all",
-    }
+    },
   );
 
   const locationTypes = locationTypesData?.locationTypes?.data || [];
@@ -88,7 +88,7 @@ export function CategoryAddForm({ onCategoryAdded }: CategoryAddFormProps) {
   const getAvailableLocationTypes = (currentIndex: number) => {
     const selectedIds = fields
       .map((field, index) =>
-        index !== currentIndex ? field.location_type_id : null
+        index !== currentIndex ? field.location_type_id : null,
       )
       .filter((id): id is string => id !== null && id !== "");
 
@@ -96,7 +96,7 @@ export function CategoryAddForm({ onCategoryAdded }: CategoryAddFormProps) {
       (locationType) =>
         !selectedIds.includes(locationType.id) &&
         locationType.id !== "1" &&
-        locationType.id !== "2"
+        locationType.id !== "2",
     );
   };
 
@@ -106,7 +106,7 @@ export function CategoryAddForm({ onCategoryAdded }: CategoryAddFormProps) {
       .filter((id): id is string => id !== null && id !== "");
 
     const availableLocationTypes = locationTypes.filter(
-      (locationType) => locationType.id !== "1" && locationType.id !== "2"
+      (locationType) => locationType.id !== "1" && locationType.id !== "2",
     );
 
     return availableLocationTypes.length > selectedIds.length;
@@ -315,7 +315,7 @@ export function CategoryAddForm({ onCategoryAdded }: CategoryAddFormProps) {
                                             </span>
                                           </div>
                                         </SelectItem>
-                                      )
+                                      ),
                                     )}
                                   </SelectContent>
                                 </Select>

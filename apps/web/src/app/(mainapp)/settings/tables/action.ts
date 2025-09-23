@@ -21,12 +21,12 @@ export interface RoomCreateResponse {
 }
 
 export async function createRoomAction(
-  input: RoomCreateInput
+  input: RoomCreateInput,
 ): Promise<ActionResult<RoomCreateResponse>> {
   return executeHttpAction(
     () =>
       httpClient.post<RoomCreateResponse, RoomCreateInput>("/api/rooms", input),
-    "Failure to create room: "
+    "Failure to create room: ",
   );
 }
 
@@ -50,15 +50,15 @@ export interface TableCreateResponse {
 
 export async function createTableAction(
   roomId: number,
-  input: TableCreateInput
+  input: TableCreateInput,
 ): Promise<ActionResult<TableCreateResponse>> {
   return executeHttpAction(
     () =>
       httpClient.post<TableCreateResponse, TableCreateInput>(
         `/api/rooms/${roomId}/tables`,
-        input
+        input,
       ),
-    "Failure to create table(s): "
+    "Failure to create table(s): ",
   );
 }
 
@@ -73,11 +73,11 @@ export interface RoomDeleteResponse {
 }
 
 export async function deleteRoomAction(
-  input: RoomDeleteInput
+  input: RoomDeleteInput,
 ): Promise<ActionResult<RoomDeleteResponse>> {
   return executeHttpAction(
     () => httpClient.delete<RoomDeleteResponse>(`/api/rooms/${input.roomId}`),
-    "Failure to delete room: "
+    "Failure to delete room: ",
   );
 }
 
@@ -93,13 +93,13 @@ export interface TableDeleteResponse {
 }
 
 export async function deleteTableAction(
-  input: TableDeleteInput
+  input: TableDeleteInput,
 ): Promise<ActionResult<TableDeleteResponse>> {
   return executeHttpAction(
     () =>
       httpClient.delete<TableDeleteResponse>(
-        `/api/rooms/${input.roomId}/tables/${input.tableId}`
+        `/api/rooms/${input.roomId}/tables/${input.tableId}`,
       ),
-    "Failure to delete table: "
+    "Failure to delete table: ",
   );
 }

@@ -32,11 +32,11 @@ export const LocationTypesList = forwardRef<
 >(
   (
     { onEdit, onAdd, selectedLocationType, onDelete, isDeleting = false },
-    ref
+    ref,
   ) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [allLocationTypes, setAllLocationTypes] = useState<LocationType[]>(
-      []
+      [],
     );
     const [isLoadingMore, setIsLoadingMore] = useState(false);
 
@@ -50,7 +50,7 @@ export const LocationTypesList = forwardRef<
         fetchPolicy: "cache-and-network",
         errorPolicy: "all",
         notifyOnNetworkStatusChange: true,
-      }
+      },
     );
 
     const paginatorInfo = data?.locationTypes?.paginatorInfo;
@@ -110,7 +110,7 @@ export const LocationTypesList = forwardRef<
           loadMore();
         }
       },
-      [loadMore]
+      [loadMore],
     );
 
     const handleRefetch = useCallback(async () => {
@@ -127,7 +127,7 @@ export const LocationTypesList = forwardRef<
       () => ({
         refresh: handleRefetch,
       }),
-      [handleRefetch]
+      [handleRefetch],
     );
 
     if (error) {
@@ -274,7 +274,7 @@ export const LocationTypesList = forwardRef<
         </div>
       </div>
     );
-  }
+  },
 );
 
 LocationTypesList.displayName = "LocationTypesList";

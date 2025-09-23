@@ -75,10 +75,12 @@ export function PreparationEntitiesField<TForm extends HasEntitiesForm>({
     "key"
   >;
   const typedFields = fields as unknown as EntitiesField[];
-  const appendEntity = append as unknown as (value: PreparationEntityForm) => void;
+  const appendEntity = append as unknown as (
+    value: PreparationEntityForm,
+  ) => void;
   const updateEntity = update as unknown as (
     index: number,
-    value: PreparationEntityForm
+    value: PreparationEntityForm,
   ) => void;
 
   const [query, setQuery] = React.useState("");
@@ -86,7 +88,7 @@ export function PreparationEntitiesField<TForm extends HasEntitiesForm>({
 
   const [runSearch, { data, loading }] = useLazyQuery<SearchIngredientsQuery>(
     SearchIngredientsDocument,
-    { fetchPolicy: "network-only" }
+    { fetchPolicy: "network-only" },
   );
 
   React.useEffect(() => {
@@ -108,7 +110,7 @@ export function PreparationEntitiesField<TForm extends HasEntitiesForm>({
         name: quantity.location.name,
         quantityInLocation: quantity.quantity,
       })),
-    })
+    }),
   );
 
   const uiItems: PickedItem[] = typedFields.map((field) => ({
@@ -124,7 +126,9 @@ export function PreparationEntitiesField<TForm extends HasEntitiesForm>({
   }));
 
   const onAdd = (item: PickedItem) => {
-    const existingIndex = typedFields.findIndex((field) => field.id === item.id);
+    const existingIndex = typedFields.findIndex(
+      (field) => field.id === item.id,
+    );
 
     if (existingIndex > -1) {
       updateEntity(existingIndex, {
@@ -155,8 +159,7 @@ export function PreparationEntitiesField<TForm extends HasEntitiesForm>({
 
   const onChangeQuantity = (id: string, quantity: number) => {
     const index = typedFields.findIndex((field) => field.id === id);
-    if (index > -1)
-      updateEntity(index, { ...typedFields[index], quantity });
+    if (index > -1) updateEntity(index, { ...typedFields[index], quantity });
   };
 
   const onChangeLocation = (id: string, locationId: string) => {
@@ -170,17 +173,16 @@ export function PreparationEntitiesField<TForm extends HasEntitiesForm>({
     if (index > -1) updateEntity(index, { ...typedFields[index], unit });
   };
 
-  const unitsSelections = React.useMemo(
-    getAllMeasurementUnitsOnlyValues,
-    []
-  );
+  const unitsSelections = React.useMemo(getAllMeasurementUnitsOnlyValues, []);
 
   return (
     <div className="flex flex-col w-full">
       {hasErrors && (
         <div className="w-full text-red-500 text-sm mt-1 text-center font-semibold">
           {(() => {
-            const errorObject = Array.isArray(hasErrors) ? undefined : hasErrors;
+            const errorObject = Array.isArray(hasErrors)
+              ? undefined
+              : hasErrors;
             const rootMessage =
               (typeof errorObject?.message === "string" &&
                 errorObject.message) ||

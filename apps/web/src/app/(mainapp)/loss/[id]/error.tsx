@@ -10,7 +10,7 @@ interface ErrorProps {
 
 export default function LossError({ error, reset }: ErrorProps) {
   const router = useRouter();
-  
+
   return (
     <ErrorPage
       error={error}

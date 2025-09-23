@@ -46,7 +46,7 @@ export function IngredientFields({ form }: IngredientFieldsProps) {
     GetMeasurementUnitsDocument,
     {
       fetchPolicy: "cache-and-network",
-    }
+    },
   );
 
   const { data: categoriesData, loading: categoriesLoading } = useQuery(
@@ -56,14 +56,14 @@ export function IngredientFields({ form }: IngredientFieldsProps) {
         first: 50,
       },
       fetchPolicy: "cache-and-network",
-    }
+    },
   );
 
   const { data: allergensData, loading: allergensLoading } = useQuery(
     GetAllergensDocument,
     {
       fetchPolicy: "cache-and-network",
-    }
+    },
   );
 
   const unitOptions = useMemo(() => {
@@ -218,7 +218,7 @@ export function IngredientFields({ form }: IngredientFieldsProps) {
                   className="h-14 text-lg font-medium border-2 border-khp-primary/30 rounded-xl focus:ring-2 focus:ring-khp-primary/20 focus:border-khp-primary"
                   onChange={(e) =>
                     field.onChange(
-                      e.target.value ? parseFloat(e.target.value) : undefined
+                      e.target.value ? parseFloat(e.target.value) : undefined,
                     )
                   }
                 />

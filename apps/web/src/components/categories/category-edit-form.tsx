@@ -49,7 +49,7 @@ export function CategoryEditForm({
     {
       fetchPolicy: "cache-and-network",
       errorPolicy: "all",
-    }
+    },
   );
 
   const locationTypes = locationTypesData?.locationTypes?.data || [];
@@ -94,7 +94,7 @@ export function CategoryEditForm({
   const getAvailableLocationTypes = (currentIndex: number) => {
     const selectedIds = fields
       .map((field, index) =>
-        index !== currentIndex ? field.location_type_id : null
+        index !== currentIndex ? field.location_type_id : null,
       )
       .filter((id): id is string => id !== null && id !== "");
 
@@ -102,7 +102,7 @@ export function CategoryEditForm({
       (locationType) =>
         !selectedIds.includes(locationType.id) &&
         locationType.id !== "1" && // Exclure congélateur
-        locationType.id !== "2" // Exclure réfrigérateur
+        locationType.id !== "2", // Exclure réfrigérateur
     );
   };
 
@@ -115,14 +115,14 @@ export function CategoryEditForm({
     const availableLocationTypes = locationTypes.filter(
       (locationType) =>
         locationType.id !== "1" && // Exclure congélateur
-        locationType.id !== "2" // Exclure réfrigérateur
+        locationType.id !== "2", // Exclure réfrigérateur
     );
 
     return availableLocationTypes.length > selectedIds.length;
   };
 
   const [initialLocationTypes, setInitialLocationTypes] = useState<string[]>(
-    []
+    [],
   );
 
   useEffect(() => {
@@ -130,12 +130,12 @@ export function CategoryEditForm({
     const fridgeShelf = shelfLives.find(
       (sl) =>
         sl.locationType?.name?.toLowerCase() === "réfrigérateur" ||
-        sl.locationType?.id === "2"
+        sl.locationType?.id === "2",
     );
     const freezerShelf = shelfLives.find(
       (sl) =>
         sl.locationType?.name?.toLowerCase() === "congélateur" ||
-        sl.locationType?.id === "1"
+        sl.locationType?.id === "1",
     );
 
     const locationTypes = shelfLives
@@ -143,7 +143,7 @@ export function CategoryEditForm({
         (sl) =>
           sl.locationType &&
           sl.locationType.id !== "1" &&
-          sl.locationType.id !== "2"
+          sl.locationType.id !== "2",
       )
       .map((sl) => ({
         location_type_id: sl.locationType!.id,
@@ -372,7 +372,7 @@ export function CategoryEditForm({
                                             </span>
                                           </div>
                                         </SelectItem>
-                                      )
+                                      ),
                                     )}
                                   </SelectContent>
                                 </Select>

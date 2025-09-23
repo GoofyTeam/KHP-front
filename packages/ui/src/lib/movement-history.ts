@@ -68,7 +68,7 @@ const getQuantityDelta = (movement: StockMovementLike) => {
 
 export const movementHistoryFromStockMovements = <T extends StockMovementLike>(
   movements: T[],
-  unit?: string
+  unit?: string,
 ): MovementHistoryEntry[] => {
   if (!movements || movements.length === 0) {
     return [];
@@ -91,10 +91,19 @@ export const movementHistoryFromStockMovements = <T extends StockMovementLike>(
     const type = (movement.type ?? "unknown").toLowerCase();
 
     if (MOVEMENT_TYPE_SET.has(type)) {
-      const keyBase = movement.created_at ? String(movement.created_at) : `index-${index}`;
+      const keyBase = movement.created_at
+        ? String(movement.created_at)
+        : `index-${index}`;
       const key = `${keyBase}-${quantity.toFixed(6)}`;
-      const bucket = movementBuckets.get(key) ?? { items: [], firstIndex: index };
-      bucket.items.push({ movement, quantity, delta: getQuantityDelta(movement) });
+      const bucket = movementBuckets.get(key) ?? {
+        items: [],
+        firstIndex: index,
+      };
+      bucket.items.push({
+        movement,
+        quantity,
+        delta: getQuantityDelta(movement),
+      });
       movementBuckets.set(key, bucket);
       return;
     }
@@ -114,7 +123,7 @@ export const movementHistoryFromStockMovements = <T extends StockMovementLike>(
   }
 
   const sortedBuckets = Array.from(movementBuckets.entries()).sort(
-    (a, b) => a[1].firstIndex - b[1].firstIndex
+    (a, b) => a[1].firstIndex - b[1].firstIndex,
   );
 
   sortedBuckets.forEach(([key, bucket]) => {
@@ -139,15 +148,20 @@ export const movementHistoryFromStockMovements = <T extends StockMovementLike>(
     const sourceLabel = Array.from(sourceNames).join(", ");
     const targetLabel = Array.from(targetNames).join(", ");
 
-    const locationLabel = sourceLabel && targetLabel
-      ? `${sourceLabel} → ${targetLabel}`
-      : sourceLabel || targetLabel || undefined;
+    const locationLabel =
+      sourceLabel && targetLabel
+        ? `${sourceLabel} → ${targetLabel}`
+        : sourceLabel || targetLabel || undefined;
 
-    const aggregatedId = bucket.items
-      .map(({ movement }) => movement.id)
-      .filter((value): value is string | number => value !== null && value !== undefined)
-      .map(String)
-      .join("_") || `movement-${key}`;
+    const aggregatedId =
+      bucket.items
+        .map(({ movement }) => movement.id)
+        .filter(
+          (value): value is string | number =>
+            value !== null && value !== undefined,
+        )
+        .map(String)
+        .join("_") || `movement-${key}`;
 
     entries.push({
       id: aggregatedId,

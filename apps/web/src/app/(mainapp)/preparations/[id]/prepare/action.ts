@@ -17,13 +17,12 @@ export type PreparePreparationInput = {
 };
 
 export async function preparePreparationAction(
-  input: PreparePreparationInput
+  input: PreparePreparationInput,
 ): Promise<ActionResult> {
   const { id, ...payload } = input;
 
   return executeHttpAction(
     () => httpClient.post(`/api/preparations/${id}/prepare`, payload),
-    "Failed to prepare: "
+    "Failed to prepare: ",
   );
 }
-

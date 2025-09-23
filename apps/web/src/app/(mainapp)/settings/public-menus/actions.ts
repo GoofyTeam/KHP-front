@@ -23,10 +23,14 @@ export type UpdatePublicMenusSettingsResponse = {
 };
 
 export async function updatePublicMenusSettingsAction(
-  input: UpdatePublicMenusSettingsInput
+  input: UpdatePublicMenusSettingsInput,
 ): Promise<ActionResult<UpdatePublicMenusSettingsResponse>> {
   return executeHttpAction(
-    () => httpClient.put<UpdatePublicMenusSettingsResponse>("/api/public-menus", input),
-    "Validation error: "
+    () =>
+      httpClient.put<UpdatePublicMenusSettingsResponse>(
+        "/api/public-menus",
+        input,
+      ),
+    "Validation error: ",
   );
 }

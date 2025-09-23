@@ -27,7 +27,7 @@ function OrderManagementActions({
   const [forcePayment, setForcePayment] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pendingAction, setPendingAction] = useState<"cancel" | "pay" | null>(
-    null
+    null,
   );
   const [isPending, startTransition] = useTransition();
 
@@ -38,7 +38,7 @@ function OrderManagementActions({
   const canCancel = useMemo(() => !isOrderCanceled, [isOrderCanceled]);
   const canPay = useMemo(
     () => !isOrderCanceled && !isOrderPayed,
-    [isOrderCanceled, isOrderPayed]
+    [isOrderCanceled, isOrderPayed],
   );
   const allowForcePayment = canPay && !isOrderServed;
   const canSubmitPayment = canPay && (isOrderServed || forcePayment);
@@ -100,7 +100,7 @@ function OrderManagementActions({
           <div
             className={cn(
               "flex items-center gap-3",
-              !allowForcePayment && "opacity-50"
+              !allowForcePayment && "opacity-50",
             )}
           >
             <Switch

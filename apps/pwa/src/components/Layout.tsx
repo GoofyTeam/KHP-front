@@ -105,7 +105,7 @@ export function Layout({ children, className }: LayoutProps) {
   };
 
   const shouldShowBackButton = !PAGES_WITHOUT_BACK_BUTTON.includes(
-    location.pathname
+    location.pathname,
   );
 
   return (
@@ -113,7 +113,7 @@ export function Layout({ children, className }: LayoutProps) {
       <header
         className={cn(
           "bg-khp-primary text-khp-text-on-primary shadow-sm h-16 sticky top-0 z-10",
-          scanMatch && "hidden"
+          scanMatch && "hidden",
         )}
       >
         <div className="mx-auto flex max-w-7xl items-center px-4 sm:px-6 lg:px-8 h-full">

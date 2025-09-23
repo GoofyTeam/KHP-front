@@ -49,7 +49,7 @@ export const MealsIngredientColumns: ColumnDef<IngredientItem>[] = [
     header: "Quantity in location",
     cell: ({ row }) => {
       const quantityForSelectedLocation = row.original.entity.quantities.find(
-        (q) => q.location.id === row.original.location.id
+        (q) => q.location.id === row.original.location.id,
       );
 
       return (
@@ -65,7 +65,7 @@ export const MealsIngredientColumns: ColumnDef<IngredientItem>[] = [
     header: "Quantity needed ?",
     cell: ({ row }) => {
       const quantityForSelectedLocation = row.original.entity.quantities.find(
-        (q) => q.location.id === row.original.location.id
+        (q) => q.location.id === row.original.location.id,
       );
 
       const neededQty = row.original.quantity;
@@ -80,17 +80,20 @@ export const MealsIngredientColumns: ColumnDef<IngredientItem>[] = [
       }
 
       const availableQty = quantityForSelectedLocation.quantity;
-      const availableUnit = row.original.entity.unit as unknown as MeasurementUnitType;
+      const availableUnit = row.original.entity
+        .unit as unknown as MeasurementUnitType;
 
       const availableInNeededUnit = convertMeasurement(
         availableQty,
         availableUnit,
-        neededUnit
+        neededUnit,
       );
 
       if (availableInNeededUnit == null) {
         return (
-          <span className="text-yellow-600">Incompatible units for comparison</span>
+          <span className="text-yellow-600">
+            Incompatible units for comparison
+          </span>
         );
       }
 

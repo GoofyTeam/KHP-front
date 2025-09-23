@@ -20,12 +20,12 @@ export interface CreateMenuCategoryInput {
 
 export async function updateMenuCategoryAction(
   categoryId: string,
-  input: UpdateMenuCategoryInput
+  input: UpdateMenuCategoryInput,
 ): Promise<ActionResult<MenuCategory>> {
   try {
     const result = await httpClient.put<MenuCategory>(
       `/api/menu-categories/${categoryId}`,
-      input
+      input,
     );
 
     revalidatePath("/settings/menu-categories");
@@ -58,12 +58,12 @@ export async function updateMenuCategoryAction(
 }
 
 export async function createMenuCategoryAction(
-  input: CreateMenuCategoryInput
+  input: CreateMenuCategoryInput,
 ): Promise<ActionResult<MenuCategory>> {
   try {
     const result = await httpClient.post<MenuCategory>(
       "/api/menu-categories",
-      input
+      input,
     );
 
     revalidatePath("/settings/menu-categories");
@@ -96,7 +96,7 @@ export async function createMenuCategoryAction(
 }
 
 export async function deleteMenuCategoryAction(
-  categoryId: string
+  categoryId: string,
 ): Promise<ActionResult> {
   try {
     await httpClient.delete(`/api/menu-categories/${categoryId}`);

@@ -3,6 +3,5 @@ export function useRegisterSW() {
     offlineReady: [false, () => {}] as const,
     needRefresh: [false, () => {}] as const,
     updateServiceWorker: () => {},
-  }
+  };
 }
-

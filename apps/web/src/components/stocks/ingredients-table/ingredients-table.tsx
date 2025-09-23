@@ -48,7 +48,7 @@ export function IngredientsTable() {
 
   const ingredients: GetIngredientsQuery["ingredients"]["data"] = useMemo(
     () => data?.ingredients?.data ?? [],
-    [data?.ingredients?.data]
+    [data?.ingredients?.data],
   );
 
   const pageInfo = data?.ingredients?.paginatorInfo;
@@ -97,7 +97,7 @@ export function IngredientsTable() {
           });
         }
       },
-      { rootMargin: "200px" }
+      { rootMargin: "200px" },
     );
 
     observer.observe(el);
@@ -155,7 +155,7 @@ export function IngredientsTable() {
                   >
                     {flexRender(
                       header.column.columnDef.header,
-                      header.getContext()
+                      header.getContext(),
                     )}
                   </TableHead>
                 ))}
@@ -187,7 +187,7 @@ export function IngredientsTable() {
                     <TableCell key={cell.id} className="px-2 text-left">
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}

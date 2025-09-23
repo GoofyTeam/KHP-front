@@ -22,12 +22,12 @@ export interface CreateLocationInput {
 
 export async function updateLocationAction(
   locationId: string,
-  input: UpdateLocationInput
+  input: UpdateLocationInput,
 ): Promise<ActionResult<Location>> {
   try {
     const result = await httpClient.put<Location>(
       `/api/location/${locationId}`,
-      input
+      input,
     );
 
     revalidatePath("/settings/location");
@@ -60,7 +60,7 @@ export async function updateLocationAction(
 }
 
 export async function createLocationAction(
-  input: CreateLocationInput
+  input: CreateLocationInput,
 ): Promise<ActionResult<Location>> {
   try {
     const result = await httpClient.post<Location>("/api/location", input);
@@ -95,7 +95,7 @@ export async function createLocationAction(
 }
 
 export async function deleteLocationAction(
-  locationId: string
+  locationId: string,
 ): Promise<ActionResult> {
   try {
     await httpClient.delete(`/api/location/${locationId}`);

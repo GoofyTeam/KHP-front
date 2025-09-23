@@ -47,7 +47,7 @@ describe("httpClient (browser environment)", () => {
 
     const getCsrfSpy = vi.spyOn(
       httpClient as { getCsrfToken: () => Promise<string | null> },
-      "getCsrfToken"
+      "getCsrfToken",
     );
 
     const data = await httpClient.get<typeof responseBody>("/test");
@@ -64,7 +64,7 @@ describe("httpClient (browser environment)", () => {
           "X-Requested-With": "XMLHttpRequest",
         }),
         cache: "default",
-      })
+      }),
     );
     expect(getCsrfSpy).not.toHaveBeenCalled();
 
@@ -86,7 +86,7 @@ describe("httpClient (browser environment)", () => {
 
     const getCsrfSpy = vi.spyOn(
       httpClient as { getCsrfToken: () => Promise<string | null> },
-      "getCsrfToken"
+      "getCsrfToken",
     );
 
     const payload = new FormData();
@@ -102,10 +102,10 @@ describe("httpClient (browser environment)", () => {
 
     expect(config.headers).not.toBeUndefined();
     expect((config.headers as Record<string, string>)["X-XSRF-TOKEN"]).toBe(
-      "token123"
+      "token123",
     );
     expect(
-      (config.headers as Record<string, string>)["Content-Type"]
+      (config.headers as Record<string, string>)["Content-Type"],
     ).toBeUndefined();
     expect(config.body).toBe(payload);
 
@@ -133,11 +133,11 @@ describe("httpClient (browser environment)", () => {
 
     const getCsrfSpy = vi.spyOn(
       httpClient as { getCsrfToken: () => Promise<string | null> },
-      "getCsrfToken"
+      "getCsrfToken",
     );
 
     await expect(httpClient.post("/users", { email: "bad" })).rejects.toThrow(
-      "Invalid address"
+      "Invalid address",
     );
     expect(getCsrfSpy).toHaveBeenCalled();
 
@@ -181,7 +181,7 @@ describe("httpClient (browser environment)", () => {
     });
 
     await expect(httpClient.get("/needs-auth")).rejects.toThrow(
-      "Authentication required. Please log in."
+      "Authentication required. Please log in.",
     );
   });
 });

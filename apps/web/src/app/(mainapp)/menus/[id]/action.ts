@@ -6,7 +6,6 @@ import { type ActionResult, executeHttpAction } from "@/lib/actionUtils";
 export async function deleteMenu(id: string): Promise<ActionResult> {
   return executeHttpAction(
     () => httpClient.delete(`/api/menus/${id}`),
-    "Failed to delete menu: "
+    "Failed to delete menu: ",
   );
 }
-

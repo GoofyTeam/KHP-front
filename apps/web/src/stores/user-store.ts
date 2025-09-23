@@ -28,7 +28,7 @@ type State = {
   // Actions
   setUser: (u: User | null) => void;
   fetchUser: (
-    apolloClient: ApolloClient<unknown>
+    apolloClient: ApolloClient<unknown>,
   ) => Promise<{ success: boolean; data?: User; error?: string }>;
   clearUser: () => void;
   clearError: () => void;
@@ -93,7 +93,7 @@ export const useUserStore = create<State>((set) => ({
       if (error instanceof ApolloError) {
         const hasAuthError =
           error.graphQLErrors?.some(
-            (err) => err.extensions?.code === "UNAUTHENTICATED"
+            (err) => err.extensions?.code === "UNAUTHENTICATED",
           ) ||
           (error.networkError &&
             "statusCode" in error.networkError &&

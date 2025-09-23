@@ -86,7 +86,7 @@ export default async function middleware(req: NextRequest) {
     const encodedUserData = btoa(
       new TextEncoder()
         .encode(JSON.stringify(userData))
-        .reduce((data, byte) => data + String.fromCharCode(byte), "")
+        .reduce((data, byte) => data + String.fromCharCode(byte), ""),
     );
     response.headers.set("x-user", encodedUserData);
 
@@ -98,7 +98,7 @@ export default async function middleware(req: NextRequest) {
 }
 
 async function checkAuthenticationAndGetUser(
-  req: NextRequest
+  req: NextRequest,
 ): Promise<{ isAuthenticated: boolean; userData?: UserData }> {
   try {
     const khpSession = req.cookies.get("khp_session")?.value;
@@ -117,7 +117,7 @@ async function checkAuthenticationAndGetUser(
   } catch (error) {
     console.error(
       "Error checking authentication and getting user data:",
-      error
+      error,
     );
     return { isAuthenticated: false };
   }

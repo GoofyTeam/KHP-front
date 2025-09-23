@@ -1,24 +1,24 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import type { ComponentProps } from 'react';
-import { vi } from 'vitest';
-import OrderManagementActions from '../order-management-actions';
-import { OrderStatusEnum } from '@/graphql/generated/graphql';
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import type { ComponentProps } from "react";
+import { vi } from "vitest";
+import OrderManagementActions from "../order-management-actions";
+import { OrderStatusEnum } from "@/graphql/generated/graphql";
 
 const navigationMocks = vi.hoisted(() => ({
   refresh: vi.fn(),
   redirect: vi.fn(),
 }));
 
-vi.mock('next/navigation', () => ({
+vi.mock("next/navigation", () => ({
   useRouter: () => ({
     refresh: navigationMocks.refresh,
   }),
   redirect: navigationMocks.redirect,
 }));
 
-describe('OrderManagementActions', () => {
+describe("OrderManagementActions", () => {
   const createProps = (
     overrides: Partial<ComponentProps<typeof OrderManagementActions>> = {},
   ) => ({
@@ -34,21 +34,21 @@ describe('OrderManagementActions', () => {
     navigationMocks.redirect.mockClear();
   });
 
-  it('disables force payment toggle when order is already served', () => {
+  it("disables force payment toggle when order is already served", () => {
     render(
       <OrderManagementActions
         {...createProps({ status: OrderStatusEnum.Served })}
       />,
     );
 
-    const forceSwitch = screen.getByLabelText('Force payment');
+    const forceSwitch = screen.getByLabelText("Force payment");
     expect(forceSwitch).toBeDisabled();
 
-    const payButton = screen.getByRole('button', { name: /mark as paid/i });
+    const payButton = screen.getByRole("button", { name: /mark as paid/i });
     expect(payButton).toBeEnabled();
   });
 
-  it('enables payment after forcing when menus remain and triggers pay action', async () => {
+  it("enables payment after forcing when menus remain and triggers pay action", async () => {
     const payOrder = vi.fn().mockResolvedValue({ success: true });
 
     render(
@@ -57,10 +57,10 @@ describe('OrderManagementActions', () => {
       />,
     );
 
-    const payButton = screen.getByRole('button', { name: /mark as paid/i });
+    const payButton = screen.getByRole("button", { name: /mark as paid/i });
     expect(payButton).toBeDisabled();
 
-    await userEvent.click(screen.getByLabelText('Force payment'));
+    await userEvent.click(screen.getByLabelText("Force payment"));
 
     expect(payButton).toBeEnabled();
 
@@ -68,26 +68,22 @@ describe('OrderManagementActions', () => {
 
     expect(payOrder).toHaveBeenCalledWith({ force: true });
     expect(navigationMocks.refresh).toHaveBeenCalled();
-    expect(navigationMocks.redirect).toHaveBeenCalledWith('/waiters');
+    expect(navigationMocks.redirect).toHaveBeenCalledWith("/waiters");
   });
 
-  it('shows an error message when cancel action fails', async () => {
+  it("shows an error message when cancel action fails", async () => {
     const cancelOrder = vi.fn().mockResolvedValue({
       success: false,
-      error: 'Unable to cancel',
+      error: "Unable to cancel",
     });
 
-    render(
-      <OrderManagementActions
-        {...createProps({ cancelOrder })}
-      />,
-    );
+    render(<OrderManagementActions {...createProps({ cancelOrder })} />);
 
-    const cancelButton = screen.getByRole('button', { name: /cancel order/i });
+    const cancelButton = screen.getByRole("button", { name: /cancel order/i });
     await userEvent.click(cancelButton);
 
     expect(cancelOrder).toHaveBeenCalled();
-    expect(await screen.findByText('Unable to cancel')).toBeInTheDocument();
+    expect(await screen.findByText("Unable to cancel")).toBeInTheDocument();
     expect(navigationMocks.redirect).not.toHaveBeenCalled();
   });
 });

@@ -76,12 +76,12 @@ const updateMenuSchema = z
         z.instanceof(File).refine(
           (file) => {
             return ACCEPTED_IMAGE_TYPES.includes(
-              file.type as (typeof ACCEPTED_IMAGE_TYPES)[number]
+              file.type as (typeof ACCEPTED_IMAGE_TYPES)[number],
             );
           },
           {
             message: "Image must be an accepted format",
-          }
+          },
         ),
         z.string(), // Pour l'URL existante
         z.undefined(),
@@ -165,14 +165,14 @@ export default function UpdateMenusPage() {
     GetMenuCategoriesDocument,
     {
       fetchPolicy: "network-only",
-    }
+    },
   );
 
   const { data: menuTypes } = useQuery<GetMenuTypesQuery>(
     GetMenuTypesDocument,
     {
       fetchPolicy: "network-only",
-    }
+    },
   );
 
   const menuFetched = data?.menu;
@@ -249,7 +249,7 @@ export default function UpdateMenusPage() {
           })) || [],
       });
       setPriceInput(
-        menuFetched.price ? menuFetched.price.toFixed(2).replace(".", ",") : ""
+        menuFetched.price ? menuFetched.price.toFixed(2).replace(".", ",") : "",
       );
     }
   }, [menuFetched, form]);
@@ -263,10 +263,10 @@ export default function UpdateMenusPage() {
   };
 
   const handleValidationErrors: SubmitErrorHandler<UpdateMenuFormValues> = (
-    errors
+    errors,
   ) => {
     const hasMenuInfoErrors = MENU_INFO_FIELDS.some((field) =>
-      Boolean(errors[field])
+      Boolean(errors[field]),
     );
 
     if (hasMenuInfoErrors) {
@@ -359,7 +359,7 @@ export default function UpdateMenusPage() {
           }
           if (lower.includes("session expired") || lower.includes("419")) {
             tips.push(
-              "Your session has expired. Refresh the page, then try again."
+              "Your session has expired. Refresh the page, then try again.",
             );
           }
           if (lower.includes("validation") || lower.includes("422")) {
@@ -367,7 +367,7 @@ export default function UpdateMenusPage() {
           }
           if (tips.length === 0) {
             tips.push(
-              "Check required fields, image format/size, and your network connection."
+              "Check required fields, image format/size, and your network connection.",
             );
           }
 
@@ -386,7 +386,7 @@ export default function UpdateMenusPage() {
         });
       }
     },
-    handleValidationErrors
+    handleValidationErrors,
   );
 
   return (
@@ -601,7 +601,7 @@ export default function UpdateMenusPage() {
                                     >
                                       {category.name}
                                     </SelectItem>
-                                  )
+                                  ),
                                 )}
                               </SelectContent>
                             </Select>
@@ -670,7 +670,7 @@ export default function UpdateMenusPage() {
                               onChange={(e) => {
                                 const value = e.target.value;
                                 field.onChange(
-                                  value === "" ? undefined : Number(value)
+                                  value === "" ? undefined : Number(value),
                                 );
                               }}
                             />

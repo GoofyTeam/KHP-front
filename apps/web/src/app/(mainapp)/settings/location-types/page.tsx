@@ -67,7 +67,7 @@ export default function LocationTypesPage() {
 
     try {
       const result = await deleteLocationTypeAction(
-        data.locationTypeToDelete.id
+        data.locationTypeToDelete.id,
       );
       if (result.success) {
         await apolloClient.refetchQueries({

@@ -38,7 +38,7 @@ type DeleteFormData = {
 export default function LocationPage() {
   const apolloClient = useApolloClient();
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(
-    null
+    null,
   );
   const locationsListRef = useRef<LocationsListRef>(null);
 

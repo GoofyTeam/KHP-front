@@ -6,7 +6,7 @@
  */
 export function formatTime(
   dateString: string,
-  locale: string = "fr-FR"
+  locale: string = "fr-FR",
 ): string {
   const date = new Date(dateString);
   return date.toLocaleTimeString(locale, {
@@ -23,7 +23,7 @@ export function formatTime(
  */
 export function formatDate(
   dateString: string,
-  locale: string = "fr-FR"
+  locale: string = "fr-FR",
 ): string {
   const date = new Date(dateString);
   return date.toLocaleDateString(locale, {
@@ -41,7 +41,7 @@ export function formatDate(
  */
 export function formatLongDate(
   dateString: string,
-  locale: string = "fr-FR"
+  locale: string = "fr-FR",
 ): string {
   const date = new Date(dateString);
   return date.toLocaleDateString(locale, {
@@ -60,7 +60,7 @@ export function formatLongDate(
  */
 export function formatDateTime(
   dateString: string,
-  locale: string = "fr-FR"
+  locale: string = "fr-FR",
 ): string {
   const date = new Date(dateString);
   return date.toLocaleString(locale, {

@@ -38,7 +38,7 @@ type DeleteFormData = {
 export default function MenuCategoriesPage() {
   const apolloClient = useApolloClient();
   const [selectedCategory, setSelectedCategory] = useState<MenuCategory | null>(
-    null
+    null,
   );
   const categoriesListRef = useRef<MenuCategoriesListRef>(null);
 

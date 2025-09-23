@@ -66,7 +66,7 @@ export const CategoriesList = forwardRef<
           });
         }
       },
-    }
+    },
   );
 
   const paginatorInfo = data?.categories?.paginatorInfo;
@@ -124,7 +124,7 @@ export const CategoriesList = forwardRef<
         loadMore();
       }
     },
-    [loadMore, paginatorInfo?.hasMorePages, isLoadingMore, hasReachedEnd]
+    [loadMore, paginatorInfo?.hasMorePages, isLoadingMore, hasReachedEnd],
   );
 
   const handleRefetch = useCallback(async () => {
@@ -148,7 +148,7 @@ export const CategoriesList = forwardRef<
     () => ({
       refresh: handleRefetch,
     }),
-    [handleRefetch]
+    [handleRefetch],
   );
 
   if (error) {

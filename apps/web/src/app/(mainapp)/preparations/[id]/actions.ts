@@ -44,26 +44,26 @@ export interface RemovePreparationQuantityInput {
 
 export async function addPreparationQuantityAction(
   preparationId: string | number,
-  input: AddPreparationQuantityInput
+  input: AddPreparationQuantityInput,
 ): Promise<LibActionResult> {
   return executeHttpAction(
     () =>
       httpClient.post(`/api/preparations/${preparationId}/add-quantity`, input),
-    "Failed to add preparation quantity: "
+    "Failed to add preparation quantity: ",
   );
 }
 
 export async function removePreparationQuantityAction(
   preparationId: string | number,
-  input: RemovePreparationQuantityInput
+  input: RemovePreparationQuantityInput,
 ): Promise<LibActionResult> {
   return executeHttpAction(
     () =>
       httpClient.post(
         `/api/preparations/${preparationId}/remove-quantity`,
-        input
+        input,
       ),
-    "Failed to remove preparation quantity: "
+    "Failed to remove preparation quantity: ",
   );
 }
 
@@ -77,14 +77,14 @@ export interface MovePreparationQuantityInput {
 
 export async function movePreparationQuantityAction(
   preparationId: string | number,
-  input: MovePreparationQuantityInput
+  input: MovePreparationQuantityInput,
 ): Promise<LibActionResult> {
   return executeHttpAction(
     () =>
       httpClient.post(
         `/api/preparations/${preparationId}/move-quantity`,
-        input
+        input,
       ),
-    "Failed to move preparation quantity: "
+    "Failed to move preparation quantity: ",
   );
 }

@@ -4,7 +4,7 @@ import { registerLossesSchema } from "./registerLossesSchema";
 import { router } from "../../../main";
 
 export const registerLossesSubmit = async (
-  values: z.infer<typeof registerLossesSchema>
+  values: z.infer<typeof registerLossesSchema>,
 ) => {
   await api.post(`/api/losses`, {
     loss_item_id: values.product_id,

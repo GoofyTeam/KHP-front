@@ -41,14 +41,14 @@ function SortMenuTypesSection() {
       fetchPolicy: "cache-and-network",
       nextFetchPolicy: "cache-first",
       notifyOnNetworkStatusChange: true,
-    }
+    },
   );
 
   const [orderedMenuTypes, setOrderedMenuTypes] = useState<MenuType[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">(
-    "idle"
+    "idle",
   );
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -127,7 +127,7 @@ function SortMenuTypesSection() {
       setSaveError(
         saveError instanceof Error
           ? saveError.message
-          : "Unable to save menu type order."
+          : "Unable to save menu type order.",
       );
     } finally {
       setIsSaving(false);
@@ -207,7 +207,7 @@ function SortMenuTypesSection() {
             const menuType = orderedMenuTypes.find((item) => item.id === value);
             if (!menuType) return null;
             const index = orderedMenuTypes.findIndex(
-              (item) => item.id === menuType.id
+              (item) => item.id === menuType.id,
             );
             return (
               <div className="px-4 py-3 bg-white rounded-md shadow-lg border border-khp-primary/30 flex items-center gap-3">

@@ -110,7 +110,7 @@ export const QuickAccessButton: FC<QuickAccessButtonProps> = ({
     <div
       className={cn(
         "flex flex-col items-center justify-between border border-khp-primary/30 rounded-md transition p-3",
-        stretch ? "w-full h-full" : "w-full aspect-square"
+        stretch ? "w-full h-full" : "w-full aspect-square",
       )}
     >
       <span className={cn("text-center font-medium text-gray-800", sz.title)}>
@@ -122,7 +122,7 @@ export const QuickAccessButton: FC<QuickAccessButtonProps> = ({
           className={cn(
             "rounded-full flex items-center justify-center text-white",
             quickAccessBgClassByColor[normalizedColor],
-            sz.circle
+            sz.circle,
           )}
         >
           <IconComponent className={sz.icon} aria-hidden />
@@ -144,11 +144,11 @@ export const QuickAccessButton: FC<QuickAccessButtonProps> = ({
         className: cn(
           "inline-flex w-full h-full",
           children.props.className,
-          className
+          className,
         ),
         ...rest,
       },
-      content
+      content,
     );
   }
 

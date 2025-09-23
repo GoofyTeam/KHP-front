@@ -35,7 +35,7 @@ export default function StocksFilters({
 
   const [searchInput, setSearchInput] = useState(filters.search || "");
   const [categoryFilters, setCategoryFilters] = useState<string[]>(
-    filters.categoryIds || []
+    filters.categoryIds || [],
   );
 
   const debouncedSearchTerm = useDebounce(searchInput.trim(), 400);

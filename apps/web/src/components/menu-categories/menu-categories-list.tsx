@@ -43,7 +43,7 @@ export const MenuCategoriesList = forwardRef<
       fetchPolicy: "cache-and-network",
       errorPolicy: "all",
       notifyOnNetworkStatusChange: true,
-    }
+    },
   );
 
   const paginatorInfo = data?.menuCategories?.paginatorInfo;
@@ -103,7 +103,7 @@ export const MenuCategoriesList = forwardRef<
         loadMore();
       }
     },
-    [loadMore]
+    [loadMore],
   );
 
   const handleRefetch = useCallback(async () => {
@@ -120,7 +120,7 @@ export const MenuCategoriesList = forwardRef<
     () => ({
       refresh: handleRefetch,
     }),
-    [handleRefetch]
+    [handleRefetch],
   );
 
   if (error) {

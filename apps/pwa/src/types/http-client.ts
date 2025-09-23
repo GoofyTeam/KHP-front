@@ -36,7 +36,7 @@ export interface HttpClientConfig {
   };
   interceptors?: {
     request?: (
-      config: RequestInit & { url: string }
+      config: RequestInit & { url: string },
     ) => RequestInit & { url: string };
     response?: (response: Response) => Response | Promise<Response>;
     error?: (error: HttpError) => HttpError | Promise<HttpError>;

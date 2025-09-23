@@ -30,7 +30,7 @@ function HandleAddQuantity() {
   const allLocationsWithQuantities =
     availableLocations?.map((location) => {
       const existingQuantity = product.quantities?.find(
-        (qty) => qty.location.id === location.id
+        (qty) => qty.location.id === location.id,
       );
 
       return {

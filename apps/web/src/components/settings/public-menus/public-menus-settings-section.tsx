@@ -43,7 +43,7 @@ const buildPublicMenusBaseUrl = (origin?: string | null) => {
 const DEFAULT_PUBLIC_MENUS_BASE_URL = buildPublicMenusBaseUrl(
   process.env.NEXT_PUBLIC_SITE_URL ??
     process.env.NEXT_PUBLIC_APP_URL ??
-    (process.env.NODE_ENV === "production" ? "https://dash.goofykhp.fr" : null)
+    (process.env.NODE_ENV === "production" ? "https://dash.goofykhp.fr" : null),
 );
 
 const publicMenusSchema = z.object({
@@ -65,7 +65,7 @@ function PublicMenusSettingsSection({
   const publicMenuSettings = companySettings?.public_menu_settings;
   const [isPending, startTransition] = useTransition();
   const [publicMenusBaseUrl, setPublicMenusBaseUrl] = useState(
-    DEFAULT_PUBLIC_MENUS_BASE_URL
+    DEFAULT_PUBLIC_MENUS_BASE_URL,
   );
 
   const form = useForm<z.infer<typeof publicMenusSchema>>({
@@ -124,7 +124,8 @@ function PublicMenusSettingsSection({
           }
 
           toast.success(
-            result.data?.message || "Public menu settings updated successfully."
+            result.data?.message ||
+              "Public menu settings updated successfully.",
           );
 
           try {
@@ -137,7 +138,7 @@ function PublicMenusSettingsSection({
           } catch (refetchError) {
             console.error(
               "Failed to refetch public menu settings",
-              refetchError
+              refetchError,
             );
           }
         } else {
@@ -158,7 +159,7 @@ function PublicMenusSettingsSection({
       } catch (error) {
         console.error("Failed to update public menu settings", error);
         toast.error(
-          "An unexpected error occurred while updating the settings."
+          "An unexpected error occurred while updating the settings.",
         );
       }
     });

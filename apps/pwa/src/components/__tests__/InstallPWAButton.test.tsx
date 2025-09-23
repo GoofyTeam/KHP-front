@@ -10,7 +10,7 @@ type MockBIP = Event & {
 };
 
 function dispatchBeforeInstallPrompt(
-  outcome: "accepted" | "dismissed" = "accepted"
+  outcome: "accepted" | "dismissed" = "accepted",
 ) {
   const e: MockBIP = Object.assign(new Event("beforeinstallprompt"), {
     prompt: vi.fn().mockResolvedValue(undefined),
@@ -29,7 +29,7 @@ describe("InstallPWAButton", () => {
       <InstallPWAButton
         label="Install"
         onVisibilityChange={onVisibilityChange}
-      />
+      />,
     );
 
     expect(screen.queryByText("Install")).toBeNull();
@@ -48,7 +48,7 @@ describe("InstallPWAButton", () => {
         label="Install"
         onInstalled={onInstalled}
         onVisibilityChange={onVisibilityChange}
-      />
+      />,
     );
 
     const e = dispatchBeforeInstallPrompt("accepted");
@@ -76,7 +76,7 @@ describe("InstallPWAButton", () => {
         label="Install"
         onInstalled={onInstalled}
         onVisibilityChange={onVisibilityChange}
-      />
+      />,
     );
 
     dispatchBeforeInstallPrompt("dismissed");
@@ -88,7 +88,7 @@ describe("InstallPWAButton", () => {
     });
 
     await waitFor(() =>
-      expect(screen.queryByRole("button", { name: "Install" })).toBeNull()
+      expect(screen.queryByRole("button", { name: "Install" })).toBeNull(),
     );
     expect(onInstalled).toHaveBeenCalled();
     expect(onVisibilityChange).toHaveBeenCalledWith(false);

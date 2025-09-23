@@ -141,10 +141,10 @@ export const MultiSelect = React.forwardRef<
       filterType,
       ...props
     },
-    ref
+    ref,
   ) => {
     const [selectedValues, setSelectedValues] = React.useState<string[]>(
-      value || defaultValue
+      value || defaultValue,
     );
     const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
     const [isAnimating, setIsAnimating] = React.useState(false);
@@ -164,7 +164,7 @@ export const MultiSelect = React.forwardRef<
     }, [defaultValue, value]);
 
     const handleInputKeyDown = (
-      event: React.KeyboardEvent<HTMLInputElement>
+      event: React.KeyboardEvent<HTMLInputElement>,
     ) => {
       if (event.key === "Enter") {
         setIsPopoverOpen(false);
@@ -222,7 +222,7 @@ export const MultiSelect = React.forwardRef<
             onClick={handleTogglePopover}
             className={cn(
               "flex w-auto p-2 rounded-md border min-h-12 h-[48px] items-center justify-between bg-inherit hover:bg-inherit [&_svg]:pointer-events-auto touch-manipulation",
-              className
+              className,
             )}
           >
             {selectedValues.length > 0 ? (
@@ -232,7 +232,7 @@ export const MultiSelect = React.forwardRef<
                     <Badge
                       className={cn(
                         isAnimating ? "animate-bounce" : "",
-                        multiSelectVariants({ variant })
+                        multiSelectVariants({ variant }),
                       )}
                       style={{ animationDuration: `${animation}s` }}
                     >
@@ -257,7 +257,7 @@ export const MultiSelect = React.forwardRef<
                             key={value}
                             className={cn(
                               isAnimating ? "animate-bounce" : "",
-                              multiSelectVariants({ variant })
+                              multiSelectVariants({ variant }),
                             )}
                             style={{ animationDuration: `${animation}s` }}
                           >
@@ -280,7 +280,7 @@ export const MultiSelect = React.forwardRef<
                           className={cn(
                             "bg-transparent text-foreground border-foreground/1 hover:bg-transparent",
                             isAnimating ? "animate-bounce" : "",
-                            multiSelectVariants({ variant })
+                            multiSelectVariants({ variant }),
                           )}
                           style={{ animationDuration: `${animation}s` }}
                         >
@@ -345,7 +345,7 @@ export const MultiSelect = React.forwardRef<
                       "mr-3 flex h-5 w-5 items-center justify-center rounded-sm border border-primary touch-manipulation",
                       selectedValues.length === options.length
                         ? "bg-primary text-primary-foreground"
-                        : "opacity-50 [&_svg]:invisible"
+                        : "opacity-50 [&_svg]:invisible",
                     )}
                   >
                     <CheckIcon className="h-4 w-4" />
@@ -365,7 +365,7 @@ export const MultiSelect = React.forwardRef<
                           "mr-3 flex h-5 w-5 items-center justify-center rounded-sm border border-primary touch-manipulation",
                           isSelected
                             ? "bg-primary text-primary-foreground"
-                            : "opacity-50 [&_svg]:invisible"
+                            : "opacity-50 [&_svg]:invisible",
                         )}
                       >
                         <CheckIcon className="h-4 w-4" />
@@ -410,14 +410,14 @@ export const MultiSelect = React.forwardRef<
           <WandSparkles
             className={cn(
               "cursor-pointer my-2 text-foreground bg-background w-3 h-3",
-              isAnimating ? "" : "text-muted-foreground"
+              isAnimating ? "" : "text-muted-foreground",
             )}
             onClick={() => setIsAnimating(!isAnimating)}
           />
         )}
       </Popover>
     );
-  }
+  },
 );
 
 MultiSelect.displayName = "MultiSelect";

@@ -139,7 +139,7 @@ export function PublicMenuCardClient({
     return Array.from(map.entries())
       .map(([value, label]) => ({ value, label }))
       .sort((a, b) =>
-        a.label.localeCompare(b.label, "fr", { sensitivity: "base" })
+        a.label.localeCompare(b.label, "fr", { sensitivity: "base" }),
       );
   }, [menus]);
 
@@ -161,7 +161,7 @@ export function PublicMenuCardClient({
     return Array.from(map.entries())
       .map(([value, label]) => ({ value, label }))
       .sort((a, b) =>
-        a.label.localeCompare(b.label, "fr", { sensitivity: "base" })
+        a.label.localeCompare(b.label, "fr", { sensitivity: "base" }),
       );
   }, [menus]);
 
@@ -196,7 +196,7 @@ export function PublicMenuCardClient({
         ]
           .filter(Boolean)
           .some((value) =>
-            normalizeText(value?.toString()).includes(normalizedSearch)
+            normalizeText(value?.toString()).includes(normalizedSearch),
           );
 
       return matchesType && matchesCategory && matchesAllergen && matchesSearch;
@@ -230,20 +230,18 @@ export function PublicMenuCardClient({
       .map(([key, group]) => ({ key, ...group }))
       .map((group) => ({
         ...group,
-        menus: group.menus
-          .slice()
-          .sort((a, b) => {
-            const priorityA =
-              typeof a.priority === "number" ? a.priority : ORDER_FALLBACK;
-            const priorityB =
-              typeof b.priority === "number" ? b.priority : ORDER_FALLBACK;
+        menus: group.menus.slice().sort((a, b) => {
+          const priorityA =
+            typeof a.priority === "number" ? a.priority : ORDER_FALLBACK;
+          const priorityB =
+            typeof b.priority === "number" ? b.priority : ORDER_FALLBACK;
 
-            if (priorityA !== priorityB) {
-              return priorityA - priorityB;
-            }
+          if (priorityA !== priorityB) {
+            return priorityA - priorityB;
+          }
 
-            return a.name.localeCompare(b.name, "fr", { sensitivity: "base" });
-          }),
+          return a.name.localeCompare(b.name, "fr", { sensitivity: "base" });
+        }),
       }))
       .sort((a, b) => {
         if (a.sortIndex !== b.sortIndex) {
@@ -260,7 +258,7 @@ export function PublicMenuCardClient({
       ? `${companyData.name} - Menu`
       : "Restaurant - Menu";
     const metaDescription = document.querySelector(
-      'meta[name="description"]'
+      'meta[name="description"]',
     ) as HTMLMetaElement | null;
     if (metaDescription && companyData.name) {
       metaDescription.content = `Explore the menu of ${companyData.name}${

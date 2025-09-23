@@ -41,7 +41,9 @@ export function mapAllergensToLabels(allergens: string[]): string[] {
  * @param allergens - Liste des codes d'allergènes disponibles
  * @returns Options formatées pour un composant de sélection
  */
-export function createAllergenOptions(allergens: string[]): Array<{ value: string; label: string }> {
+export function createAllergenOptions(
+  allergens: string[],
+): Array<{ value: string; label: string }> {
   return allergens.map((allergen) => ({
     value: allergen,
     label: getAllergenLabel(allergen),
@@ -52,7 +54,10 @@ export function createAllergenOptions(allergens: string[]): Array<{ value: strin
  * Obtient tous les allergènes disponibles sous forme d'options
  * @returns Toutes les options d'allergènes
  */
-export function getAllAllergenOptions(): Array<{ value: string; label: string }> {
+export function getAllAllergenOptions(): Array<{
+  value: string;
+  label: string;
+}> {
   return Object.entries(allergenLabels).map(([value, label]) => ({
     value,
     label,

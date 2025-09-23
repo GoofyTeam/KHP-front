@@ -60,7 +60,7 @@ function makeClient() {
       // Handle CSRF token expiration with automatic retry
       if (response.status === 419) {
         console.warn(
-          "Apollo GraphQL CSRF token expired, refreshing token and retrying..."
+          "Apollo GraphQL CSRF token expired, refreshing token and retrying...",
         );
 
         const newToken = await refreshCSRFToken();
@@ -86,7 +86,7 @@ function makeClient() {
       // Handle authentication errors
       if (response.status === 401) {
         console.warn(
-          "Apollo GraphQL authentication failed, redirecting to login..."
+          "Apollo GraphQL authentication failed, redirecting to login...",
         );
         window.location.href = "/login";
       }

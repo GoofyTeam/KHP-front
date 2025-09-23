@@ -5,7 +5,7 @@ export type QuickAccessNormalizedColor =
   | "info";
 
 export const normalizeQuickAccessColor = (
-  color: unknown
+  color: unknown,
 ): QuickAccessNormalizedColor => {
   const colorKey = String(color).toLowerCase();
   switch (colorKey) {

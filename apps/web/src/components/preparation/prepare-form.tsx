@@ -46,7 +46,7 @@ const overrideItemSchema: z.ZodType<MenuItemForm> = z
           id: z.string(),
           name: z.string(),
           quantityInLocation: z.number(),
-        })
+        }),
       )
       .optional(),
   })
@@ -122,7 +122,7 @@ function PreparePreparationForm({
       },
       fetchPolicy: "cache-and-network",
       notifyOnNetworkStatusChange: true,
-    }
+    },
   );
 
   const locationsData = data?.locations?.data;
@@ -247,7 +247,7 @@ function PreparePreparationForm({
       })
       .filter(
         (override): override is NonNullable<typeof override> =>
-          override !== null
+          override !== null,
       );
 
     const quantityNumber = Number(values.quantity);

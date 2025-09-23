@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { AutoBreadcrumb } from "@/components/auto-breadcrumb";
 export const metadata: Metadata = {
   title: "KHP | Stocks",
-  description:
-    "Inventory management - View and manage your company's stock",
+  description: "Inventory management - View and manage your company's stock",
 };
 
 export default function StocksLayout({

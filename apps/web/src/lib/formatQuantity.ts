@@ -6,7 +6,7 @@
  */
 export function formatQuantity(
   quantity: number,
-  maxDecimals: number = 3
+  maxDecimals: number = 3,
 ): string {
   // Gestion des cas spéciaux
   if (isNaN(quantity) || !isFinite(quantity)) {

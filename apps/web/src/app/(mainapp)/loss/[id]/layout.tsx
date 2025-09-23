@@ -3,8 +3,7 @@ import LossBreadcrumb from "./loss-breadcrumb";
 
 export const metadata: Metadata = {
   title: "KHP | Loss Details",
-  description:
-    "Loss management - View and manage loss details",
+  description: "Loss management - View and manage loss details",
 };
 
 interface LossLayoutProps {

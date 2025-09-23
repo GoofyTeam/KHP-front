@@ -49,7 +49,7 @@ export const PreparationIngredientColumns: ColumnDef<IngredientItem>[] = [
     header: "Quantity in location",
     cell: ({ row }) => {
       const quantityForSelectedLocation = row.original.entity.quantities.find(
-        (q) => q.location.id === row.original.location.id
+        (q) => q.location.id === row.original.location.id,
       );
 
       return (
@@ -65,7 +65,7 @@ export const PreparationIngredientColumns: ColumnDef<IngredientItem>[] = [
     header: "Quantity needed?",
     cell: ({ row }) => {
       const quantityForSelectedLocation = row.original.entity.quantities.find(
-        (q) => q.location.id === row.original.location.id
+        (q) => q.location.id === row.original.location.id,
       );
 
       const neededQty = row.original.quantity;
@@ -86,7 +86,7 @@ export const PreparationIngredientColumns: ColumnDef<IngredientItem>[] = [
       const availableInNeededUnit = convertMeasurement(
         availableQty,
         availableUnit,
-        neededUnit
+        neededUnit,
       );
 
       if (availableInNeededUnit == null) {

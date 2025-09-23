@@ -25,14 +25,14 @@ registerRoute(
     request.destination === "image",
   new CacheFirst({
     cacheName: "static-resources",
-  })
+  }),
 );
 
 registerRoute(
   ({ request }) => request.mode === "navigate",
   new NetworkFirst({
     cacheName: "pages",
-  })
+  }),
 );
 
 const bgSyncPlugin = new BackgroundSyncPlugin("apiQueue", {
@@ -42,12 +42,12 @@ const bgSyncPlugin = new BackgroundSyncPlugin("apiQueue", {
 registerRoute(
   /\/api\/sync/,
   new NetworkOnly({ plugins: [bgSyncPlugin] }),
-  "POST"
+  "POST",
 );
 
 registerRoute(
   ({ url }) => url.pathname.endsWith("sql-wasm.wasm"),
   new CacheFirst({
     cacheName: "sql-wasm-cache",
-  })
+  }),
 );

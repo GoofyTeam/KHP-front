@@ -59,7 +59,7 @@ export function AddStockForm({ preparation }: AddStockFormProps) {
       : 0;
   const selectedLocationId = form.watch("selectedLocationIndex");
   const selectedLocation = existingLocations.find(
-    (q) => q.location.id === selectedLocationId
+    (q) => q.location.id === selectedLocationId,
   );
 
   const handleSubmit = async (data: AddStockFormData) => {

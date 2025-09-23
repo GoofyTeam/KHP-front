@@ -70,7 +70,7 @@ function revalidateMenuTypePages() {
 }
 
 export async function createMenuTypeAction(
-  input: CreateMenuTypeInput
+  input: CreateMenuTypeInput,
 ): Promise<ActionResult<MenuType>> {
   try {
     const payload = sanitizePayload(input);
@@ -98,14 +98,14 @@ export async function createMenuTypeAction(
 
 export async function updateMenuTypeAction(
   menuTypeId: string,
-  input: UpdateMenuTypeInput
+  input: UpdateMenuTypeInput,
 ): Promise<ActionResult<MenuType>> {
   try {
     const payload = sanitizePayload(input);
 
     const result = await httpClient.put<MenuType>(
       `/api/menu-types/${menuTypeId}`,
-      payload
+      payload,
     );
 
     revalidateMenuTypePages();
@@ -128,7 +128,7 @@ export async function updateMenuTypeAction(
 }
 
 export async function deleteMenuTypeAction(
-  menuTypeId: string
+  menuTypeId: string,
 ): Promise<ActionResult> {
   try {
     await httpClient.delete(`/api/menu-types/${menuTypeId}`);

@@ -33,7 +33,7 @@ const quantityFormatter = new Intl.NumberFormat("fr-FR", {
 export function ExpiryTable({ items }: ExpiryTableProps) {
   const [rows, setRows] = useState(items);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(
-    () => new Set<string>()
+    () => new Set<string>(),
   );
   const [isMarking, setIsMarking] = useState(false);
 
@@ -70,7 +70,7 @@ export function ExpiryTable({ items }: ExpiryTableProps) {
         formattedDate: formatExpirationDate(item.expirationDate),
         formattedQuantity: `${quantityFormatter.format(item.quantity)} kg`,
       })),
-    [rows]
+    [rows],
   );
 
   const handleToggleAll = (checked: CheckedState) => {
@@ -107,7 +107,7 @@ export function ExpiryTable({ items }: ExpiryTableProps) {
 
     try {
       const results = await Promise.allSettled(
-        ids.map((id) => httpClient.patch(`/api/perishables/${id}/read`))
+        ids.map((id) => httpClient.patch(`/api/perishables/${id}/read`)),
       );
 
       const succeeded = new Set<string>();
@@ -130,7 +130,7 @@ export function ExpiryTable({ items }: ExpiryTableProps) {
         toast.success(
           successCount === 1
             ? "1 ingredient marked as read."
-            : `${successCount} ingredients marked as read.`
+            : `${successCount} ingredients marked as read.`,
         );
       }
 
@@ -215,7 +215,7 @@ export function ExpiryTable({ items }: ExpiryTableProps) {
                       key={item.id}
                       className={cn(
                         "border-b border-khp-primary/10 transition-colors hover:bg-khp-primary/5 cursor-pointer",
-                        isSelected && "bg-khp-primary/5"
+                        isSelected && "bg-khp-primary/5",
                       )}
                       onClick={() => handleToggleRow(item.id, !isSelected)}
                     >

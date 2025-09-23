@@ -69,7 +69,7 @@ function getDocumentTitle(
   pathname: string,
   productId?: string | null,
   isHistoryRoute?: boolean,
-  isNotFound?: boolean
+  isNotFound?: boolean,
 ): string {
   if (isNotFound) {
     return PAGE_DOCUMENT_TITLES["/404"];
@@ -123,7 +123,7 @@ function RootComponent() {
   const documentTitle = getDocumentTitle(
     location.pathname,
     productId,
-    isHistoryRoute
+    isHistoryRoute,
   );
 
   if (PAGES_WITHOUT_LAYOUT.includes(location.pathname)) {

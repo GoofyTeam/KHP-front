@@ -32,7 +32,7 @@ export interface UpdateCategoryInput {
 }
 
 export async function createCategoryAction(
-  input: CreateCategoryInput
+  input: CreateCategoryInput,
 ): Promise<ActionResult<Category>> {
   return executeHttpAction(() => {
     // Build API input according to POST /categories structure
@@ -68,7 +68,7 @@ export async function createCategoryAction(
 
 export async function updateCategoryAction(
   id: string,
-  input: UpdateCategoryInput
+  input: UpdateCategoryInput,
 ): Promise<ActionResult<Category>> {
   return executeHttpAction(() => {
     // Build API input according to PUT /categories/{id} structure
@@ -124,6 +124,6 @@ export async function updateCategoryAction(
 export async function deleteCategoryAction(id: string): Promise<ActionResult> {
   return executeHttpAction(
     () => httpClient.delete(`/api/categories/${id}`),
-    "Failed to delete category: "
+    "Failed to delete category: ",
   );
 }

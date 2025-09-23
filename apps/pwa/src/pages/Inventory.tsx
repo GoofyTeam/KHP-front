@@ -69,7 +69,7 @@ function InventoryPage() {
           });
         }
       },
-      { rootMargin: "200px" }
+      { rootMargin: "200px" },
     );
 
     observer.observe(el);
@@ -99,13 +99,13 @@ function InventoryPage() {
       {allItems.map(
         (
           ingredient: GetCompanyProductsQuery["ingredients"]["data"][number],
-          index: number
+          index: number,
         ) => (
           <InventoryRow
             key={index + ingredient.id + "_" + ingredient.name}
             productDetails={ingredient}
           />
-        )
+        ),
       )}
       {pageInfo.hasMorePages ? (
         <div ref={sentinelRef} className="h-8" />

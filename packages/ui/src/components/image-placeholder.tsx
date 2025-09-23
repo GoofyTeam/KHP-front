@@ -16,7 +16,7 @@ export function ImagePlaceholder({
     <div
       className={cn(
         "aspect-square border border-khp-primary/20 rounded-lg flex flex-col items-center justify-center bg-muted/20",
-        className
+        className,
       )}
     >
       <Image className="text-khp-primary/60" strokeWidth={1} size={iconSize} />
@@ -40,7 +40,7 @@ export function ImageAdd({
     <div
       className={cn(
         "aspect-square w-34 border border-khp-primary rounded-lg flex flex-col items-center justify-center my-4 cursor-pointer hover:bg-khp-primary/10 mx-auto",
-        className
+        className,
       )}
       onClick={onClick}
     >

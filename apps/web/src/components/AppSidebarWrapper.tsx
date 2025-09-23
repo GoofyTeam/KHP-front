@@ -25,7 +25,7 @@ const getSidebarDefaultState = (currentPath: string): boolean => {
 
   if (
     defaultClosedPages.some(
-      (page) => currentPath === page || currentPath.startsWith(page + "/")
+      (page) => currentPath === page || currentPath.startsWith(page + "/"),
     )
   ) {
     return false;
@@ -33,7 +33,7 @@ const getSidebarDefaultState = (currentPath: string): boolean => {
 
   if (
     defaultOpenPages.some(
-      (page) => currentPath === page || currentPath.startsWith(page + "/")
+      (page) => currentPath === page || currentPath.startsWith(page + "/"),
     )
   ) {
     return true;

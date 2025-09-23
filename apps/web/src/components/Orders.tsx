@@ -89,7 +89,7 @@ function transformData(queryData: GetOrdersQuery): OrderItem[] {
 
 function isQueryData(data: unknown): data is GetOrdersQuery {
   return Boolean(
-    data && typeof data === "object" && data !== null && "orders" in data
+    data && typeof data === "object" && data !== null && "orders" in data,
   );
 }
 
@@ -151,7 +151,7 @@ export function Orders({ data, className }: OrdersProps) {
     <section
       className={cn(
         "rounded-md border border-khp-primary/30 bg-white shadow-sm pt-2 flex flex-col min-h-0",
-        className
+        className,
       )}
       aria-label="Orders"
     >

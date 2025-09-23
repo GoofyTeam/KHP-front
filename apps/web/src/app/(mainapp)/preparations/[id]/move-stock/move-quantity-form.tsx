@@ -38,12 +38,12 @@ export function MoveQuantityForm({
   const [apiError, setApiError] = useState<string | null>(null);
 
   const availableSourceQuantities = preparation.quantities.filter(
-    (q) => q.quantity > 0
+    (q) => q.quantity > 0,
   );
 
   const selectedSourceLocation = formData.sourceLocationIndex
     ? availableSourceQuantities.find(
-        (q) => q.location.id === formData.sourceLocationIndex
+        (q) => q.location.id === formData.sourceLocationIndex,
       )
     : null;
 
@@ -55,12 +55,12 @@ export function MoveQuantityForm({
       : parseFloat(formData.quantityOTP) || 0;
 
   const existingDestinations = preparation.quantities.filter(
-    (q) => q.location.id !== selectedSourceLocation?.location.id
+    (q) => q.location.id !== selectedSourceLocation?.location.id,
   );
 
   const newDestinations = allLocations
     .filter(
-      (loc) => !preparation.quantities.some((q) => q.location.id === loc.id)
+      (loc) => !preparation.quantities.some((q) => q.location.id === loc.id),
     )
     .map((location) => ({
       quantity: 0,

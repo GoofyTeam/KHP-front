@@ -177,13 +177,13 @@ export function MovementHistory({
             key={key}
             className={cn(
               "flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors duration-200 active:bg-muted/50",
-              "touch-manipulation min-h-[64px]"
+              "touch-manipulation min-h-[64px]",
             )}
           >
             <div
               className={cn(
                 "flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center",
-                badgeStyles
+                badgeStyles,
               )}
             >
               <IconComponent className="h-5 w-5" strokeWidth={2.5} />

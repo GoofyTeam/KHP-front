@@ -75,7 +75,7 @@ const createMenuSchema = z
       })
       .refine((file) => {
         return ACCEPTED_IMAGE_TYPES.includes(
-          file.type as (typeof ACCEPTED_IMAGE_TYPES)[number]
+          file.type as (typeof ACCEPTED_IMAGE_TYPES)[number],
         );
       }, "Image must be an accepted format"),
     description: z.string().optional(),
@@ -145,14 +145,14 @@ export default function CreateMenusPage() {
     GetMenuCategoriesDocument,
     {
       fetchPolicy: "network-only",
-    }
+    },
   );
 
   const { data: menuTypes } = useQuery<GetMenuTypesQuery>(
     GetMenuTypesDocument,
     {
       fetchPolicy: "network-only",
-    }
+    },
   );
 
   const form = useForm<CreateMenuFormValues>({
@@ -173,10 +173,10 @@ export default function CreateMenusPage() {
   });
 
   const handleValidationErrors: SubmitErrorHandler<CreateMenuFormValues> = (
-    errors
+    errors,
   ) => {
     const hasMenuInfoErrors = MENU_INFO_FIELDS.some((field) =>
-      Boolean(errors[field])
+      Boolean(errors[field]),
     );
 
     if (hasMenuInfoErrors) {
@@ -254,7 +254,7 @@ export default function CreateMenusPage() {
       }
       if (lower.includes("session expired") || lower.includes("419")) {
         tips.push(
-          "Your session has expired. Refresh the page, then try again."
+          "Your session has expired. Refresh the page, then try again.",
         );
       }
       if (lower.includes("validation") || lower.includes("422")) {
@@ -262,7 +262,7 @@ export default function CreateMenusPage() {
       }
       if (tips.length === 0) {
         tips.push(
-          "Check required fields, image format/size, and your network connection."
+          "Check required fields, image format/size, and your network connection.",
         );
       }
 
@@ -282,7 +282,7 @@ export default function CreateMenusPage() {
         <form
           onSubmit={form.handleSubmit(
             onMenusCreateSubmit,
-            handleValidationErrors
+            handleValidationErrors,
           )}
           className="w-full max-w-6xl mx-auto"
         >
@@ -474,7 +474,7 @@ export default function CreateMenusPage() {
                                     >
                                       {category.name}
                                     </SelectItem>
-                                  )
+                                  ),
                                 )}
                               </SelectContent>
                             </Select>
@@ -543,7 +543,7 @@ export default function CreateMenusPage() {
                               onChange={(e) => {
                                 const value = e.target.value;
                                 field.onChange(
-                                  value === "" ? undefined : Number(value)
+                                  value === "" ? undefined : Number(value),
                                 );
                               }}
                             />

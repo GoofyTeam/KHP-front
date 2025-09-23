@@ -8,171 +8,171 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as ProtectedMoveQuantityRouteImport } from './routes/_protected/move-quantity'
-import { Route as ProtectedInventoryRouteImport } from './routes/_protected/inventory'
-import { Route as ProtectedHandleItemRouteImport } from './routes/_protected/handle-item'
-import { Route as ProtectedScanScanTypeRouteImport } from './routes/_protected/scan.$scanType'
-import { Route as ProtectedProductsIdRouteImport } from './routes/_protected/products.$id'
-import { Route as ProtectedProductsIdHistoryRouteImport } from './routes/_protected/products.$id_.history'
+import { Route as rootRouteImport } from "./routes/__root";
+import { Route as LoginRouteImport } from "./routes/login";
+import { Route as ProtectedMoveQuantityRouteImport } from "./routes/_protected/move-quantity";
+import { Route as ProtectedInventoryRouteImport } from "./routes/_protected/inventory";
+import { Route as ProtectedHandleItemRouteImport } from "./routes/_protected/handle-item";
+import { Route as ProtectedScanScanTypeRouteImport } from "./routes/_protected/scan.$scanType";
+import { Route as ProtectedProductsIdRouteImport } from "./routes/_protected/products.$id";
+import { Route as ProtectedProductsIdHistoryRouteImport } from "./routes/_protected/products.$id_.history";
 
 const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+  id: "/login",
+  path: "/login",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const ProtectedMoveQuantityRoute = ProtectedMoveQuantityRouteImport.update({
-  id: '/_protected/move-quantity',
-  path: '/move-quantity',
+  id: "/_protected/move-quantity",
+  path: "/move-quantity",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const ProtectedInventoryRoute = ProtectedInventoryRouteImport.update({
-  id: '/_protected/inventory',
-  path: '/inventory',
+  id: "/_protected/inventory",
+  path: "/inventory",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const ProtectedHandleItemRoute = ProtectedHandleItemRouteImport.update({
-  id: '/_protected/handle-item',
-  path: '/handle-item',
+  id: "/_protected/handle-item",
+  path: "/handle-item",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const ProtectedScanScanTypeRoute = ProtectedScanScanTypeRouteImport.update({
-  id: '/_protected/scan/$scanType',
-  path: '/scan/$scanType',
+  id: "/_protected/scan/$scanType",
+  path: "/scan/$scanType",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const ProtectedProductsIdRoute = ProtectedProductsIdRouteImport.update({
-  id: '/_protected/products/$id',
-  path: '/products/$id',
+  id: "/_protected/products/$id",
+  path: "/products/$id",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const ProtectedProductsIdHistoryRoute =
   ProtectedProductsIdHistoryRouteImport.update({
-    id: '/_protected/products/$id_/history',
-    path: '/products/$id/history',
+    id: "/_protected/products/$id_/history",
+    path: "/products/$id/history",
     getParentRoute: () => rootRouteImport,
-  } as any)
+  } as any);
 
 export interface FileRoutesByFullPath {
-  '/login': typeof LoginRoute
-  '/handle-item': typeof ProtectedHandleItemRoute
-  '/inventory': typeof ProtectedInventoryRoute
-  '/move-quantity': typeof ProtectedMoveQuantityRoute
-  '/products/$id': typeof ProtectedProductsIdRoute
-  '/scan/$scanType': typeof ProtectedScanScanTypeRoute
-  '/products/$id/history': typeof ProtectedProductsIdHistoryRoute
+  "/login": typeof LoginRoute;
+  "/handle-item": typeof ProtectedHandleItemRoute;
+  "/inventory": typeof ProtectedInventoryRoute;
+  "/move-quantity": typeof ProtectedMoveQuantityRoute;
+  "/products/$id": typeof ProtectedProductsIdRoute;
+  "/scan/$scanType": typeof ProtectedScanScanTypeRoute;
+  "/products/$id/history": typeof ProtectedProductsIdHistoryRoute;
 }
 export interface FileRoutesByTo {
-  '/login': typeof LoginRoute
-  '/handle-item': typeof ProtectedHandleItemRoute
-  '/inventory': typeof ProtectedInventoryRoute
-  '/move-quantity': typeof ProtectedMoveQuantityRoute
-  '/products/$id': typeof ProtectedProductsIdRoute
-  '/scan/$scanType': typeof ProtectedScanScanTypeRoute
-  '/products/$id/history': typeof ProtectedProductsIdHistoryRoute
+  "/login": typeof LoginRoute;
+  "/handle-item": typeof ProtectedHandleItemRoute;
+  "/inventory": typeof ProtectedInventoryRoute;
+  "/move-quantity": typeof ProtectedMoveQuantityRoute;
+  "/products/$id": typeof ProtectedProductsIdRoute;
+  "/scan/$scanType": typeof ProtectedScanScanTypeRoute;
+  "/products/$id/history": typeof ProtectedProductsIdHistoryRoute;
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/login': typeof LoginRoute
-  '/_protected/handle-item': typeof ProtectedHandleItemRoute
-  '/_protected/inventory': typeof ProtectedInventoryRoute
-  '/_protected/move-quantity': typeof ProtectedMoveQuantityRoute
-  '/_protected/products/$id': typeof ProtectedProductsIdRoute
-  '/_protected/scan/$scanType': typeof ProtectedScanScanTypeRoute
-  '/_protected/products/$id_/history': typeof ProtectedProductsIdHistoryRoute
+  __root__: typeof rootRouteImport;
+  "/login": typeof LoginRoute;
+  "/_protected/handle-item": typeof ProtectedHandleItemRoute;
+  "/_protected/inventory": typeof ProtectedInventoryRoute;
+  "/_protected/move-quantity": typeof ProtectedMoveQuantityRoute;
+  "/_protected/products/$id": typeof ProtectedProductsIdRoute;
+  "/_protected/scan/$scanType": typeof ProtectedScanScanTypeRoute;
+  "/_protected/products/$id_/history": typeof ProtectedProductsIdHistoryRoute;
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
+  fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
-    | '/login'
-    | '/handle-item'
-    | '/inventory'
-    | '/move-quantity'
-    | '/products/$id'
-    | '/scan/$scanType'
-    | '/products/$id/history'
-  fileRoutesByTo: FileRoutesByTo
+    | "/login"
+    | "/handle-item"
+    | "/inventory"
+    | "/move-quantity"
+    | "/products/$id"
+    | "/scan/$scanType"
+    | "/products/$id/history";
+  fileRoutesByTo: FileRoutesByTo;
   to:
-    | '/login'
-    | '/handle-item'
-    | '/inventory'
-    | '/move-quantity'
-    | '/products/$id'
-    | '/scan/$scanType'
-    | '/products/$id/history'
+    | "/login"
+    | "/handle-item"
+    | "/inventory"
+    | "/move-quantity"
+    | "/products/$id"
+    | "/scan/$scanType"
+    | "/products/$id/history";
   id:
-    | '__root__'
-    | '/login'
-    | '/_protected/handle-item'
-    | '/_protected/inventory'
-    | '/_protected/move-quantity'
-    | '/_protected/products/$id'
-    | '/_protected/scan/$scanType'
-    | '/_protected/products/$id_/history'
-  fileRoutesById: FileRoutesById
+    | "__root__"
+    | "/login"
+    | "/_protected/handle-item"
+    | "/_protected/inventory"
+    | "/_protected/move-quantity"
+    | "/_protected/products/$id"
+    | "/_protected/scan/$scanType"
+    | "/_protected/products/$id_/history";
+  fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  LoginRoute: typeof LoginRoute
-  ProtectedHandleItemRoute: typeof ProtectedHandleItemRoute
-  ProtectedInventoryRoute: typeof ProtectedInventoryRoute
-  ProtectedMoveQuantityRoute: typeof ProtectedMoveQuantityRoute
-  ProtectedProductsIdRoute: typeof ProtectedProductsIdRoute
-  ProtectedScanScanTypeRoute: typeof ProtectedScanScanTypeRoute
-  ProtectedProductsIdHistoryRoute: typeof ProtectedProductsIdHistoryRoute
+  LoginRoute: typeof LoginRoute;
+  ProtectedHandleItemRoute: typeof ProtectedHandleItemRoute;
+  ProtectedInventoryRoute: typeof ProtectedInventoryRoute;
+  ProtectedMoveQuantityRoute: typeof ProtectedMoveQuantityRoute;
+  ProtectedProductsIdRoute: typeof ProtectedProductsIdRoute;
+  ProtectedScanScanTypeRoute: typeof ProtectedScanScanTypeRoute;
+  ProtectedProductsIdHistoryRoute: typeof ProtectedProductsIdHistoryRoute;
 }
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_protected/move-quantity': {
-      id: '/_protected/move-quantity'
-      path: '/move-quantity'
-      fullPath: '/move-quantity'
-      preLoaderRoute: typeof ProtectedMoveQuantityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_protected/inventory': {
-      id: '/_protected/inventory'
-      path: '/inventory'
-      fullPath: '/inventory'
-      preLoaderRoute: typeof ProtectedInventoryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_protected/handle-item': {
-      id: '/_protected/handle-item'
-      path: '/handle-item'
-      fullPath: '/handle-item'
-      preLoaderRoute: typeof ProtectedHandleItemRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_protected/scan/$scanType': {
-      id: '/_protected/scan/$scanType'
-      path: '/scan/$scanType'
-      fullPath: '/scan/$scanType'
-      preLoaderRoute: typeof ProtectedScanScanTypeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_protected/products/$id': {
-      id: '/_protected/products/$id'
-      path: '/products/$id'
-      fullPath: '/products/$id'
-      preLoaderRoute: typeof ProtectedProductsIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_protected/products/$id_/history': {
-      id: '/_protected/products/$id_/history'
-      path: '/products/$id/history'
-      fullPath: '/products/$id/history'
-      preLoaderRoute: typeof ProtectedProductsIdHistoryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+    "/login": {
+      id: "/login";
+      path: "/login";
+      fullPath: "/login";
+      preLoaderRoute: typeof LoginRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/_protected/move-quantity": {
+      id: "/_protected/move-quantity";
+      path: "/move-quantity";
+      fullPath: "/move-quantity";
+      preLoaderRoute: typeof ProtectedMoveQuantityRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/_protected/inventory": {
+      id: "/_protected/inventory";
+      path: "/inventory";
+      fullPath: "/inventory";
+      preLoaderRoute: typeof ProtectedInventoryRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/_protected/handle-item": {
+      id: "/_protected/handle-item";
+      path: "/handle-item";
+      fullPath: "/handle-item";
+      preLoaderRoute: typeof ProtectedHandleItemRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/_protected/scan/$scanType": {
+      id: "/_protected/scan/$scanType";
+      path: "/scan/$scanType";
+      fullPath: "/scan/$scanType";
+      preLoaderRoute: typeof ProtectedScanScanTypeRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/_protected/products/$id": {
+      id: "/_protected/products/$id";
+      path: "/products/$id";
+      fullPath: "/products/$id";
+      preLoaderRoute: typeof ProtectedProductsIdRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/_protected/products/$id_/history": {
+      id: "/_protected/products/$id_/history";
+      path: "/products/$id/history";
+      fullPath: "/products/$id/history";
+      preLoaderRoute: typeof ProtectedProductsIdHistoryRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
   }
 }
 
@@ -184,7 +184,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProtectedProductsIdRoute: ProtectedProductsIdRoute,
   ProtectedScanScanTypeRoute: ProtectedScanScanTypeRoute,
   ProtectedProductsIdHistoryRoute: ProtectedProductsIdHistoryRoute,
-}
+};
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+  ._addFileTypes<FileRouteTypes>();

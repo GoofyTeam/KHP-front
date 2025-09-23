@@ -60,11 +60,11 @@ sequenceDiagram
   API->>PWA: Return inventory data
   Chef->>PWA: Update stock quantities
   PWA->>API: Submit stock changes
-  
+
   Note over Web: Parallel dashboard usage
   Web->>API: Real-time inventory monitoring
   API->>Web: Live stock updates
-  
+
   Note over Turbo: Development process
   Turbo->>Web: run dev (schema + next dev)
   Turbo->>PWA: run dev (schema + vite)
@@ -88,14 +88,18 @@ npm install
 ## Environment Variables
 
 ### Web Dashboard (`apps/web`)
+
 Create `.env` file (see `.env.example`):
+
 ```env
 NEXT_PUBLIC_API_URL=https://back.goofykhp.fr/graphql
 # For local development: http://localhost:8000/graphql
 ```
 
-### Mobile PWA (`apps/pwa`)  
+### Mobile PWA (`apps/pwa`)
+
 `.env` file required:
+
 ```env
 VITE_API_URL=https://back.goofykhp.fr/graphql
 VITE_PROJECT_NAME=KHP-front
@@ -107,6 +111,7 @@ VITE_PROJECT_NAME=KHP-front
 ## Development
 
 ### Quick Start
+
 Start both applications with Turborepo:
 
 ```bash
@@ -116,17 +121,21 @@ npm run dev
 ### Individual Applications
 
 **Web Dashboard** (desktop/tablet interface):
+
 ```bash
 npm run dev:web   # → http://localhost:3000
 ```
 
 **Mobile PWA** (barcode scanner):
+
 ```bash
 npm run dev:pwa   # → http://localhost:5173 (network exposed)
 ```
 
 ### First Run Setup
+
 On initial startup, both applications will:
+
 1. **Introspect** the KHP GraphQL API schema from `https://back.goofykhp.fr/graphql`
 2. **Generate** TypeScript types and GraphQL operations
 3. **Start** the development servers
@@ -136,16 +145,19 @@ On initial startup, both applications will:
 ## Build & Quality
 
 ### Build Commands
+
 - `npm run build` — build all applications and packages
-- `npm run build:web` — build web dashboard only  
+- `npm run build:web` — build web dashboard only
 - `npm run build:pwa` — build mobile PWA only
 
 ### Code Quality
+
 - `npm run lint` — lint the entire workspace
 - `npm run check-types` — TypeScript type checking
 - `npm run format` — format code with Prettier (`*.ts, *.tsx, *.md`)
 
 ### Testing
+
 - Individual apps support `npm run test`, `npm run test:watch`, `npm run test:run`
 - Run from workspace root or navigate to specific app directories
 
@@ -154,24 +166,29 @@ On initial startup, both applications will:
 Production-ready Dockerfiles are provided for both applications. Use the included `Makefile` for simplified container management:
 
 ### All Applications
+
 ```bash
 make build-and-start    # Build and start both containers
 ```
 
 ### Web Dashboard
+
 ```bash
 make build-web          # Build web dashboard image
 make start-web          # Start container (localhost:5432 → container:3000)
 ```
 
-### Mobile PWA  
+### Mobile PWA
+
 ```bash
 make build-pwa          # Build PWA image
 make start-pwa          # Start container (localhost:5433 → container:80)
 ```
 
 ### Production Deployment
+
 The CI/CD workflows automatically build and publish images to GitHub Container Registry (GHCR) on pushes to `main`:
+
 - **Web**: `deploy_webapp` workflow
 - **PWA**: `deploy_pwa` workflow
 
@@ -188,6 +205,7 @@ flowchart TB
 ## Development Conventions
 
 ### Git Hooks
+
 Git hooks are managed by [Lefthook](https://github.com/evilmartians/lefthook):
 
 ```bash
@@ -195,12 +213,15 @@ npx lefthook install
 ```
 
 ### Commit Messages
+
 Enforce conventional commit format: `[KHP-123] feat(scope): message`
+
 - Validated by `verify-commit-msg.sh`
 - Include ticket numbers for traceability
 - Use conventional commit types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 
 ### Code Organization
+
 - **Shared components**: Use `@workspace/ui` for reusable kitchen/inventory UI components
 - **GraphQL**: Schema introspection and type generation handled automatically
 - **TypeScript**: Strict typing enforced across all packages

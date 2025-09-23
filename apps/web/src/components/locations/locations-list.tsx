@@ -43,7 +43,7 @@ export const LocationsList = forwardRef<LocationsListRef, LocationsListProps>(
         fetchPolicy: "cache-and-network",
         errorPolicy: "all",
         notifyOnNetworkStatusChange: true,
-      }
+      },
     );
 
     const paginatorInfo = data?.locations?.paginatorInfo;
@@ -108,7 +108,7 @@ export const LocationsList = forwardRef<LocationsListRef, LocationsListProps>(
           loadMore();
         }
       },
-      [loadMore]
+      [loadMore],
     );
 
     // Reset when refetch is called (for refresh after mutations)
@@ -128,7 +128,7 @@ export const LocationsList = forwardRef<LocationsListRef, LocationsListProps>(
       () => ({
         refresh: handleRefetch,
       }),
-      [handleRefetch]
+      [handleRefetch],
     );
 
     if (error) {
@@ -280,7 +280,7 @@ export const LocationsList = forwardRef<LocationsListRef, LocationsListProps>(
         </div>
       </div>
     );
-  }
+  },
 );
 
 LocationsList.displayName = "LocationsList";

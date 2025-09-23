@@ -18,7 +18,7 @@ function handleHttpError<T = unknown>(e: unknown): ActionResult<T> {
 }
 
 export async function moveIngredientQuantityAction(
-  input: MoveIngredientInput
+  input: MoveIngredientInput,
 ): Promise<ActionResult> {
   const { ingredientId, from_location_id, to_location_id, quantity } = input;
 
@@ -29,7 +29,7 @@ export async function moveIngredientQuantityAction(
         to_location_id,
         quantity,
       }),
-    "Failed to move ingredient quantity: "
+    "Failed to move ingredient quantity: ",
   );
 }
 
@@ -48,7 +48,7 @@ export interface UpdateIngredientInput {
 }
 
 export async function updateIngredientAction(
-  input: UpdateIngredientInput
+  input: UpdateIngredientInput,
 ): Promise<ActionResult> {
   const { ingredientId, image, ...data } = input;
 
@@ -79,16 +79,16 @@ export async function updateIngredientAction(
 
   return executeHttpAction(
     () => httpClient.post(`/api/ingredients/${ingredientId}`, formData),
-    "Failed to update ingredient: "
+    "Failed to update ingredient: ",
   );
 }
 
 export async function deleteIngredientAction(
-  ingredientId: string | number
+  ingredientId: string | number,
 ): Promise<ActionResult> {
   return executeHttpAction(
     () => httpClient.delete(`/api/ingredients/${ingredientId}`),
-    "Failed to delete ingredient: "
+    "Failed to delete ingredient: ",
   );
 }
 
@@ -118,25 +118,25 @@ export interface RemoveQuantityInput {
 
 export async function addIngredientQuantityAction(
   ingredientId: string | number,
-  input: AddQuantityInput
+  input: AddQuantityInput,
 ): Promise<ActionResult> {
   return executeHttpAction(
     () =>
       httpClient.post(`/api/ingredients/${ingredientId}/add-quantity`, input),
-    "Failed to add ingredient quantity: "
+    "Failed to add ingredient quantity: ",
   );
 }
 
 export async function removeIngredientQuantityAction(
   ingredientId: string | number,
-  input: RemoveQuantityInput
+  input: RemoveQuantityInput,
 ): Promise<ActionResult> {
   return executeHttpAction(
     () =>
       httpClient.post(
         `/api/ingredients/${ingredientId}/remove-quantity`,
-        input
+        input,
       ),
-    "Failed to remove ingredient quantity: "
+    "Failed to remove ingredient quantity: ",
   );
 }

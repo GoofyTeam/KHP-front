@@ -1,15 +1,14 @@
-'use client';
+"use client";
 
-import { AutoBreadcrumb } from '@/components/auto-breadcrumb';
+import { AutoBreadcrumb } from "@/components/auto-breadcrumb";
 
 export default function LossBreadcrumb() {
   return (
     <AutoBreadcrumb
       listClassName="text-xl font-semibold"
       lastLabel="Loss"
-      isLink={(href) => href !== '/loss'}
-      overrides={{ loss: 'Losses' }}
+      isLink={(href) => href !== "/loss"}
+      overrides={{ loss: "Losses" }}
     />
   );
 }
-

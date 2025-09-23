@@ -23,15 +23,15 @@ export type BulkCreateIngredientsInput = {
 };
 
 export async function bulkCreateIngredientsAction(
-  input: BulkCreateIngredientsInput
+  input: BulkCreateIngredientsInput,
 ): Promise<ActionResult<{ ingredient_ids?: number[] }>> {
   return executeHttpAction(
     () =>
       httpClient.post<{ ingredient_ids?: number[] }>(
         "/api/ingredients/bulk",
-        input
+        input,
       ),
-    "Failed to bulk create ingredients: "
+    "Failed to bulk create ingredients: ",
   );
 }
 
@@ -55,29 +55,29 @@ export type BulkCreateIngredientsWithImagesInput = {
 };
 
 export async function bulkCreateIngredientsUploadAction(
-  formData: FormData
+  formData: FormData,
 ): Promise<ActionResult<{ ingredient_ids?: number[] }>> {
   return executeHttpAction(
     () =>
       httpClient.post<{ ingredient_ids?: number[] }>(
         "/api/ingredients/bulk",
-        formData
+        formData,
       ),
-    "Failed to bulk create ingredients with images: "
+    "Failed to bulk create ingredients with images: ",
   );
 }
 
 export async function createIngredientUploadAction(
-  formData: FormData
+  formData: FormData,
 ): Promise<ActionResult<{ id?: number }>> {
   return executeHttpAction(
     () => httpClient.post<{ id?: number }>("/api/ingredients", formData),
-    "Failed to create ingredient: "
+    "Failed to create ingredient: ",
   );
 }
 
 export async function findIngredientByNameAction(
-  name: string
+  name: string,
 ): Promise<ActionResult<{ id?: number }>> {
   return executeHttpAction(async () => {
     const { data } = await query({
@@ -95,7 +95,7 @@ export async function findIngredientByNameAction(
       (it) =>
         String(it?.name ?? "")
           .trim()
-          .toLowerCase() === target
+          .toLowerCase() === target,
     );
     if (!match?.id) return {};
     return { id: Number(match.id) };
@@ -104,7 +104,7 @@ export async function findIngredientByNameAction(
 
 export async function addQuantitiesToIngredientAction(
   ingredientId: number,
-  quantities: IngredientQuantityInput[]
+  quantities: IngredientQuantityInput[],
 ): Promise<ActionResult> {
   return executeHttpAction(async () => {
     for (const q of quantities) {

@@ -22,7 +22,7 @@ export default function MenusPage() {
 
   const menus: GetMenusQuery["menus"]["data"] = useMemo(
     () => data?.menus?.data ?? [],
-    [data?.menus?.data]
+    [data?.menus?.data],
   );
 
   const pageInfo = data?.menus?.paginatorInfo;
@@ -59,7 +59,7 @@ export default function MenusPage() {
           });
         }
       },
-      { rootMargin: "200px" }
+      { rootMargin: "200px" },
     );
 
     observer.observe(el);

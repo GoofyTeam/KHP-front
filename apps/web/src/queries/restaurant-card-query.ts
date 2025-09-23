@@ -40,7 +40,7 @@ export type RestaurantCardFetchResult =
   | { status: "error"; message: string };
 
 export async function fetchRestaurantCard(
-  publicMenuCardUrl: string
+  publicMenuCardUrl: string,
 ): Promise<RestaurantCardFetchResult> {
   if (!publicMenuCardUrl) {
     return {
@@ -51,7 +51,7 @@ export async function fetchRestaurantCard(
 
   try {
     const response = await httpClient.get<RestaurantCardResponse>(
-      `/api/restaurant-card/${encodeURIComponent(publicMenuCardUrl)}`
+      `/api/restaurant-card/${encodeURIComponent(publicMenuCardUrl)}`,
     );
 
     if (!response?.company) {
@@ -112,7 +112,9 @@ function getPriorityOrder(menu: RestaurantCardMenu): number {
   return typeof menu.priority === "number" ? menu.priority : ORDER_FALLBACK;
 }
 
-function sortMenusForDisplay(menus: RestaurantCardMenu[]): RestaurantCardMenu[] {
+function sortMenusForDisplay(
+  menus: RestaurantCardMenu[],
+): RestaurantCardMenu[] {
   return menus.slice().sort((a, b) => {
     const typeComparison = getTypeOrder(a) - getTypeOrder(b);
 

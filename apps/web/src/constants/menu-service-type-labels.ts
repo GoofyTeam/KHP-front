@@ -6,7 +6,7 @@ export const MENU_SERVICE_TYPE_LABELS: Record<MenuServiceTypeEnum, string> = {
 };
 
 export function getMenuServiceTypeLabel(
-  serviceType?: MenuServiceTypeEnum | null
+  serviceType?: MenuServiceTypeEnum | null,
 ): string {
   if (!serviceType) return "—";
   return MENU_SERVICE_TYPE_LABELS[serviceType] ?? serviceType;

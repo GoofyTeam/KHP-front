@@ -44,7 +44,7 @@ function HandleAddProduct() {
   const [serverError, setServerError] = useState<string | null>(null);
 
   const storageUnitDefault = getAllMeasurementUnits().find(
-    (unit) => unit.value === "unit"
+    (unit) => unit.value === "unit",
   )?.value;
 
   const form = useForm<z.infer<typeof handleItemSchema>>({
@@ -209,7 +209,7 @@ function HandleAddProduct() {
                                 {categorie.name}
                               </SelectItem>
                             );
-                          }
+                          },
                         )}
                     </SelectContent>
                   </Select>
@@ -335,7 +335,7 @@ function HandleAddProduct() {
                               <SelectItem key={location.id} value={location.id}>
                                 {location.name}
                               </SelectItem>
-                            )
+                            ),
                           )}
                         </SelectContent>
                       </Select>

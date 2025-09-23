@@ -32,15 +32,15 @@ export interface QuickAccessResponse {
 }
 
 export async function updateQuickAccessAction(
-  input: QuickAccessUpdateData
+  input: QuickAccessUpdateData,
 ): Promise<ActionResult<QuickAccessResponse>> {
   return executeHttpAction(
     () =>
       httpClient.put<QuickAccessResponse, QuickAccessUpdateData>(
         "/api/quick-access",
-        input
+        input,
       ),
-    "Failed to update quick access: "
+    "Failed to update quick access: ",
   );
 }
 
@@ -49,6 +49,6 @@ export async function resetQuickAccessAction(): Promise<
 > {
   return executeHttpAction(
     () => httpClient.post<QuickAccessResponse>("/api/quick-access/reset"),
-    "Failed to reset quick access: "
+    "Failed to reset quick access: ",
   );
 }

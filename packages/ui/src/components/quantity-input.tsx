@@ -70,14 +70,14 @@ export function QuantityInput({
   // Show raw value while focused, formatted otherwise (memoized to avoid extra work)
   const displayValue = useMemo(
     () => (isFocused ? value : formatDisplayValue(value)),
-    [value, isFocused]
+    [value, isFocused],
   );
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       onChange(cleanNumericString(e.target.value));
     },
-    [onChange]
+    [onChange],
   );
 
   const handleFocus = useCallback(() => setIsFocused(true), []);
@@ -104,7 +104,7 @@ export function QuantityInput({
         e.preventDefault();
       }
     },
-    []
+    [],
   );
 
   const handlePaste = useCallback(
@@ -113,7 +113,7 @@ export function QuantityInput({
       const cleaned = cleanNumericString(e.clipboardData.getData("text"));
       onChange(cleaned);
     },
-    [onChange]
+    [onChange],
   );
 
   return (

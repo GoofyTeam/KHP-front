@@ -49,7 +49,7 @@ function WaitersRoomsTabs({ createOrderForTable }: WaitersRoomsTabsProps) {
 
   const normalizedRooms = useMemo(
     () => extractRooms(liveRoomsData),
-    [liveRoomsData]
+    [liveRoomsData],
   );
 
   const errorMessages = useMemo(() => {

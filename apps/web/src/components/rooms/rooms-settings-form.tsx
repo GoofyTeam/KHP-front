@@ -258,7 +258,7 @@ function RoomsSettingsForm() {
                         deleteTableForm.setValue("roomId", room.id.toString());
                         deleteTableForm.setValue(
                           "tableId",
-                          table.id.toString()
+                          table.id.toString(),
                         );
                         setIsDeleteTableDialogOpen(true);
                       }}
@@ -453,7 +453,7 @@ function RoomsSettingsForm() {
               Delete{" "}
               {
                 rooms.find(
-                  (r) => r.id.toString() === deleteRoomForm.getValues("roomId")
+                  (r) => r.id.toString() === deleteRoomForm.getValues("roomId"),
                 )?.name
               }
             </DialogTitle>
@@ -493,11 +493,11 @@ function RoomsSettingsForm() {
                 rooms
                   .find(
                     (r) =>
-                      r.id.toString() === deleteTableForm.getValues("roomId")
+                      r.id.toString() === deleteTableForm.getValues("roomId"),
                   )
                   ?.tables?.find(
                     (t) =>
-                      t.id.toString() === deleteTableForm.getValues("tableId")
+                      t.id.toString() === deleteTableForm.getValues("tableId"),
                   )?.label
               }
             </DialogTitle>

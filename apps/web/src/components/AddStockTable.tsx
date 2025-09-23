@@ -74,7 +74,7 @@ function useIsMobile() {
       const userAgent = navigator.userAgent;
       const isMobileDevice =
         /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-          userAgent
+          userAgent,
         );
       const isSmallScreen = window.innerWidth < 768;
       setIsMobile(isMobileDevice || isSmallScreen);
@@ -168,7 +168,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
   const { data: locationsData, loading: locationsLoading } =
     useQuery(GetLocationsDocument);
   const { data: categoriesData, loading: categoriesLoading } = useQuery(
-    GetCategoriesDocument
+    GetCategoriesDocument,
   );
   const { data: unitsData, loading: unitsLoading } = useQuery(GetUnitDocument);
 
@@ -272,11 +272,11 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
       if (window.visualViewport) {
         window.visualViewport.removeEventListener(
           "resize",
-          handleViewportChange
+          handleViewportChange,
         );
         window.visualViewport.removeEventListener(
           "scroll",
-          handleViewportScroll
+          handleViewportScroll,
         );
       }
     };
@@ -305,14 +305,14 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
           "category",
           categories.map((c) => String(c.id)),
           draft.category ? String(draft.category) : "",
-          (v) => setDraft((d) => ({ ...d, category: Number(v) }))
+          (v) => setDraft((d) => ({ ...d, category: Number(v) })),
         );
       } else if (field === "location") {
         handleSelectClick(
           "location",
           locations.map((l) => l.name),
           draft.location,
-          (v) => setDraft((d) => ({ ...d, location: v }))
+          (v) => setDraft((d) => ({ ...d, location: v })),
         );
       }
     }, 100);
@@ -335,7 +335,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
         setFocusedField("qtyunit");
         setTimeout(
           () => visibleInputRef.current?.focus({ preventScroll: true }),
-          50
+          50,
         );
         break;
       case "qtyunit":
@@ -344,13 +344,13 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
             "unit",
             units.map((u) => u.value),
             draft.unit,
-            (v) => setDraft((d) => ({ ...d, unit: v as Unit }))
+            (v) => setDraft((d) => ({ ...d, unit: v as Unit })),
           );
         } else {
           setFocusedField("baseqtyunit");
           setTimeout(
             () => visibleInputRef.current?.focus({ preventScroll: true }),
-            50
+            50,
           );
         }
         break;
@@ -360,7 +360,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
             "base_unit",
             units.map((u) => u.value),
             draft.base_unit,
-            (v) => setDraft((d) => ({ ...d, base_unit: v as Unit }))
+            (v) => setDraft((d) => ({ ...d, base_unit: v as Unit })),
           );
         } else {
           setFocusedField("category");
@@ -369,7 +369,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
               "category",
               categories.map((c) => String(c.id)),
               draft.category ? String(draft.category) : "",
-              (v) => setDraft((d) => ({ ...d, category: Number(v) }))
+              (v) => setDraft((d) => ({ ...d, category: Number(v) })),
             );
           }, 100);
         }
@@ -381,7 +381,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
             "location",
             locations.map((l) => l.name),
             draft.location,
-            (v) => setDraft((d) => ({ ...d, location: v }))
+            (v) => setDraft((d) => ({ ...d, location: v })),
           );
         }, 100);
         break;
@@ -399,14 +399,14 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
         setFocusedField("productName");
         setTimeout(
           () => visibleInputRef.current?.focus({ preventScroll: true }),
-          50
+          50,
         );
         break;
       case "baseqtyunit":
         setFocusedField("qtyunit");
         setTimeout(
           () => visibleInputRef.current?.focus({ preventScroll: true }),
-          50
+          50,
         );
         break;
       case "productName":
@@ -416,7 +416,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
             "location",
             locations.map((l) => l.name),
             draft.location,
-            (v) => setDraft((d) => ({ ...d, location: v }))
+            (v) => setDraft((d) => ({ ...d, location: v })),
           );
         }, 100);
         break;
@@ -424,7 +424,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
         setFocusedField("baseqtyunit");
         setTimeout(
           () => visibleInputRef.current?.focus({ preventScroll: true }),
-          50
+          50,
         );
         break;
       case "location":
@@ -434,7 +434,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
             "category",
             categories.map((c) => String(c.id)),
             draft.category ? String(draft.category) : "",
-            (v) => setDraft((d) => ({ ...d, category: Number(v) }))
+            (v) => setDraft((d) => ({ ...d, category: Number(v) })),
           );
         }, 100);
         break;
@@ -457,7 +457,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
     setActiveSelect(null);
     setTimeout(
       () => visibleInputRef.current?.focus({ preventScroll: true }),
-      50
+      50,
     );
   };
 
@@ -470,7 +470,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
     type: "unit" | "base_unit" | "category" | "location",
     options: string[],
     value: string,
-    onSelect: (value: string) => void
+    onSelect: (value: string) => void,
   ) => {
     setActiveSelect({ type, options, value, onSelect });
   };
@@ -485,7 +485,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
         setFocusedField("baseqtyunit");
         setTimeout(
           () => visibleInputRef.current?.focus({ preventScroll: true }),
-          50
+          50,
         );
       } else if (selectType === "base_unit") {
         setFocusedField("category");
@@ -494,7 +494,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
             "category",
             categories.map((c) => String(c.id)),
             draft.category ? String(draft.category) : "",
-            (v) => setDraft((d) => ({ ...d, category: Number(v) }))
+            (v) => setDraft((d) => ({ ...d, category: Number(v) })),
           );
         }, 100);
       } else if (selectType === "category") {
@@ -504,7 +504,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
             "location",
             locations.map((l) => l.name),
             draft.location,
-            (v) => setDraft((d) => ({ ...d, location: v }))
+            (v) => setDraft((d) => ({ ...d, location: v })),
           );
         }, 100);
       } else if (selectType === "location") {
@@ -524,7 +524,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
 
     getFormDataPayload: () => {
       const nameToId = new Map<string, number>(
-        locations.map((l) => [l.name, l.id])
+        locations.map((l) => [l.name, l.id]),
       );
 
       type Acc = {
@@ -584,7 +584,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
 
         acc.quantitiesMap.set(
           locId,
-          (acc.quantitiesMap.get(locId) ?? 0) + qtyNum
+          (acc.quantitiesMap.get(locId) ?? 0) + qtyNum,
         );
       }
 
@@ -598,7 +598,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
             base_unit: acc.base_unit,
             category_id: acc.category_id,
             quantities: Array.from(acc.quantitiesMap.entries()).map(
-              ([location_id, quantity]) => ({ location_id, quantity })
+              ([location_id, quantity]) => ({ location_id, quantity }),
             ),
             base_quantity: acc.base_quantity,
             image: acc.image,
@@ -829,7 +829,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
                           document.documentElement.scrollTop;
                         setTimeout(
                           () => window.scrollTo(0, currentScrollTop),
-                          0
+                          0,
                         );
                         startEditing("qtyunit");
                       }}
@@ -929,7 +929,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
                           document.documentElement.scrollTop;
                         setTimeout(
                           () => window.scrollTo(0, currentScrollTop),
-                          0
+                          0,
                         );
                         startEditing("baseqtyunit");
                       }}
@@ -1122,7 +1122,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
                           className="text-khp-error"
                           onClick={() =>
                             setRows((prevRows) =>
-                              prevRows.filter((_, j) => j !== i)
+                              prevRows.filter((_, j) => j !== i),
                             )
                           }
                         >
@@ -1221,7 +1221,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
                               keyboardKeeperRef.current?.focus({
                                 preventScroll: true,
                               }),
-                            50
+                            50,
                           );
                         }}
                         style={{
@@ -1256,7 +1256,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
                                 keyboardKeeperRef.current?.focus({
                                   preventScroll: true,
                                 }),
-                              50
+                              50,
                             );
                           }}
                           style={{
@@ -1273,7 +1273,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
                               units.map((u) => u.value),
                               draft.unit,
                               (v) =>
-                                setDraft((d) => ({ ...d, unit: v as Unit }))
+                                setDraft((d) => ({ ...d, unit: v as Unit })),
                             )
                           }
                         >
@@ -1312,7 +1312,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
                                 keyboardKeeperRef.current?.focus({
                                   preventScroll: true,
                                 }),
-                              50
+                              50,
                             );
                           }}
                           style={{
@@ -1332,7 +1332,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
                                 setDraft((d) => ({
                                   ...d,
                                   base_unit: v as Unit,
-                                }))
+                                })),
                             )
                           }
                         >
@@ -1356,7 +1356,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
                             categories.map((c) => String(c.id)),
                             draft.category ? String(draft.category) : "",
                             (v) =>
-                              setDraft((d) => ({ ...d, category: Number(v) }))
+                              setDraft((d) => ({ ...d, category: Number(v) })),
                           )
                         }
                       >
@@ -1377,7 +1377,7 @@ export const AddStockTable = React.forwardRef<AddStockTableHandle>((_, ref) => {
                             "location",
                             locations.map((l) => l.name),
                             draft.location,
-                            (v) => setDraft((d) => ({ ...d, location: v }))
+                            (v) => setDraft((d) => ({ ...d, location: v })),
                           )
                         }
                       >

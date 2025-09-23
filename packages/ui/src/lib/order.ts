@@ -62,7 +62,7 @@ export const getUrgencyColor = (createdAt: string) => {
   const currentTime = new Date();
   const created = new Date(createdAt);
   const diffMinutes = Math.floor(
-    (currentTime.getTime() - created.getTime()) / (1000 * 60)
+    (currentTime.getTime() - created.getTime()) / (1000 * 60),
   );
   if (diffMinutes > 20) return "text-red-600";
   if (diffMinutes > 10) return "text-orange-600";

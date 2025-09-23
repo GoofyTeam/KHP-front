@@ -48,7 +48,7 @@ class HttpClient {
 
         if (!res.ok) {
           throw new Error(
-            `Failed to fetch CSRF token: ${res.status} ${res.statusText}`
+            `Failed to fetch CSRF token: ${res.status} ${res.statusText}`,
           );
         }
 
@@ -84,7 +84,7 @@ class HttpClient {
       } catch (error) {
         console.error(
           "WEB SERVER: Error getting CSRF token from cookies:",
-          error
+          error,
         );
         return null;
       }
@@ -112,7 +112,7 @@ class HttpClient {
       } catch (error) {
         console.error(
           "WEB SERVER: Error extracting token from cookies:",
-          error
+          error,
         );
         return null;
       }
@@ -122,7 +122,7 @@ class HttpClient {
   private extractTokenFromCookieSync(): string | null {
     if (!isBrowser) {
       console.warn(
-        "extractTokenFromCookieSync should only be called client-side"
+        "extractTokenFromCookieSync should only be called client-side",
       );
       return null;
     }
@@ -215,7 +215,7 @@ class HttpClient {
 
   private async prepareHeaders(
     method: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
   ): Promise<Record<string, string>> {
     const baseHeaders: Record<string, string> = {
       Accept: "application/json",
@@ -259,7 +259,7 @@ class HttpClient {
     endpoint: string,
     data?: D,
     options: RequestInit = {},
-    retryCount = 0
+    retryCount = 0,
   ): Promise<T> {
     const maxRetries = 1;
     try {
@@ -293,7 +293,7 @@ class HttpClient {
         if (res.status === 419 && retryCount < maxRetries) {
           if (isBrowser) {
             console.warn(
-              "WEB: CSRF token expired, refreshing token and retrying..."
+              "WEB: CSRF token expired, refreshing token and retrying...",
             );
             this.resetCsrfToken();
 
@@ -304,11 +304,11 @@ class HttpClient {
               endpoint,
               data,
               options,
-              retryCount + 1
+              retryCount + 1,
             );
           } else {
             console.warn(
-              "WEB SERVER: CSRF token expired in Server Action - redirecting to logout"
+              "WEB SERVER: CSRF token expired in Server Action - redirecting to logout",
             );
 
             try {
@@ -358,7 +358,7 @@ class HttpClient {
           if (errorData?.errors) {
             const firstError = Object.values(errorData.errors)[0];
             throw new Error(
-              Array.isArray(firstError) ? firstError[0] : String(firstError)
+              Array.isArray(firstError) ? firstError[0] : String(firstError),
             );
           }
         }
@@ -405,7 +405,7 @@ class HttpClient {
   async post<T, D extends RequestData | FormData = RequestData | FormData>(
     endpoint: string,
     data?: D,
-    options?: RequestInit
+    options?: RequestInit,
   ): Promise<T> {
     return this.request<T, D>("POST", endpoint, data, options);
   }
@@ -413,7 +413,7 @@ class HttpClient {
   async put<T, D extends RequestData | FormData = RequestData | FormData>(
     endpoint: string,
     data?: D,
-    options?: RequestInit
+    options?: RequestInit,
   ): Promise<T> {
     return this.request<T, D>("PUT", endpoint, data, options);
   }
@@ -421,7 +421,7 @@ class HttpClient {
   async patch<T, D extends RequestData | FormData = RequestData | FormData>(
     endpoint: string,
     data?: D,
-    options?: RequestInit
+    options?: RequestInit,
   ): Promise<T> {
     return this.request<T, D>("PATCH", endpoint, data, options);
   }
@@ -436,7 +436,7 @@ class HttpClient {
   >(
     endpoint: string,
     data?: D,
-    options?: RequestInit
+    options?: RequestInit,
   ): Promise<{ success: true; data: T } | { success: false; error: string }> {
     try {
       const result = await this.post<T, D>(endpoint, data, options);
@@ -449,7 +449,7 @@ class HttpClient {
 
   async getWithResult<T>(
     endpoint: string,
-    options?: RequestInit
+    options?: RequestInit,
   ): Promise<{ success: true; data: T } | { success: false; error: string }> {
     try {
       const result = await this.get<T>(endpoint, options);

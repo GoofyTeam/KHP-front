@@ -63,7 +63,7 @@ export default async function Dashboard() {
   }
   if (thresholdError) {
     throw new Error(
-      `Failed to fetch threshold data: ${thresholdError.message}`
+      `Failed to fetch threshold data: ${thresholdError.message}`,
     );
   }
   if (ordersError) {
@@ -71,7 +71,7 @@ export default async function Dashboard() {
   }
   if (perishableError) {
     throw new Error(
-      `Failed to fetch perishable data: ${perishableError.message}`
+      `Failed to fetch perishable data: ${perishableError.message}`,
     );
   }
 
@@ -123,7 +123,7 @@ export default async function Dashboard() {
               <Link
                 href={getQuickAccessUrl(extraAccess.url_key)}
                 className={`block rounded-md px-4 py-4 text-center font-semibold text-white ${getQuickAccessBgClass(
-                  extraAccess.icon_color
+                  extraAccess.icon_color,
                 )}`}
               >
                 {extraAccess.name}

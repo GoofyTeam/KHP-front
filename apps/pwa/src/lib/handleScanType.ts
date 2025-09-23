@@ -23,7 +23,7 @@ export type WantedDataType = {
 
 const handleScanType = async (
   mode: HandleItemSearch["mode"],
-  productId: string | undefined
+  productId: string | undefined,
 ) => {
   let wantedData: WantedDataType = {
     product_image: "",
@@ -39,7 +39,7 @@ const handleScanType = async (
   if (mode === "barcode") {
     const resultByBarcode = await graphqlRequest<GetIngredientQuery>(
       GetIngredient,
-      { barcode: productId! }
+      { barcode: productId! },
     );
     if (resultByBarcode.ingredient) {
       wantedData = {
@@ -62,7 +62,7 @@ const handleScanType = async (
       {
         barcode: productId,
         page: 1,
-      }
+      },
     );
     if (!result.search) {
       throw new Error("Product not found");

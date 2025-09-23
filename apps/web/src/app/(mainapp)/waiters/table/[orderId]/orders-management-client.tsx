@@ -54,12 +54,12 @@ function OrdersManagementClient({
     }
 
     const orderedSteps = [...order.steps].sort(
-      (a, b) => a.position - b.position
+      (a, b) => a.position - b.position,
     );
     const lastStepId =
       orderedSteps.length > 0 ? orderedSteps[orderedSteps.length - 1].id : null;
     const remainingMenus = order.steps.some((step) =>
-      step.stepMenus.some((menu) => menu.status !== StepMenuStatusEnum.Served)
+      step.stepMenus.some((menu) => menu.status !== StepMenuStatusEnum.Served),
     );
 
     return { latestStepId: lastStepId, hasRemainingMenus: remainingMenus };

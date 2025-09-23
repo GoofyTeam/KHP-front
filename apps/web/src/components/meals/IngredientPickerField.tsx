@@ -80,7 +80,7 @@ export function IngredientPickerField<TForm extends HasItemsForm>({
   const appendItem = append as unknown as (value: MenuItemForm) => void;
   const updateItem = update as unknown as (
     index: number,
-    value: MenuItemForm
+    value: MenuItemForm,
   ) => void;
 
   // ------- SEARCH contrôlé --------
@@ -89,7 +89,7 @@ export function IngredientPickerField<TForm extends HasItemsForm>({
 
   const [runSearch, { data, loading }] = useLazyQuery<SearchIngredientsQuery>(
     SearchIngredientsDocument,
-    { fetchPolicy: "network-only" }
+    { fetchPolicy: "network-only" },
   );
 
   React.useEffect(() => {
@@ -113,7 +113,7 @@ export function IngredientPickerField<TForm extends HasItemsForm>({
         name: q.location.name,
         quantityInLocation: q.quantity,
       })),
-    })
+    }),
   );
 
   // map RHF -> UI items
@@ -176,10 +176,7 @@ export function IngredientPickerField<TForm extends HasItemsForm>({
   };
 
   // Memoize static measurement units to avoid recalculation on each render
-  const unitsSelections = React.useMemo(
-    getAllMeasurementUnitsOnlyValues,
-    []
-  );
+  const unitsSelections = React.useMemo(getAllMeasurementUnitsOnlyValues, []);
 
   return (
     <div className="flex flex-col w-full">

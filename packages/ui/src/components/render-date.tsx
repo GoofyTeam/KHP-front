@@ -12,7 +12,7 @@ export const RenderDateWithMinutesAndSeconds = ({
   useEffect(() => {
     if (!locale) {
       console.warn(
-        "No locale provided to RenderDateWithMinutesAndSeconds, using default locale"
+        "No locale provided to RenderDateWithMinutesAndSeconds, using default locale",
       );
     }
 
@@ -45,7 +45,7 @@ export const RenderDateWithMinutes = ({
   useEffect(() => {
     if (!locale) {
       console.warn(
-        "No locale provided to RenderDateWithMinutes, using default locale"
+        "No locale provided to RenderDateWithMinutes, using default locale",
       );
     }
 

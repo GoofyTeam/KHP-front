@@ -17,7 +17,10 @@ export async function createPreparationAction(data: CreateMenuFormValues) {
       data.entities.forEach((entity, index) => {
         formData.append(`entities[${index}][id]`, entity.id);
         formData.append(`entities[${index}][type]`, entity.type);
-        formData.append(`entities[${index}][quantity]`, String(entity.quantity));
+        formData.append(
+          `entities[${index}][quantity]`,
+          String(entity.quantity),
+        );
         formData.append(`entities[${index}][unit]`, entity.unit);
         formData.append(`entities[${index}][location_id]`, entity.location_id);
       });

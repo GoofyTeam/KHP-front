@@ -191,7 +191,7 @@ function HandleUpdateProduct() {
                                 {categorie.name}
                               </SelectItem>
                             );
-                          }
+                          },
                         )}
                     </SelectContent>
                   </Select>

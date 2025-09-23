@@ -38,7 +38,7 @@ export function IngredientStockDisplay({
     if (quantities.length === 1) {
       const onlyLocationId = quantities[0]?.location.id ?? "all";
       setSelectedLocationId((prev) =>
-        prev === onlyLocationId ? prev : onlyLocationId
+        prev === onlyLocationId ? prev : onlyLocationId,
       );
       return;
     }
@@ -46,7 +46,7 @@ export function IngredientStockDisplay({
     setSelectedLocationId((prev) =>
       prev === "all" || !quantities.some((q) => q.location.id === prev)
         ? "all"
-        : prev
+        : prev,
     );
   }, [quantities]);
 

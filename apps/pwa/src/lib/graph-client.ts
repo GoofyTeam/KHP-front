@@ -9,7 +9,7 @@ const API_URL = import.meta.env.VITE_API_URL
 
 async function csrfFetch(
   input: string | URL | Request,
-  init: RequestInit = {}
+  init: RequestInit = {},
 ): Promise<Response> {
   if (init.method === "POST") {
     let token = api.readCookie("XSRF-TOKEN");
@@ -65,7 +65,7 @@ export async function graphqlRequest<
 >(
   document: RequestDocument,
   variables?: TVars,
-  requestHeaders?: HeadersInit
+  requestHeaders?: HeadersInit,
 ): Promise<TData> {
   // @ts-expect-error - L'argument de type '[TVars | undefined, HeadersInit | undefined]' n'est pas attribuable au paramètre de type 'VariablesAndRequestHeadersArgs<TVars>'.
   return gqlClient.request<TData, TVars>(document, variables, requestHeaders);

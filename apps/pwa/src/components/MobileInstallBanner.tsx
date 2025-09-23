@@ -44,7 +44,7 @@ export default function MobileInstallBanner() {
     <div className="fixed inset-x-0 bottom-4 z-50 flex justify-center px-4 pointer-events-none">
       <div
         className={`pointer-events-auto flex items-center gap-3 rounded-xl border border-[rgba(76,175,80,0.25)] bg-white px-4 py-3 shadow-lg ${
-          visible ? '' : 'hidden'
+          visible ? "" : "hidden"
         }`}
       >
         <span className="text-sm text-slate-900 font-medium">

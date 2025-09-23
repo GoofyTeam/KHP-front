@@ -20,12 +20,12 @@ export interface CreateLocationTypeInput {
 
 export async function updateLocationTypeAction(
   locationTypeId: string,
-  input: UpdateLocationTypeInput
+  input: UpdateLocationTypeInput,
 ): Promise<ActionResult<LocationType>> {
   try {
     const result = await httpClient.put<LocationType>(
       `/api/location-types/${locationTypeId}`,
-      input
+      input,
     );
 
     revalidatePath("/settings/location-types");
@@ -58,12 +58,12 @@ export async function updateLocationTypeAction(
 }
 
 export async function createLocationTypeAction(
-  input: CreateLocationTypeInput
+  input: CreateLocationTypeInput,
 ): Promise<ActionResult<LocationType>> {
   try {
     const result = await httpClient.post<LocationType>(
       "/api/location-types",
-      input
+      input,
     );
 
     revalidatePath("/settings/location-types");
@@ -96,7 +96,7 @@ export async function createLocationTypeAction(
 }
 
 export async function deleteLocationTypeAction(
-  locationTypeId: string
+  locationTypeId: string,
 ): Promise<ActionResult> {
   try {
     await httpClient.delete(`/api/location-types/${locationTypeId}`);

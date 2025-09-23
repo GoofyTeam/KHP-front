@@ -73,5 +73,5 @@ export const { getClient, query, PreloadQuery } = registerApolloClient(
         enabled: process.env.NODE_ENV !== "production",
       },
     });
-  }
+  },
 );

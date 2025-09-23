@@ -102,7 +102,7 @@ export default async function MenuPage({
               className={cn(
                 "w-full",
                 (preparation?.preparable_quantity?.quantity ?? 0) <= 0 &&
-                  "opacity-50 cursor-not-allowed!"
+                  "opacity-50 cursor-not-allowed!",
               )}
               disabled={(preparation?.preparable_quantity?.quantity ?? 0) <= 0}
             >

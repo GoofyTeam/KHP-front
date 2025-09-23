@@ -54,7 +54,7 @@ function RegisterLosses() {
     if (!product.quantities) return 0;
     return product.quantities.reduce(
       (total, qty) => total + (qty.quantity || 0),
-      0
+      0,
     );
   };
 

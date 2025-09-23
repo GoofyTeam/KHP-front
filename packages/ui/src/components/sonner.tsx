@@ -1,17 +1,19 @@
-"use client"
+"use client";
 
-import { useTheme } from "next-themes"
-import { Toaster as Sonner } from "sonner"
+import { useTheme } from "next-themes";
+import { Toaster as Sonner } from "sonner";
 
-type ToasterProps = React.ComponentProps<typeof Sonner>
+type ToasterProps = React.ComponentProps<typeof Sonner>;
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme()
+  const { theme = "system" } = useTheme();
 
-  const toastBase = "group toast group-[.toaster]:shadow-lg"
+  const toastBase = "group toast group-[.toaster]:shadow-lg";
   const toastNeutral =
-    "group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border"
-  const toastClass = props.richColors ? toastBase : `${toastBase} ${toastNeutral}`
+    "group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border";
+  const toastClass = props.richColors
+    ? toastBase
+    : `${toastBase} ${toastNeutral}`;
 
   return (
     <Sonner
@@ -29,7 +31,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }}
       {...props}
     />
-  )
-}
+  );
+};
 
-export { Toaster }
+export { Toaster };

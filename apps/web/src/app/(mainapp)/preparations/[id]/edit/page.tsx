@@ -68,7 +68,7 @@ const preparationItemsSchema = z.object({
         id: z.string(),
         name: z.string(),
         quantityInLocation: z.number(),
-      })
+      }),
     )
     .optional(),
   storage_unit: z.string().optional(),
@@ -84,10 +84,10 @@ const updatePreparationSchema = z
         (file) => {
           if (!file) return true;
           return ACCEPTED_IMAGE_TYPES.includes(
-            file.type as (typeof ACCEPTED_IMAGE_TYPES)[number]
+            file.type as (typeof ACCEPTED_IMAGE_TYPES)[number],
           );
         },
-        { message: "Image must be an accepted format" }
+        { message: "Image must be an accepted format" },
       ),
     unit: z.string().nonempty("Unit is required"),
     base_quantity: z
@@ -250,7 +250,7 @@ export default function UpdatePreparationPage() {
     UpdatePreparationFormValues
   > = (errors) => {
     const hasDetailErrors = PREPARATION_DETAILS_FIELDS.some((field) =>
-      Boolean(errors[field])
+      Boolean(errors[field]),
     );
 
     if (hasDetailErrors) {
@@ -337,7 +337,7 @@ export default function UpdatePreparationPage() {
       };
       reader.readAsDataURL(file);
     },
-    [preparation?.image_url]
+    [preparation?.image_url],
   );
 
   const handleRemoveImage = useCallback(() => {

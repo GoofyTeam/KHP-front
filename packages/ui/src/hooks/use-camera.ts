@@ -74,7 +74,7 @@ export function useCamera() {
       canvas.getContext("2d")!.drawImage(video, 0, 0, w, h);
 
       const blob: Blob = await new Promise((res) =>
-        canvas.toBlob((b) => res(b ?? new Blob()), "image/jpeg", 0.92)
+        canvas.toBlob((b) => res(b ?? new Blob()), "image/jpeg", 0.92),
       );
       const file = new File([blob], filename, { type: "image/jpeg" });
 
@@ -87,7 +87,7 @@ export function useCamera() {
 
       return compressed;
     },
-    []
+    [],
   );
 
   return { videoRef, start, stop, takePhoto };

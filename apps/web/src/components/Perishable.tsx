@@ -74,7 +74,7 @@ function StatusIcon({ status }: { status?: PerishableItem["status"] }) {
 
 function transformPerishableItem(
   item: PerishableData,
-  type: "soon" | "expired"
+  type: "soon" | "expired",
 ): PerishableItem {
   const expirationMessage = getExpirationMessage(item.expiration_at);
   const locationQuantityText =
@@ -103,10 +103,10 @@ function transformData(queryData: GetPerishableQuery): PerishableItem[] {
     const unreadExpired = queryData.expired
       .filter(
         (item) =>
-          !item.is_read && hasAvailableStock(item as unknown as PerishableData)
+          !item.is_read && hasAvailableStock(item as unknown as PerishableData),
       )
       .map((item) =>
-        transformPerishableItem(item as unknown as PerishableData, "expired")
+        transformPerishableItem(item as unknown as PerishableData, "expired"),
       );
     unreadItems.push(...unreadExpired);
   }
@@ -115,10 +115,10 @@ function transformData(queryData: GetPerishableQuery): PerishableItem[] {
     const unreadSoon = queryData.soon
       .filter(
         (item) =>
-          !item.is_read && hasAvailableStock(item as unknown as PerishableData)
+          !item.is_read && hasAvailableStock(item as unknown as PerishableData),
       )
       .map((item) =>
-        transformPerishableItem(item as unknown as PerishableData, "soon")
+        transformPerishableItem(item as unknown as PerishableData, "soon"),
       );
     unreadItems.push(...unreadSoon);
   }
@@ -150,7 +150,7 @@ function isGraphQLData(data: unknown): data is GetPerishableQuery {
     data &&
       typeof data === "object" &&
       data !== null &&
-      ("soon" in data || "expired" in data)
+      ("soon" in data || "expired" in data),
   );
 }
 
@@ -182,7 +182,7 @@ export function Perishable({ data, className }: PerishableProps) {
     <section
       className={cn(
         "rounded-md border border-khp-primary/30 bg-white shadow-sm pt-2 flex flex-col min-h-0",
-        className
+        className,
       )}
       aria-label="Expiry"
     >
@@ -212,7 +212,7 @@ export function Perishable({ data, className }: PerishableProps) {
                     "w-full text-left flex items-start gap-3 py-2.5 px-3 md:px-4 lg:px-5",
                     item.status === "error"
                       ? "bg-khp-error/10"
-                      : "bg-transparent"
+                      : "bg-transparent",
                   )}
                   onClick={item.onClick}
                 >

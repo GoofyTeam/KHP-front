@@ -34,7 +34,7 @@ export const MenuTypesList = forwardRef<MenuTypesListRef, MenuTypesListProps>(
         fetchPolicy: "cache-and-network",
         nextFetchPolicy: "cache-first",
         notifyOnNetworkStatusChange: true,
-      }
+      },
     );
 
     useImperativeHandle(
@@ -49,7 +49,7 @@ export const MenuTypesList = forwardRef<MenuTypesListRef, MenuTypesListProps>(
           }
         },
       }),
-      [refetch]
+      [refetch],
     );
 
     const menuTypes = useMemo(() => {
@@ -193,7 +193,7 @@ export const MenuTypesList = forwardRef<MenuTypesListRef, MenuTypesListProps>(
         </div>
       </div>
     );
-  }
+  },
 );
 
 MenuTypesList.displayName = "MenuTypesList";

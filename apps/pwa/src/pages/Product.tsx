@@ -49,7 +49,7 @@ export default function ProductPage() {
   const uniqueQuantities = (product?.quantities || []).reduce(
     (acc, current) => {
       const existing = acc.find(
-        (item) => item.location.id === current.location.id
+        (item) => item.location.id === current.location.id,
       );
       if (!existing) {
         acc.push(current);
@@ -59,12 +59,12 @@ export default function ProductPage() {
       }
       return acc;
     },
-    [] as NonNullable<typeof product.quantities>
+    [] as NonNullable<typeof product.quantities>,
   );
 
   const totalQuantity = uniqueQuantities.reduce(
     (sum, qty) => sum + qty.quantity,
-    0
+    0,
   );
   const locations = uniqueQuantities;
 
@@ -81,7 +81,7 @@ export default function ProductPage() {
       } as const;
     } else {
       const locationQty = locations.find(
-        (qty) => qty.location.id === selectedLocation
+        (qty) => qty.location.id === selectedLocation,
       );
 
       if (!locationQty) {
@@ -310,7 +310,7 @@ export default function ProductPage() {
           <MovementHistory
             entries={movementHistoryFromStockMovements(
               recentStockMovements,
-              product.unit
+              product.unit,
             )}
             showHeader={false}
             defaultUnit={product.unit}

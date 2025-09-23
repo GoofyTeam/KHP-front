@@ -49,7 +49,7 @@ function MenuToPrepareCard({
     try {
       setIsMarkingReady(true);
       await httpClient.post(
-        `/api/orders/${orderItem.id}/step-menus/${menuItem.id}/ready`
+        `/api/orders/${orderItem.id}/step-menus/${menuItem.id}/ready`,
       );
       toast.success("Menu marked as ready to serve.");
       await onStatusChange?.();

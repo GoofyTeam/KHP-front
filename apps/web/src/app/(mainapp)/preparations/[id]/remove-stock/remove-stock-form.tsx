@@ -48,7 +48,7 @@ export function RemoveStockForm({ preparation }: RemoveStockFormProps) {
   });
 
   const availableLocations = preparation.quantities.filter(
-    (q) => q.quantity > 0
+    (q) => q.quantity > 0,
   );
 
   const removeQuantityString = form.watch("removeQuantity");
@@ -58,7 +58,7 @@ export function RemoveStockForm({ preparation }: RemoveStockFormProps) {
       : 0;
   const selectedLocationId = form.watch("selectedLocationIndex");
   const selectedLocation = availableLocations.find(
-    (q) => q.location.id === selectedLocationId
+    (q) => q.location.id === selectedLocationId,
   );
 
   const maxQuantity = selectedLocation?.quantity || 0;
@@ -83,7 +83,7 @@ export function RemoveStockForm({ preparation }: RemoveStockFormProps) {
 
       if (quantity > maxQuantity) {
         setApiError(
-          `Quantity cannot exceed ${maxQuantity} ${preparation.unit}`
+          `Quantity cannot exceed ${maxQuantity} ${preparation.unit}`,
         );
         return;
       }
@@ -220,7 +220,7 @@ export function RemoveStockForm({ preparation }: RemoveStockFormProps) {
             <span className="font-bold text-khp-primary">
               {Math.max(
                 0,
-                (selectedLocation?.quantity || 0) - removeQuantity
+                (selectedLocation?.quantity || 0) - removeQuantity,
               ).toFixed(3)}{" "}
               {preparation.unit}
             </span>

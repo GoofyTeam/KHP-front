@@ -9,6 +9,6 @@ export async function updateCompanyOptionsAction(input: {
 }): Promise<ActionResult> {
   return executeHttpAction(
     () => httpClient.put<unknown>("/api/company/options", input),
-    "Validation error: "
+    "Validation error: ",
   );
 }

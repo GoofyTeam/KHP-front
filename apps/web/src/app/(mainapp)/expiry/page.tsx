@@ -11,7 +11,8 @@ import { query } from "@/lib/ApolloClient";
 
 export const metadata: Metadata = {
   title: "KHP | Expiry",
-  description: "Review ingredients that are approaching or past their expiration date.",
+  description:
+    "Review ingredients that are approaching or past their expiration date.",
 };
 
 export const dynamic = "force-dynamic";
@@ -25,7 +26,7 @@ type PerishableNode = NonNullable<
 
 function toExpiryTableItems(
   items: Maybe<GetPerishableQuery["expired"]>,
-  status: ExpiryStatus
+  status: ExpiryStatus,
 ): ExpiryTableItem[] {
   if (!items?.length) {
     return [];

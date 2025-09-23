@@ -38,9 +38,7 @@ export default function ResetDialog({
         onReset();
         onOpenChange(false);
       } else {
-        setResetError(
-          result.error || "Error while resetting quick access"
-        );
+        setResetError(result.error || "Error while resetting quick access");
       }
     } catch {
       setResetError("Error while resetting quick access");

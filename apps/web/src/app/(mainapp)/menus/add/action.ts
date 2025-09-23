@@ -6,7 +6,7 @@ import { UpdateMenuFormValues } from "../[id]/edit/page";
 import { type ActionResult, executeHttpAction } from "@/lib/actionUtils";
 
 export async function createMenuAction(
-  data: CreateMenuFormValues
+  data: CreateMenuFormValues,
 ): Promise<ActionResult> {
   return executeHttpAction(() => {
     const formData = new FormData();
@@ -49,7 +49,7 @@ export async function createMenuAction(
 
 export async function updateMenuAction(
   id: string,
-  data: UpdateMenuFormValues
+  data: UpdateMenuFormValues,
 ): Promise<ActionResult> {
   return executeHttpAction(() => {
     const formData = new FormData();

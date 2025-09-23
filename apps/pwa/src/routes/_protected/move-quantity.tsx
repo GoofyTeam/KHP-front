@@ -43,7 +43,7 @@ export const Route = createFileRoute("/_protected/move-quantity")({
       return product.quantities.reduce(
         (total: number, qty: { quantity?: number }) =>
           total + (qty.quantity || 0),
-        0
+        0,
       );
     };
 

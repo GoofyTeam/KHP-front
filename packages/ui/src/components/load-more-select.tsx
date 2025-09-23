@@ -82,7 +82,7 @@ export function LoadMoreSelect({
   ...rootProps
 }: LoadMoreSelectProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(
-    defaultOpen ?? false
+    defaultOpen ?? false,
   );
   const isControlled = controlledOpen !== undefined;
   const open = isControlled ? controlledOpen : uncontrolledOpen;
@@ -97,7 +97,7 @@ export function LoadMoreSelect({
       }
       onOpenChange?.(nextOpen);
     },
-    [isControlled, onOpenChange]
+    [isControlled, onOpenChange],
   );
 
   const resetRequestFlag = React.useCallback(() => {
@@ -173,7 +173,7 @@ export function LoadMoreSelect({
 
       return option.label;
     },
-    [renderOption]
+    [renderOption],
   );
 
   const showLoadMoreHint = hasMore && !loading;
@@ -192,11 +192,7 @@ export function LoadMoreSelect({
   } = contentProps ?? {};
 
   return (
-    <Select
-      {...rootProps}
-      open={open}
-      onOpenChange={handleOpenChange}
-    >
+    <Select {...rootProps} open={open} onOpenChange={handleOpenChange}>
       <SelectTrigger {...triggerProps}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
@@ -207,7 +203,7 @@ export function LoadMoreSelect({
             "bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 max-h-(--radix-select-content-available-height) min-w-[8rem] origin-(--radix-select-content-transform-origin) overflow-hidden rounded-md border shadow-md",
             position === "popper" &&
               "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
-            contentClassName
+            contentClassName,
           )}
           position={position}
           sideOffset={sideOffset}
@@ -226,7 +222,7 @@ export function LoadMoreSelect({
               "p-1 overflow-y-auto",
               position === "popper" &&
                 "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)] scroll-my-1",
-              viewportClassName
+              viewportClassName,
             )}
           >
             {options.length === 0 && !loading ? (

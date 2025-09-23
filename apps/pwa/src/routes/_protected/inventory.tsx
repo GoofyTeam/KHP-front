@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_protected/inventory")({
 
     const result = await graphqlRequest<GetCompanyProductsQuery>(
       GetCompanyProducts,
-      variables
+      variables,
     );
 
     return {

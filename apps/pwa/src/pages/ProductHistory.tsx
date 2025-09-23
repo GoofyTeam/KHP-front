@@ -91,7 +91,7 @@ export default function ProductHistoryPage() {
     }
 
     return stockMovements.filter(
-      (movement) => movement.location?.id === selectedLocationId
+      (movement) => movement.location?.id === selectedLocationId,
     );
   }, [stockMovements, selectedLocationId]);
 
@@ -144,7 +144,7 @@ export default function ProductHistoryPage() {
         setIsNavigating(false);
       }
     },
-    [navigate]
+    [navigate],
   );
 
   const handlePresetChange = (preset: FilterPreset) => {
@@ -291,7 +291,7 @@ export default function ProductHistoryPage() {
         <MovementHistory
           entries={movementHistoryFromStockMovements(
             filteredMovements,
-            product.unit
+            product.unit,
           )}
           defaultUnit={product.unit}
         />

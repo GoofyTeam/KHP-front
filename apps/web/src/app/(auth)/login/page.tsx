@@ -87,7 +87,11 @@ function resolveRedirectPath(path: string | null): string {
     "/reset-password",
   ];
 
-  if (disallowedPrefixes.some((prefix) => path === prefix || path.startsWith(`${prefix}/`))) {
+  if (
+    disallowedPrefixes.some(
+      (prefix) => path === prefix || path.startsWith(`${prefix}/`),
+    )
+  ) {
     return "/dashboard";
   }
 

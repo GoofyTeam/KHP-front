@@ -6,9 +6,7 @@ import { AutoBreadcrumb as CoreAutoBreadcrumb } from "@workspace/ui/components/a
 
 type Props = React.ComponentProps<typeof CoreAutoBreadcrumb>;
 
-export function AutoBreadcrumb(
-  props: Omit<Props, "pathname" | "renderLink">
-) {
+export function AutoBreadcrumb(props: Omit<Props, "pathname" | "renderLink">) {
   const pathname = usePathname() || "/";
   return (
     <CoreAutoBreadcrumb

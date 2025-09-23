@@ -9,7 +9,7 @@ import {
  * Fetch a single ingredient by ID
  */
 export async function fetchIngredient(
-  id: string
+  id: string,
 ): Promise<NonNullable<GetIngredientQuery["ingredient"]>> {
   try {
     const { data, error } = await query({

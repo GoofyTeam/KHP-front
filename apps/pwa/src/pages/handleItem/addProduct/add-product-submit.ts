@@ -7,7 +7,7 @@ import { router } from "../../../main";
 const addProductFormData = async (
   values: z.infer<typeof handleItemSchema>,
   barcode: string | null | undefined,
-  internalId: string | null | undefined
+  internalId: string | null | undefined,
 ) => {
   const formData = new FormData();
   formData.append("name", values.product_name);
@@ -40,7 +40,7 @@ const addProductJsonData = async (
   values: z.infer<typeof handleItemSchema>,
   barcode: string | null | undefined,
   internalId: string | null | undefined,
-  product: WantedDataType
+  product: WantedDataType,
 ) => {
   await api.post("/api/ingredients", {
     image_url: product?.product_image || undefined,
@@ -64,7 +64,7 @@ export const addProductSubmit = async (
   values: z.infer<typeof handleItemSchema>,
   barcode: string | null | undefined,
   internalId: string | null | undefined,
-  product: WantedDataType
+  product: WantedDataType,
 ) => {
   if (values.image) {
     await addProductFormData(values, barcode, internalId);

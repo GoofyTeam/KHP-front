@@ -141,13 +141,83 @@ import {
   Trashed,
   UnitEnum,
   User,
-  UserPaginator
-} from 'generated/schema.graphql';
-import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
-export type GetCategoriesQueryVariables = Exact<{ [key: string]: never; }>;
+  UserPaginator,
+} from "generated/schema.graphql";
+import { TypedDocumentNode as DocumentNode } from "@graphql-typed-document-node/core";
+export type GetCategoriesQueryVariables = Exact<{ [key: string]: never }>;
 
+export type GetCategoriesQuery = {
+  __typename?: "Query";
+  categories: {
+    __typename?: "CategoryPaginator";
+    data: Array<{
+      __typename?: "Category";
+      id: string;
+      name: string;
+      updated_at: string;
+    }>;
+    paginatorInfo: {
+      __typename?: "PaginatorInfo";
+      total: number;
+      count: number;
+    };
+  };
+};
 
-export type GetCategoriesQuery = { __typename?: 'Query', categories: { __typename?: 'CategoryPaginator', data: Array<{ __typename?: 'Category', id: string, name: string, updated_at: string }>, paginatorInfo: { __typename?: 'PaginatorInfo', total: number, count: number } } };
-
-
-export const GetCategories = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"getCategories"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"categories"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"100"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"data"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"updated_at"}}]}},{"kind":"Field","name":{"kind":"Name","value":"paginatorInfo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"count"}}]}}]}}]}}]} as unknown as DocumentNode<GetCategoriesQuery, GetCategoriesQueryVariables>;
+export const GetCategories = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "getCategories" },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "categories" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "first" },
+                value: { kind: "IntValue", value: "100" },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "data" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "Field", name: { kind: "Name", value: "id" } },
+                      { kind: "Field", name: { kind: "Name", value: "name" } },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "updated_at" },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "paginatorInfo" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "Field", name: { kind: "Name", value: "total" } },
+                      { kind: "Field", name: { kind: "Name", value: "count" } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<GetCategoriesQuery, GetCategoriesQueryVariables>;

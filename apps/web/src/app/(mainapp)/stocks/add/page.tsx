@@ -57,7 +57,7 @@ export default function AddStockPage() {
             if (id) {
               const addRes = await addQuantitiesToIngredientAction(
                 id,
-                ing.quantities
+                ing.quantities,
               );
               if (!addRes.success)
                 throw new Error(addRes.error || "Failed to add quantities");

@@ -26,7 +26,7 @@ export type LowStockProps = {
 
 function calculateStockPercentage(
   currentQuantity: number,
-  threshold: number
+  threshold: number,
 ): number {
   if (threshold === 0) return 100;
   return (currentQuantity / threshold) * 100;
@@ -55,7 +55,7 @@ function getStockStatus(percentage: number): {
 }
 
 function transformThresholdDataToLowStockItems(
-  data: GetThresholdQuery
+  data: GetThresholdQuery,
 ): LowStockItem[] {
   const items: LowStockItem[] = [];
 
@@ -129,14 +129,14 @@ export function LowStock({ thresholdData, className }: LowStockProps) {
     thresholdData || {
       ingredientTreshold: [],
       PreparationsThreshold: [],
-    }
+    },
   );
 
   return (
     <section
       className={cn(
         "rounded-md border border-khp-primary/30 bg-white shadow-sm pt-2 flex flex-col min-h-0",
-        className
+        className,
       )}
       aria-label="Low Stock"
     >

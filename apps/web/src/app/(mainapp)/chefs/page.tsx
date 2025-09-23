@@ -49,7 +49,7 @@ function ChefsPage() {
 
   const filteredSteps = stepsData.filter(
     (orderStep) =>
-      orderStep.order && visibleOrderStatuses.has(orderStep.order.status)
+      orderStep.order && visibleOrderStatuses.has(orderStep.order.status),
   );
 
   const extractStepMenus = (targetStatus: StepMenuStatusEnum) =>
@@ -58,9 +58,9 @@ function ChefsPage() {
         .filter(
           (stepMenu) =>
             stepMenu.menu?.service_type === MenuServiceTypeEnum.Prep &&
-            stepMenu.status === targetStatus
+            stepMenu.status === targetStatus,
         )
-        .map((stepMenu) => ({ step: stepMenu, order: orderStep.order }))
+        .map((stepMenu) => ({ step: stepMenu, order: orderStep.order })),
     );
 
   const inPreparation = extractStepMenus(StepMenuStatusEnum.InPrep);
@@ -69,10 +69,11 @@ function ChefsPage() {
   const activeOrderIds = new Set(
     [...inPreparation, ...readyOrders]
       .map(({ order }) => order?.id)
-      .filter((orderId): orderId is string => Boolean(orderId))
+      .filter((orderId): orderId is string => Boolean(orderId)),
   );
 
-  const hasNoActiveOrders = inPreparation.length === 0 && readyOrders.length === 0;
+  const hasNoActiveOrders =
+    inPreparation.length === 0 && readyOrders.length === 0;
 
   return (
     <div className="w-full py-4 px-2">

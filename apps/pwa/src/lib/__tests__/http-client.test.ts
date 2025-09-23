@@ -56,7 +56,7 @@ describe("ImprovedHttpClient", () => {
     expect(result).toEqual({ success: true });
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(fetchMock.mock.calls[0]?.[0]).toBe(
-      "https://api.test/sanctum/csrf-cookie"
+      "https://api.test/sanctum/csrf-cookie",
     );
 
     const [, config] = fetchMock.mock.calls[1] ?? [];
@@ -114,7 +114,7 @@ describe("ImprovedHttpClient", () => {
 
     const response = await client.post<FormData, { uploaded: boolean }>(
       "/upload",
-      payload
+      payload,
     );
 
     expect(response).toEqual({ uploaded: true });

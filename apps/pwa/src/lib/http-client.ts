@@ -67,7 +67,7 @@ export class ImprovedHttpClient {
 
         if (!this.csrfToken) {
           throw new Error(
-            `Cookie ${this.csrfConfig.cookieName} not found after retries`
+            `Cookie ${this.csrfConfig.cookieName} not found after retries`,
           );
         }
       }
@@ -81,7 +81,7 @@ export class ImprovedHttpClient {
 
   public readCookie(name: string): string | null {
     const match = document.cookie.match(
-      new RegExp("(^|; )" + name + "=([^;]*)")
+      new RegExp("(^|; )" + name + "=([^;]*)"),
     );
 
     if (match) {
@@ -97,7 +97,7 @@ export class ImprovedHttpClient {
 
   private async createHttpError(
     response: Response,
-    message?: string
+    message?: string,
   ): Promise<HttpError> {
     let data: unknown;
     try {
@@ -112,7 +112,7 @@ export class ImprovedHttpClient {
     }
 
     const error = new Error(
-      message || `HTTP ${response.status}: ${response.statusText}`
+      message || `HTTP ${response.status}: ${response.statusText}`,
     ) as HttpError;
     error.status = response.status;
     error.statusText = response.statusText;
@@ -159,7 +159,7 @@ export class ImprovedHttpClient {
   private async withRetry<T>(
     fn: (retries: number) => Promise<T>,
     retries: number = this.retries,
-    delay = 1000
+    delay = 1000,
   ): Promise<T> {
     try {
       return await fn(retries);
@@ -185,7 +185,7 @@ export class ImprovedHttpClient {
 
   async request<Req = unknown, Res = unknown>(
     options: RequestOptions<Req>,
-    responseType: ResponseType = "json"
+    responseType: ResponseType = "json",
   ): Promise<Res> {
     const {
       method,
@@ -264,12 +264,12 @@ export class ImprovedHttpClient {
     const controller = new AbortController();
     const timeoutId = setTimeout(
       () => controller.abort(),
-      timeout ?? this.timeout
+      timeout ?? this.timeout,
     );
     if (signal) signal.addEventListener("abort", () => controller.abort());
 
     const executeRequest = async (
-      currentRetries = retries ?? this.retries
+      currentRetries = retries ?? this.retries,
     ): Promise<Res> => {
       try {
         const freshHeaders: Record<string, string> = {
@@ -306,7 +306,7 @@ export class ImprovedHttpClient {
           if (currentRetries > 0) {
             throw await this.createHttpError(
               response,
-              "CSRF token expired – token refreshed, retrying"
+              "CSRF token expired – token refreshed, retrying",
             );
           }
         }
@@ -323,7 +323,7 @@ export class ImprovedHttpClient {
 
           throw await this.createHttpError(
             response,
-            "Too Many Requests – CSRF token refreshed, retrying"
+            "Too Many Requests – CSRF token refreshed, retrying",
           );
         }
 
@@ -380,22 +380,22 @@ export class ImprovedHttpClient {
   get<Res = unknown>(
     path: string,
     options?: Partial<RequestOptions<undefined>>,
-    responseType?: ResponseType
+    responseType?: ResponseType,
   ) {
     return this.request<undefined, Res>(
       { method: HttpMethod.GET, path, body: undefined, ...options },
-      responseType
+      responseType,
     );
   }
 
   delete<Res = unknown>(
     path: string,
     options?: Partial<RequestOptions<undefined>>,
-    responseType?: ResponseType
+    responseType?: ResponseType,
   ) {
     return this.request<undefined, Res>(
       { method: HttpMethod.DELETE, path, body: undefined, ...options },
-      responseType
+      responseType,
     );
   }
 
@@ -403,11 +403,11 @@ export class ImprovedHttpClient {
     path: string,
     body: Req,
     options?: Partial<RequestOptions<Req>>,
-    responseType?: ResponseType
+    responseType?: ResponseType,
   ) {
     return this.request<Req, Res>(
       { method: HttpMethod.POST, path, body, ...options },
-      responseType
+      responseType,
     );
   }
 
@@ -415,11 +415,11 @@ export class ImprovedHttpClient {
     path: string,
     body: Req,
     options?: Partial<RequestOptions<Req>>,
-    responseType?: ResponseType
+    responseType?: ResponseType,
   ) {
     return this.request<Req, Res>(
       { method: HttpMethod.PUT, path, body, ...options },
-      responseType
+      responseType,
     );
   }
 
@@ -427,18 +427,18 @@ export class ImprovedHttpClient {
     path: string,
     body: Req,
     options?: Partial<RequestOptions<Req>>,
-    responseType?: ResponseType
+    responseType?: ResponseType,
   ) {
     return this.request<Req, Res>(
       { method: HttpMethod.PATCH, path, body, ...options },
-      responseType
+      responseType,
     );
   }
 
   async upload<Res = unknown>(
     path: string,
     fileOrForm: File | FormData,
-    options?: Partial<RequestOptions<FormData>>
+    options?: Partial<RequestOptions<FormData>>,
   ): Promise<Res> {
     const formData =
       fileOrForm instanceof FormData ? fileOrForm : new FormData();
@@ -458,7 +458,7 @@ export class ImprovedHttpClient {
         headers,
         ...rest,
       },
-      "json"
+      "json",
     );
   }
 

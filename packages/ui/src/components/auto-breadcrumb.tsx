@@ -64,7 +64,7 @@ function computeLastLabel(
   lastSegment: string,
   prevLabel: string | undefined,
   fullPath: string,
-  overrides?: Record<string, string>
+  overrides?: Record<string, string>,
 ) {
   // Highest precedence: full path override
   if (overrides && overrides[fullPath]) return overrides[fullPath];
@@ -108,13 +108,11 @@ export function AutoBreadcrumb({
     items.push(
       <BreadcrumbItem key="home">
         {renderLink ? (
-          <BreadcrumbLink asChild>
-            {renderLink("/", homeLabel)}
-          </BreadcrumbLink>
+          <BreadcrumbLink asChild>{renderLink("/", homeLabel)}</BreadcrumbLink>
         ) : (
           <BreadcrumbLink href="/">{homeLabel}</BreadcrumbLink>
         )}
-      </BreadcrumbItem>
+      </BreadcrumbItem>,
     );
     if (crumbs.length > 0) items.push(<BreadcrumbSeparator key="sep-home" />);
   }
@@ -141,19 +139,20 @@ export function AutoBreadcrumb({
           ) : (
             <BreadcrumbPage>{linkLabel}</BreadcrumbPage>
           )}
-        </BreadcrumbItem>
+        </BreadcrumbItem>,
       );
       items.push(<BreadcrumbSeparator key={`sep-${c.href}`} />);
     } else {
       const prev = crumbs[idx - 1];
       const prevLabel = prev
-        ? overrides?.[prev.seg] ?? titleCase(prev.seg)
+        ? (overrides?.[prev.seg] ?? titleCase(prev.seg))
         : undefined;
-      const pageLabel = lastLabel ?? computeLastLabel(c.seg, prevLabel, c.href, overrides);
+      const pageLabel =
+        lastLabel ?? computeLastLabel(c.seg, prevLabel, c.href, overrides);
       items.push(
         <BreadcrumbItem key={c.href}>
           <BreadcrumbPage>{pageLabel}</BreadcrumbPage>
-        </BreadcrumbItem>
+        </BreadcrumbItem>,
       );
     }
   });

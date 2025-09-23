@@ -19,7 +19,7 @@ export function InstallPWAButton({
   onVisibilityChange?: (visible: boolean) => void;
 }) {
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(
-    null
+    null,
   );
   const [visible, setVisible] = useState(false);
 

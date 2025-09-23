@@ -51,7 +51,7 @@ interface LocationSelectProps {
 const formatQuantity = (q: number) => parseFloat(q.toFixed(3)).toString();
 
 export const locationSelectMapper = (
-  q: LocationsFromCompany[] | IngredientsForLocationSelect
+  q: LocationsFromCompany[] | IngredientsForLocationSelect,
 ) => {
   if (!Array.isArray(q)) return [];
 
@@ -103,7 +103,7 @@ export function LocationSelect({
 
     // 4) total
     const total = parseFloat(
-      arr.reduce((s, q) => s + q.quantity, 0).toFixed(3)
+      arr.reduce((s, q) => s + q.quantity, 0).toFixed(3),
     );
 
     // 5) accès direct par id
@@ -186,7 +186,7 @@ export function LocationSelect({
         <SelectTrigger
           className={cn(
             "w-full !h-14 text-base border-khp-primary focus:bg-khp-primary/5 transition-all",
-            triggerClassName
+            triggerClassName,
           )}
         >
           {isAll ? (
@@ -213,7 +213,7 @@ export function LocationSelect({
                 displayAllQuantity && (
                   <p className="text-sm text-gray-600 ml-2 flex-shrink-0">
                     {formatQuantity(
-                      selected.quantity > 0 ? selected.quantity : 0
+                      selected.quantity > 0 ? selected.quantity : 0,
                     )}{" "}
                     {unit}
                   </p>

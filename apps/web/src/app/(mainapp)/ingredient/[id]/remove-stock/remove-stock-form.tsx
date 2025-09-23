@@ -48,7 +48,7 @@ export function RemoveStockForm({ ingredient }: RemoveStockFormProps) {
   });
 
   const availableLocations = ingredient.quantities.filter(
-    (q) => q.quantity > 0
+    (q) => q.quantity > 0,
   );
 
   const removeQuantityString = form.watch("removeQuantity");
@@ -58,7 +58,7 @@ export function RemoveStockForm({ ingredient }: RemoveStockFormProps) {
       : 0;
   const selectedLocationId = form.watch("selectedLocationIndex");
   const selectedLocation = availableLocations.find(
-    (q) => q.location.id === selectedLocationId
+    (q) => q.location.id === selectedLocationId,
   );
 
   const maxQuantity = selectedLocation?.quantity || 0;
@@ -218,7 +218,7 @@ export function RemoveStockForm({ ingredient }: RemoveStockFormProps) {
             <span className="font-bold text-khp-primary">
               {Math.max(
                 0,
-                (selectedLocation?.quantity || 0) - removeQuantity
+                (selectedLocation?.quantity || 0) - removeQuantity,
               ).toFixed(3)}{" "}
               {ingredient.unit}
             </span>

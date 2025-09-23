@@ -49,7 +49,7 @@ export function LossForm({ ingredient }: LossFormProps) {
   const [apiError, setApiError] = useState<string | null>(null);
 
   const availableLocations = ingredient.quantities.filter(
-    (q) => q.quantity > 0
+    (q) => q.quantity > 0,
   );
 
   const form = useForm<LossFormData>({
@@ -69,8 +69,8 @@ export function LossForm({ ingredient }: LossFormProps) {
         {
           message: "Loss quantity cannot exceed available stock",
           path: ["lossQuantity"],
-        }
-      )
+        },
+      ),
     ),
     defaultValues: {
       selectedLocationIndex: "",
@@ -87,7 +87,7 @@ export function LossForm({ ingredient }: LossFormProps) {
 
   const selectedLocation = watchedValues.selectedLocationIndex
     ? availableLocations.find(
-        (loc) => loc.location.id === watchedValues.selectedLocationIndex
+        (loc) => loc.location.id === watchedValues.selectedLocationIndex,
       )
     : null;
   const lossQuantity = parseFloat(watchedValues.lossQuantity) || 0;
@@ -284,7 +284,7 @@ export function LossForm({ ingredient }: LossFormProps) {
             >
               {selectedLocation
                 ? Math.max(0, selectedLocation.quantity - lossQuantity).toFixed(
-                    3
+                    3,
                   )
                 : (0 - lossQuantity).toFixed(3)}{" "}
               {ingredient.unit}

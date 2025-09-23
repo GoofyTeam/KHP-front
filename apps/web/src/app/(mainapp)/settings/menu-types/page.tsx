@@ -47,7 +47,7 @@ type DeleteFormData = {
 export default function MenuTypesPage() {
   const apolloClient = useApolloClient();
   const [selectedMenuType, setSelectedMenuType] = useState<MenuType | null>(
-    null
+    null,
   );
   const menuTypesListRef = useRef<MenuTypesListRef>(null);
 

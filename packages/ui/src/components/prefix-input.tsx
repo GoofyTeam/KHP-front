@@ -63,7 +63,7 @@ function PrefixInput({
           <div
             className={cn(
               "flex items-center px-3 py-1 text-sm text-muted-foreground bg-muted border border-r-0 border-input rounded-l-md flex-shrink-0 whitespace-nowrap",
-              prefixClassName
+              prefixClassName,
             )}
           >
             {prefix}
@@ -89,7 +89,7 @@ function PrefixInput({
               : shouldHidePrefix
                 ? "rounded-l-md"
                 : "rounded-l-none",
-            className
+            className,
           )}
           {...props}
         />
@@ -104,7 +104,7 @@ function PrefixInput({
               shouldHidePrefix
                 ? "rounded-l-none rounded-r-md"
                 : "rounded-l-none",
-              copyButtonClassName
+              copyButtonClassName,
             )}
             onClick={handleCopy}
             title="Copier l'URL complète"
