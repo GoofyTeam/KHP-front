@@ -1,25 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useQuery } from "@apollo/client";
+import { GetBusinessHoursDocument } from "@workspace/graphql";
 import { BusinessHoursStatus } from "@/components/BusinessHoursStatus";
 import { formatTime, formatLongDate } from "@workspace/ui/lib/date-utils";
 
 interface LiveWelcomePanelProps {
   className?: string;
-  businessHours?: Array<{
-    opens_at: string;
-    closes_at: string;
-    day_of_week: number;
-    sequence: number;
-    is_overnight: boolean;
-  }>;
 }
 
-export function LiveWelcomePanel({
-  className,
-  businessHours,
-}: LiveWelcomePanelProps) {
+export function LiveWelcomePanel({ className }: LiveWelcomePanelProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Fetch business hours directly in this component
+  const { data: businessHoursData } = useQuery(GetBusinessHoursDocument, {
+    errorPolicy: "all",
+  });
 
   useEffect(() => {
     // Update time every second for live display
@@ -48,7 +45,10 @@ export function LiveWelcomePanel({
           <p className="text-xl font-semibold text-khp-primary mb-4">
             {currentTimeFormatted}
           </p>
-          <BusinessHoursStatus businessHours={businessHours} className="mt-4" />
+          <BusinessHoursStatus
+            businessHours={businessHoursData?.me?.company?.businessHours}
+            className="mt-4"
+          />
         </div>
       </div>
     </section>

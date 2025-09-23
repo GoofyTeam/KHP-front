@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
+import { useQuery } from "@apollo/client";
 import { AlertTriangle, XCircle } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@workspace/ui/lib/utils";
-import { GetPerishableQuery } from "@workspace/graphql";
+import { GetPerishableDocument, GetPerishableQuery } from "@workspace/graphql";
 
 // --- Types
 export type PerishableItem = {
@@ -31,7 +32,6 @@ export type PerishableData = {
 };
 
 export type PerishableProps = {
-  data?: PerishableItem[] | GetPerishableQuery | null;
   className?: string;
 };
 
@@ -163,7 +163,12 @@ function EmptyState() {
 }
 
 // --- Main component
-export function Perishable({ data, className }: PerishableProps) {
+export function Perishable({ className }: PerishableProps) {
+  // Fetch perishable data directly in this component
+  const { data, loading, error } = useQuery(GetPerishableDocument, {
+    errorPolicy: "all",
+  });
+
   const transformedData: PerishableItem[] = React.useMemo(() => {
     if (!data) return [];
 

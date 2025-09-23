@@ -1,4 +1,4 @@
-import { DashboardClient } from "@/components/DashboardClient";
+import DashboardClient from "@/components/DashboardClient";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;

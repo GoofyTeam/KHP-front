@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
+import { useQuery } from "@apollo/client";
 import { Clock, CheckCircle, XCircle, Banknote } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@workspace/ui/lib/utils";
-import { GetOrdersQuery } from "@workspace/graphql";
+import { GetOrdersDocument, GetOrdersQuery } from "@workspace/graphql";
 import { formatTime } from "@workspace/ui/lib/date-utils";
 
 interface TableData {
@@ -32,7 +33,6 @@ export type OrderItem = {
 };
 
 export type OrdersProps = {
-  data?: OrderItem[] | GetOrdersQuery | null;
   className?: string;
 };
 
@@ -132,7 +132,12 @@ function EmptyState() {
 }
 
 // --- Main component
-export function Orders({ data, className }: OrdersProps) {
+export function Orders({ className }: OrdersProps) {
+  // Fetch orders data directly in this component
+  const { data, loading, error } = useQuery(GetOrdersDocument, {
+    errorPolicy: "all",
+  });
+
   const transformedData: OrderItem[] = React.useMemo(() => {
     if (!data) return [];
 
