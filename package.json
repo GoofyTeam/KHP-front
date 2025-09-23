@@ -1,5 +1,6 @@
 {
   "name": "khpfront",
+  "description": "KHP Frontend - Kitchen Inventory Management System with web dashboard and mobile barcode scanning PWA",
   "private": true,
   "scripts": {
     "build": "turbo run build",

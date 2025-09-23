@@ -1,35 +1,35 @@
-# KHP Front — Frontend Monorepo
+# KHP Front — Kitchen Inventory Management System
 
-A [Turborepo](https://turbo.build) monorepo with two apps (Web and PWA) and several shared packages.
+A [Turborepo](https://turbo.build) monorepo for **KHP** (Kitchen Hospitality Platform) - a comprehensive inventory management system designed for restaurants and commercial kitchens. Features web dashboard and mobile PWA with barcode scanning capabilities.
 
 ## Repository Structure
 
-- `apps/web` — [Next.js](https://nextjs.org/) web application
-- `apps/pwa` — [Vite + React](https://vitejs.dev/) Progressive Web App
-- `packages/ui` — shared React UI library (light design system)
+- `apps/web` — [Next.js](https://nextjs.org/) web dashboard for inventory management (desktop/tablet)
+- `apps/pwa` — [Vite + React](https://vitejs.dev/) Progressive Web App with barcode scanning (mobile-first)
+- `packages/ui` — shared React UI library with kitchen-specific components
 - `packages/eslint-config` — shared ESLint configuration
 - `packages/typescript-config` — shared TypeScript configurations
-- `packages/graphql` — shared GraphQL artifacts (optional)
+- `packages/graphql` — shared GraphQL artifacts and schema introspection
 
-All projects use TypeScript and common tooling.
+Both apps connect to the KHP GraphQL API for real-time inventory tracking, ingredient management, stock monitoring, and barcode-based product identification.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-  subgraph Apps
-    Web[Next.js Web App<br/>apps/web]
-    PWA[Vite + React PWA<br/>apps/pwa]
+  subgraph Apps["KHP Applications"]
+    Web[Next.js Web Dashboard<br/>Desktop/Tablet Interface<br/>apps/web]
+    PWA[Vite + React PWA<br/>Mobile Barcode Scanner<br/>apps/pwa]
   end
 
   subgraph Shared Packages
-    UI[&#64;workspace/ui<br/>React UI Library]
+    UI[&#64;workspace/ui<br/>Kitchen UI Components]
     ESLint[&#64;workspace/eslint-config]
     TS[&#64;workspace/typescript-config]
-    GQL[packages/graphql<br/>Shared artifacts]
+    GQL[packages/graphql<br/>Schema & Introspection]
   end
 
-  Backend[(GraphQL API<br/>https://back.goofykhp.fr/graphql)]
+  Backend[(KHP GraphQL API<br/>https://back.goofykhp.fr/graphql<br/>Inventory & Product Data)]
 
   Web --> UI
   Web --> ESLint
@@ -47,26 +47,37 @@ flowchart LR
 
 ```mermaid
 sequenceDiagram
-  participant Dev as Developer
-  participant Turbo as Turborepo
-  participant W as Web (Next.js)
-  participant P as PWA (Vite)
-  participant API as GraphQL API
+  participant Chef as Kitchen Staff
+  participant PWA as Mobile PWA<br/>(Barcode Scanner)
+  participant Web as Web Dashboard
+  participant Turbo as Turborepo Dev
+  participant API as KHP GraphQL API
 
-  Dev->>Turbo: npm run dev
-  Turbo->>W: run dev (introspect + codegen + next dev)
-  Turbo->>P: run dev (introspect + vite)
-  W->>API: get-graphql-schema (introspection)
-  P->>API: get-graphql-schema (introspection)
-  Dev->>W: open http://localhost:3000
-  Dev->>P: open http://localhost:5173
+  Chef->>PWA: Open inventory app
+  PWA->>API: Introspect schema (first run)
+  Chef->>PWA: Scan product barcode
+  PWA->>API: Query product info
+  API->>PWA: Return inventory data
+  Chef->>PWA: Update stock quantities
+  PWA->>API: Submit stock changes
+  
+  Note over Web: Parallel dashboard usage
+  Web->>API: Real-time inventory monitoring
+  API->>Web: Live stock updates
+  
+  Note over Turbo: Development process
+  Turbo->>Web: run dev (schema + next dev)
+  Turbo->>PWA: run dev (schema + vite)
+  Web->>API: Schema introspection :3000
+  PWA->>API: Schema introspection :5173
 ```
 
 ## Requirements
 
-- Node.js >= 18 (repo uses `npm@11`)
-- Network access to fetch the GraphQL schema on first run
-- Docker (optional) to build runtime images
+- **Node.js >= 18** (project uses `npm@11.3.0`)
+- **Network access** to KHP GraphQL API (`https://back.goofykhp.fr/graphql`) for schema introspection
+- **Camera/Barcode scanner** support for mobile PWA (optional but recommended)
+- **Docker** (optional) for containerized deployments
 
 ## Setup
 
@@ -76,54 +87,93 @@ npm install
 
 ## Environment Variables
 
-- `apps/web` — create `.env` (see `.env.example`):
-  - `NEXT_PUBLIC_API_URL` (e.g. `http://localhost:8000`)
-- `apps/pwa` — `.env` expected:
-  - `VITE_API_URL` (e.g. `http://localhost:8000`)
-  - `VITE_PROJECT_NAME` (e.g. `KHP-front`)
+### Web Dashboard (`apps/web`)
+Create `.env` file (see `.env.example`):
+```env
+NEXT_PUBLIC_API_URL=https://back.goofykhp.fr/graphql
+# For local development: http://localhost:8000/graphql
+```
+
+### Mobile PWA (`apps/pwa`)  
+`.env` file required:
+```env
+VITE_API_URL=https://back.goofykhp.fr/graphql
+VITE_PROJECT_NAME=KHP-front
+# For local development: VITE_API_URL=http://localhost:8000/graphql
+```
+
+**Note**: Both apps automatically introspect the GraphQL schema from `https://back.goofykhp.fr/graphql` during development and build processes.
 
 ## Development
 
-Start everything with Turborepo:
+### Quick Start
+Start both applications with Turborepo:
 
 ```bash
 npm run dev
 ```
 
-Run a specific app:
+### Individual Applications
 
+**Web Dashboard** (desktop/tablet interface):
 ```bash
-npm run dev:web   # Next.js
-npm run dev:pwa   # Vite (host exposed)
+npm run dev:web   # → http://localhost:3000
 ```
 
-By default, Web runs at `http://localhost:3000` and PWA at `http://localhost:5173`.
-On first run, both apps introspect `https://back.goofykhp.fr/graphql` to update their local schema files.
+**Mobile PWA** (barcode scanner):
+```bash
+npm run dev:pwa   # → http://localhost:5173 (network exposed)
+```
+
+### First Run Setup
+On initial startup, both applications will:
+1. **Introspect** the KHP GraphQL API schema from `https://back.goofykhp.fr/graphql`
+2. **Generate** TypeScript types and GraphQL operations
+3. **Start** the development servers
+
+**Note**: Ensure network connectivity to the KHP API for schema introspection.
 
 ## Build & Quality
 
-- `npm run build` — build all apps and packages
-- `npm run build:web` / `npm run build:pwa` — targeted builds
+### Build Commands
+- `npm run build` — build all applications and packages
+- `npm run build:web` — build web dashboard only  
+- `npm run build:pwa` — build mobile PWA only
+
+### Code Quality
 - `npm run lint` — lint the entire workspace
-- `npm run check-types` — TypeScript checks
-- `npm run format` — Prettier (`*.ts, *.tsx, *.md`)
+- `npm run check-types` — TypeScript type checking
+- `npm run format` — format code with Prettier (`*.ts, *.tsx, *.md`)
 
-## Docker (optional)
+### Testing
+- Individual apps support `npm run test`, `npm run test:watch`, `npm run test:run`
+- Run from workspace root or navigate to specific app directories
 
-Dockerfiles are provided for both apps. The `Makefile` includes shortcuts:
+## Docker Deployment
 
+Production-ready Dockerfiles are provided for both applications. Use the included `Makefile` for simplified container management:
+
+### All Applications
 ```bash
-# Build and start both apps
-make build-and-start
-
-# Web only
-make build-web
-make start-web   # maps host 5432 -> container 3000
-
-# PWA only
-make build-pwa
-make start-pwa   # maps host 5433 -> container 80
+make build-and-start    # Build and start both containers
 ```
+
+### Web Dashboard
+```bash
+make build-web          # Build web dashboard image
+make start-web          # Start container (localhost:5432 → container:3000)
+```
+
+### Mobile PWA  
+```bash
+make build-pwa          # Build PWA image
+make start-pwa          # Start container (localhost:5433 → container:80)
+```
+
+### Production Deployment
+The CI/CD workflows automatically build and publish images to GitHub Container Registry (GHCR) on pushes to `main`:
+- **Web**: `deploy_webapp` workflow
+- **PWA**: `deploy_pwa` workflow
 
 ### Runtime Topology
 
@@ -135,15 +185,25 @@ flowchart TB
   end
 ```
 
-## Conventions
+## Development Conventions
 
-- Git hooks managed by [Lefthook](https://github.com/evilmartians/lefthook):
+### Git Hooks
+Git hooks are managed by [Lefthook](https://github.com/evilmartians/lefthook):
 
 ```bash
 npx lefthook install
 ```
 
-- Commit format: `[KHP-123] feat(scope): message` enforced by `verify-commit-msg.sh`.
+### Commit Messages
+Enforce conventional commit format: `[KHP-123] feat(scope): message`
+- Validated by `verify-commit-msg.sh`
+- Include ticket numbers for traceability
+- Use conventional commit types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
+
+### Code Organization
+- **Shared components**: Use `@workspace/ui` for reusable kitchen/inventory UI components
+- **GraphQL**: Schema introspection and type generation handled automatically
+- **TypeScript**: Strict typing enforced across all packages
 
 ## Per-Project Docs
 
