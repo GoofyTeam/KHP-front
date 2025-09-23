@@ -1,0 +1,30 @@
+query GetAllIngredients {
+  ingredients {
+    data {
+      id
+      name
+      unit
+      image_url
+      category {
+        id
+        name
+      }
+      quantities {
+        quantity
+        location {
+          id
+          name
+          locationType {
+            name
+          }
+        }
+      }
+    }
+    paginatorInfo {
+      total
+      currentPage
+      lastPage
+      hasMorePages
+    }
+  }
+}

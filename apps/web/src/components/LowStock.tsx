@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { AlertTriangle, XCircle, Plus } from "lucide-react";
@@ -147,7 +147,7 @@ export function LowStock({ thresholdData, className }: LowStockProps) {
 
         <div className="flex items-center gap-2">
           <Link
-            href="/stocks/add"
+            href="/stocks/restock"
             className="flex h-6 w-6 items-center justify-center rounded-full border border-khp-primary/90 text-khp-primary/90"
             aria-label="Add stock"
           >

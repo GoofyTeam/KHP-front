@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { AutoBreadcrumb } from "@/components/auto-breadcrumb";
 
 export const metadata: Metadata = {
@@ -19,6 +19,7 @@ export default function StocksLayout({
             listClassName="text-xl font-semibold"
             overrides={{
               "/stocks/add": "Add to stock",
+              "/stocks/add/low-stock": "Restock low inventory",
             }}
           />
         </div>
