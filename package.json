@@ -1,5 +1,6 @@
 {
   "name": "khpfront",
+  "description": "Kitchen Hospitality Platform frontend for managing restaurant and commercial kitchen inventory.",
   "private": true,
   "scripts": {
     "build": "turbo run build",

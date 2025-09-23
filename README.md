@@ -1,12 +1,12 @@
-# KHP Front — Frontend Monorepo
+# KHP Front — Kitchen Inventory Management System
 
-A [Turborepo](https://turbo.build) monorepo with two apps (Web and PWA) and several shared packages.
+Kitchen Hospitality Platform (KHP) is a [Turborepo](https://turbo.build) monorepo that powers a kitchen-focused inventory management system for restaurants and commercial kitchens. It combines a desktop/tablet dashboard with a mobile-first scanner experience to keep stock levels accurate from receiving to service.
 
 ## Repository Structure
 
-- `apps/web` — [Next.js](https://nextjs.org/) web application
-- `apps/pwa` — [Vite + React](https://vitejs.dev/) Progressive Web App
-- `packages/ui` — shared React UI library (light design system)
+- `apps/web` — [Next.js](https://nextjs.org/) kitchen dashboard for managers and expediter stations
+- `apps/pwa` — [Vite + React](https://vitejs.dev/) mobile barcode scanning Progressive Web App for stock operations
+- `packages/ui` — shared React UI components tailored to kitchen workflows and surfaces
 - `packages/eslint-config` — shared ESLint configuration
 - `packages/typescript-config` — shared TypeScript configurations
 - `packages/graphql` — shared GraphQL artifacts (optional)
@@ -17,19 +17,20 @@ All projects use TypeScript and common tooling.
 
 ```mermaid
 flowchart LR
-  subgraph Apps
-    Web[Next.js Web App<br/>apps/web]
-    PWA[Vite + React PWA<br/>apps/pwa]
+  subgraph "KHP Applications"
+    Web[Kitchen Dashboard<br/>apps/web]
+    PWA[Mobile Barcode Scanner<br/>apps/pwa]
   end
 
   subgraph Shared Packages
-    UI[&#64;workspace/ui<br/>React UI Library]
+    UI[&#64;workspace/ui<br/>Kitchen UI Library]
     ESLint[&#64;workspace/eslint-config]
     TS[&#64;workspace/typescript-config]
     GQL[packages/graphql<br/>Shared artifacts]
   end
 
-  Backend[(GraphQL API<br/>https://back.goofykhp.fr/graphql)]
+  Backend[(KHP GraphQL API<br/>https://back.goofykhp.fr/graphql)]
+  InventoryDB[(Inventory Services<br/>Real-time stock tracking)]
 
   Web --> UI
   Web --> ESLint
@@ -41,31 +42,32 @@ flowchart LR
   UI --> TS
   Web --> Backend
   PWA --> Backend
+  Backend --> InventoryDB
+  Web --> InventoryDB
 ```
 
 ### Development Flow
 
 ```mermaid
 sequenceDiagram
-  participant Dev as Developer
-  participant Turbo as Turborepo
-  participant W as Web (Next.js)
-  participant P as PWA (Vite)
+  participant Staff as Kitchen Staff
+  participant Mobile as PWA Scanner
   participant API as GraphQL API
+  participant Inventory as Inventory Services
+  participant Dashboard as Web Dashboard
 
-  Dev->>Turbo: npm run dev
-  Turbo->>W: run dev (introspect + codegen + next dev)
-  Turbo->>P: run dev (introspect + vite)
-  W->>API: get-graphql-schema (introspection)
-  P->>API: get-graphql-schema (introspection)
-  Dev->>W: open http://localhost:3000
-  Dev->>P: open http://localhost:5173
+  Staff->>Mobile: Scan item barcode
+  Mobile->>API: Submit inventory mutation (introspected schema)
+  API->>Inventory: Update stock quantities
+  Inventory-->>Dashboard: Push real-time inventory counts
+  Dashboard->>Staff: Display alerts and replenishment insights
 ```
 
 ## Requirements
 
 - Node.js >= 18 (repo uses `npm@11`)
 - Network access to fetch the GraphQL schema on first run
+- Camera access with barcode scanning capability on mobile devices for the PWA
 - Docker (optional) to build runtime images
 
 ## Setup
@@ -74,13 +76,16 @@ sequenceDiagram
 npm install
 ```
 
+On first run, both apps will generate TypeScript types from the KHP GraphQL schema. Ensure you have network access for schema introspection and a valid API token when working against protected environments.
+
 ## Environment Variables
 
 - `apps/web` — create `.env` (see `.env.example`):
-  - `NEXT_PUBLIC_API_URL` (e.g. `http://localhost:8000`)
+  - `NEXT_PUBLIC_API_URL` (e.g. `http://localhost:8000` or production `https://back.goofykhp.fr/graphql`)
 - `apps/pwa` — `.env` expected:
-  - `VITE_API_URL` (e.g. `http://localhost:8000`)
+  - `VITE_API_URL` (e.g. `http://localhost:8000` or production `https://back.goofykhp.fr/graphql`)
   - `VITE_PROJECT_NAME` (e.g. `KHP-front`)
+  - `VITE_ENABLE_CAMERA` (set to `true` to prompt for camera/barcode access)
 
 ## Development
 
@@ -98,7 +103,7 @@ npm run dev:pwa   # Vite (host exposed)
 ```
 
 By default, Web runs at `http://localhost:3000` and PWA at `http://localhost:5173`.
-On first run, both apps introspect `https://back.goofykhp.fr/graphql` to update their local schema files.
+Both apps perform schema introspection against `https://back.goofykhp.fr/graphql` before starting to ensure mutations and queries stay in sync with the backend contract. The dashboard focuses on monitoring and reporting, while the mobile scanner optimizes receiving, counts, and station-level adjustments.
 
 ## Build & Quality
 
@@ -110,7 +115,7 @@ On first run, both apps introspect `https://back.goofykhp.fr/graphql` to update 
 
 ## Docker (optional)
 
-Dockerfiles are provided for both apps. The `Makefile` includes shortcuts:
+Dockerfiles are provided for both apps. The `Makefile` includes shortcuts and can be wired into CI/CD to build and publish deployable images for each surface:
 
 ```bash
 # Build and start both apps
@@ -144,6 +149,8 @@ npx lefthook install
 ```
 
 - Commit format: `[KHP-123] feat(scope): message` enforced by `verify-commit-msg.sh`.
+- Prefer colocating kitchen-specific business logic within feature folders (`inventory`, `recipes`, etc.) and sharing reusable primitives via `packages/ui` or `packages/graphql`.
+- Keep schema changes versioned by re-running code generation (`npm run dev` or `turbo run introspect`) before submitting merge requests.
 
 ## Per-Project Docs
 
