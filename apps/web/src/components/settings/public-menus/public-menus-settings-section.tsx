@@ -27,24 +27,7 @@ import {
   updatePublicMenusSettingsAction,
   type UpdatePublicMenusSettingsInput,
 } from "@/app/(mainapp)/settings/public-menus/actions";
-
-const buildPublicMenusBaseUrl = (origin?: string | null) => {
-  const trimmedOrigin = origin?.trim();
-
-  if (!trimmedOrigin) {
-    return "https://dash.goofykhp.fr/public-menus/";
-  }
-
-  const sanitizedOrigin = trimmedOrigin.replace(/\/+$/, "");
-
-  return `${sanitizedOrigin}/public-menus/`;
-};
-
-const DEFAULT_PUBLIC_MENUS_BASE_URL = buildPublicMenusBaseUrl(
-  process.env.NEXT_PUBLIC_SITE_URL ??
-    process.env.NEXT_PUBLIC_APP_URL ??
-    (process.env.NODE_ENV === "production" ? "https://dash.goofykhp.fr" : null)
-);
+import { buildPublicMenusBaseUrl } from "@workspace/ui/lib/public-menus";
 
 const publicMenusSchema = z.object({
   public_menu_card_url: z
@@ -61,6 +44,14 @@ function PublicMenusSettingsSection({
 }: {
   companySettings: GetPublicMenusSettingsQuery["me"]["company"];
 }) {
+  const DEFAULT_PUBLIC_MENUS_BASE_URL = buildPublicMenusBaseUrl(
+    process.env.NEXT_PUBLIC_SITE_URL ??
+      process.env.NEXT_PUBLIC_APP_URL ??
+      (process.env.NODE_ENV === "production"
+        ? "https://dash.goofykhp.fr"
+        : null)
+  );
+
   const apolloClient = useApolloClient();
   const publicMenuSettings = companySettings?.public_menu_settings;
   const [isPending, startTransition] = useTransition();

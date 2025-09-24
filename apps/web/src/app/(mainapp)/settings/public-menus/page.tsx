@@ -2,10 +2,12 @@ import PublicMenusSettingsSection from "@/components/settings/public-menus/publi
 import SortMenuTypesSection from "@/components/settings/public-menus/sort-menus-types-section";
 import { GetPublicMenusSettingsDocument } from "@workspace/graphql";
 import { query } from "@/lib/ApolloClient";
+import PublicMenuQrGenerator from "@/components/settings/public-menus/public-menu-qr-generator";
 
 export default async function PublicMenusSettingsPage() {
   const { data, error } = await query({
     query: GetPublicMenusSettingsDocument,
+    //fetchPolicy: "network-only",
   });
 
   const companySettings = data?.me?.company;
@@ -22,6 +24,11 @@ export default async function PublicMenusSettingsPage() {
     <div className="space-y-8 w-full">
       <PublicMenusSettingsSection companySettings={companySettings} />
       <SortMenuTypesSection />
+      <PublicMenuQrGenerator
+        publicMenusSlug={
+          companySettings.public_menu_settings.public_menu_card_url || undefined
+        }
+      />
     </div>
   );
 }

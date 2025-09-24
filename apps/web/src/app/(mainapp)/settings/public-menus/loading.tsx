@@ -1,6 +1,6 @@
 export default function Loading() {
   return (
-    <div className="h-full flex items-center justify-center lg:p-4">
+    <div className="h-full flex items-center justify-center lg:p-4 w-full">
       <div className="w-full">
         <div className="lg:p-8">
           <div className="max-w-2xl mx-auto space-y-8 w-full">
