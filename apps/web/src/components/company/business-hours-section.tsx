@@ -272,8 +272,8 @@ export function BusinessHoursSection() {
   };
 
   return (
-    <div className="bg-khp-surface rounded-2xl shadow-lg border border-khp-primary/20 overflow-hidden">
-      <div className="bg-gradient-to-r from-khp-primary/5 to-khp-primary/10 px-6 py-5 border-b border-khp-primary/20">
+    <div className="bg-khp-surface rounded-2xl shadow-lg border border-khp-primary/20 overflow-hidden w-full max-w-full">
+      <div className="bg-gradient-to-r from-khp-primary/5 to-khp-primary/10 px-4 sm:px-6 py-5 border-b border-khp-primary/20">
         <h2 className="text-xl font-semibold text-khp-primary">
           Business Hours
         </h2>
@@ -282,16 +282,17 @@ export function BusinessHoursSection() {
         </p>
       </div>
 
-      <div className="p-6 space-y-6">
+      <div className="p-4 sm:p-6 space-y-6">
         <div className="space-y-4">
           {DAYS_OF_WEEK.map((day) => {
             const dayHours = weekHours[day.value];
             return (
               <div
                 key={day.value}
-                className="flex items-center gap-6 p-5 border rounded-xl bg-gradient-to-r from-white/50 to-transparent hover:shadow-sm transition-all duration-200"
+                className="p-5 border rounded-xl bg-gradient-to-r from-white/50 to-transparent hover:shadow-sm transition-all duration-200"
               >
-                <div className="flex items-center space-x-3 w-28">
+                {/* Day label and checkbox */}
+                <div className="flex items-center space-x-3 mb-4">
                   <Checkbox
                     checked={dayHours.isOpen}
                     onCheckedChange={(checked) =>
@@ -305,8 +306,9 @@ export function BusinessHoursSection() {
                 </div>
 
                 {dayHours.isOpen ? (
-                  <>
-                    <div className="flex items-center gap-4">
+                  <div className="space-y-4 xl:flex xl:items-center xl:gap-4">
+                    {/* Time selectors */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                       <TimeSelector
                         value={dayHours.openTime}
                         onChange={(time) =>
@@ -314,7 +316,7 @@ export function BusinessHoursSection() {
                         }
                         label="Opens"
                       />
-                      <div className="flex items-center justify-center">
+                      <div className="hidden sm:flex items-center justify-center">
                         <span className="text-sm text-khp-text/50 font-medium">
                           —
                         </span>
@@ -328,8 +330,9 @@ export function BusinessHoursSection() {
                       />
                     </div>
 
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center space-x-2 bg-khp-primary/5 px-3 py-2 rounded-lg">
+                    {/* Controls */}
+                    <div className="flex flex-col sm:flex-row gap-4">
+                      <div className="flex items-center space-x-2 px-3 py-2 rounded-lg">
                         <Switch
                           checked={dayHours.isOvernight}
                           onCheckedChange={(checked) =>
@@ -347,12 +350,12 @@ export function BusinessHoursSection() {
                         variant="outline"
                         size="sm"
                         onClick={() => copyToAllDays(day.value)}
-                        className="text-xs font-medium border-khp-primary/20 text-khp-primary hover:bg-khp-primary hover:text-white transition-colors"
+                        className="text-xs font-medium border-khp-primary/20 text-khp-primary hover:bg-khp-primary hover:text-white transition-colors self-start"
                       >
                         Copy to all
                       </Button>
                     </div>
-                  </>
+                  </div>
                 ) : (
                   <div className="flex items-center">
                     <span className="text-khp-text/40 italic font-medium bg-gray-50 px-4 py-2 rounded-lg">
