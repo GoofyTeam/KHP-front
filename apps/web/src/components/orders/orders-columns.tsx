@@ -52,6 +52,8 @@ const ordersColumns: ColumnDef<Order>[] = [
   {
     id: "menu_name",
     header: "Menu",
+    size: 200,
+    maxSize: 250,
     cell: ({ row }) => {
       const order = row.original;
       const menuNames =
@@ -63,7 +65,14 @@ const ordersColumns: ColumnDef<Order>[] = [
         ) || [];
 
       const uniqueMenuNames = [...new Set(menuNames)];
-      return uniqueMenuNames.length > 0 ? uniqueMenuNames.join(", ") : "-";
+      const menuText =
+        uniqueMenuNames.length > 0 ? uniqueMenuNames.join(", ") : "-";
+
+      return (
+        <div className="max-w-[200px] truncate" title={menuText}>
+          {menuText}
+        </div>
+      );
     },
   },
   {

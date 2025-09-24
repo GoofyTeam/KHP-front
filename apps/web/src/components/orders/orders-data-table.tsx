@@ -163,6 +163,7 @@ export function OrdersDataTable<TValue>({
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
+    columnResizeMode: "onChange",
     state: {
       columnFilters,
       columnVisibility,
@@ -188,6 +189,7 @@ export function OrdersDataTable<TValue>({
                   <TableHead
                     key={header.id}
                     className="px-2 text-left bg-white"
+                    style={{ width: header.getSize() }}
                   >
                     {header.isPlaceholder
                       ? null
@@ -221,7 +223,11 @@ export function OrdersDataTable<TValue>({
                   className="hover:cursor-pointer hover:bg-khp-primary/10 border-b border-khp-text-secondary/30 focus:outline-2 focus:outline-offset-2 focus:outline-khp-primary h-16"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="px-2 text-left">
+                    <TableCell
+                      key={cell.id}
+                      className="px-2 text-left"
+                      style={{ width: cell.column.getSize() }}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

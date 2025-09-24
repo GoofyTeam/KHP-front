@@ -91,9 +91,9 @@ function MenuToPrepareCard({
       onClick={isInPreparation ? handleMarkReady : undefined}
     >
       <CardContent className="p-0 h-full flex flex-col">
-        <div className="flex gap-4 p-6 flex-1">
+        <div className="flex gap-4 p-6 flex-1 xl:flex-row flex-col">
           {menu.image_url && (
-            <div className="w-20 h-20 flex-shrink-0">
+            <div className="w-full h-25 xl:w-20 xl:h-20 flex-shrink-0">
               <img
                 src={menu.image_url}
                 alt={menu.name}
@@ -102,8 +102,8 @@ function MenuToPrepareCard({
             </div>
           )}
 
-          <div className="flex-1 space-y-3">
-            <div className="flex items-start justify-between">
+          <div className="flex-1 space-y-3 contents xl:flex xl:flex-col">
+            <div className="flex items-start justify-between flex-1 ">
               <div>
                 <h3 className="font-semibold text-gray-900 text-lg leading-tight">
                   {menu.name}
@@ -114,10 +114,11 @@ function MenuToPrepareCard({
                   </span>
                 </div>
               </div>
-              <Badge variant="outline" className="text-sm px-3 py-1 min-w-18 flex justify-center">
-                <p className="text-center">
-                  Qty: {menuItem.quantity}
-                </p>
+              <Badge
+                variant="outline"
+                className="text-sm px-3 py-1 min-w-18 flex justify-center"
+              >
+                <p className="text-center">Qty: {menuItem.quantity}</p>
               </Badge>
             </div>
 
