@@ -24,6 +24,7 @@ import Link from "next/link";
 
 export function DashboardClient() {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const lowStockIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const { data: quickAccessData } = useQuery(GetQuickAccessButtonDocument, {
     notifyOnNetworkStatusChange: true,
@@ -85,7 +86,6 @@ export function DashboardClient() {
       intervalRef.current = setInterval(async () => {
         try {
           await Promise.all([
-            refetchThreshold(),
             refetchOrders(),
             refetchPerishable(),
             ...(Math.random() < 0.1 ? [refetchBusinessHours()] : []),
@@ -106,16 +106,37 @@ export function DashboardClient() {
   }, [
     isOpen,
     businessHoursData,
-    refetchThreshold,
     refetchOrders,
     refetchPerishable,
     refetchBusinessHours,
   ]);
 
   useEffect(() => {
+    console.log("Setting up Low Stock interval (60s)");
+
+    lowStockIntervalRef.current = setInterval(async () => {
+      try {
+        console.log("Refreshing Low Stock data...");
+        await refetchThreshold();
+      } catch (error) {
+        console.error("Error refreshing low stock data:", error);
+      }
+    }, 60000);
+
+    return () => {
+      if (lowStockIntervalRef.current) {
+        clearInterval(lowStockIntervalRef.current);
+      }
+    };
+  }, [refetchThreshold]);
+
+  useEffect(() => {
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+      }
+      if (lowStockIntervalRef.current) {
+        clearInterval(lowStockIntervalRef.current);
       }
     };
   }, []);

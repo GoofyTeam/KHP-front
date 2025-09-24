@@ -35,7 +35,10 @@ import {
   type GetIngredientQuery,
 } from "@workspace/graphql";
 import { createAllergenOptions } from "@workspace/ui/lib/allergens";
-import { updateIngredientAction } from "@/app/(mainapp)/ingredient/actions";
+import {
+  updateIngredientAction,
+  updateIngredientThresholdAction,
+} from "@/app/(mainapp)/ingredient/actions";
 import {
   ACCEPTED_IMAGE_TYPES,
   WANTED_IMAGE_SIZE,
@@ -78,6 +81,14 @@ const editIngredientSchema = z.object({
     .string()
     .refine((val) => val !== undefined && val !== "", "Category is required"),
   allergens: z.array(z.string()).optional(),
+  threshold: z
+    .string()
+    .optional()
+    .refine((val) => {
+      if (val === undefined || val === "") return true;
+      const num = Number(val);
+      return !Number.isNaN(num) && num >= 0;
+    }, "Threshold must be a non-negative number"),
 });
 
 export type EditIngredientFormValues = z.infer<typeof editIngredientSchema>;
@@ -94,6 +105,7 @@ const DEFAULT_FORM_VALUES: Omit<EditIngredientFormValues, "image"> & {
   base_unit: "",
   category_id: "",
   allergens: [],
+  threshold: "",
 };
 
 export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
@@ -156,6 +168,12 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
       base_unit: ingredient.base_unit?.toString() ?? "",
       category_id: ingredient.category?.id ?? "",
       allergens: ingredient.allergens ?? [],
+      threshold:
+        "threshold" in ingredient &&
+        ingredient.threshold !== undefined &&
+        ingredient.threshold !== null
+          ? String(ingredient.threshold)
+          : "",
     });
   }, [ingredient, form]);
 
@@ -236,17 +254,50 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
 
       const result = await updateIngredientAction(updateData);
 
-      if (result.success) {
-        setSuccess(true);
-        router.push(`/ingredient/${ingredient.id}`);
+      if (!result.success) {
+        form.setError("root", {
+          type: "server",
+          message: result.error || "Failed to update ingredient.",
+        });
         return;
       }
 
-      const errorMessage = result.error || "Failed to update ingredient.";
-      form.setError("root", {
-        type: "server",
-        message: errorMessage,
-      });
+      // Update threshold separately if provided
+      if (values.threshold !== undefined && values.threshold.trim() !== "") {
+        const thresholdNum = parseFloat(values.threshold);
+        if (!isNaN(thresholdNum) && thresholdNum >= 0) {
+          const thresholdResult = await updateIngredientThresholdAction(
+            ingredient.id,
+            { threshold: thresholdNum }
+          );
+
+          if (!thresholdResult.success) {
+            form.setError("root", {
+              type: "server",
+              message: thresholdResult.error || "Failed to update threshold.",
+            });
+            return;
+          }
+        }
+      } else {
+        // If threshold is empty, set it to null
+        const thresholdResult = await updateIngredientThresholdAction(
+          ingredient.id,
+          { threshold: null }
+        );
+
+        if (!thresholdResult.success) {
+          form.setError("root", {
+            type: "server",
+            message: thresholdResult.error || "Failed to update threshold.",
+          });
+          return;
+        }
+      }
+
+      setSuccess(true);
+      router.push(`/ingredient/${ingredient.id}`);
+      return;
     } catch {
       form.setError("root", {
         type: "server",
@@ -439,6 +490,27 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
                           onValueChange={field.onChange}
                           placeholder="Select allergens"
                           className="w-full"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="threshold"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel>Stock Alert Threshold</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder="Enter minimum stock level"
+                          className="border-khp-primary"
                         />
                       </FormControl>
                       <FormMessage />

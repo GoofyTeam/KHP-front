@@ -140,3 +140,18 @@ export async function removeIngredientQuantityAction(
     "Failed to remove ingredient quantity: "
   );
 }
+
+export interface UpdateThresholdInput {
+  threshold: number | null;
+}
+
+export async function updateIngredientThresholdAction(
+  ingredientId: string | number,
+  input: UpdateThresholdInput
+): Promise<ActionResult> {
+  return executeHttpAction(
+    () =>
+      httpClient.put(`/api/ingredients/${ingredientId}/threshold`, input as { threshold: number | null }),
+    "Failed to update ingredient threshold: "
+  );
+}
