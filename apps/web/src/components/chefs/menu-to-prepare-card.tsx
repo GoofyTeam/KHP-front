@@ -114,8 +114,10 @@ function MenuToPrepareCard({
                   </span>
                 </div>
               </div>
-              <Badge variant="outline" className="text-sm px-3 py-1">
-                Qty: {menuItem.quantity}
+              <Badge variant="outline" className="text-sm px-3 py-1 min-w-18 flex justify-center">
+                <p className="text-center">
+                  Qty: {menuItem.quantity}
+                </p>
               </Badge>
             </div>
 

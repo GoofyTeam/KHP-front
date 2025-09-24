@@ -47,7 +47,7 @@ export function getMenuTypeLabel(type: MenuType) {
     case "PREP":
       return "Needs preparation";
     case "DIRECT":
-      return "Ready to serve immediately";
+      return "Ready to serve";
     default:
       return "Unknown";
   }
