@@ -79,10 +79,6 @@ export function DashboardClient() {
 
       const refreshInterval = isOpen ? 15000 : 300000;
 
-      console.log(
-        `Setting refresh interval to ${refreshInterval / 1000}s (restaurant ${isOpen ? "open" : "closed"})`
-      );
-
       intervalRef.current = setInterval(async () => {
         try {
           await Promise.all([
@@ -112,11 +108,8 @@ export function DashboardClient() {
   ]);
 
   useEffect(() => {
-    console.log("Setting up Low Stock interval (60s)");
-
     lowStockIntervalRef.current = setInterval(async () => {
       try {
-        console.log("Refreshing Low Stock data...");
         await refetchThreshold();
       } catch (error) {
         console.error("Error refreshing low stock data:", error);
