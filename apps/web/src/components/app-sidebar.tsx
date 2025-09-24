@@ -144,9 +144,9 @@ export function AppSidebar({
       </SidebarHeader>
 
       <SidebarContent className="h-full flex justify-center">
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
+        <SidebarGroup className="h-full">
+          <SidebarGroupContent className="h-full pb-4">
+            <SidebarMenu className="w-full h-full">
               {config.navigation.map((item) => {
                 const ItemIcon = getIcon(item.icon);
                 const isActive = isRouteActive(pathname, item);
@@ -205,6 +205,7 @@ export function AppSidebar({
                     </SidebarMenuItem>
                   );
                 })}
+              <div className="pb-2" />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

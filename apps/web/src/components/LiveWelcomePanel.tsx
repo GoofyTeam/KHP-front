@@ -39,6 +39,7 @@ export function LiveWelcomePanel({
     <section
       className={cn(
         "rounded-md border border-khp-primary/30 bg-white shadow-sm pt-2 flex flex-col min-h-0",
+        "overflow-scroll",
         className
       )}
       aria-label="Welcome"
