@@ -49,6 +49,24 @@ import { cn } from "@workspace/ui/lib/utils";
 
 type IngredientData = NonNullable<GetIngredientQuery["ingredient"]>;
 
+// Utility function for threshold validation
+function validateThreshold(value: string | undefined): {
+  isValid: boolean;
+  numericValue?: number;
+} {
+  if (value === undefined || value === "") {
+    return { isValid: true }; // Empty is valid (optional field)
+  }
+
+  const num = Number(value);
+  const isValid = !Number.isNaN(num) && num >= 0;
+
+  return {
+    isValid,
+    numericValue: isValid ? num : undefined,
+  };
+}
+
 interface EditIngredientFormProps {
   ingredient: IngredientData;
 }
@@ -84,11 +102,10 @@ const editIngredientSchema = z.object({
   threshold: z
     .string()
     .optional()
-    .refine((val) => {
-      if (val === undefined || val === "") return true;
-      const num = Number(val);
-      return !Number.isNaN(num) && num >= 0;
-    }, "Threshold must be a non-negative number"),
+    .refine(
+      (val) => validateThreshold(val).isValid,
+      "Threshold must be a non-negative number"
+    ),
 });
 
 export type EditIngredientFormValues = z.infer<typeof editIngredientSchema>;
@@ -262,37 +279,25 @@ export function EditIngredientForm({ ingredient }: EditIngredientFormProps) {
         return;
       }
 
-      // Update threshold separately if provided
-      if (values.threshold !== undefined && values.threshold.trim() !== "") {
-        const thresholdNum = parseFloat(values.threshold);
-        if (!isNaN(thresholdNum) && thresholdNum >= 0) {
-          const thresholdResult = await updateIngredientThresholdAction(
-            ingredient.id,
-            { threshold: thresholdNum }
-          );
+      // Update threshold separately
+      const thresholdValidation = validateThreshold(values.threshold?.trim());
+      const thresholdValue =
+        thresholdValidation.isValid &&
+        thresholdValidation.numericValue !== undefined
+          ? thresholdValidation.numericValue
+          : null;
 
-          if (!thresholdResult.success) {
-            form.setError("root", {
-              type: "server",
-              message: thresholdResult.error || "Failed to update threshold.",
-            });
-            return;
-          }
-        }
-      } else {
-        // If threshold is empty, set it to null
-        const thresholdResult = await updateIngredientThresholdAction(
-          ingredient.id,
-          { threshold: null }
-        );
+      const thresholdResult = await updateIngredientThresholdAction(
+        ingredient.id,
+        { threshold: thresholdValue }
+      );
 
-        if (!thresholdResult.success) {
-          form.setError("root", {
-            type: "server",
-            message: thresholdResult.error || "Failed to update threshold.",
-          });
-          return;
-        }
+      if (!thresholdResult.success) {
+        form.setError("root", {
+          type: "server",
+          message: thresholdResult.error || "Failed to update threshold.",
+        });
+        return;
       }
 
       setSuccess(true);
